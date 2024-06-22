@@ -1,14 +1,15 @@
-import React, {useLayoutEffect, useRef} from 'react';
+import React, {useEffect, useLayoutEffect, useRef} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
-import {Platform, StatusBar} from 'react-native';
+import {PermissionsAndroid, Platform, StatusBar} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import DownTime from '../Components/UIComp/DownTime';
 import {ClearError} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
 import {useNetInfo} from '@react-native-community/netinfo';
 import Network from '../Components/UIComp/Network';
+import messaging from '@react-native-firebase/messaging';
 
 export function RootNavigation() {
   const downTime = useSelector(state => state.data.downTime);
@@ -16,6 +17,32 @@ export function RootNavigation() {
   const {type, isConnected} = useNetInfo();
 
   const routeNameRef = useRef();
+
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (Platform.OS === 'android') {
+      const PermissionAndroid = PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      if (PermissionAndroid === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Permission Granted');
+      } else {
+        console.log('Permission Denied');
+      }
+    }
+
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
 
   useLayoutEffect(() => {
     if (Platform.OS === 'android') StatusBar.setBackgroundColor('#222');
