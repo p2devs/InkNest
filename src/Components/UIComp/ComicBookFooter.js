@@ -1,0 +1,97 @@
+import React from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+
+import { useSelector } from 'react-redux';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
+
+const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
+  const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+  const baseUrl = useSelector(state => state.data.baseUrl);
+  const index = ComicBook?.volumes.findIndex(
+    item => {
+      const checklinkBaseUrl = item?.link.includes('readallcomics.com') ? 'readallcomics' : 'azcomic';
+      const currentComic = baseUrl == checklinkBaseUrl ?
+        item.title.split("#")[1] === ComicBook?.title.split("#")[1] :
+        item.title.replace('- Reading', '').trim() === ComicBook?.title;
+      return currentComic
+    }
+  );
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        width: '100%',
+        height: 50,
+        backgroundColor: '#222',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        borderBottomColor: '#fff',
+        borderBottomWidth: 0.5,
+        borderTopColor: '#fff',
+        borderTopWidth: 0.5,
+        marginBottom: 5,
+        bottom: 0,
+      }}>
+      {ComicBook?.volumes.length == 1 ?
+        <View />
+        :
+        <TouchableOpacity
+          onPress={() => {
+            console.log(index, ComicBook?.volumes.length - 1, 'index');
+            if (index < ComicBook?.volumes.length - 1 || index > 0) {
+              navigation.replace('ComicBook', {
+                comicBook: ComicBook?.volumes[index - 1]?.link,
+              });
+            }
+          }}
+          disabled={index == 0}>
+          <Text
+            style={{
+              fontSize: heightPercentageToDP('1.8%'),
+              fontWeight: 'bold',
+              color: index == 0 ? '#555' : '#FFF',
+            }}>
+            Previous Volume
+          </Text>
+        </TouchableOpacity>}
+      <TouchableOpacity
+        onPress={() => {
+          setViewAll(!ViewAll);
+        }}>
+        <Ionicons
+          name={ViewAll ? 'book-outline' : 'grid-outline'}
+          size={24}
+          color="#fff"
+          style={{ marginRight: 10 }}
+        />
+      </TouchableOpacity>
+      {index !== ComicBook?.volumes.length - 1 ? (
+        <TouchableOpacity
+          onPress={() => {
+            if (index < ComicBook?.volumes.length - 1) {
+              navigation.replace('ComicBook', {
+                comicBook: ComicBook?.volumes[index + 1].link,
+              });
+            }
+          }}>
+          <Text
+            style={{
+              fontSize: heightPercentageToDP('1.8%'),
+              fontWeight: 'bold',
+              color: '#FFF',
+            }}>
+            Next Volume
+          </Text>
+        </TouchableOpacity>
+      ) :
+        <View />
+      }
+    </View>
+  );
+};
+
+export default ComicBookFooter;

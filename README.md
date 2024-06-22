@@ -14,4 +14,4 @@
 </p>
 
 ## Download
-Get the app from our [releases page](https://github.com/p2devs/inknest-release/releases).
+Get the app from our [releases page](https://github.com/p2devs/InkNest/releases).
