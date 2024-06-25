@@ -1,0 +1,58 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.container {
+  text-align: left;
+  margin: 0 auto;
+  padding: 4rem 0;
+  padding-right: 2rem;
+  padding-left: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 2em;
+  /* color: #a7b1ff; */
+}
+
+.subtitle {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.description {
+  margin: 20px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: left;
+  gap: 10px;
+}
+
+.getStartedButton,
+.downloadButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.getStartedButton {
+  background-color: #a7b1ff;
+  color: #1e1e1e;
+}
+
+.downloadButton {
+  background-color: #a7b1ff;
+  color: #1e1e1e;
+}
+
+/* .downloadButton {
+  background-color: #333;
+  color: #fff;
+} */
