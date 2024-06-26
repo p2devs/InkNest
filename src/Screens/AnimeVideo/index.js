@@ -22,19 +22,6 @@ const AnimeVideo = ({ route, navigation }) => {
     const error = useSelector(state => state.data.error);
     const loading = useSelector(state => state.data.loading);
     const [serverLink, setServerLink] = useState(0);
-    // [{ "serverLink": "https://s3taku.com/streaming.php?id=MjI3MzQx&title=Helck+%28Dub%29+Episode+13", "serverName": "Vidstreaming" }, { "serverLink": "https://s3taku.com/embedplus?id=MjI3MzQx&token=ckse69ZEeonbix9it2ig8g&expires=1719410804", "serverName": "Multiquality Server" }, { "serverLink": "https://awish.pro/e/vdi3gftsj4i8", "serverName": "Streamwish" }, { "serverLink": "https://dood.wf/e/tky5fnmpc4q9", "serverName": "Doodstream" }, { "serverLink": "https://www.mp4upload.com/embed-arel5vp4cbc3.html", "serverName": "Mp4upload" }]
-
-    // {
-    //     category,
-    //     animeInfo: {
-    //         title: animeInfoTitle,
-    //         link: animeInfoLink,
-    //     },
-    //     downloadLink,
-    //     servers,
-    //     episodes
-    //     episodePages
-    // }
 
     useLayoutEffect(() => {
         getData()
@@ -209,11 +196,14 @@ const AnimeVideo = ({ route, navigation }) => {
 
             <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <View style={{ flexDirection: "column", gap: 13 }}>
-                    <Text style={{ color: "gold", fontSize: 16 }}>
+                    <Text style={{ color: "gold", fontSize: 16 }}
+                        onPress={() => {
+                            navigation.replace(NAVIGATION.animeDetails, { link: videoData.animeInfo?.link, title: videoData.animeInfo?.title });
+                        }}>
                         Anime Title: {videoData.animeInfo?.title}
                     </Text>
                     <Text style={{ color: "gold", fontSize: 16 }}>
-                        Catagory: {videoData?.category?.categoryTitle}
+                        Catagory: {videoData?.category?.title}
                     </Text>
                 </View>
 
@@ -228,7 +218,7 @@ const AnimeVideo = ({ route, navigation }) => {
                 {
                     videoData?.servers?.map((server, index) => (
                         <Button
-                        color={serverLink == index ? "gold" : "silver"}
+                            color={serverLink == index ? "gold" : "silver"}
                             key={index}
                             title={server.serverName}
                             onPress={() => {

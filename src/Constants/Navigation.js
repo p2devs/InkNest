@@ -3,11 +3,13 @@ export const NAVIGATION = {
   home: 'Home',
   comicDetails: 'ComicDetails',
   comicBook: 'ComicBook',
-  animeVideo: 'AnimeVideo',
   search: 'Search',
   bookmarks: 'Bookmarks',
   settings: 'Settings',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
   update: 'Update',
+  animeVideo: 'AnimeVideo',
+  animeDetails: 'AnimeDetails',
+  
 };

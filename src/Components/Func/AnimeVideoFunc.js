@@ -48,10 +48,10 @@ export const GetVideoLink = async (link, dispatch) => {
         const servers = await getVideoLink({ id, title, dispatch });
 
         const result = {
-            category: { categoryTitle, categoryLink },
+            category: { title: categoryTitle, link: `${HostName["gogoanimes"]}${categoryLink.replace("/", "")}`, },
             animeInfo: {
                 title: animeInfoTitle,
-                link: animeInfoLink,
+                link: `${HostName["gogoanimes"]}${animeInfoLink.replace("/", "")}`,
             },
             downloadLink,
             servers,
@@ -107,4 +107,87 @@ export const getVideoLink = async ({ id, title, dispatch }) => {
         return null;
     }
 
+}
+
+export const getAnimeInfo = async (link, dispatch) => {
+    dispatch(fetchDataStart());
+
+    try {
+        let response = await axios.get(link);
+        const $ = cheerio.load(response.data);
+
+        const isError404 = $('h1.entry-title').text().trim()
+        if (isError404.includes("Error 404")) {
+            if (dispatch) dispatch(checkDownTime({ response: { status: 404, AnimeVideo: true } }));
+            return;
+        }
+        // Extract title
+        const title = $('.anime_info_body_bg h1').text().trim();
+
+        // Extract image URL
+        const imageUrl = $('.anime_info_body_bg img').attr('src');
+
+        // Extract type
+        const type = $('.anime_info_body_bg .type').filter((i, el) => $(el).text().includes('Type:')).find('a').text().trim();
+
+        // Extract plot summary
+        const plotSummary = $('.anime_info_body_bg .description').text().trim();
+
+        // Extract genres
+        const genres = [];
+        $('.anime_info_body_bg .type').filter((i, el) => $(el).text().includes('Genre:')).find('a').each((i, el) => {
+            genres.push($(el).text().trim());
+        });
+
+        // Extract release year
+        const releaseYear = $('.anime_info_body_bg .type').filter((i, el) => $(el).text().includes('Released:')).text().replace('Released:', '').trim();
+
+        // Extract status
+        const status = $('.anime_info_body_bg .type').filter((i, el) => $(el).text().includes('Status:')).find('a').text().trim();
+
+        // Extract other names
+        const otherNames = [];
+        $('.anime_info_body_bg .other-name').find('a').each((i, el) => {
+            otherNames.push($(el).text().trim());
+        });
+
+        // Extract episode page ranges
+        const episodePages = [];
+        $('#episode_page li a').each((index, element) => {
+            const epStart = $(element).attr('ep_start');
+            const epEnd = $(element).attr('ep_end');
+            const active = $(element).hasClass('active');
+            // console.log(element);
+            episodePages.push({ epStart, epEnd, active });
+        });
+        if (episodePages.length == 1) episodePages[0].active = true;
+        // Extract episodes
+        const movie_id = $('#movie_id').val();
+        const default_ep = $('#default_ep').val();
+        const alias_anime = $('#alias_anime').val();
+        const activeEp = episodePages.find((ep) => ep.active);
+        const episodes = await getEpisodes({ ep_start: activeEp?.epStart ?? 1, ep_end: activeEp?.epEnd ?? 100, id: movie_id, default_ep, alias: alias_anime, dispatch });
+
+        const result = {
+            title,
+            imageUrl: `${HostName["gogoanimes"]}${imageUrl.replace("/", "")}`,
+            type,
+            plotSummary,
+            genres,
+            releaseYear,
+            status,
+            otherNames,
+            episodes,
+            episodePages,
+            id: movie_id,
+            alias: alias_anime
+        };
+
+        dispatch(checkDownTime(response));
+        return result;
+    } catch (error) {
+        console.log('Error fetching or parsing data AnimeVideo:', error);
+        if (dispatch) dispatch(checkDownTime(error));
+        return null;
+    }
 }
