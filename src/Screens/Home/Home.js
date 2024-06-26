@@ -11,6 +11,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Switch,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,7 +20,7 @@ import { BlurView } from '@react-native-community/blur';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import { fetchComicsData } from '../../Components/Func/HomeFunc';
+import { FetchAnimeData, fetchComicsData } from '../../Components/Func/HomeFunc';
 import { NAVIGATION } from '../../Constants';
 import LoadingModal from '../../Components/UIComp/LoadingModal';
 import {
@@ -43,13 +44,16 @@ export function Home({ navigation }) {
   const [Showhistory, setShowhistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
-  // const [filter, setFilter] = useState([{ title: "Ongoing", link: "ongoing-comics/", selected: true }, { title: "New Comics", link: "new-comics/" }, { title: "Popular Comics", link: "popular-comics/" }])
+  const [switchValue, setSwitchValue] = useState(false);
+  const [AnimatedData, setAnimatedData] = useState({ data: [], });
+  const [filter, setFilter] = useState([{ title: "Recent", type: 1, }, { title: "Dub", type: 2, selected: true }, { title: "Chinese", type: 3 }])
   let Tag = Platform.OS === 'ios' ? BlurView : View;
   const loadComics = async ({ next = true, JumpToPage = false }) => {
     //LoadToPage = null, filterType = null
     try {
       if (JumpToPage) setPageJumpTo(null);
       setLoading(true);
+
       let LoadingPage = JumpToPage
         ? Number(pageJumpTo.page)
         : next
@@ -87,8 +91,23 @@ export function Home({ navigation }) {
     loadComics({ next: true });
   }, []);
 
-
-
+  const animatedCall = async (page, type) => {
+    try {
+      if (!type) type = filter.find(item => item.selected)?.type
+      setLoading(true);
+      let res = await FetchAnimeData(`page=${page}&type=${type}`, dispatch, baseUrl);
+      setAnimatedData({
+        data: res,
+        page: page,
+      });
+      setLoading(false);
+      // setPage(page);
+      if (flatListRef?.current) flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+    } catch (error) {
+      setLoading(false);
+      return;
+    }
+  }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
       <View
@@ -128,6 +147,8 @@ export function Home({ navigation }) {
             style={{
               flexDirection: 'row',
               marginHorizontal: widthPercentageToDP('1%'),
+              gap: 10,
+              marginBottom: 5,
             }}>
             <TouchableOpacity
               onPress={() => {
@@ -136,18 +157,33 @@ export function Home({ navigation }) {
               {Showhistory ? (
                 <AntDesign
                   name="book"
-                  size={heightPercentageToDP('3%')}
+                  size={heightPercentageToDP('4%')}
                   color="#FFF"
                 />
               ) : (
                 <MaterialCommunityIcons
                   name="history"
-                  size={heightPercentageToDP('3%')}
+                  size={heightPercentageToDP('4%')}
                   color="#FFF"
                 />
               )}
             </TouchableOpacity>
+            <Switch
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={Showhistory ? '#f5dd4b' : '#f4f3f4'}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={(e) => {
+                setSwitchValue(e)
+                if (e) animatedCall(AnimatedData.page ?? 1);
+                else loadComics({ next: true });
+                // loadComics({ next: true });
+              }}
+              value={switchValue}
+            />
           </View>
+
+
+
         </Header>
         {!loading && !comicsData?.data?.length && error ? (
           <View
@@ -175,34 +211,34 @@ export function Home({ navigation }) {
               flex: 1,
               backgroundColor: '#000',
             }}
-            data={Showhistory ? Object.values(History) : comicsData?.data}
+            data={switchValue ? AnimatedData?.data : Showhistory ? Object.values(History) : comicsData?.data}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} Showhistory={Showhistory} />}
-            // ListHeaderComponent={() => {
-            //   if (baseUrl == "readallcomics") return null;
-            //   return (
-            //     <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
-            //       {filter.map((item, index) => (
-            //         <Button
-            //           color={item.selected ? "gold" : "#007AFF"}
-            //           // textSize={heightPercentageToDP('1.5%')}
-            //           key={index}
-            //           title={item.title}
-            //           onPress={async () => {
-            //             //set selected filter in state
-            //             await setFilter(filter.map((item, i) => {
-            //               if (index === i) return { ...item, selected: true }
-            //               else return { ...item, selected: false }
-            //             }
-            //             ))
-            //             setPage(0);
-            //             loadComics({ next: true, LoadToPage: 1, filterType: item.link });
-            //           }}
-            //         />
-            //       ))}
-            //     </View>
-            //   )
-            // }}
+            ListHeaderComponent={() => {
+              if (!switchValue) return null;
+              return (
+                <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
+                  {filter.map((item, index) => (
+                    <Button
+                      color={item.selected ? "gold" : "#007AFF"}
+                      // textSize={heightPercentageToDP('1.5%')}
+                      key={index}
+                      title={item.title}
+                      onPress={async () => {
+                        //set selected filter in state
+                        await setFilter(filter.map((item, i) => {
+                          if (index === i) return { ...item, selected: true }
+                          else return { ...item, selected: false }
+                        }
+                        ))
+                        animatedCall(1, item.type);
+
+                      }}
+                    />
+                  ))}
+                </View>
+              )
+            }}
             ListFooterComponent={() => {
               if (Showhistory) return null;
               return (
@@ -217,24 +253,30 @@ export function Home({ navigation }) {
                   <Button
                     title="Previous"
                     onPress={() => {
+                      if (switchValue && AnimatedData.page > 1) {
+                        animatedCall(AnimatedData.page - 1);
+                        return;
+                      } else if (switchValue) return;
                       if (page === 1) return;
                       loadComics({ next: false });
                     }}
-                    disabled={[0, 1].includes(page)}
+                    disabled={[0, 1].includes(switchValue ? AnimatedData.page : page)}
                   />
                   <Text
                     onPress={() => {
+                      if (switchValue) return;
                       if (!comicsData?.lastPage) return;
                       setPageJumpTo({ page: page.toString() });
                     }}
                     style={{
                       color: 'white',
                     }}>
-                    Page {page}
+                    Page {switchValue ? String(AnimatedData.page) : page}
                   </Text>
                   <Button
                     title="Next"
                     onPress={() => {
+                      if (switchValue) animatedCall(AnimatedData.page + 1);
                       if (page === comicsData?.lastPage) return;
                       loadComics({ next: true });
                     }}
@@ -244,6 +286,7 @@ export function Home({ navigation }) {
             }}
           />
         )}
+
         <Modal
           transparent
           animationType="slide"
@@ -374,6 +417,7 @@ export function Home({ navigation }) {
             </Tag>
           </KeyboardAvoidingView>
         </Modal>
+
         <LoadingModal loading={loading} />
       </View>
     </SafeAreaView>

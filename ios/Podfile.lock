@@ -1129,6 +1129,11 @@ PODS:
     - React-Core
   - react-native-safe-area-context (4.10.3):
     - React-Core
+  - react-native-video (5.2.1):
+    - React-Core
+    - react-native-video/Video (= 5.2.1)
+  - react-native-video/Video (5.2.1):
+    - React-Core
   - React-nativeconfig (0.74.1)
   - React-NativeModulesApple (0.74.1):
     - glog
@@ -1486,6 +1491,7 @@ DEPENDENCIES:
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-video (from `../node_modules/react-native-video`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1616,6 +1622,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-video:
+    :path: "../node_modules/react-native-video"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -1739,6 +1747,7 @@ SPEC CHECKSUMS:
   react-native-blur: b58f3155f534d975b7647593d93a2e907513addd
   react-native-netinfo: 076df4f9b07f6670acf4ce9a75aac8d34c2e2ccc
   react-native-safe-area-context: b01d8f42d4e62a7be5a3e69fd332e0c7e67584c7
+  react-native-video: c26780b224543c62d5e1b2a7244a5cd1b50e8253
   React-nativeconfig: 21d89c65ca39875fad2c5c465e0e013e514eba21
   React-NativeModulesApple: e2e180dae4486b2978fcf3564cc4c8de4b453a68
   React-perflogger: 3d31e0d1e8ad891e43a09ac70b7b17a79773003a
@@ -1776,4 +1785,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9fcb03d491101702682929068cf6ea51908a88f3
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2

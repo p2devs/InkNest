@@ -4,6 +4,7 @@ import { NAVIGATION } from '../Constants';
 import { AboutUs, ComicBook, ComicDetails } from '../Screens';
 import { BottomNavigation } from './BottomNavigation/BottomNavigation';
 import UpdateScreen from '../Screens/Update';
+import AnimeVideo from '../Screens/AnimeVideo';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,7 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.comicBook} component={ComicBook} />
       <Stack.Screen name={NAVIGATION.aboutUs} component={AboutUs} />
       <Stack.Screen name={NAVIGATION.update} component={UpdateScreen} />
+      <Stack.Screen name={NAVIGATION.animeVideo} component={AnimeVideo} />
     </Stack.Navigator>
   );
 }

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
-import {checkDownTime} from '../../Redux/Actions/GlobalActions';
-import {fetchDataStart} from '../../Redux/Reducers';
-import {HostName} from '../../Utils/APIs';
+import { checkDownTime } from '../../Redux/Actions/GlobalActions';
+import { fetchDataStart } from '../../Redux/Reducers';
+import { HostName } from '../../Utils/APIs';
 
 export const fetchComicsData = async (link, dispatch, baseUrl) => {
   console.log(baseUrl, 'baseUrl');
@@ -61,7 +61,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
         const link = $(element).find('h2 a').attr('href');
 
         // Push the extracted data into the array
-        comicsData.push({title, date, imageUrl, link});
+        comicsData.push({ title, date, imageUrl, link });
       });
       let page = link.split('/');
       page = page[page.length - 2];
@@ -74,7 +74,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
       }
     }
     dispatch(checkDownTime(response));
-    return {data: comicsData, lastPage};
+    return { data: comicsData, lastPage };
   } catch (error) {
     // console.log(link, 'link');
     console.log('Error fetching or parsing data Home:', error);
@@ -83,5 +83,43 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
   }
 };
 
-// Use the function and log the results
-// fetchComicsData().then((data) => console.log(data));
+
+export const FetchAnimeData = async (link, dispatch, baseUrl) => {
+  // console.log(baseUrl, 'baseUrl');
+  if (!link) return;
+  dispatch(fetchDataStart());
+  try {
+    let url = "https://ajax.gogocdn.net/ajax/page-recent-release.html?"
+    // Fetch the HTML content from the website
+    const response = await axios.get(`${url}${link}`);
+    const html = response.data;
+    // console.log(html, "html");
+
+    // Load the HTML into Cheerio
+    const $ = cheerio.load(html);
+
+    // Array to hold the extracted data
+    const AnimaData = [];
+    let lastPage = null;
+    // Extract data from the website
+    $('.last_episodes .items li').each((index, element) => {
+      const title = $(element).find('.name a').attr('title');
+      const link = $(element).find('.name a').attr('href');
+      const imageUrl = $(element).find('.img a img').attr('src');
+      const episode = $(element).find('.episode').text();
+      AnimaData.push({
+        title,
+        link: `${HostName["gogoanimes"]}${link.replace("/", "")}`,
+        imageUrl,
+        episode
+      });
+    });
+
+    dispatch(checkDownTime(response));
+    return AnimaData;
+  } catch (error) {
+    console.log('Error fetching or parsing data Home:', error);
+    if (dispatch) dispatch(checkDownTime(error));
+    return [];
+  }
+}

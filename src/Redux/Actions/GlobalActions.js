@@ -31,6 +31,10 @@ export const checkDownTime = (error) => async dispatch => {
     return;
   }
   if (error?.response?.status === 404) {
+    if (error.response.AnimeVideo) {
+      dispatch(fetchDataFailure("Oops!! Looks like the anime episode is not available right now,\nPlease try again later..."));
+      return;
+    }
     dispatch(fetchDataFailure("Oops!! Looks like the comic is not available right now,\nPlease try again later..."));
     return;
   }
