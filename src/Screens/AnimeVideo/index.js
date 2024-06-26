@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Linking } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Linking, ActivityIndicator, ScrollView } from "react-native";
 import Header from "../../Components/UIComp/Header";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -10,6 +10,9 @@ import Error from "../../Components/UIComp/Error";
 import Button from "../../Components/UIComp/Button";
 import Video, { Orientation } from 'react-native-video';
 import { NAVIGATION } from "../../Constants";
+import { WebView } from 'react-native-webview';
+import axios from "axios";
+import cheerio from "cheerio";
 
 
 
@@ -19,9 +22,11 @@ const AnimeVideo = ({ route, navigation }) => {
     const { link, title } = route.params;
     const dispatch = useDispatch();
     const [videoData, setVideoData] = useState({});
+    const [videoUrls, setVideoUrls] = useState([]);
     const error = useSelector(state => state.data.error);
     const loading = useSelector(state => state.data.loading);
     const [serverLink, setServerLink] = useState(0);
+    const [videoLoading, setVideoLoading] = useState(false);
 
     useLayoutEffect(() => {
         getData()
@@ -31,8 +36,39 @@ const AnimeVideo = ({ route, navigation }) => {
         try {
             const data = await GetVideoLink(link, dispatch);
             setVideoData(data);
+            getVideoLinkFromServer(data?.id);
         } catch (error) {
             console.log('Error fetching or parsing data AnimeVideo:', error);
+        }
+    }
+    const getVideoLinkFromServer = async (id) => {
+        setVideoLoading(true);
+        try {
+            let headers = {
+                "accept": "*/*",
+                "accept-language": "en-US,en;q=0.9,hi;q=0.8",
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-origin",
+                "x-requested-with": "XMLHttpRequest",
+            }
+            let body = `captcha_v3=03AFcWeA5P0_zs3F-8qdJfYLpjVD42n5zRIvGqSRyZQZ6oMlWoEyuiDY6Xyt73A7SjE916iWJXTdfCBMmkWfQTwCQMqr5R2HXF72iupJ4I2DEAx8nn95yRQq1Oh9kLkwglJuF13UioP6bmDtAEps35tmpIOTpMM_na0Gw_NYiP_t8GvxbCBmcnpd7ehKr5UXJRQ5JeZ8WVk9Tf3Y1Qh0q9-ETGLidMmAsJ61pqIdJavLIP9-ISobzTXcLoWRKFLX4x-XM6pDAA2X9BW27m2KFZZysBEi-qz2Cx_vJl-sLk2hIqA9_yH1EvPrvbgSzA0aHJuFZB876viTIDMLbdtiDbVZQlqlrfFjFogOuunXXWpQ2OJeDykt_6n0TkC1ZQE3tJVSGYwfQ-QFjiyh_5v4dwV50SlV3JSy-Yrq-nGf1DVLnA1PYSfeKpMaB26x2_CBovZPrxXdB9KY2zLadZf0l9yQpYm7vAeHos8ytL0eMpy2S9lMdJppLVAwOENRwMwq_Y5Va-ljzPe2q6plxJEocZWsyHj-9869B7eqGTYf6S1afcGa32d5vT4I3iwFeFGbr5u1ScIzT6ipaYU0qs5a72RY1ylYHx5GcUCHaeHSd9bkfFJIoSguiHK6Fm92iX6i_AWmpcFHM7VaeVTpyjGMsFnQzhnHji31nzSBL0FRie2CVqDRu4tC1FCZ4&id=${id}`
+            let response = await axios.post("https://s3taku.com/download", body, { headers });
+            const $ = cheerio.load(response.data);
+            const downloadLinks = [];
+            $('.mirror_link').first().find('.dowload a').each((index, element) => {
+                const link = $(element).attr('href');
+                const quality = $(element).text().trim();
+                downloadLinks.push({ quality, link });
+            });
+
+            // console.log(downloadLinks, 'downloadLinks');
+            setVideoUrls(downloadLinks);
+            setVideoLoading(false);
+
+        } catch (error) {
+            console.log('Error fetching or parsing data AnimeVideo:', error);
+            setVideoLoading(false);
         }
     }
 
@@ -141,13 +177,7 @@ const AnimeVideo = ({ route, navigation }) => {
             </View>
         </SafeAreaView>
     }
-    // console.log(videoData?.servers);
-    const onBuffer = (buffer) => {
-        console.log(buffer);
-    }
-    const onError = (error) => {
-        console.log(error);
-    }
+    console.log(videoUrls);
     return (
         <SafeAreaView style={{ backgroundColor: "#222", flex: 1 }}>
             <Header
@@ -194,7 +224,7 @@ const AnimeVideo = ({ route, navigation }) => {
                 />
             </Header>
 
-            <View style={{ flex: 1, paddingHorizontal: 12 }}>
+            <ScrollView style={{ flex: 1, paddingHorizontal: 12 }}>
                 <View style={{ flexDirection: "column", gap: 13 }}>
                     <Text style={{ color: "gold", fontSize: 16 }}
                         onPress={() => {
@@ -207,47 +237,52 @@ const AnimeVideo = ({ route, navigation }) => {
                     </Text>
                 </View>
 
-                <Button
-                    title="Download"
-                    onPress={() => {
-                        Linking.openURL(videoData?.downloadLink);
-                    }}
-                />
+                {videoLoading ?
+                    <View style={{ flexDirection: "row", gap: 12, justifyContent: "center", alignItems: "center", }}>
+                        <ActivityIndicator size="small" color="#007AFF" />
+                        <Text style={{ color: '#007AFF' }}>Loading Episodes...</Text>
+                    </View>
 
-                <Text style={{ fontSize: 14, color: "white", marginTop: 12 }}>Servers</Text>
-                {
-                    videoData?.servers?.map((server, index) => (
-                        <Button
-                            color={serverLink == index ? "gold" : "silver"}
-                            key={index}
-                            title={server.serverName}
-                            onPress={() => {
-                                setServerLink(index);
-                            }}
-                        />
-                    ))
-                }
-                <Video
-                    source={{ uri: videoData?.servers[serverLink]?.serverLink }}
-                    ref={videoRef}
-                    // Callback when remote video is buffering                                      
-                    onBuffer={onBuffer}
-                    // Callback when video cannot be loaded              
-                    onError={onError}
-                    style={styles.backgroundVideo}
-                    controls={true}
-                    paused={false}
-                    onFullscreenPlayerWillPresent={() => {
-                        //rotate screen
-                        // Orientation.LANDSCAPE= "LANDSCAPE-LEFT"
-                    }}
-                    onFullscreenPlayerWillDismiss={() => {
-                        //rotate screen
-                        // Orientation.PORTRAIT= "PORTRAIT"
+                    :
+                    //if videoUrls is not empty then show no of servers try again 
+                    videoUrls.length == 0 ?
+                        <Text style={{ fontSize: 14, color: "white", marginTop: 12 }}>Oops!! something went wrong, Try after sometime...</Text>
+                        :
+                        <View>
 
-                    }}
-                // resizeMode="contain"
-                />
+                            <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 12, }}>
+                                <Text style={{ fontSize: 14, color: "white", }}>Quality:</Text>
+
+                                {
+                                    videoUrls?.map((server, index) => (
+                                        <Button
+                                            color={serverLink == index ? "gold" : "silver"}
+                                            key={index}
+                                            title={server.quality.replace("Download", "").replace("- mp4)", "|").replace("(", "").trim()}
+                                            onPress={() => {
+                                                setServerLink(index);
+                                            }}
+                                        />
+                                    ))
+                                }
+                            </View>
+                            <Video
+                                source={{ uri: videoUrls[serverLink]?.link }}
+                                ref={videoRef}
+                                // Callback when remote video is buffering                                      
+                                onBuffer={(onBuffer) => {
+                                    console.log(onBuffer, 'onBuffer');
+                                }}
+                                // Callback when video cannot be loaded              
+                                onError={(onError) => {
+                                    console.log(onError, 'onError');
+                                }}
+                                style={styles.backgroundVideo}
+                                controls={true}
+                                paused={false}
+                            />
+
+                        </View>}
 
                 <Text style={{ fontSize: 14, color: "white", marginTop: 12 }}> Episodes</Text>
                 <View style={{ flexDirection: "row", flexWrap: "wrap", marginHorizontal: 12, marginVertical: 12 }}>
@@ -282,7 +317,7 @@ const AnimeVideo = ({ route, navigation }) => {
                         ))
                     }
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView >
     );
 }

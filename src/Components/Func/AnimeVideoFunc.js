@@ -56,7 +56,9 @@ export const GetVideoLink = async (link, dispatch) => {
             downloadLink,
             servers,
             episodes,
-            episodePages
+            episodePages,
+            id,
+            title
         };
         dispatch(checkDownTime(response));
         return result;
