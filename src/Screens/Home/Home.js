@@ -39,17 +39,20 @@ export function Home({ navigation }) {
   const baseUrl = useSelector(state => state.data.baseUrl);
   const flatListRef = useRef(null);
   const History = useSelector(state => state.data.history);
+  const IsAnime = useSelector(state => state.data.Anime);
   const [comicsData, setComicsData] = useState([]);
   const [page, setPage] = useState(0);
   const [Showhistory, setShowhistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
-  const [switchValue, setSwitchValue] = useState(false);
   const [AnimatedData, setAnimatedData] = useState({ data: [], });
-  const [filter, setFilter] = useState([{ title: "Recent", type: 1, }, { title: "Dub", type: 2, selected: true }, { title: "Chinese", type: 3 }])
+  const [filter, setFilter] = useState([{ title: "Recent", type: 1, }, { title: "Dub", type: 2, selected: true, }, { title: "Chinese", type: 3 }])
+  const [menuList, setMenuList] = useState([{ title: "Sub", type: "" }, { title: "Raw", type: "recently-added-raw" }, { title: "Dub", type: "recently-added-dub", selected: true }, { title: "Anime Movies", type: "movies" }, { title: "New Season", type: "new-season" }, { title: "Popular Anime", type: "popular" }, { title: "Ongoing Anime", type: "ongoing-series" }])
   let Tag = Platform.OS === 'ios' ? BlurView : View;
+  // console.log(baseUrl, 'baseUrl',IsAnime);
   const loadComics = async ({ next = true, JumpToPage = false }) => {
     //LoadToPage = null, filterType = null
+    if(IsAnime) return;
     try {
       if (JumpToPage) setPageJumpTo(null);
       setLoading(true);
@@ -88,14 +91,19 @@ export function Home({ navigation }) {
   };
 
   useEffect(() => {
-    loadComics({ next: true });
+    // console.log('useEffect');
+    if (IsAnime) animatedCall(1);
+    else loadComics({ next: true });
   }, []);
 
   const animatedCall = async (page, type) => {
+    console.log(baseUrl, page, type, 'baseUrl');
     try {
-      if (!type) type = filter.find(item => item.selected)?.type
+      if (!type) type = (baseUrl == "s3taku" ? menuList : filter).find(item => item.selected)?.type
+      console.log(type, 'type');
       setLoading(true);
-      let res = await FetchAnimeData(`page=${page}&type=${type}`, dispatch, baseUrl);
+      let url = baseUrl == 'gogoanimes' ? `?page=${page}&type=${type}` : `${type}?page=${page}`;
+      let res = await FetchAnimeData(url, dispatch, baseUrl);
       setAnimatedData({
         data: res,
         page: page,
@@ -104,6 +112,7 @@ export function Home({ navigation }) {
       // setPage(page);
       if (flatListRef?.current) flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
     } catch (error) {
+      console.log(error, 'error in home page');
       setLoading(false);
       return;
     }
@@ -168,18 +177,6 @@ export function Home({ navigation }) {
                 />
               )}
             </TouchableOpacity>
-            <Switch
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={Showhistory ? '#f5dd4b' : '#f4f3f4'}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={(e) => {
-                setSwitchValue(e)
-                if (e) animatedCall(AnimatedData.page ?? 1);
-                else loadComics({ next: true });
-                // loadComics({ next: true });
-              }}
-              value={switchValue}
-            />
           </View>
 
 
@@ -211,14 +208,14 @@ export function Home({ navigation }) {
               flex: 1,
               backgroundColor: '#000',
             }}
-            data={switchValue ? AnimatedData?.data : Showhistory ? Object.values(History) : comicsData?.data}
+            data={IsAnime ? AnimatedData?.data : Showhistory ? Object.values(History) : comicsData?.data}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} Showhistory={Showhistory} />}
             ListHeaderComponent={() => {
-              if (!switchValue) return null;
+              if (!IsAnime) return null;
               return (
                 <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
-                  {filter.map((item, index) => (
+                  {(baseUrl == "s3taku" ? menuList : filter).map((item, index) => (
                     <Button
                       color={item.selected ? "gold" : "#007AFF"}
                       // textSize={heightPercentageToDP('1.5%')}
@@ -226,12 +223,22 @@ export function Home({ navigation }) {
                       title={item.title}
                       onPress={async () => {
                         //set selected filter in state
-                        await setFilter(filter.map((item, i) => {
-                          if (index === i) return { ...item, selected: true }
-                          else return { ...item, selected: false }
+                        if (baseUrl == "s3taku") {
+                          await setMenuList(menuList.map((item, i) => {
+                            if (index === i) return { ...item, selected: true }
+                            else return { ...item, selected: false }
+                          }
+                          ))
+                          animatedCall(1, item.type);
+                          return;
+                        } else {
+                          await setFilter(filter.map((item, i) => {
+                            if (index === i) return { ...item, selected: true }
+                            else return { ...item, selected: false }
+                          }
+                          ))
+                          animatedCall(1, item.type);
                         }
-                        ))
-                        animatedCall(1, item.type);
 
                       }}
                     />
@@ -253,30 +260,30 @@ export function Home({ navigation }) {
                   <Button
                     title="Previous"
                     onPress={() => {
-                      if (switchValue && AnimatedData.page > 1) {
+                      if (IsAnime && AnimatedData.page > 1) {
                         animatedCall(AnimatedData.page - 1);
                         return;
-                      } else if (switchValue) return;
+                      } else if (IsAnime) return;
                       if (page === 1) return;
                       loadComics({ next: false });
                     }}
-                    disabled={[0, 1].includes(switchValue ? AnimatedData.page : page)}
+                    disabled={[0, 1].includes(IsAnime ? AnimatedData.page : page)}
                   />
                   <Text
                     onPress={() => {
-                      if (switchValue) return;
+                      if (IsAnime) return;
                       if (!comicsData?.lastPage) return;
                       setPageJumpTo({ page: page.toString() });
                     }}
                     style={{
                       color: 'white',
                     }}>
-                    Page {switchValue ? String(AnimatedData.page) : page}
+                    Page {IsAnime ? String(AnimatedData.page) : page}
                   </Text>
                   <Button
                     title="Next"
                     onPress={() => {
-                      if (switchValue) animatedCall(AnimatedData.page + 1);
+                      if (IsAnime) animatedCall(AnimatedData.page + 1);
                       if (page === comicsData?.lastPage) return;
                       loadComics({ next: true });
                     }}

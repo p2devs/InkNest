@@ -1,4 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   dataByUrl: {},
@@ -8,6 +8,7 @@ const initialState = {
   Search: [],
   downTime: false,
   baseUrl: 'azcomic',
+  Anime: false,
 };
 
 const Reducers = createSlice({
@@ -19,7 +20,7 @@ const Reducers = createSlice({
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -29,9 +30,9 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
+      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
       // state.dataByUrl[url] = data;
     },
     pushHistory: (state, action) => {
@@ -64,6 +65,9 @@ const Reducers = createSlice({
     SwtichBaseUrl: (state, action) => {
       state.baseUrl = action.payload;
     },
+    SwtichToAnime: state => {
+      state.Anime = !state.Anime;
+    }
   },
 });
 
@@ -79,5 +83,6 @@ export const {
   UpdateSearch,
   DownTime,
   SwtichBaseUrl,
+  SwtichToAnime,
 } = Reducers.actions;
 export default Reducers.reducer;

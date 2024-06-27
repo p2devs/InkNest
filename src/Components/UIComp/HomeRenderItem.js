@@ -5,7 +5,7 @@ import { NAVIGATION } from "../../Constants";
 import Image from "./Image";
 import { BlurView } from "@react-native-community/blur";
 
-const HomeRenderItem = ({ item, index, Showhistory }) => {
+const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
     let Tag = Platform.OS === 'ios' ? BlurView : View;
 
     const [showItem, setShowItem] = useState(true);
@@ -27,6 +27,13 @@ const HomeRenderItem = ({ item, index, Showhistory }) => {
                     flexWrap: 'wrap',
                 }}
                 onPress={async () => {
+                    if (search) {
+                        navigate(NAVIGATION.animeDetails, {
+                            link: item?.link,
+                            title: item?.title
+                        })
+                        return;
+                    }
                     if (item.episode) {
                         navigate(NAVIGATION.animeVideo, {
                             link: item.link,
@@ -49,7 +56,7 @@ const HomeRenderItem = ({ item, index, Showhistory }) => {
                         height: 180,
                     }}
                     onFailer={() => {
-                        console.log('Image Load Failed');
+                        console.log('Image Load Failed', item.imageUrl);
                         setShowItem(false);
                     }}
 
@@ -80,7 +87,7 @@ const HomeRenderItem = ({ item, index, Showhistory }) => {
                     </Text>
                 </Tag>
             </TouchableOpacity>
-        </View>
+        </View >
     )
 }
 
