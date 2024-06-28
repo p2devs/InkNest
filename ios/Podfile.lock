@@ -3,13 +3,13 @@ PODS:
   - BVLinearGradient (2.8.3):
     - React-Core
   - DoubleConversion (1.1.6)
-  - FasterImage (1.6.1):
-    - FasterImage/Nuke (= 1.6.1)
-    - FasterImage/NukeUI (= 1.6.1)
+  - FasterImage (1.6.2):
+    - FasterImage/Nuke (= 1.6.2)
+    - FasterImage/NukeUI (= 1.6.2)
     - React-Core
-  - FasterImage/Nuke (1.6.1):
+  - FasterImage/Nuke (1.6.2):
     - React-Core
-  - FasterImage/NukeUI (1.6.1):
+  - FasterImage/NukeUI (1.6.2):
     - React-Core
   - FBLazyVector (0.74.1)
   - Firebase/Analytics (10.27.0):
@@ -1738,7 +1738,7 @@ SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
-  FasterImage: 4563818710bcb2dc2235fab5a5b35c3fb9ac26df
+  FasterImage: af05a76f042ca3654c962b658fdb01cb4d31caee
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
   Firebase: 26b040b20866a55f55eb3611b9fcf3ae64816b86
   FirebaseABTesting: 589bc28c0ab3e5554336895a34aa262e24276665
@@ -1829,4 +1829,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9fcb03d491101702682929068cf6ea51908a88f3
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.14.3

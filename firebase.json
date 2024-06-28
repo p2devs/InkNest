@@ -2,15 +2,17 @@
   "react-native": {
     "crashlytics_debug_enabled": false,
     "crashlytics_disable_auto_disabler": true,
-    "crashlytics_auto_collection_enabled": true,
+    "crashlytics_auto_collection_enabled": false,
     "crashlytics_is_error_generation_on_js_crash_enabled": true,
-    "crashlytics_javascript_exception_handler_chaining_enabled": false,
+    "crashlytics_javascript_exception_handler_chaining_enabled": true,
     "android_task_executor_maximum_pool_size": 10,
     "android_task_executor_keep_alive_seconds": 3,
     "messaging_ios_auto_register_for_remote_messages": true,
     "messaging_ios_foreground_presentation_options": ["badge", "sound", "list", "banner"],
-    "analytics_auto_collection_enabled": true,
+    "analytics_auto_collection_enabled": false,
     "messaging_auto_init_enabled": true,
-    "messaging_android_notification_channel_id": "high-priority"
+    "messaging_android_notification_channel_id": "high-priority",
+    "perf_auto_collection_enabled": false,
+    "google_analytics_automatic_screen_reporting_enabled": true
   }
 }
