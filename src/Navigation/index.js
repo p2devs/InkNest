@@ -44,7 +44,7 @@ export function RootNavigation() {
   }
 
   async function AnalyticsEnabled() {
-    await firebase.analytics().setAnalyticsCollectionEnabled(true);
+    await fire.analytics().setAnalyticsCollectionEnabled(true);
   }
 
   async function toggleCrashlytics() {
