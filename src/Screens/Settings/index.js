@@ -1,10 +1,18 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, Linking, Platform} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Platform,
+  Switch,
+} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
+import {getVersion, getBuildNumber} from 'react-native-device-info';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -14,14 +22,22 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
 import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
-import {HostName} from '../../Utils/APIs';
-import {SwtichBaseUrl} from '../../Redux/Reducers';
+import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
+import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
 
 export function Settings({navigation}) {
   const dispatch = useDispatch();
   const baseUrl = useSelector(state => state.data.baseUrl);
-  const SwitchbaseUrlName = baseUrl == 'azcomic' ? 'website 1' : 'webstie 2';
-
+  const Anime = useSelector(state => state.data.Anime);
+  const SwitchAnimeToggle = () => {
+    dispatch(SwtichToAnime(!Anime));
+    if (Anime) dispatch(SwtichBaseUrl('readallcomics'));
+    if (!Anime) dispatch(SwtichBaseUrl('gogoanimes'));
+    navigation.reset({
+      index: 0,
+      routes: [{name: NAVIGATION.home}],
+    });
+  };
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <Header title="Settings" />
@@ -118,11 +134,50 @@ export function Settings({navigation}) {
           </Text>
         </TouchableOpacity>
 
+        <View
+          style={{
+            paddingVertical: hp('1%'),
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+          <View style={{flexDirection: 'row'}}>
+            <MaterialIcons
+              name="burst-mode"
+              size={hp('2.5%')}
+              color="#000"
+              style={{marginRight: 4}}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              {`Anime Mode`}
+            </Text>
+          </View>
+
+          <Switch
+            trackColor={{false: '#767577', true: '#81b0ff'}}
+            thumbColor={'#007AFF'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={SwitchAnimeToggle}
+            value={Anime}
+          />
+        </View>
+
         <TouchableOpacity
           onPress={() => {
             // navigation.navigate(NAVIGATION.privacyPolicy);
             // get the current base url and switch it to the other one from hostName
-            let keys = Object.keys(HostName);
+            //if Anime mode is on switch to anime website and vice versa
+            let keys = Object.keys(Anime ? AnimeHostName : ComicHostName);
             let index = keys.indexOf(baseUrl);
             let newIndex = index === 0 ? 1 : 0;
             let SwitchbaseUrl = keys[newIndex];
@@ -143,10 +198,10 @@ export function Settings({navigation}) {
             alignItems: 'center',
           }}>
           <MaterialIcons
-            name="contact-page"
+            name="language"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{marginRight: 4}}
           />
           <Text
             style={{
@@ -154,7 +209,7 @@ export function Settings({navigation}) {
               fontWeight: 'bold',
               color: '#000',
             }}>
-            {`Switch Website: \n${SwitchbaseUrlName}`}
+            {`Switch Website: ${String(baseUrl).toUpperCase()}`}
           </Text>
         </TouchableOpacity>
 
@@ -187,6 +242,16 @@ export function Settings({navigation}) {
             Privacy Policy
           </Text>
         </TouchableOpacity>
+
+        <View style={{padding: 10, alignItems: 'center'}}>
+          <Text style={{color: 'yellow', fontSize: 20}}>
+            Version: {getVersion()}
+          </Text>
+
+          <Text style={{color: 'yellow', fontSize: 20}}>
+            Build Number: {getBuildNumber()}
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

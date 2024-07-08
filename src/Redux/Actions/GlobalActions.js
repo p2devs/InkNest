@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 import * as cheerio from 'cheerio';
 import {
   fetchDataStart,
@@ -14,6 +14,7 @@ import {
 } from '../Reducers';
 import { Alert } from 'react-native';
 import { goBack } from '../../Navigation/NavigationService';
+import APICaller from '../Controller/Interceptor';
 
 //History Watched Comic
 export const WatchedData = data => async (dispatch, getState) => {
@@ -31,6 +32,10 @@ export const checkDownTime = (error) => async dispatch => {
     return;
   }
   if (error?.response?.status === 404) {
+    if (error.response.AnimeVideo) {
+      dispatch(fetchDataFailure("Oops!! Looks like the anime episode is not available right now,\nPlease try again later..."));
+      return;
+    }
     dispatch(fetchDataFailure("Oops!! Looks like the comic is not available right now,\nPlease try again later..."));
     return;
   }
@@ -59,7 +64,7 @@ export const fetchComicDetails = (link, refresh = false) => async (dispatch, get
       return;
     }
     // console.log(link, "link");
-    const response = await axios.get(link);
+    const response = await APICaller.get(link);
     const html = response.data;
     // console.log(html, "html");
     const $ = cheerio.load(html);
@@ -187,7 +192,7 @@ export const fetchComicBook =
           dispatch(checkDownTime());
           return;
         }
-        const response = await axios.get(Hiturl);
+        const response = await APICaller.get(Hiturl);
         const html = response.data;
         const $ = cheerio.load(html);
         const targetDiv = $('div[style="margin:0px auto; max-width: 1000px; background:#fff; padding:20px 0px 10px 0px; border-radius: 15px;font-size: 22px; padding-top: 10px;"]')
@@ -257,7 +262,7 @@ export const fetchSearchComic = search => async (dispatch, getState) => {
   dispatch(fetchDataStart());
   try {
     dispatch(UpdateSearch({ user: "user", query: search }));
-    const response = await axios.get(
+    const response = await APICaller.get(
       `https://readallcomics.com/?story=${search.replaceAll(
         ' ',
         '+',

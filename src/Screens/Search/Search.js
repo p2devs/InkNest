@@ -10,6 +10,7 @@ import {
   Image,
   Modal,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,19 +24,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchSearchComic } from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
+import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export function Search({ navigation }) {
   const dispatch = useDispatch();
   const searchDatas = useSelector(state => state.data.Search);
   const loading = useSelector(state => state.data.loading);
+  const IsAnime = useSelector(state => state.data.Anime);
+  const baseUrl = useSelector(state => state.data.baseUrl);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
+  const [AnimeData, setAnimeData] = useState([]);
   const flatlistRef = React.useRef();
   let Tag = Platform.OS === 'ios' ? BlurView : View;
 
   const fetchData = async () => {
+
     if (loading) return;
     if (!searchTerm.trim()) return;
+    if (IsAnime) {
+      let data = await SearchAnime(searchTerm, dispatch, baseUrl);
+      setSearchTerm('');
+      if (data.length == 0) {
+        setAnimeData([]);
+        Alert.alert('No results found');
+        return
+      }
+      setAnimeData(data);
+      return;
+    }
     dispatch(fetchSearchComic(searchTerm));
     setSearchTerm('');
     //scroll to the top of the list
@@ -44,6 +63,10 @@ export function Search({ navigation }) {
   useEffect(() => {
     // Scroll to the top of the list
     flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
+    return () => {
+      setAnimeData([]);
+      setSearchTerm('');
+    }
   }, [loading]);
 
   const renderItem = ({ item, index }) => {
@@ -160,28 +183,7 @@ export function Search({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
       <View style={styles.container}>
-        {/* <View
-          style={{
-            width: '100%',
-            height: heightPercentageToDP('4%'),
-            backgroundColor: '#222',
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-            borderBottomColor: '#fff',
-            borderBottomWidth: 0.5,
-            marginBottom: 5,
-          }}>
-          <Text
-            style={{
-              fontSize: heightPercentageToDP('2%'),
-              fontWeight: 'bold',
-              color: '#FFF',
-            }}>
-            Comic Bot
-          </Text>
-        </View> */}
-        <Header title="Comic Bot" />
+        <Header title="Search Bot" />
         <View style={{
           paddingHorizontal: widthPercentageToDP('2%'),
           paddingVertical: heightPercentageToDP('2%'),
@@ -200,7 +202,7 @@ export function Search({ navigation }) {
             }}>
             <TextInput
               style={styles.input}
-              placeholder='Send us what you want to read...'
+              placeholder='Send us what you want to see...'
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
@@ -220,7 +222,7 @@ export function Search({ navigation }) {
             {/* <Button title="Search" onPress={fetchData} /> */}
           </View>
         </View>
-        <FlatList
+        {!IsAnime ? <FlatList
           scrollsToTop
           ref={flatlistRef}
           style={{ flex: 1, backgroundColor: '#000' }}
@@ -244,12 +246,47 @@ export function Search({ navigation }) {
               </Text>
             </View>
           }
-          data={searchDatas}
+          data={IsAnime ? AnimeData : searchDatas}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={{ flexGrow: 1 }}
           ListFooterComponent={<View style={{ marginVertical: heightPercentageToDP('6%'), }} />}
         />
+          :
+          <FlatList
+            ref={flatlistRef}
+            numColumns={2}
+            key={2}
+            showsVerticalScrollIndicator={false}
+            style={{
+              flex: 1,
+              backgroundColor: '#000',
+            }}
+            data={AnimeData}
+            keyExtractor={(item, index) => index.toString()}
+            ListEmptyComponent={
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <MaterialCommunityIcons
+                  name="search-web"
+                  size={heightPercentageToDP('10%')}
+                  color="gold"
+                  style={{ marginRight: 10 }}
+                />
+                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                  Send us what you want to see
+                </Text>
+                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                  we will find it for you
+                </Text>
+                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                  and show you the results
+                </Text>
+              </View>
+            }
+            renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} search={true} />}
+            ListFooterComponent={<View style={{ marginVertical: heightPercentageToDP('6%'), }} />}
+          />
+        }
         <Modal
           transparent
           animationType="slide"

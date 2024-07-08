@@ -11,14 +11,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
-import Loading from '../../Components/UIComp/Loading';
-import Error from '../../Components/UIComp/Error';
-import Gallery from '../../Components/Gallery/src/index';
-import { updateData } from '../../Redux/Reducers';
-import ComicBookHeader from '../../Components/UIComp/ComicBookHeader';
-import ComicBookFooter from '../../Components/UIComp/ComicBookFooter';
-import Image from '../../Components/UIComp/Image';
+import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
+import Loading from '../../../Components/UIComp/Loading';
+import Error from '../../../Components/UIComp/Error';
+import Gallery from '../../../Components/Gallery/src/index';
+import { updateData } from '../../../Redux/Reducers';
+import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
+import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
+import Image from '../../../Components/UIComp/Image';
 
 export function ComicBook({ navigation, route }) {
   const { comicBook, pageJump } = route?.params;

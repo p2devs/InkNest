@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: hp('2%'),
         fontWeight: 'bold',
-        color: '#FFF'
+        color: '#FFF',
     }
 })
 

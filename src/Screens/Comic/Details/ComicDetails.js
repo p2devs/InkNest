@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ScrollView,
   Text,
@@ -9,8 +9,8 @@ import {
   // Button,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
@@ -18,20 +18,18 @@ import {
   checkDownTime,
   fetchComicBook,
   fetchComicDetails,
-} from '../../Redux/Actions/GlobalActions';
-import Loading from '../../Components/UIComp/Loading';
-import Error from '../../Components/UIComp/Error';
-import { updateData } from '../../Redux/Reducers';
-import ChaptersView from '../../Components/UIComp/ChaptersView';
-import DescriptionView from '../../Components/UIComp/DescriptionView';
-import {
-  heightPercentageToDP,
-} from 'react-native-responsive-screen';
-import Button from '../../Components/UIComp/Button';
-import Header from '../../Components/UIComp/Header';
+} from '../../../Redux/Actions/GlobalActions';
+import Loading from '../../../Components/UIComp/Loading';
+import Error from '../../../Components/UIComp/Error';
+import {updateData} from '../../../Redux/Reducers';
+import ChaptersView from '../../../Components/UIComp/ChaptersView';
+import DescriptionView from '../../../Components/UIComp/DescriptionView';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
+import Button from '../../../Components/UIComp/Button';
+import Header from '../../../Components/UIComp/Header';
 
-export function ComicDetails({ navigation, route }) {
-  const { link, PageUrl, search = false, home = false } = route.params;
+export function ComicDetails({navigation, route}) {
+  const {link, PageUrl, search = false, home = false} = route.params;
   const [PageLink, setPageLink] = useState('');
   const dispatch = useDispatch();
   const ComicDetail = useSelector(
@@ -43,7 +41,7 @@ export function ComicDetails({ navigation, route }) {
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   useEffect(() => {
-    ApiCall()
+    ApiCall();
   }, [PageUrl, link, search, home, dispatch]);
   // console.log(ComicDetail, 'ComicDetail');
   useEffect(() => {
@@ -53,7 +51,7 @@ export function ComicDetails({ navigation, route }) {
   }, [PageLink]);
 
   const ApiCall = () => {
-    if (ComicDetail) dispatch(checkDownTime())
+    if (ComicDetail) dispatch(checkDownTime());
 
     if (search && !ComicDetail) {
       dispatch(fetchComicDetails(PageUrl));
@@ -71,11 +69,15 @@ export function ComicDetails({ navigation, route }) {
       }
       return;
     }
-
-  }
+  };
 
   useEffect(() => {
-    console.log('ComicDetail', !ComicDetail?.title && !ComicDetail?.imgSrc, !ComicDetail?.title, !ComicDetail?.imgSrc);
+    console.log(
+      'ComicDetail',
+      !ComicDetail?.title && !ComicDetail?.imgSrc,
+      !ComicDetail?.title,
+      !ComicDetail?.imgSrc,
+    );
     if (ComicDetail) {
       if (!ComicDetail?.title) {
         setTabSelected(1);
@@ -87,14 +89,11 @@ export function ComicDetails({ navigation, route }) {
   }
 
   if (error) {
-    return <Error
-      error={error}
-      onPress={ApiCall}
-    />;
+    return <Error error={error} onPress={ApiCall} />;
   }
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
-      <View style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
+      <View style={{flex: 1}}>
         <Header
           style={{
             width: '100%',
@@ -116,7 +115,7 @@ export function ComicDetails({ navigation, route }) {
               name="chevron-back"
               size={heightPercentageToDP('3%')}
               color="#fff"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
           </TouchableOpacity>
 
@@ -128,14 +127,13 @@ export function ComicDetails({ navigation, route }) {
             }}>
             Comic Details
           </Text>
-          <View style={{ flexDirection: "row", gap: 20 }}>
-
+          <View style={{flexDirection: 'row', gap: 20}}>
             <TouchableOpacity
               onPress={() => {
                 dispatch(
                   updateData({
                     url: search ? PageUrl : PageLink,
-                    data: { Bookmark: !ComicDetail?.Bookmark },
+                    data: {Bookmark: !ComicDetail?.Bookmark},
                   }),
                 );
               }}>
@@ -147,7 +145,7 @@ export function ComicDetails({ navigation, route }) {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                dispatch(fetchComicDetails(search ? PageUrl : PageLink, true))
+                dispatch(fetchComicDetails(search ? PageUrl : PageLink, true));
                 // dispatch(
                 //   updateData({
                 //     url: search ? PageUrl : PageLink,
@@ -170,18 +168,19 @@ export function ComicDetails({ navigation, route }) {
             alignItems: 'center',
             marginBottom: 5,
           }}>
-          {(!ComicDetail?.title) ? null :
+          {!ComicDetail?.title ? null : (
             <Button
               title="Info"
-              color={TabSelected !== 0 ? '#007AFF' : "gold"}
+              color={TabSelected !== 0 ? '#007AFF' : 'gold'}
               textSize={TabSelected !== 0 ? 13 : 18}
               onPress={() => {
                 setTabSelected(0);
               }}
-            />}
+            />
+          )}
           <Button
             title="Chapters"
-            color={TabSelected !== 1 ? '#007AFF' : "gold"}
+            color={TabSelected !== 1 ? '#007AFF' : 'gold'}
             textSize={TabSelected !== 1 ? 13 : 18}
             onPress={() => {
               setTabSelected(1);
@@ -189,7 +188,7 @@ export function ComicDetails({ navigation, route }) {
           />
           <Button
             title="Bookmarks"
-            color={TabSelected !== 2 ? '#007AFF' : "gold"}
+            color={TabSelected !== 2 ? '#007AFF' : 'gold'}
             textSize={TabSelected !== 2 ? 13 : 18}
             onPress={() => {
               setTabSelected(2);
@@ -206,29 +205,34 @@ export function ComicDetails({ navigation, route }) {
             marginBottom: 10,
           }}>
           {TabSelected !== 0 ? null : (
-            <View style={{ flexDirection: 'row' }}>
-              <View style={{ flexDirection: 'column', width: 220 }}>
+            <View
+              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <View style={{flexDirection: 'column', width: 220}}>
                 <Text style={styles.title}>{ComicDetail?.title}</Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Genres:</Text>{' '}
-                  {ComicDetail?.genres ? ComicDetail?.genres : "--"}
+                  {ComicDetail?.genres ? ComicDetail?.genres : '--'}
                 </Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Publisher:</Text>{' '}
-                  {ComicDetail?.publisher ? ComicDetail?.publisher : "--"}
+                  {ComicDetail?.publisher ? ComicDetail?.publisher : '--'}
                 </Text>
-                {!ComicDetail?.yearOfRelease ? null : <Text style={styles.text}>
-                  <Text style={styles.label}>Year Of Release:</Text>{' '}
-                  {ComicDetail?.yearOfRelease ?? "--"}
-                </Text>}
-                {!ComicDetail?.status ? null : <Text style={styles.text}>
-                  <Text style={styles.label}>Status:</Text>{' '}
-                  {ComicDetail?.status ?? "--"}
-                </Text>}
+                {!ComicDetail?.yearOfRelease ? null : (
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Year Of Release:</Text>{' '}
+                    {ComicDetail?.yearOfRelease ?? '--'}
+                  </Text>
+                )}
+                {!ComicDetail?.status ? null : (
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Status:</Text>{' '}
+                    {ComicDetail?.status ?? '--'}
+                  </Text>
+                )}
               </View>
               {ComicDetail?.imgSrc ? (
                 <Image
-                  source={{ uri: ComicDetail?.imgSrc }}
+                  source={{uri: ComicDetail?.imgSrc}}
                   style={styles.image}
                 />
               ) : (
@@ -238,8 +242,9 @@ export function ComicDetails({ navigation, route }) {
           )}
           {TabSelected !== 0
             ? null
-            : !ComicDetail?.volumes ? null :
-              ComicDetail?.volumes.map((vol, index) => (
+            : !ComicDetail?.volumes
+            ? null
+            : ComicDetail?.volumes.map((vol, index) => (
                 <DescriptionView key={index} index={index} vol={vol} />
               ))}
           {[1, 2].includes(TabSelected) ? (
@@ -249,27 +254,25 @@ export function ComicDetails({ navigation, route }) {
           ) : null}
           {![1, 2].includes(TabSelected)
             ? null
-            :
-            ComicDetail?.issues ?
-              ComicDetail?.issues.map((item, index) => (
+            : ComicDetail?.issues
+            ? ComicDetail?.issues.map((item, index) => (
                 <ChaptersView
                   chapter={item}
                   key={index}
                   Bookmark={TabSelected == 2}
                 />
               ))
-              :
-              ComicDetail?.chapters.map((item, index) => (
+            : ComicDetail?.chapters.map((item, index) => (
                 <ChaptersView
                   chapter={item}
                   key={index}
                   Bookmark={TabSelected == 2}
                 />
               ))}
-          <View style={{ height: 50 }} />
+          <View style={{height: 50}} />
         </ScrollView>
       </View>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }
 

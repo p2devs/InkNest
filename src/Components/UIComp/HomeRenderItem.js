@@ -5,8 +5,8 @@ import { NAVIGATION } from "../../Constants";
 import Image from "./Image";
 import { BlurView } from "@react-native-community/blur";
 
-const HomeRenderItem = ({ item, index,Showhistory }) => {
-  let Tag = Platform.OS === 'ios' ? BlurView : View;
+const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
+    let Tag = Platform.OS === 'ios' ? BlurView : View;
 
     const [showItem, setShowItem] = useState(true);
     if (!showItem) return null;
@@ -27,13 +27,28 @@ const HomeRenderItem = ({ item, index,Showhistory }) => {
                     flexWrap: 'wrap',
                 }}
                 onPress={async () => {
+                    if (search) {
+                        navigate(NAVIGATION.animeDetails, {
+                            link: item?.link,
+                            title: item?.title
+                        })
+                        return;
+                    }
+                    if (item.episode) {
+                        navigate(NAVIGATION.animeVideo, {
+                            link: item.link,
+                            title: item.title,
+                        });
+                        return;
+                    }
                     navigate(NAVIGATION.comicDetails, {
                         link: item.link,
                         home: !Showhistory,
                         search: Showhistory,
                         PageUrl: item.link,
                     });
-                }}>
+                }
+                }>
                 <Image
                     source={{ uri: item.imageUrl }}
                     style={{
@@ -41,7 +56,7 @@ const HomeRenderItem = ({ item, index,Showhistory }) => {
                         height: 180,
                     }}
                     onFailer={() => {
-                        console.log('Image Load Failed');
+                        // console.log('Image Load Failed', item.imageUrl);
                         setShowItem(false);
                     }}
 
@@ -68,11 +83,11 @@ const HomeRenderItem = ({ item, index,Showhistory }) => {
                         {item.title}
                     </Text>
                     <Text style={{ color: 'white', width: '80%' }} numberOfLines={1}>
-                        {item?.genres ? item?.genres.join(',') : item.date}
+                        {item?.episode ? item?.episode : item?.genres ? item?.genres.join(',') : item.date}
                     </Text>
                 </Tag>
             </TouchableOpacity>
-        </View>
+        </View >
     )
 }
 

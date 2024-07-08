@@ -11,6 +11,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Switch,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,18 +20,18 @@ import { BlurView } from '@react-native-community/blur';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import { fetchComicsData } from '../../Components/Func/HomeFunc';
-import { NAVIGATION } from '../../Constants';
-import LoadingModal from '../../Components/UIComp/LoadingModal';
+import { FetchAnimeData, fetchComicsData } from '../../../Components/Func/HomeFunc';
+import { NAVIGATION } from '../../../Constants';
+import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import Button from '../../Components/UIComp/Button';
-import Header from '../../Components/UIComp/Header';
-import Image from '../../Components/UIComp/Image';
-import ErrorCard from '../../Components/UIComp/ErrorCard';
-import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import Button from '../../../Components/UIComp/Button';
+import Header from '../../../Components/UIComp/Header';
+import Image from '../../../Components/UIComp/Image';
+import ErrorCard from '../../../Components/UIComp/ErrorCard';
+import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 
 export function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -38,18 +39,18 @@ export function Home({ navigation }) {
   const baseUrl = useSelector(state => state.data.baseUrl);
   const flatListRef = useRef(null);
   const History = useSelector(state => state.data.history);
+  const IsAnime = useSelector(state => state.data.Anime);
   const [comicsData, setComicsData] = useState([]);
   const [page, setPage] = useState(0);
   const [Showhistory, setShowhistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
-  // const [filter, setFilter] = useState([{ title: "Ongoing", link: "ongoing-comics/", selected: true }, { title: "New Comics", link: "new-comics/" }, { title: "Popular Comics", link: "popular-comics/" }])
   let Tag = Platform.OS === 'ios' ? BlurView : View;
   const loadComics = async ({ next = true, JumpToPage = false }) => {
-    //LoadToPage = null, filterType = null
     try {
       if (JumpToPage) setPageJumpTo(null);
       setLoading(true);
+
       let LoadingPage = JumpToPage
         ? Number(pageJumpTo.page)
         : next
@@ -86,8 +87,6 @@ export function Home({ navigation }) {
   useEffect(() => {
     loadComics({ next: true });
   }, []);
-
-
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
@@ -128,6 +127,8 @@ export function Home({ navigation }) {
             style={{
               flexDirection: 'row',
               marginHorizontal: widthPercentageToDP('1%'),
+              gap: 10,
+              marginBottom: 5,
             }}>
             <TouchableOpacity
               onPress={() => {
@@ -136,13 +137,13 @@ export function Home({ navigation }) {
               {Showhistory ? (
                 <AntDesign
                   name="book"
-                  size={heightPercentageToDP('3%')}
+                  size={heightPercentageToDP('4%')}
                   color="#FFF"
                 />
               ) : (
                 <MaterialCommunityIcons
                   name="history"
-                  size={heightPercentageToDP('3%')}
+                  size={heightPercentageToDP('4%')}
                   color="#FFF"
                 />
               )}
@@ -167,6 +168,11 @@ export function Home({ navigation }) {
           </View>
         ) : (
           <FlatList
+            refreshing={loading}
+            onRefresh={async () => {
+              setPageJumpTo({ page: page.toString() });
+              loadComics({ JumpToPage: true });
+            }}
             ref={flatListRef}
             numColumns={2}
             key={2}
@@ -175,34 +181,20 @@ export function Home({ navigation }) {
               flex: 1,
               backgroundColor: '#000',
             }}
-            data={Showhistory ? Object.values(History) : comicsData?.data}
+            data={
+              Showhistory
+                ? Object.values(History)
+                : comicsData?.data
+            }
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} Showhistory={Showhistory} />}
-            // ListHeaderComponent={() => {
-            //   if (baseUrl == "readallcomics") return null;
-            //   return (
-            //     <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
-            //       {filter.map((item, index) => (
-            //         <Button
-            //           color={item.selected ? "gold" : "#007AFF"}
-            //           // textSize={heightPercentageToDP('1.5%')}
-            //           key={index}
-            //           title={item.title}
-            //           onPress={async () => {
-            //             //set selected filter in state
-            //             await setFilter(filter.map((item, i) => {
-            //               if (index === i) return { ...item, selected: true }
-            //               else return { ...item, selected: false }
-            //             }
-            //             ))
-            //             setPage(0);
-            //             loadComics({ next: true, LoadToPage: 1, filterType: item.link });
-            //           }}
-            //         />
-            //       ))}
-            //     </View>
-            //   )
-            // }}
+            renderItem={({ item, index }) => (
+              <HomeRenderItem
+                item={item}
+                index={index}
+                key={index}
+                Showhistory={Showhistory}
+              />
+            )}
             ListFooterComponent={() => {
               if (Showhistory) return null;
               return (
@@ -220,7 +212,9 @@ export function Home({ navigation }) {
                       if (page === 1) return;
                       loadComics({ next: false });
                     }}
-                    disabled={[0, 1].includes(page)}
+                    disabled={[0, 1].includes(
+                      IsAnime ? AnimatedData.page : page,
+                    )}
                   />
                   <Text
                     onPress={() => {
@@ -244,6 +238,7 @@ export function Home({ navigation }) {
             }}
           />
         )}
+
         <Modal
           transparent
           animationType="slide"
@@ -374,6 +369,7 @@ export function Home({ navigation }) {
             </Tag>
           </KeyboardAvoidingView>
         </Modal>
+
         <LoadingModal loading={loading} />
       </View>
     </SafeAreaView>

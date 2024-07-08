@@ -10,6 +10,9 @@ import analytics from '@react-native-firebase/analytics';
 import {useNetInfo} from '@react-native-community/netinfo';
 import Network from '../Components/UIComp/Network';
 import messaging from '@react-native-firebase/messaging';
+import {firebase} from '@react-native-firebase/perf';
+import crashlytics from '@react-native-firebase/crashlytics';
+import {firebase as fire} from '@react-native-firebase/analytics';
 
 export function RootNavigation() {
   const downTime = useSelector(state => state.data.downTime);
@@ -40,8 +43,25 @@ export function RootNavigation() {
     }
   }
 
+  async function AnalyticsEnabled() {
+    await fire.analytics().setAnalyticsCollectionEnabled(true);
+  }
+
+  async function toggleCrashlytics() {
+    await crashlytics().setCrashlyticsCollectionEnabled(true);
+  }
+
+  async function PerformanceMonitoring() {
+    await firebase.perf().setPerformanceCollectionEnabled(true);
+  }
+
   useEffect(() => {
     requestUserPermission();
+    if (!__DEV__) {
+      PerformanceMonitoring();
+      toggleCrashlytics();
+      AnalyticsEnabled();
+    }
   }, []);
 
   useLayoutEffect(() => {

@@ -9,4 +9,8 @@ export const NAVIGATION = {
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
   update: 'Update',
+  animeVideo: 'AnimeVideo',
+  animeDetails: 'AnimeDetails',
+  moreDetails: 'MoreDetails',
+  ViewAll:"ViewAll",
 };

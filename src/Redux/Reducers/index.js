@@ -7,7 +7,8 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 'azcomic',
+  baseUrl: 's3taku',
+  Anime: true,
 };
 
 const Reducers = createSlice({
@@ -64,6 +65,9 @@ const Reducers = createSlice({
     SwtichBaseUrl: (state, action) => {
       state.baseUrl = action.payload;
     },
+    SwtichToAnime: state => {
+      state.Anime = !state.Anime;
+    },
   },
 });
 
@@ -79,5 +83,6 @@ export const {
   UpdateSearch,
   DownTime,
   SwtichBaseUrl,
+  SwtichToAnime,
 } = Reducers.actions;
 export default Reducers.reducer;

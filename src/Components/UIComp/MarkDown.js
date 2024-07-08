@@ -1,6 +1,6 @@
 // MarkdownParser.js
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Linking } from 'react-native';
 
 // Helper function to parse markdown text
 const parseMarkdown = (text) => {
@@ -24,9 +24,10 @@ const parseMarkdown = (text) => {
             const endIndex = line.indexOf('](');
             const text = line.substring(1, endIndex);
             const url = line.substring(endIndex + 2, line.length - 1);
-            return <Text key={index} style={styles.link} onPress={() => console.log(`Open link: ${url}`)}>{text}</Text>;
+            return <Text key={index} style={styles.link} onPress={() => Linking.openURL(url)}> {text}</Text >;
         } else {
-            return <Text key={index} style={styles.paragraph}>{line}</Text>;
+            return <Text key={index} style={styles.paragraph
+            } > {line}</Text >;
         }
     });
 
