@@ -3394,6 +3394,7 @@ __metadata:
     react: 18.2.0
     react-content-loader: ^7.0.2
     react-native: 0.74.1
+    react-native-device-info: ^11.1.0
     react-native-gesture-handler: 2.16.2
     react-native-linear-gradient: 2.8.3
     react-native-reanimated: 3.11.0
@@ -8887,6 +8888,15 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "react-native-device-info@npm:11.1.0"
+  peerDependencies:
+    react-native: "*"
+  checksum: 272cab82573933a1f3a9bc394b82a387ccbdf9fbef131fc1f04b8ff78b36f581931b5c643f5aa278f28577cbc320ef2ac588cafdb73292e9b0cf4427d54c44ce
   languageName: node
   linkType: hard
 

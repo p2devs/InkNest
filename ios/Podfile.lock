@@ -1405,6 +1405,8 @@ PODS:
     - React-Core
   - RNCPicker (2.7.7):
     - React-Core
+  - RNDeviceInfo (11.1.0):
+    - React-Core
   - RNFBAnalytics (20.1.0):
     - Firebase/Analytics (= 10.27.0)
     - React-Core
@@ -1559,6 +1561,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
@@ -1718,6 +1721,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCPicker:
     :path: "../node_modules/@react-native-picker/picker"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNFBAnalytics:
     :path: "../node_modules/@react-native-firebase/analytics"
   RNFBApp:
@@ -1821,6 +1826,7 @@ SPEC CHECKSUMS:
   ReactCommon: eb4c4a9c43fcc0d93f922d0fdada24638429e515
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNCPicker: b7873ba797dc586bfaf3307d737cbdc620a9ff3e
+  RNDeviceInfo: b899ce37a403a4dea52b7cb85e16e49c04a5b88e
   RNFBAnalytics: 3f336502732e51de9f5a5be8b5e3df879bf2eca7
   RNFBApp: 9acbe359ef3559d6f8ca5c350db471f2b352f98a
   RNFBCrashlytics: a4a66785997e629313ec8005a0811765738239fd
@@ -1835,4 +1841,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9fcb03d491101702682929068cf6ea51908a88f3
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.14.3

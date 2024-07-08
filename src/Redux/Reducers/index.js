@@ -7,8 +7,8 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 'azcomic',
-  Anime: false,
+  baseUrl: 's3taku',
+  Anime: true,
 };
 
 const Reducers = createSlice({

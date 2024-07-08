@@ -1,23 +1,31 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Linking, Platform, Switch } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Platform,
+  Switch,
+} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
+import {getVersion, getBuildNumber} from 'react-native-device-info';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { NAVIGATION } from '../../Constants';
+import {NAVIGATION} from '../../Constants';
 import Header from '../../Components/UIComp/Header';
-import { useDispatch, useSelector } from 'react-redux';
-import { AnimeHostName, ComicHostName } from '../../Utils/APIs';
-import { SwtichBaseUrl, SwtichToAnime } from '../../Redux/Reducers';
+import {useDispatch, useSelector} from 'react-redux';
+import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
+import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
 
-export function Settings({ navigation }) {
+export function Settings({navigation}) {
   const dispatch = useDispatch();
   const baseUrl = useSelector(state => state.data.baseUrl);
   const Anime = useSelector(state => state.data.Anime);
@@ -27,11 +35,11 @@ export function Settings({ navigation }) {
     if (!Anime) dispatch(SwtichBaseUrl('gogoanimes'));
     navigation.reset({
       index: 0,
-      routes: [{ name: NAVIGATION.home }],
+      routes: [{name: NAVIGATION.home}],
     });
-  }
+  };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <Header title="Settings" />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -53,7 +61,7 @@ export function Settings({ navigation }) {
             name="information-circle-outline"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -83,7 +91,7 @@ export function Settings({ navigation }) {
             name="update"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -114,7 +122,7 @@ export function Settings({ navigation }) {
             name="database"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -136,26 +144,28 @@ export function Settings({ navigation }) {
             borderRadius: 5,
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: "space-between"
+            justifyContent: 'space-between',
           }}>
-          <View style={{flexDirection:"row"}}>
-          <MaterialIcons name="burst-mode"
-            size={hp('2.5%')}
-            color="#000"
-            style={{ marginRight: 4 }} />
-          <Text
-            style={{
-              fontSize: hp('2%'),
-              fontWeight: 'bold',
-              color: '#000',
-            }}>
-            {`Anime Mode`}
-          </Text>
+          <View style={{flexDirection: 'row'}}>
+            <MaterialIcons
+              name="burst-mode"
+              size={hp('2.5%')}
+              color="#000"
+              style={{marginRight: 4}}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              {`Anime Mode`}
+            </Text>
           </View>
 
           <Switch
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={"#007AFF"}
+            trackColor={{false: '#767577', true: '#81b0ff'}}
+            thumbColor={'#007AFF'}
             ios_backgroundColor="#3e3e3e"
             onValueChange={SwitchAnimeToggle}
             value={Anime}
@@ -174,7 +184,7 @@ export function Settings({ navigation }) {
             dispatch(SwtichBaseUrl(SwitchbaseUrl));
             navigation.reset({
               index: 0,
-              routes: [{ name: NAVIGATION.home }],
+              routes: [{name: NAVIGATION.home}],
             });
           }}
           style={{
@@ -191,7 +201,7 @@ export function Settings({ navigation }) {
             name="language"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 4 }}
+            style={{marginRight: 4}}
           />
           <Text
             style={{
@@ -221,7 +231,7 @@ export function Settings({ navigation }) {
             name="policy"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -232,6 +242,16 @@ export function Settings({ navigation }) {
             Privacy Policy
           </Text>
         </TouchableOpacity>
+
+        <View style={{padding: 10, alignItems: 'center'}}>
+          <Text style={{color: 'yellow', fontSize: 20}}>
+            Version: {getVersion()}
+          </Text>
+
+          <Text style={{color: 'yellow', fontSize: 20}}>
+            Build Number: {getBuildNumber()}
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

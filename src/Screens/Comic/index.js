@@ -1,3 +1,3 @@
 export {Home} from './Home/Home';
-export {ComicDetails} from '../ComicDetails/ComicDetails';
-export {ComicBook} from '../ComicBook/ComicBook';
+export {ComicDetails} from './Details/ComicDetails';
+export {ComicBook} from './Book/ComicBook';
