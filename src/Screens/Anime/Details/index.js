@@ -82,7 +82,7 @@ export function Details({navigation, route}) {
   };
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
-      <View style={{flex: 1}}>
+      <View style={{flex: 1,}}>
         <Header
           style={{
             width: '100%',
@@ -164,7 +164,7 @@ export function Details({navigation, route}) {
           }}>
           {/* <Text style={styles.title}>{data?.title}</Text> */}
           {TabSelected !== 0 ? null : (
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row',justifyContent:"space-between"}}>
               <View style={{flexDirection: 'column', width: 220}}>
                 <Text style={styles.title}>{data?.title}</Text>
                 <Text style={styles.text}>

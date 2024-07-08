@@ -206,7 +206,7 @@ export function ComicDetails({ navigation, route }) {
             marginBottom: 10,
           }}>
           {TabSelected !== 0 ? null : (
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: 'row',justifyContent:"space-between" }}>
               <View style={{ flexDirection: 'column', width: 220 }}>
                 <Text style={styles.title}>{ComicDetail?.title}</Text>
                 <Text style={styles.text}>

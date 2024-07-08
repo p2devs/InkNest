@@ -304,7 +304,7 @@ const AnimeVideo = ({ route, navigation }) => {
                 }}
                 style={styles.backgroundVideo}
                 controls={true}
-                paused={true}
+                paused={false}
                 onEnd={() => {
                   //get index of current active episode then check for next index 
                   let currentIndex = videoData.episodes.findIndex(item => item.active);
