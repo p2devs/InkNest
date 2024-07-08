@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -14,26 +14,26 @@ import {
   Switch,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from '@react-native-community/blur';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {BlurView} from '@react-native-community/blur';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import { FetchAnimeData, fetchComicsData } from '../../Components/Func/HomeFunc';
-import { NAVIGATION } from '../../Constants';
-import LoadingModal from '../../Components/UIComp/LoadingModal';
+import {FetchAnimeData, fetchComicsData} from '../../../Components/Func/HomeFunc';
+import {NAVIGATION} from '../../../Constants';
+import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import Button from '../../Components/UIComp/Button';
-import Header from '../../Components/UIComp/Header';
-import Image from '../../Components/UIComp/Image';
-import ErrorCard from '../../Components/UIComp/ErrorCard';
-import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import Button from '../../../Components/UIComp/Button';
+import Header from '../../../Components/UIComp/Header';
+import Image from '../../../Components/UIComp/Image';
+import ErrorCard from '../../../Components/UIComp/ErrorCard';
+import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 
-export function Home({ navigation }) {
+export function Home({navigation}) {
   const dispatch = useDispatch();
   const error = useSelector(state => state.data.error);
   const baseUrl = useSelector(state => state.data.baseUrl);
@@ -45,14 +45,26 @@ export function Home({ navigation }) {
   const [Showhistory, setShowhistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
-  const [AnimatedData, setAnimatedData] = useState({ data: [], });
-  const [filter, setFilter] = useState([{ title: "Recent", type: 1, }, { title: "Dub", type: 2, selected: true, }, { title: "Chinese", type: 3 }])
-  const [menuList, setMenuList] = useState([{ title: "Sub", type: "" }, { title: "Raw", type: "recently-added-raw" }, { title: "Dub", type: "recently-added-dub", selected: true }, { title: "Anime Movies", type: "movies" }, { title: "New Season", type: "new-season" }, { title: "Popular Anime", type: "popular" }, { title: "Ongoing Anime", type: "ongoing-series" }])
+  const [AnimatedData, setAnimatedData] = useState({data: []});
+  const [filter, setFilter] = useState([
+    {title: 'Recent', type: 1},
+    {title: 'Dub', type: 2, selected: true},
+    {title: 'Chinese', type: 3},
+  ]);
+  const [menuList, setMenuList] = useState([
+    {title: 'Sub', type: ''},
+    {title: 'Raw', type: 'recently-added-raw'},
+    {title: 'Dub', type: 'recently-added-dub', selected: true},
+    {title: 'Anime Movies', type: 'movies'},
+    {title: 'New Season', type: 'new-season'},
+    {title: 'Popular Anime', type: 'popular'},
+    {title: 'Ongoing Anime', type: 'ongoing-series'},
+  ]);
   let Tag = Platform.OS === 'ios' ? BlurView : View;
   // console.log(baseUrl, 'baseUrl',IsAnime);
-  const loadComics = async ({ next = true, JumpToPage = false }) => {
+  const loadComics = async ({next = true, JumpToPage = false}) => {
     //LoadToPage = null, filterType = null
-    if(IsAnime) return;
+    if (IsAnime) return;
     try {
       if (JumpToPage) setPageJumpTo(null);
       setLoading(true);
@@ -60,8 +72,8 @@ export function Home({ navigation }) {
       let LoadingPage = JumpToPage
         ? Number(pageJumpTo.page)
         : next
-          ? page + 1
-          : page - 1;
+        ? page + 1
+        : page - 1;
       let filterType = 'ongoing-comics/';
       let url =
         baseUrl == 'azcomic'
@@ -76,7 +88,7 @@ export function Home({ navigation }) {
       });
       setLoading(false);
       if (flatListRef?.current)
-        flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+        flatListRef.current.scrollToOffset({animated: true, offset: 0});
       if (JumpToPage) {
         setPage(Number(pageJumpTo.page));
         return;
@@ -93,16 +105,22 @@ export function Home({ navigation }) {
   useEffect(() => {
     // console.log('useEffect');
     if (IsAnime) animatedCall(1);
-    else loadComics({ next: true });
+    else loadComics({next: true});
   }, []);
 
   const animatedCall = async (page, type) => {
     console.log(baseUrl, page, type, 'baseUrl');
     try {
-      if (!type) type = (baseUrl == "s3taku" ? menuList : filter).find(item => item.selected)?.type
+      if (!type)
+        type = (baseUrl == 's3taku' ? menuList : filter).find(
+          item => item.selected,
+        )?.type;
       console.log(type, 'type');
       setLoading(true);
-      let url = baseUrl == 'gogoanimes' ? `?page=${page}&type=${type}` : `${type}?page=${page}`;
+      let url =
+        baseUrl == 'gogoanimes'
+          ? `?page=${page}&type=${type}`
+          : `${type}?page=${page}`;
       let res = await FetchAnimeData(url, dispatch, baseUrl);
       setAnimatedData({
         data: res,
@@ -110,15 +128,16 @@ export function Home({ navigation }) {
       });
       setLoading(false);
       // setPage(page);
-      if (flatListRef?.current) flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+      if (flatListRef?.current)
+        flatListRef.current.scrollToOffset({animated: true, offset: 0});
     } catch (error) {
       console.log(error, 'error in home page');
       setLoading(false);
       return;
     }
-  }
+  };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <View
         style={{
           flex: 1,
@@ -141,7 +160,7 @@ export function Home({ navigation }) {
               if (Showhistory) setShowhistory(false);
             }}
             activeOpacity={Showhistory ? 0 : 1}
-            style={{ flexDirection: 'row', gap: 12 }}>
+            style={{flexDirection: 'row', gap: 12}}>
             <Text
               style={{
                 fontSize: heightPercentageToDP('2%'),
@@ -178,9 +197,6 @@ export function Home({ navigation }) {
               )}
             </TouchableOpacity>
           </View>
-
-
-
         </Header>
         {!loading && !comicsData?.data?.length && error ? (
           <View
@@ -194,7 +210,7 @@ export function Home({ navigation }) {
               error={error}
               ButtonText="Reload"
               onPress={() => {
-                loadComics({ next: true });
+                loadComics({next: true});
               }}
             />
           </View>
@@ -208,43 +224,66 @@ export function Home({ navigation }) {
               flex: 1,
               backgroundColor: '#000',
             }}
-            data={IsAnime ? AnimatedData?.data : Showhistory ? Object.values(History) : comicsData?.data}
+            data={
+              IsAnime
+                ? AnimatedData?.data
+                : Showhistory
+                ? Object.values(History)
+                : comicsData?.data
+            }
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} Showhistory={Showhistory} />}
+            renderItem={({item, index}) => (
+              <HomeRenderItem
+                item={item}
+                index={index}
+                key={index}
+                Showhistory={Showhistory}
+              />
+            )}
             ListHeaderComponent={() => {
               if (!IsAnime) return null;
               return (
-                <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
-                  {(baseUrl == "s3taku" ? menuList : filter).map((item, index) => (
-                    <Button
-                      color={item.selected ? "gold" : "#007AFF"}
-                      // textSize={heightPercentageToDP('1.5%')}
-                      key={index}
-                      title={item.title}
-                      onPress={async () => {
-                        //set selected filter in state
-                        if (baseUrl == "s3taku") {
-                          await setMenuList(menuList.map((item, i) => {
-                            if (index === i) return { ...item, selected: true }
-                            else return { ...item, selected: false }
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 10,
+                  }}>
+                  {(baseUrl == 's3taku' ? menuList : filter).map(
+                    (item, index) => (
+                      <Button
+                        color={item.selected ? 'gold' : '#007AFF'}
+                        // textSize={heightPercentageToDP('1.5%')}
+                        key={index}
+                        title={item.title}
+                        onPress={async () => {
+                          //set selected filter in state
+                          if (baseUrl == 's3taku') {
+                            await setMenuList(
+                              menuList.map((item, i) => {
+                                if (index === i)
+                                  return {...item, selected: true};
+                                else return {...item, selected: false};
+                              }),
+                            );
+                            animatedCall(1, item.type);
+                            return;
+                          } else {
+                            await setFilter(
+                              filter.map((item, i) => {
+                                if (index === i)
+                                  return {...item, selected: true};
+                                else return {...item, selected: false};
+                              }),
+                            );
+                            animatedCall(1, item.type);
                           }
-                          ))
-                          animatedCall(1, item.type);
-                          return;
-                        } else {
-                          await setFilter(filter.map((item, i) => {
-                            if (index === i) return { ...item, selected: true }
-                            else return { ...item, selected: false }
-                          }
-                          ))
-                          animatedCall(1, item.type);
-                        }
-
-                      }}
-                    />
-                  ))}
+                        }}
+                      />
+                    ),
+                  )}
                 </View>
-              )
+              );
             }}
             ListFooterComponent={() => {
               if (Showhistory) return null;
@@ -265,15 +304,17 @@ export function Home({ navigation }) {
                         return;
                       } else if (IsAnime) return;
                       if (page === 1) return;
-                      loadComics({ next: false });
+                      loadComics({next: false});
                     }}
-                    disabled={[0, 1].includes(IsAnime ? AnimatedData.page : page)}
+                    disabled={[0, 1].includes(
+                      IsAnime ? AnimatedData.page : page,
+                    )}
                   />
                   <Text
                     onPress={() => {
                       if (IsAnime) return;
                       if (!comicsData?.lastPage) return;
-                      setPageJumpTo({ page: page.toString() });
+                      setPageJumpTo({page: page.toString()});
                     }}
                     style={{
                       color: 'white',
@@ -285,7 +326,7 @@ export function Home({ navigation }) {
                     onPress={() => {
                       if (IsAnime) animatedCall(AnimatedData.page + 1);
                       if (page === comicsData?.lastPage) return;
-                      loadComics({ next: true });
+                      loadComics({next: true});
                     }}
                   />
                 </View>
@@ -348,7 +389,7 @@ export function Home({ navigation }) {
                   borderBottomWidth: 0.5,
                   borderColor: '#fff',
                 }}>
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
+                <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
                   Enter Jamp to Page
                 </Text>
                 <TouchableOpacity
@@ -359,7 +400,7 @@ export function Home({ navigation }) {
                     source={{
                       uri: 'https://cdn-icons-png.freepik.com/512/3588/3588762.png',
                     }}
-                    style={{ width: 30, height: 30 }}
+                    style={{width: 30, height: 30}}
                   />
                 </TouchableOpacity>
               </View>
@@ -396,28 +437,28 @@ export function Home({ navigation }) {
                       if (Number(page) < 1) return;
                       if (!/^\d+$/.test(page)) return;
                       if (Number(page) > comicsData?.lastPage) return;
-                      setPageJumpTo({ page });
+                      setPageJumpTo({page});
                     }}
                     value={pageJumpTo?.page}
                     placeholderTextColor={'#fff'}
-                    style={{ color: '#fff', fontSize: 20 }}
+                    style={{color: '#fff', fontSize: 20}}
                     onSubmitEditing={() => {
                       if (!pageJumpTo?.page) return;
                       if (Number(pageJumpTo?.page) > comicsData?.lastPage)
                         return;
                       if (Number(pageJumpTo?.page) < 1) return;
-                      loadComics({ JumpToPage: true });
+                      loadComics({JumpToPage: true});
                     }}
                   />
                   <Text
-                    style={{ color: '#fff', fontSize: 20, fontWeight: '500' }}>
+                    style={{color: '#fff', fontSize: 20, fontWeight: '500'}}>
                     / {comicsData?.lastPage}
                   </Text>
                 </View>
                 <Button
                   title="JumpTo"
                   onPress={() => {
-                    loadComics({ JumpToPage: true });
+                    loadComics({JumpToPage: true});
                   }}
                 />
               </View>

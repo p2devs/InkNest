@@ -11,5 +11,5 @@ export const NAVIGATION = {
   update: 'Update',
   animeVideo: 'AnimeVideo',
   animeDetails: 'AnimeDetails',
-  
+  moreDetails: 'MoreDetails',
 };
