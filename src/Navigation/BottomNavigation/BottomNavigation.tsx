@@ -8,11 +8,11 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
-import {Bookmarks, Search, Settings} from '../../Screens';
-import {NAVIGATION} from '../../Constants';
-import {useSelector} from 'react-redux';
-import {AnimeHome} from '../../Screens/Anime';
-import {Home} from '../../Screens/Comic';
+import { Bookmarks, Search, Settings } from '../../Screens';
+import { NAVIGATION } from '../../Constants';
+import { useSelector } from 'react-redux';
+import { AnimeHome } from '../../Screens/Anime';
+import { Home } from '../../Screens/Comic';
 
 const BottomTab = AnimatedTabBarNavigator();
 
@@ -75,7 +75,7 @@ export function BottomNavigation() {
         name={NAVIGATION.home}
         component={animeActive ? AnimeHome : Home}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
           ),
         }}
@@ -85,17 +85,17 @@ export function BottomNavigation() {
         name={NAVIGATION.search}
         component={Search}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="search" />
           ),
         }}
       />
 
-      <BottomTab.Screen
+      {animeActive ? null : <BottomTab.Screen
         name={NAVIGATION.bookmarks}
         component={Bookmarks}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon
               focused={focused}
               tintColor={color}
@@ -103,13 +103,13 @@ export function BottomNavigation() {
             />
           ),
         }}
-      />
+      />}
 
       <BottomTab.Screen
         name={NAVIGATION.settings}
         component={Settings}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="settings" />
           ),
         }}

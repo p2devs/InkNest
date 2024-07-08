@@ -93,7 +93,7 @@ export const GetVideoLink = async (link, dispatch) => {
                 //get the category of the episode like dub or sub from title
                 const episodeCategory = episodeTitle.includes("Dub") ? "Dub" : episodeTitle.includes("Sub") ? "Sub" : "Other";
                 //check for active episode by comparing the episode number
-                episodes.push({ title: episodeTitle, episodeLink: `${HostName["s3taku"]}${episodeLink}`, episodeNumber: "Ep " + EP, episodeCategory, active: EP == episode });
+                episodes.push({ title: episodeTitle, episodeLink: `${HostName["s3taku"]}${episodeLink}`, episodeNumber: "EP " + EP, episodeCategory, active: EP == episode });
             });
 
             // Format the data

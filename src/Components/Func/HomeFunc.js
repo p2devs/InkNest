@@ -86,15 +86,20 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
 
 
 export const FetchAnimeData = async (link, dispatch, baseUrl) => {
-  console.log(baseUrl, link, 'baseUrl');
+  // console.log(baseUrl, link, 'baseUrl');
   if (!link) return;
   dispatch(fetchDataStart());
   try {
     let url = "https://ajax.gogocdn.net/ajax/page-recent-release.html"
     const baseUrlLink = AnimeHostName[baseUrl];
+    //check if link have ?type= or not
+    if (!link.includes("type=")) {
+      url = AnimeHostName[baseUrl]
+    }
+    console.log(`${url}${link}`, 'url');
     url = baseUrl == "gogoanimes" ? `${url}${link}` : `${baseUrlLink}${link}`;
     // Fetch the HTML content from the website
-    console.log(url, 'url');
+    // console.log(url, 'url');
     const response = await APICaller.get(url);
     const html = response.data;
     // console.log(response, "html");
@@ -110,19 +115,23 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
     if (baseUrl == "gogoanimes") {
       console.log('gogoanimes');
       $('.last_episodes .items li').each((index, element) => {
-        const title = $(element).find('.name a').attr('title');
-        const link = $(element).find('.name a').attr('href');
-        const imageUrl = $(element).find('.img a img').attr('src');
-        const episode = $(element).find('.episode').text();
+        let title = $(element).find('.name a').attr('title');
+        let link = $(element).find('.name a').attr('href');
+        let imageUrl = $(element).find('.img a img').attr('src');
+        let episode = $(element).find('.episode').text();
+        let date = $(element).find('.released').text().trim() || null;
+        //if image missing hostName then add base url
+        if (!imageUrl.includes("https://")) imageUrl = `${baseUrlLink}${imageUrl.replace("/", "")}`;
         AnimaData.push({
           title,
           link: `${baseUrlLink}${link.replace("/", "")}`,
           imageUrl,
-          episode
+          episode,
+          date,
         });
       });
 
-      console.log(AnimaData, 'AnimaData');
+      // console.log(AnimaData, 'AnimaData');
     } else {
       // console.log($(".meta").text(), 'html');
       $('.listing li.video-block').each((i, elem) => {
@@ -138,10 +147,10 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
           title,
           link: `${baseUrlLink}${link}`,
           imageUrl,
-          episode:"Episode "+episode
+          episode: "Episode " + episode,
         });
       });
-      console.log(AnimaData, 'videos');
+      // console.log(AnimaData, 'videos');
     }
 
     dispatch(checkDownTime(response));

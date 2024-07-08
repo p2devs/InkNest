@@ -56,7 +56,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
                         height: 180,
                     }}
                     onFailer={() => {
-                        console.log('Image Load Failed', item.imageUrl);
+                        // console.log('Image Load Failed', item.imageUrl);
                         setShowItem(false);
                     }}
 

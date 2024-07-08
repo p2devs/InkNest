@@ -12,4 +12,5 @@ export const NAVIGATION = {
   animeVideo: 'AnimeVideo',
   animeDetails: 'AnimeDetails',
   moreDetails: 'MoreDetails',
+  ViewAll:"ViewAll",
 };
