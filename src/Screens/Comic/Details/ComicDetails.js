@@ -24,7 +24,7 @@ import Error from '../../../Components/UIComp/Error';
 import {updateData} from '../../../Redux/Reducers';
 import ChaptersView from '../../../Components/UIComp/ChaptersView';
 import DescriptionView from '../../../Components/UIComp/DescriptionView';
-import {heightPercentageToDP} from 'react-native-responsive-screen';
+import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Header from '../../../Components/UIComp/Header';
 
@@ -283,8 +283,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   image: {
-    width: 150,
-    height: 150,
+    width: widthPercentageToDP("30%"),
+    height: heightPercentageToDP("25%"),
     // marginBottom: 10,
     resizeMode: 'contain',
   },

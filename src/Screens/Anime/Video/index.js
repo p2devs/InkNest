@@ -304,6 +304,10 @@ const AnimeVideo = ({ route, navigation }) => {
                 }}
                 style={styles.backgroundVideo}
                 controls={true}
+                fullscreenAutorotate={true}
+                fullscreenOrientation="landscape"
+                pictureInPicture={true}
+                playInBackground={true}
                 paused={false}
                 onEnd={() => {
                   //get index of current active episode then check for next index 
@@ -319,8 +323,8 @@ const AnimeVideo = ({ route, navigation }) => {
                     link: videoData.episodes[nextIndex].episodeLink,
                     title: videoData.episodes[nextIndex].title,
                   });
-                  console.log(nextIndex, 'nextIndex');
                 }}
+                resizeMode="contain"
               />
               <View
                 style={{ flexDirection: 'row', justifyContent: "space-between", marginVertical: 4, paddingHorizontal: 5, alignItems: "center" }}

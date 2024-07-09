@@ -12,6 +12,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     Switch,
+    Dimensions,
+    RefreshControl,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,15 +33,18 @@ import Header from '../../../Components/UIComp/Header';
 import ErrorCard from '../../../Components/UIComp/ErrorCard';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 import { AnimeHostName } from '../../../Utils/APIs';
+import GridList from '../../../Components/UIComp/GridList';
 
 export function ViewAll({ navigation, route }) {
+    const flatListRef = useRef(null);
     const { LoadedData, type, title, PageLink } = route.params;
     const dispatch = useDispatch();
     const error = useSelector(state => state.data.error);
     const baseUrl = useSelector(state => state.data.baseUrl);
-    const flatListRef = useRef(null);
     const [loading, setLoading] = useState(false);
     const [AnimatedData, setAnimatedData] = useState({ data: LoadedData, page: 1 });
+
+
     const animatedCall = async (page) => {
         console.log('page', page);
         try {
@@ -57,8 +62,9 @@ export function ViewAll({ navigation, route }) {
             });
             setLoading(false);
             // setPage(page);
-            if (flatListRef?.current)
+            if (flatListRef.current) {
                 flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+            }
         } catch (error) {
             console.log(error, 'error in home page');
             setLoading(false);
@@ -117,15 +123,13 @@ export function ViewAll({ navigation, route }) {
                         />
                     </View>
                 ) : (
-                    <FlatList
+                    <GridList
                         refreshing={loading}
                         onRefresh={() => {
                             animatedCall(AnimatedData.page);
                         }}
-                        
+
                         ref={flatListRef}
-                        numColumns={2}
-                        key={2}
                         showsVerticalScrollIndicator={false}
                         style={{
                             flex: 1,
@@ -139,6 +143,7 @@ export function ViewAll({ navigation, route }) {
                                 index={index}
                                 key={index}
                                 Showhistory={false}
+                                search={Boolean(PageLink)}
                             />
                         )}
                         ListFooterComponent={() => {

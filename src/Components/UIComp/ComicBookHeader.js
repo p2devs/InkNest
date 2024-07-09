@@ -18,7 +18,7 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll}) => {
         position: 'absolute',
         width: '100%',
         height: heightPercentageToDP('4%'),
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',

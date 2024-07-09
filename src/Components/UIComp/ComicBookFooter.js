@@ -25,7 +25,7 @@ const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
         position: 'absolute',
         width: '100%',
         height: 50,
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
