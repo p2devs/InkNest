@@ -1,100 +1,99 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  Text,
-  View,
-  // Image,
-  TouchableOpacity,
-  FlatList,
-  // Button,
-  Alert,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  Switch,
-} from 'react-native';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
+import {Text, View, FlatList} from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from '@react-native-community/blur';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {
-  FetchAnimeData,
-  fetchComicsData,
-} from '../../../Components/Func/HomeFunc';
-import { NAVIGATION } from '../../../Constants';
-import LoadingModal from '../../../Components/UIComp/LoadingModal';
+import {FetchAnimeData} from '../../../Components/Func/HomeFunc';
+import {NAVIGATION} from '../../../Constants';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Header from '../../../Components/UIComp/Header';
-import { AnimeHostName } from '../../../Utils/APIs';
+import {AnimeHostName, ComicHostName} from '../../../Utils/APIs';
 import SkeletonLoader from '../../../Components/UIComp/Skeleton';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
-export function AnimeHome({ navigation }) {
+import {SwtichBaseUrl} from '../../../Redux/Reducers';
+export function AnimeHome({navigation}) {
   const dispatch = useDispatch();
   const baseUrl = useSelector(state => state.data.baseUrl);
+  const Anime = useSelector(state => state.data.Anime);
   const [data, setData] = useState({});
   useLayoutEffect(() => {
-    SetupDate()
+    SetupDate();
   }, []);
   const SetupDate = () => {
     if (AnimeHostName[baseUrl] == AnimeHostName.s3taku) {
       setData({
-        'Dub': { data: [], loading: true, type: "recently-added-dub" },
-        'Sub': { data: [], loading: true, type: "" },
-        'Raw': { data: [], loading: true, type: "recently-added-raw" },
-        'Anime Movies': { data: [], loading: true, type: "movies" },
-        'New Season': { data: [], loading: true, type: "new-season" },
-        'Popular Anime': { data: [], loading: true, type: "popular" },
-        'Ongoing Anime': { data: [], loading: true, type: "ongoing-series" },
-
+        Dub: {data: [], loading: true, type: 'recently-added-dub'},
+        Sub: {data: [], loading: true, type: ''},
+        Raw: {data: [], loading: true, type: 'recently-added-raw'},
+        'Anime Movies': {data: [], loading: true, type: 'movies'},
+        'New Season': {data: [], loading: true, type: 'new-season'},
+        'Popular Anime': {data: [], loading: true, type: 'popular'},
+        'Ongoing Anime': {data: [], loading: true, type: 'ongoing-series'},
       });
     }
     if (AnimeHostName[baseUrl] == AnimeHostName.gogoanimes) {
       setData({
-        'Dub': { data: [], loading: true, type: 2 },
-        'Sub': { data: [], loading: true, type: 1 },
-        'Chinese': { data: [], loading: true, type: 3 },
-        'Movies': { data: [], loading: true, link: "anime-movies.html" },
-        'Popular': { data: [], loading: true, link: "popular.html" },
-        "New Season": { data: [], loading: true, link: "new-season.html" },
-
+        Dub: {data: [], loading: true, type: 2},
+        Sub: {data: [], loading: true, type: 1},
+        Chinese: {data: [], loading: true, type: 3},
+        Movies: {data: [], loading: true, link: 'anime-movies.html'},
+        Popular: {data: [], loading: true, link: 'popular.html'},
+        'New Season': {data: [], loading: true, link: 'new-season.html'},
       });
     }
-  }
+  };
 
   const animatedCall = async () => {
     for (let key in data) {
-      let url = AnimeHostName[baseUrl] == AnimeHostName.gogoanimes ? (data[key].type ? `?type=` : "") : (key == "Sub" ? "?page=1" : "")
+      let url =
+        AnimeHostName[baseUrl] == AnimeHostName.gogoanimes
+          ? data[key].type
+            ? `?type=`
+            : ''
+          : key == 'Sub'
+          ? '?page=1'
+          : '';
       // if (key == "Sub") console.log(`${url}${data[key]?.type}`, "url");
-      let res = await FetchAnimeData(`${url}${data[key]?.type ?? data[key]?.link}`, dispatch, baseUrl);
+      let res = await FetchAnimeData(
+        `${url}${data[key]?.type ?? data[key]?.link}`,
+        dispatch,
+        baseUrl,
+      );
       let DataforSet = {
         data: res,
         loading: false,
-      }
+      };
       if (data[key].type) DataforSet.type = data[key].type;
       if (data[key].link) DataforSet.link = data[key].link;
       setData(prev => ({
         ...prev,
-        [key]: DataforSet
+        [key]: DataforSet,
       }));
-
     }
-  }
+  };
 
   useEffect(() => {
-    if (Object.keys(data).length > 0 && Object.values(data).every(item => item.loading == true)) {
+    if (Anime && Object.keys(ComicHostName).includes(baseUrl)) {
+      dispatch(SwtichBaseUrl('gogoanimes'));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
+      Object.keys(data).length > 0 &&
+      Object.values(data).every(item => item.loading == true)
+    ) {
       animatedCall();
     }
   }, [data]);
   // console.log(data["Sub"], "data");
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <View
         style={{
           flex: 1,
@@ -126,22 +125,21 @@ export function AnimeHome({ navigation }) {
           style={{
             flex: 1,
             backgroundColor: '#000',
-            gap: 16
+            gap: 16,
           }}>
-
           <FlatList
             refreshing={Object.values(data).every(item => item.loading == true)}
             onRefresh={() => {
-              SetupDate()
+              SetupDate();
             }}
             data={Object.keys(data)}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={{ gap: 5, paddingHorizontal: 12 }}>
+            renderItem={({item}) => (
+              <View style={{gap: 5, paddingHorizontal: 12}}>
                 <View
                   style={{
                     alignItems: 'center',
-                    justifyContent: "space-between",
+                    justifyContent: 'space-between',
                     flexDirection: 'row',
                   }}>
                   <Text
@@ -152,7 +150,7 @@ export function AnimeHome({ navigation }) {
                     }}>
                     {item}
                   </Text>
-                  {data[item].loading ? null :
+                  {data[item].loading ? null : (
                     <Button
                       title="View All"
                       onPress={() => {
@@ -161,17 +159,18 @@ export function AnimeHome({ navigation }) {
                           LoadedData: data[item].data,
                           type: data[item].type,
                           title: item,
-                          PageLink: data[item]?.link
+                          PageLink: data[item]?.link,
                         });
                       }}
-                    />}
+                    />
+                  )}
                 </View>
-                {(!data[item].loading && data[item]?.data?.length == 0) ? null :
+                {!data[item].loading && data[item]?.data?.length == 0 ? null : (
                   <FlatList
                     horizontal
                     data={data[item]?.data}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item, index }) => (
+                    renderItem={({item, index}) => (
                       <HomeRenderItem
                         item={item}
                         index={index}
@@ -187,16 +186,25 @@ export function AnimeHome({ navigation }) {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        {data[item]?.loading ?
-                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
-                            {Array(6).fill(0).map((_, index) => (
-                              <SkeletonLoader key={index} />
-                            ))}
+                        {data[item]?.loading ? (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              flexWrap: 'wrap',
+                              justifyContent: 'center',
+                              gap: 12,
+                            }}>
+                            {Array(6)
+                              .fill(0)
+                              .map((_, index) => (
+                                <SkeletonLoader key={index} />
+                              ))}
                           </View>
-                          : null}
+                        ) : null}
                       </View>
                     )}
-                  />}
+                  />
+                )}
               </View>
             )}
             ListEmptyComponent={() => (
@@ -224,12 +232,8 @@ export function AnimeHome({ navigation }) {
               />
             )}
           />
-
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
-
-
