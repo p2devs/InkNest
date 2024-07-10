@@ -40,11 +40,14 @@ export function AnimeHome({ navigation }) {
   const baseUrl = useSelector(state => state.data.baseUrl);
   const [data, setData] = useState({});
   useLayoutEffect(() => {
+    SetupDate()
+  }, []);
+  const SetupDate = () => {
     if (AnimeHostName[baseUrl] == AnimeHostName.s3taku) {
       setData({
+        'Dub': { data: [], loading: true, type: "recently-added-dub" },
         'Sub': { data: [], loading: true, type: "" },
         'Raw': { data: [], loading: true, type: "recently-added-raw" },
-        'Dub': { data: [], loading: true, type: "recently-added-dub" },
         'Anime Movies': { data: [], loading: true, type: "movies" },
         'New Season': { data: [], loading: true, type: "new-season" },
         'Popular Anime': { data: [], loading: true, type: "popular" },
@@ -54,8 +57,8 @@ export function AnimeHome({ navigation }) {
     }
     if (AnimeHostName[baseUrl] == AnimeHostName.gogoanimes) {
       setData({
-        'Sub': { data: [], loading: true, type: 1 },
         'Dub': { data: [], loading: true, type: 2 },
+        'Sub': { data: [], loading: true, type: 1 },
         'Chinese': { data: [], loading: true, type: 3 },
         'Movies': { data: [], loading: true, link: "anime-movies.html" },
         'Popular': { data: [], loading: true, link: "popular.html" },
@@ -63,7 +66,7 @@ export function AnimeHome({ navigation }) {
 
       });
     }
-  }, []);
+  }
 
   const animatedCall = async () => {
     for (let key in data) {
@@ -127,6 +130,10 @@ export function AnimeHome({ navigation }) {
           }}>
 
           <FlatList
+            refreshing={Object.values(data).every(item => item.loading == true)}
+            onRefresh={() => {
+              SetupDate()
+            }}
             data={Object.keys(data)}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
@@ -170,6 +177,7 @@ export function AnimeHome({ navigation }) {
                         index={index}
                         key={index}
                         Showhistory={false}
+                        search={Boolean(item?.date)}
                       />
                     )}
                     ListFooterComponent={() => (

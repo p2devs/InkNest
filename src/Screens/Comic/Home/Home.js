@@ -32,6 +32,7 @@ import Header from '../../../Components/UIComp/Header';
 import Image from '../../../Components/UIComp/Image';
 import ErrorCard from '../../../Components/UIComp/ErrorCard';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
+import GridList from '../../../Components/UIComp/GridList';
 
 export function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -167,15 +168,13 @@ export function Home({ navigation }) {
             />
           </View>
         ) : (
-          <FlatList
+          <GridList
             refreshing={loading}
             onRefresh={async () => {
               setPageJumpTo({ page: page.toString() });
               loadComics({ JumpToPage: true });
             }}
             ref={flatListRef}
-            numColumns={2}
-            key={2}
             showsVerticalScrollIndicator={false}
             style={{
               flex: 1,

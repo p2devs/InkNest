@@ -16,7 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
-import {heightPercentageToDP} from 'react-native-responsive-screen';
+import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Header from '../../../Components/UIComp/Header';
 import {
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   image: {
-    width: 150,
-    height: 150,
+    width: widthPercentageToDP("30%"),
+    height: heightPercentageToDP("25%"),
     marginBottom: 10,
     resizeMode: 'contain',
   },

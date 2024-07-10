@@ -5,6 +5,7 @@ import {
   Dimensions,
   TouchableOpacity,
   FlatList,
+  StatusBar,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,6 +38,15 @@ export function ComicBook({ navigation, route }) {
   useEffect(() => {
     dispatch(fetchComicBook(comicBook));
   }, [comicBook, dispatch]);
+  useEffect(() => {
+    //hide status bar
+    StatusBar.setHidden(true);
+
+    return () => {
+      //show status bar
+      StatusBar.setHidden(false);
+    }
+  }, []);
 
   if (loading) {
     return <Loading />;
@@ -89,7 +99,7 @@ export function ComicBook({ navigation, route }) {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: '#222' }}
+      style={{ flex: 1, backgroundColor: 'black' }}
       edges={['top', 'bottom']}>
       <View style={{ flex: 1 }}>
         {ViewAll ? (
