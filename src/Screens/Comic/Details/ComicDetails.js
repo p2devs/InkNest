@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
   Text,
@@ -9,8 +9,8 @@ import {
   // Button,
 } from 'react-native';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
@@ -21,15 +21,15 @@ import {
 } from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
-import {updateData} from '../../../Redux/Reducers';
+import { updateData } from '../../../Redux/Reducers';
 import ChaptersView from '../../../Components/UIComp/ChaptersView';
 import DescriptionView from '../../../Components/UIComp/DescriptionView';
-import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
+import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Header from '../../../Components/UIComp/Header';
 
-export function ComicDetails({navigation, route}) {
-  const {link, PageUrl, search = false, home = false} = route.params;
+export function ComicDetails({ navigation, route }) {
+  const { link, PageUrl, search = false, home = false } = route.params;
   const [PageLink, setPageLink] = useState('');
   const dispatch = useDispatch();
   const ComicDetail = useSelector(
@@ -92,8 +92,8 @@ export function ComicDetails({navigation, route}) {
     return <Error error={error} onPress={ApiCall} />;
   }
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
-      <View style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+      <View style={{ flex: 1 }}>
         <Header
           style={{
             width: '100%',
@@ -115,7 +115,7 @@ export function ComicDetails({navigation, route}) {
               name="chevron-back"
               size={heightPercentageToDP('3%')}
               color="#fff"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
           </TouchableOpacity>
 
@@ -127,13 +127,13 @@ export function ComicDetails({navigation, route}) {
             }}>
             Comic Details
           </Text>
-          <View style={{flexDirection: 'row', gap: 20}}>
+          <View style={{ flexDirection: 'row', gap: 20 }}>
             <TouchableOpacity
               onPress={() => {
                 dispatch(
                   updateData({
                     url: search ? PageUrl : PageLink,
-                    data: {Bookmark: !ComicDetail?.Bookmark},
+                    data: { Bookmark: !ComicDetail?.Bookmark },
                   }),
                 );
               }}>
@@ -206,8 +206,8 @@ export function ComicDetails({navigation, route}) {
           }}>
           {TabSelected !== 0 ? null : (
             <View
-              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={{flexDirection: 'column', width: 220}}>
+              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'column', width: 220 }}>
                 <Text style={styles.title}>{ComicDetail?.title}</Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Genres:</Text>{' '}
@@ -232,7 +232,7 @@ export function ComicDetails({navigation, route}) {
               </View>
               {ComicDetail?.imgSrc ? (
                 <Image
-                  source={{uri: ComicDetail?.imgSrc}}
+                  source={{ uri: ComicDetail?.imgSrc }}
                   style={styles.image}
                 />
               ) : (
@@ -243,8 +243,8 @@ export function ComicDetails({navigation, route}) {
           {TabSelected !== 0
             ? null
             : !ComicDetail?.volumes
-            ? null
-            : ComicDetail?.volumes.map((vol, index) => (
+              ? null
+              : ComicDetail?.volumes.map((vol, index) => (
                 <DescriptionView key={index} index={index} vol={vol} />
               ))}
           {[1, 2].includes(TabSelected) ? (
@@ -252,24 +252,26 @@ export function ComicDetails({navigation, route}) {
               {TabSelected == 1 ? 'Chapters' : 'Bookmarks'} List:
             </Text>
           ) : null}
-          {![1, 2].includes(TabSelected)
-            ? null
-            : ComicDetail?.issues
-            ? ComicDetail?.issues.map((item, index) => (
-                <ChaptersView
-                  chapter={item}
-                  key={index}
-                  Bookmark={TabSelected == 2}
-                />
-              ))
+          {![1, 2].includes(TabSelected) ? null : !ComicDetail?.issues ? null :
+            ComicDetail?.issues.map((item, index) => (
+              <ChaptersView
+                chapter={item}
+                key={index}
+                Bookmark={TabSelected == 2}
+              />
+            ))
+
+          }
+          {![1, 2].includes(TabSelected) ? null : !ComicDetail?.chapters ? null
             : ComicDetail?.chapters.map((item, index) => (
-                <ChaptersView
-                  chapter={item}
-                  key={index}
-                  Bookmark={TabSelected == 2}
-                />
-              ))}
-          <View style={{height: 50}} />
+              <ChaptersView
+                chapter={item}
+                key={index}
+                Bookmark={TabSelected == 2}
+              />
+            ))
+          }
+          <View style={{ height: 50 }} />
         </ScrollView>
       </View>
     </SafeAreaView>

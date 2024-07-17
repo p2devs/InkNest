@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -24,23 +24,61 @@ import { NAVIGATION } from '../../../Constants';
 import cheerio from 'cheerio';
 import APICaller from '../../../Redux/Controller/Interceptor';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { AnimeHistroy } from '../../../Redux/Actions/GlobalActions';
 
 const AnimeVideo = ({ route, navigation }) => {
   const videoRef = useRef(null);
-  const { link, title } = route.params;
+  const { link, title, imageUrl = null } = route.params;
   const [fullDescription, setFullDescription] = useState(false);
+  const baseUrl = useSelector(state => state.data.baseUrl);
   const dispatch = useDispatch();
   const [videoData, setVideoData] = useState({});
   const [videoUrls, setVideoUrls] = useState([]);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
   const error = useSelector(state => state.data.error);
   const loading = useSelector(state => state.data.loading);
   const [serverLink, setServerLink] = useState(0);
   const [videoLoading, setVideoLoading] = useState(false);
   const [episodeLoading, setEpisodeLoading] = useState(false);
-
+  const AnimeWatched = useSelector(state => state.data.AnimeWatched);
+  let AnimeName = `${videoData?.animeInfo?.title ?? videoData?.title}-${baseUrl}`
   useLayoutEffect(() => {
     getData();
   }, []);
+  useEffect(() => {
+    console.log(AnimeName, 'AnimeName');
+    //update watched episode once all loading is done and no error
+    if (!loading && !error && !episodeLoading && !videoLoading) {
+      //check video player is ready then check we have data for this anime episode in AnimeWatched then update watched 
+      if (videoRef?.current) {
+        if (!AnimeWatched[AnimeName] && !AnimeWatched[AnimeName]?.Episodes[link]) {
+          UpdateWatched({}); //if no data found then update with empty data
+          return;
+        } else {
+          let currentTime = AnimeWatched[AnimeName]?.Episodes[link];
+          if (!currentTime) return;
+          const { EpisdoeDuration = 0, EpisdoePlayable = 0, EpisdoeProgress = 0, } = currentTime;
+          UpdateWatched({ currentTime: EpisdoeProgress, seekableDuration: EpisdoeDuration, playableDuration: EpisdoePlayable });
+        }
+      }
+    }
+  }, [loading, error, episodeLoading, videoLoading]);
+
+  const UpdateWatched = ({ currentTime = 0, seekableDuration = null, playableDuration = null }) => {
+    let currentIndex = videoData.episodes.findIndex(item => item.active);
+    let data = {
+      AnimeName,
+      imageUrl,
+      ActiveEpisdeLink: link,
+      ActiveEpisdoe: videoData.episodes[currentIndex].episodeNumber,
+      ActiveEpisdoeProgress: currentTime,
+      ActiveEpisdoeDuration: seekableDuration,
+      ActiveEpisdoePlayable: playableDuration,
+      watchTime: new Date().getTime(),
+    };
+    dispatch(AnimeHistroy({ data }));
+  }
+
 
   const getData = async () => {
     try {
@@ -51,6 +89,7 @@ const AnimeVideo = ({ route, navigation }) => {
       console.log('Error fetching or parsing data AnimeVideo:', error);
     }
   };
+
   const getVideoLinkFromServer = async id => {
     // console.log(id);
     setVideoLoading(true);
@@ -86,6 +125,7 @@ const AnimeVideo = ({ route, navigation }) => {
       setVideoLoading(false);
     }
   };
+
   const getEpisodesForPage = async (page, index) => {
     //don't fetch same page again
     let activePage = videoData.episodePages.find(item => item.active);
@@ -293,14 +333,24 @@ const AnimeVideo = ({ route, navigation }) => {
               <Video
                 source={{ uri: videoUrls[serverLink]?.link }}
                 ref={videoRef}
-                // Callback when remote video is buffering
-                onBuffer={onBuffer => {
-                  // console.log(onBuffer, 'onBuffer');
-                }}
                 // Callback when video cannot be loaded
                 onError={onError => {
-                  console.log(onError, 'onError');
-                  alert('Error loading video');
+                  alert('Error loading video, Try to switch quality');
+                }}
+                onProgress={({ currentTime, seekableDuration, playableDuration }) => {
+                  setVideoCurrentTime(currentTime);
+                  UpdateWatched({ currentTime, seekableDuration, playableDuration });
+                }}
+                onLoad={() => {
+                  if (AnimeWatched[AnimeName] && AnimeWatched[AnimeName]?.Episodes[link]) {
+                    console.log(AnimeWatched[AnimeName]?.Episodes[link], 'AnimeWatched');
+                    let currentTime = AnimeWatched[AnimeName]?.Episodes[link]?.EpisdoeProgress;
+                    console.log(currentTime, 'currentTime');
+                    videoRef.current.seek(currentTime ?? videoCurrentTime);
+                  } else if (videoCurrentTime > 0) {
+                    console.log(videoCurrentTime, 'videoCurrentTime');
+                    videoRef.current.seek(videoCurrentTime);
+                  }
                 }}
                 style={styles.backgroundVideo}
                 controls={true}
@@ -322,6 +372,7 @@ const AnimeVideo = ({ route, navigation }) => {
                   navigation.replace(NAVIGATION.animeVideo, {
                     link: videoData.episodes[nextIndex].episodeLink,
                     title: videoData.episodes[nextIndex].title,
+                    imageUrl
                   });
                 }}
                 resizeMode="contain"
@@ -332,7 +383,7 @@ const AnimeVideo = ({ route, navigation }) => {
 
                 <Button
                   onPress={() => {
-                    //get index of current active episode then check for next index 
+                    // //get index of current active episode then check for next index 
                     let currentIndex = videoData.episodes.findIndex(item => item.active);
                     let nextIndex = currentIndex + 1;
                     //if next index is greater than total episodes then set next index to 0
@@ -344,6 +395,7 @@ const AnimeVideo = ({ route, navigation }) => {
                     navigation.replace(NAVIGATION.animeVideo, {
                       link: videoData.episodes[nextIndex].episodeLink,
                       title: videoData.episodes[nextIndex].title,
+                      imageUrl: imageUrl
                     });
                   }}
                 >
@@ -369,6 +421,7 @@ const AnimeVideo = ({ route, navigation }) => {
                     navigation.replace(NAVIGATION.animeVideo, {
                       link: videoData.episodes[nextIndex].episodeLink,
                       title: videoData.episodes[nextIndex].title,
+                      imageUrl: imageUrl
                     });
                   }}
                 >
@@ -508,6 +561,7 @@ const AnimeVideo = ({ route, navigation }) => {
                   navigation.replace(NAVIGATION.animeVideo, {
                     link: episode.episodeLink,
                     title: episode.title ?? title,
+                    imageUrl: imageUrl
                   });
                 }}
                 style={{
