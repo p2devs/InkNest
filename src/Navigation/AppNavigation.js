@@ -1,14 +1,14 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import { NAVIGATION } from '../Constants';
-import { AboutUs } from '../Screens';
-import { BottomNavigation } from './BottomNavigation/BottomNavigation';
+import {NAVIGATION} from '../Constants';
+import {AboutUs} from '../Screens';
+import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import AnimeVideo from '../Screens/Anime/Video';
-import { useSelector } from 'react-redux';
-import { Details } from '../Screens/Anime';
-import { ComicBook, ComicDetails, Home } from '../Screens/Comic';
-import { ViewAll } from '../Screens/Anime/Home/ViewAll';
+import {useSelector} from 'react-redux';
+import {Details} from '../Screens/Anime';
+import {ComicBook, ComicDetails, Home} from '../Screens/Comic';
+import {ViewAll} from '../Screens/Anime/Home/ViewAll';
 
 const Stack = createNativeStackNavigator();
 
