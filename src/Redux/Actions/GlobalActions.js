@@ -11,6 +11,7 @@ import {
   UpdateSearch,
   DownTime,
   updateData,
+  AnimeWatched,
 } from '../Reducers';
 import { Alert } from 'react-native';
 import { goBack } from '../../Navigation/NavigationService';
@@ -292,6 +293,27 @@ export const fetchSearchComic = search => async (dispatch, getState) => {
     dispatch(UpdateSearch({ user: 'error', error: 'Oops!! something went wrong, please try again...' }));
   }
 }
+
+export const AnimeHistroy = ({ data }) => async (dispatch, getState) => {
+  //get data from state
+  let History = getState().data.AnimeWatched;
+  let WatchedEpisodes = History[data.AnimeName]?.Episodes;
+  let AnimeData = {
+    ...data,
+    Episodes: {
+      ...WatchedEpisodes,
+      [data.ActiveEpisdeLink]: {
+        Link: data.ActiveEpisdeLink,
+        Episode: data?.ActiveEpisdoe,
+        EpisdoeProgress: data?.ActiveEpisdoeProgress,
+        EpisdoeDuration: data?.ActiveEpisdoeDuration,
+        EpisdoePlayable: data?.ActiveEpisdoePlayable,
+      },
+    }
+  };
+  dispatch(AnimeWatched(AnimeData));
+
+};
 
 //clear error and loading
 export const clearError = () => async dispatch => {

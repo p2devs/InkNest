@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
   Text,
@@ -10,23 +10,23 @@ import {
   // Button,
 } from 'react-native';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
-import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
+import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Header from '../../../Components/UIComp/Header';
 import {
   getAnimeInfo,
   getEpisodes,
 } from '../../../Components/Func/AnimeVideoFunc';
-import {NAVIGATION} from '../../../Constants';
+import { NAVIGATION } from '../../../Constants';
 
-export function Details({navigation, route}) {
-  const {link} = route.params;
+export function Details({ navigation, route }) {
+  const { link } = route.params;
   const dispatch = useDispatch();
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
@@ -81,8 +81,8 @@ export function Details({navigation, route}) {
     }
   };
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
-      <View style={{flex: 1,}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+      <View style={{ flex: 1, }}>
         <Header
           style={{
             width: '100%',
@@ -104,7 +104,7 @@ export function Details({navigation, route}) {
               name="chevron-back"
               size={heightPercentageToDP('3%')}
               color="#fff"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
           </TouchableOpacity>
 
@@ -116,7 +116,7 @@ export function Details({navigation, route}) {
             }}>
             Anime Details
           </Text>
-          <View style={{flexDirection: 'row', gap: 20}}>
+          <View style={{ flexDirection: 'row', gap: 20 }}>
             <TouchableOpacity
               onPress={() => {
                 ApiCall();
@@ -164,8 +164,8 @@ export function Details({navigation, route}) {
           }}>
           {/* <Text style={styles.title}>{data?.title}</Text> */}
           {TabSelected !== 0 ? null : (
-            <View style={{flexDirection: 'row',justifyContent:"space-between"}}>
-              <View style={{flexDirection: 'column', width: 220}}>
+            <View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
+              <View style={{ flexDirection: 'column', width: 220 }}>
                 <Text style={styles.title}>{data?.title}</Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Type:</Text>{' '}
@@ -189,7 +189,7 @@ export function Details({navigation, route}) {
                 </Text>
               </View>
               {data?.imageUrl ? (
-                <Image source={{uri: data?.imageUrl}} style={styles.image} />
+                <Image source={{ uri: data?.imageUrl }} style={styles.image} />
               ) : (
                 <View style={styles.image} />
               )}
@@ -247,7 +247,7 @@ export function Details({navigation, route}) {
                       flex: 1,
                     }}>
                     <ActivityIndicator size="small" color="#007AFF" />
-                    <Text style={{color: '#007AFF'}}>Loading Episodes...</Text>
+                    <Text style={{ color: '#007AFF' }}>Loading Episodes...</Text>
                   </View>
                 ) : (
                   data?.episodes?.map((episode, index) => (
@@ -257,6 +257,7 @@ export function Details({navigation, route}) {
                         navigation.navigate(NAVIGATION.animeVideo, {
                           link: episode.episodeLink,
                           title: data.title,
+                          imageUrl: data.imageUrl,
                         });
                       }}
                       style={{
@@ -299,7 +300,7 @@ export function Details({navigation, route}) {
               </View>
             </View>
           )}
-          <View style={{height: 50}} />
+          <View style={{ height: 50 }} />
         </ScrollView>
       </View>
     </SafeAreaView>

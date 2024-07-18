@@ -1,4 +1,4 @@
-import {createNavigationContainerRef} from '@react-navigation/native';
+import { createNavigationContainerRef } from '@react-navigation/native';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -23,5 +23,14 @@ export function push(name, params) {
 export function replace(name, params) {
   if (navigationRef.isReady()) {
     navigationRef.replace(name, params);
+  }
+}
+
+export function resetRoot(name, params) {
+  if (navigationRef.isReady()) {
+    navigationRef.resetRoot({
+      index: 0,
+      routes: [{ name, params }],
+    });
   }
 }
