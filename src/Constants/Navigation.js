@@ -1,3 +1,4 @@
+
 export const NAVIGATION = {
   splash: 'Splash',
   home: 'Home',
@@ -5,6 +6,7 @@ export const NAVIGATION = {
   comicBook: 'ComicBook',
   search: 'Search',
   bookmarks: 'Bookmarks',
+  localComic: "LocalComic",
   settings: 'Settings',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
@@ -12,5 +14,5 @@ export const NAVIGATION = {
   animeVideo: 'AnimeVideo',
   animeDetails: 'AnimeDetails',
   moreDetails: 'MoreDetails',
-  ViewAll:"ViewAll",
+  ViewAll: "ViewAll",
 };
