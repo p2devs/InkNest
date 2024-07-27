@@ -1,15 +1,16 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {Bookmarks, Search, Settings} from '../Screens';
-import {NAVIGATION} from '../Constants';
-import {useSelector} from 'react-redux';
-import {AnimeHome} from '../Screens/Anime';
-import {Home} from '../Screens/Comic';
-import {View, StyleSheet} from 'react-native';
+import { Bookmarks, Search, Settings } from '../Screens';
+import { NAVIGATION } from '../Constants';
+import { useSelector } from 'react-redux';
+import { AnimeHome } from '../Screens/Anime';
+import { Home, LocalComic } from '../Screens/Comic';
+import { View, StyleSheet } from 'react-native';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -33,6 +34,14 @@ const TabBarIcon = props => {
   } else if (props.name === 'book-bookmark') {
     return (
       <FontAwesome6
+        name={props.name}
+        size={props.size ? props.size : 24}
+        color={props.tintColor}
+      />
+    );
+  } else if (props.name === 'reader') {
+    return (
+      <Ionicons
         name={props.name}
         size={props.size ? props.size : 24}
         color={props.tintColor}
@@ -80,7 +89,7 @@ export function BottomNavigation() {
         name={NAVIGATION.home}
         component={animeActive ? AnimeHome : Home}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
           ),
         }}
@@ -90,18 +99,27 @@ export function BottomNavigation() {
         name={NAVIGATION.search}
         component={Search}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="search" />
           ),
         }}
       />
-
+      {animeActive ? null :
+        <BottomTab.Screen
+          name={NAVIGATION.localComic}
+          component={LocalComic}
+          options={{
+            tabBarIcon: ({ focused, color }) => (
+              <TabBarIcon focused={focused} tintColor={color} name="reader" />
+            ),
+          }}
+        />}
       {animeActive ? null : (
         <BottomTab.Screen
           name={NAVIGATION.bookmarks}
           component={Bookmarks}
           options={{
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -116,7 +134,7 @@ export function BottomNavigation() {
         name={NAVIGATION.settings}
         component={Settings}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="settings" />
           ),
         }}

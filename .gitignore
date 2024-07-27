@@ -80,3 +80,7 @@ package-lock.json
 google-services.json
 GoogleService-Info.plist
 global.jks
+
+
+#Files to ignore
+**/LocalComic/index.js
