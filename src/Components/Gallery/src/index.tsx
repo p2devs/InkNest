@@ -969,7 +969,7 @@ const GalleryComponent = <T extends any>(
 
   useImperativeHandle(ref, () => ({
     setIndex(newIndex: number, animated?: boolean) {
-      refs.current?.[index].reset(false);
+      if (refs?.current) refs.current?.[index].reset(false);
       setIndex(newIndex);
       currentIndex.value = newIndex;
       if (animated) {

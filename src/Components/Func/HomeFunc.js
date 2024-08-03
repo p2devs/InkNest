@@ -161,3 +161,19 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
     return [];
   }
 }
+
+export const checkServerDown = async ( url, dispatch) => {
+  dispatch(fetchDataStart());
+  try {
+    const response = await APICaller.get(url);
+    //set DownTime to false
+    console.log(response.status, 'response');
+    dispatch(checkDownTime(response));
+    return false;
+  } catch (error) {
+    //set DownTime to true
+    console.log('Error checking server down:', error.message);
+    dispatch(checkDownTime(error));
+    return true;
+  }
+}

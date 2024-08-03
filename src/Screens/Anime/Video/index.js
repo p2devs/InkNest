@@ -25,6 +25,7 @@ import cheerio from 'cheerio';
 import APICaller from '../../../Redux/Controller/Interceptor';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { AnimeHistroy } from '../../../Redux/Actions/GlobalActions';
+import { AnimeHostName } from '../../../Utils/APIs';
 
 const AnimeVideo = ({ route, navigation }) => {
   const videoRef = useRef(null);
@@ -78,7 +79,29 @@ const AnimeVideo = ({ route, navigation }) => {
     };
     dispatch(AnimeHistroy({ data }));
   }
+  function sanitizeTitle(str) {
+    const newstr = str
+      ?.replace(/\s+/g, '-')          // Replace whitespace with dash
+      .replace(/\./g, '-')            // Replace period with dash
+      .replace(/[()]/g, '')           // Remove parentheses
+      .replace(/:/g, '')              // Remove colon
+      .replace(/--/g, '-dub')         // Replace -- with -dub
+      .replace(/[éèëê]/g, 'e')        // Replace accented e with e
+      .replace(/[àâ]/g, 'a')          // Replace accented a with a
+      .replace(/ç/g, 'c')             // Replace ç with c
+      .replace(/[ôö]/g, 'o')          // Replace accented o with o
+      .replace(/[ûüù]/g, 'u')         // Replace accented u with u
+      .replace(/[îï]/g, 'i')          // Replace accented i with i
+      .replace(/ñ/g, 'n')             // Replace ñ with n
+      .replace(/'/g, '')              // Remove apostrophes
+      .replace(/!/g, '')              // Remove exclamation marks
+      .replace(/,/g, '')              // Remove commas
+      .replace(/[^a-zA-Z0-9-]/g, '')  // Remove any remaining special characters
+      .replace(/--+/g, '-')           // Replace double dashes with a single dash
+      .toLowerCase();                 // Convert to lowercase
 
+    return newstr;
+  }
 
   const getData = async () => {
     try {
@@ -465,8 +488,18 @@ const AnimeVideo = ({ route, navigation }) => {
         {link.includes('s3taku') ? (
           <View
             style={{ flexDirection: 'column', gap: 4, paddingHorizontal: 12 }}>
-            <Text style={{ color: 'gold', fontSize: 16 }}>
+            {/* <Text style={{ color: 'gold', fontSize: 16 }}>
               Title: {videoData.title}
+            </Text> */}
+            <Text
+              style={{ color: 'gold', fontSize: 16 }}
+              onPress={() => {
+                navigation.replace(NAVIGATION.animeDetails, {
+                  link: `${AnimeHostName.gogoanimes}/category/${sanitizeTitle(videoData?.title)}`,
+                  title: videoData.title,
+                });
+              }}>
+              Title: <Text style={{ color: "#007AFF" }} >{videoData.title}</Text>
             </Text>
             <Text style={{ color: 'gold', fontSize: 16 }}>
               Episode: {videoData.episode}

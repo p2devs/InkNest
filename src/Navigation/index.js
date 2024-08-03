@@ -4,7 +4,6 @@ import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
 import {PermissionsAndroid, Platform, StatusBar} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import DownTime from '../Components/UIComp/DownTime';
 import {ClearError} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
 import {useNetInfo} from '@react-native-community/netinfo';
@@ -15,7 +14,6 @@ import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
 
 export function RootNavigation() {
-  const downTime = useSelector(state => state.data.downTime);
   const dispatch = useDispatch();
   const {type, isConnected} = useNetInfo();
 
@@ -72,9 +70,6 @@ export function RootNavigation() {
     return <Network />;
   }
 
-  if (downTime) {
-    return <DownTime />;
-  }
 
   return (
     <NavigationContainer

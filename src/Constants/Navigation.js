@@ -5,7 +5,7 @@ export const NAVIGATION = {
   comicDetails: 'ComicDetails',
   comicBook: 'ComicBook',
   search: 'Search',
-  bookmarks: 'Bookmarks',
+  bookmarks: 'History',
   localComic: "LocalComic",
   settings: 'Settings',
   bottomNavigation: 'BottomNavigation',

@@ -5,12 +5,13 @@ import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { Bookmarks, Search, Settings } from '../Screens';
+import { Search, Settings } from '../Screens';
 import { NAVIGATION } from '../Constants';
 import { useSelector } from 'react-redux';
-import { AnimeHome } from '../Screens/Anime';
-import { Home, LocalComic } from '../Screens/Comic';
+import { AnimeBookmarks, AnimeHome } from '../Screens/Anime';
+import { ComicBookmarks, Home, LocalComic } from '../Screens/Comic';
 import { View, StyleSheet } from 'react-native';
+import DownTime from '../Components/UIComp/DownTime';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -58,8 +59,11 @@ const TabBarIcon = props => {
   }
 };
 
+
 export function BottomNavigation() {
   const animeActive = useSelector(state => state?.data?.Anime);
+  const downTime = useSelector(state => state.data.downTime);
+
   return (
     <BottomTab.Navigator
       initialRouteName="Home"
@@ -87,7 +91,7 @@ export function BottomNavigation() {
       }}>
       <BottomTab.Screen
         name={NAVIGATION.home}
-        component={animeActive ? AnimeHome : Home}
+        component={downTime ? DownTime : animeActive ? AnimeHome : Home}
         options={{
           tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
@@ -114,21 +118,21 @@ export function BottomNavigation() {
             ),
           }}
         />}
-      {animeActive ? null : (
-        <BottomTab.Screen
-          name={NAVIGATION.bookmarks}
-          component={Bookmarks}
-          options={{
-            tabBarIcon: ({ focused, color }) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="book-bookmark"
-              />
-            ),
-          }}
-        />
-      )}
+
+      <BottomTab.Screen
+        name={NAVIGATION.bookmarks}
+        component={animeActive ? AnimeBookmarks : ComicBookmarks}
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarIcon
+              focused={focused}
+              tintColor={color}
+              name="book-bookmark"
+            />
+          ),
+        }}
+      />
+
 
       <BottomTab.Screen
         name={NAVIGATION.settings}

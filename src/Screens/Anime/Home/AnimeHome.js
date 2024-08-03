@@ -24,7 +24,6 @@ export function AnimeHome({ navigation }) {
   const [data, setData] = useState({});
   const AnimeWatched = useSelector(state => state.data.AnimeWatched);
   useLayoutEffect(() => {
-    console.log('AnimeHome', AnimeWatched);
     SetupDate();
   }, []);
   const SetupDate = () => {
@@ -135,8 +134,9 @@ export function AnimeHome({ navigation }) {
             gap: 16,
           }}>
           <FlatList
-            ListHeaderComponent={() => (
-              Object.keys(AnimeWatched).filter(el => el.includes(`-${baseUrl}`)).length < 1 ? null :
+            ListHeaderComponent={() => {
+              if (Object.keys(AnimeWatched).filter(el => el.includes(`-${baseUrl}`)).length <= 1) return null;
+              return (
                 <View style={{ gap: 5, paddingHorizontal: 12 }}>
                   <View
                     style={{
@@ -178,7 +178,8 @@ export function AnimeHome({ navigation }) {
 
                   />
                 </View>
-            )}
+              )
+            }}
             refreshing={Object.values(data).every(item => item.loading == true)}
             onRefresh={() => {
               SetupDate();

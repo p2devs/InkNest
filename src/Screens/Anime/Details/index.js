@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
@@ -24,6 +25,8 @@ import {
   getEpisodes,
 } from '../../../Components/Func/AnimeVideoFunc';
 import { NAVIGATION } from '../../../Constants';
+import { AddAnimeBookMark, RemoveAnimeBookMark } from '../../../Redux/Reducers';
+
 
 export function Details({ navigation, route }) {
   const { link } = route.params;
@@ -33,6 +36,7 @@ export function Details({ navigation, route }) {
   const [TabSelected, setTabSelected] = useState(0);
   const [data, setData] = useState(null);
   const [episodeLoading, setEpisodeLoading] = useState(false);
+  const AnimeBookMark = useSelector(state => state.data.AnimeBookMarks);
 
   useEffect(() => {
     ApiCall();
@@ -42,6 +46,24 @@ export function Details({ navigation, route }) {
     let data = await getAnimeInfo(link, dispatch);
     if (!data) return;
     setData(data);
+  };
+  const HandleBookMark = () => {
+    if (AnimeBookMark[link]) {
+      dispatch(RemoveAnimeBookMark({ url: link }));
+      return;
+    }
+    let BookMarkdata = {
+      url: link,
+      title: data?.title,
+      imageUrl: data?.imageUrl,
+      otherNames: data?.otherNames,
+      releaseYear: data?.releaseYear,
+      type: data?.type,
+      genres: data?.genres,
+    }
+    dispatch(
+      AddAnimeBookMark(BookMarkdata),
+    );
   };
 
   if (loading) {
@@ -116,18 +138,27 @@ export function Details({ navigation, route }) {
             }}>
             Anime Details
           </Text>
-          <View style={{ flexDirection: 'row', gap: 20 }}>
-            <TouchableOpacity
-              onPress={() => {
-                ApiCall();
-              }}>
-              <Ionicons
-                name="refresh-outline"
-                size={heightPercentageToDP('2.4%')}
-                color={'#FFF'}
-              />
-            </TouchableOpacity>
-          </View>
+          {!data?.title ? <View /> :
+            <View style={{ flexDirection: 'row', gap: 20 }}>
+              <TouchableOpacity
+                onPress={HandleBookMark}>
+                <FontAwesome6
+                  name="book-bookmark"
+                  size={heightPercentageToDP('2.4%')}
+                  color={AnimeBookMark[link] ? 'yellow' : '#FFF'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  ApiCall();
+                }}>
+                <Ionicons
+                  name="refresh-outline"
+                  size={heightPercentageToDP('2.4%')}
+                  color={'#FFF'}
+                />
+              </TouchableOpacity>
+            </View>}
         </Header>
         <View
           style={{
