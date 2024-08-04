@@ -10,6 +10,7 @@ const initialState = {
   baseUrl: 's3taku',
   Anime: true,
   AnimeWatched: {},
+  AnimeBookMarks: {},
 };
 
 const Reducers = createSlice({
@@ -65,13 +66,21 @@ const Reducers = createSlice({
     },
     SwtichBaseUrl: (state, action) => {
       state.baseUrl = action.payload;
+      state.downTime = false;
     },
     SwtichToAnime: state => {
       state.Anime = !state.Anime;
+      state.downTime = false;
     },
     AnimeWatched: (state, action) => {
       state.AnimeWatched[action?.payload?.AnimeName] = action?.payload
-    }
+    },
+    AddAnimeBookMark: (state, action) => {
+      state.AnimeBookMarks[action?.payload?.url] = action?.payload
+    },
+    RemoveAnimeBookMark: (state, action) => {
+      delete state.AnimeBookMarks[action?.payload?.url]
+    },
   },
 });
 
@@ -89,5 +98,7 @@ export const {
   SwtichBaseUrl,
   SwtichToAnime,
   AnimeWatched,
+  AddAnimeBookMark,
+  RemoveAnimeBookMark,
 } = Reducers.actions;
 export default Reducers.reducer;

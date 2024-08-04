@@ -1,12 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchComicsData } from "../Func/HomeFunc";
+import { checkServerDown } from "../Func/HomeFunc";
 import Button from "./Button";
+import { AnimeHostName, ComicHostName } from "../../Utils/APIs";
 
 const DownTime = () => {
     const dispatch = useDispatch();
     const loading = useSelector(state => state.data.loading);
+    const animeActive = useSelector(state => state?.data?.Anime);
+    const baseUrl = useSelector(state => state.data.baseUrl);
     return (
         <View style={styles.container} >
             {loading ?
@@ -18,7 +21,11 @@ const DownTime = () => {
                 <Button
                     title="Retry"
                     onPress={() => {
-                        fetchComicsData(`https://readallcomics.com/`, dispatch);
+                        if (animeActive) {
+                            checkServerDown(AnimeHostName[baseUrl], dispatch)
+                        } else {
+                            checkServerDown(ComicHostName[baseUrl], dispatch)
+                        }
                     }}
                     textSize={20}
                 />}

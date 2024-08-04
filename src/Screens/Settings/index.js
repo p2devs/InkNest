@@ -267,16 +267,12 @@ export function Settings({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <View style={{ padding: 10, alignItems: 'center' }}>
-          <Text style={{ color: 'yellow', fontSize: 20 }}>
-            Version: {getVersion()}
-          </Text>
-
-          <Text style={{ color: 'yellow', fontSize: 20 }}>
-            Build Number: {getBuildNumber()}
-          </Text>
-        </View>
       </ScrollView>
+      <View style={{ padding: 10, alignItems: 'center', justifyContent:"center"}}>
+        <Text style={{ color: 'silver', fontSize: 13 }}>
+          V {getVersion()} - {getBuildNumber()}
+        </Text>
+      </View>
 
       <Modal
         transparent

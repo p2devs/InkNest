@@ -39,11 +39,9 @@ export function Home({ navigation }) {
   const error = useSelector(state => state.data.error);
   const baseUrl = useSelector(state => state.data.baseUrl);
   const flatListRef = useRef(null);
-  const History = useSelector(state => state.data.history);
   const IsAnime = useSelector(state => state.data.Anime);
   const [comicsData, setComicsData] = useState([]);
   const [page, setPage] = useState(0);
-  const [Showhistory, setShowhistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
   let Tag = Platform.OS === 'ios' ? BlurView : View;
@@ -108,11 +106,7 @@ export function Home({ navigation }) {
             borderBottomWidth: 0.5,
             marginBottom: 5,
           }}>
-          <TouchableOpacity
-            onPress={() => {
-              if (Showhistory) setShowhistory(false);
-            }}
-            activeOpacity={Showhistory ? 0 : 1}
+          <View
             style={{ flexDirection: 'row', gap: 12 }}>
             <Text
               style={{
@@ -120,35 +114,8 @@ export function Home({ navigation }) {
                 fontWeight: 'bold',
                 color: '#FFF',
               }}>
-              {Showhistory ? 'History List' : 'InkNest Comics'}
+              {'InkNest Comics'}
             </Text>
-          </TouchableOpacity>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              marginHorizontal: widthPercentageToDP('1%'),
-              gap: 10,
-              marginBottom: 5,
-            }}>
-            <TouchableOpacity
-              onPress={() => {
-                setShowhistory(!Showhistory);
-              }}>
-              {Showhistory ? (
-                <AntDesign
-                  name="book"
-                  size={heightPercentageToDP('4%')}
-                  color="#FFF"
-                />
-              ) : (
-                <MaterialCommunityIcons
-                  name="history"
-                  size={heightPercentageToDP('4%')}
-                  color="#FFF"
-                />
-              )}
-            </TouchableOpacity>
           </View>
         </Header>
         {!loading && !comicsData?.data?.length && error ? (
@@ -180,22 +147,17 @@ export function Home({ navigation }) {
               flex: 1,
               backgroundColor: '#000',
             }}
-            data={
-              Showhistory
-                ? Object.values(History)
-                : comicsData?.data
-            }
+            data={comicsData?.data}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }) => (
               <HomeRenderItem
                 item={item}
                 index={index}
                 key={index}
-                Showhistory={Showhistory}
+                Showhistory={false}
               />
             )}
             ListFooterComponent={() => {
-              if (Showhistory) return null;
               return (
                 <View
                   style={{

@@ -16,7 +16,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Gallery from '../Gallery/src';
-import { navigate } from '../../Navigation/NavigationService';
+import { navigate, replace } from '../../Navigation/NavigationService';
 import { NAVIGATION } from '../../Constants';
 
 const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
@@ -130,13 +130,21 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
                 placeholderTextColor={'#fff3'}
                 placeholder="Jump to"
                 keyboardType="numeric"
-                value={PageIndex + 1}
+                value={jumpToPage}
                 ref={InputRef}
                 onChangeText={(text) => {
                   if (text === '') return;
+                  //check text should be number full number no decimal or negative or any other character
+                  if (text.match(/[^0-9]/g)) {
+                    setJumpToPage(text.replace(/[^0-9]/g, ''));
+                    return Alert.alert('Please enter a valid page number');
+                  }
                   let index = parseInt(text) - 1;
                   //check is vaild number
-                  if (isNaN(index)) return Alert.alert('Please enter a valid number');
+                  if (isNaN(index)) {
+                    setJumpToPage(index.replace(/[^0-9]/g, ''));
+                    return Alert.alert('Please enter a valid page number');
+                  }
                   if (index < 0 || index >= images.length) return Alert.alert('Invalid page number');
                   setJumpToPage(index);
                 }}
@@ -151,7 +159,9 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
               </Text>
               <TouchableOpacity
                 style={{ marginLeft: 10 }}
+                disabled={jumpToPage === ""}
                 onPress={() => {
+                  if (jumpToPage === "") return;
                   GalleryRef.current?.setIndex(jumpToPage);
                   InputRef.current?.clear();
                   InputRef.current?.blur();
@@ -160,7 +170,7 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
                 <MaterialCommunityIcons
                   name="book-open-page-variant-outline"
                   size={24}
-                  color="#fff"
+                  color={!jumpToPage ? "#fff3" : "#fff"}
                 />
               </TouchableOpacity>
             </View>
