@@ -7,8 +7,8 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 's3taku',
-  Anime: true,
+  baseUrl: 'azcomic',
+  Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
 };
