@@ -13,9 +13,6 @@
   <a href="https://discord.gg/WYwJefvWNT">
     <img alt="Discord Chat" src="https://img.shields.io/discord/1281938822275403817.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48">
   </a>
-  <a href="https://t.me/inknest">
-    <img alt="Telegram" src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
-  </a>
   <a href="https://p2devs.github.io/InkNest/">
     <img alt="Website" src="https://img.shields.io/badge/Website-000000?style=flat&logo=googlechrome&logoColor=white" >
   </a>
