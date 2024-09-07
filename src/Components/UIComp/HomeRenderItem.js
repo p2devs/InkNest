@@ -86,7 +86,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
                 ? item?.genres.join(',')
                 : item.date}
           </Text>
-          {
+          {/* {
             //create a progress bar
             !item?.Progress ? null : (
               <View
@@ -107,7 +107,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
                 />
               </View>
             )
-          }
+          } */}
         </Tag>
       </TouchableOpacity>
     </View>
