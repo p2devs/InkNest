@@ -47,7 +47,6 @@ const AnimeVideo = ({ route, navigation }) => {
     getData();
   }, []);
   useEffect(() => {
-    console.log(AnimeName, 'AnimeName');
     //update watched episode once all loading is done and no error
     if (!loading && !error && !episodeLoading && !videoLoading) {
       //check video player is ready then check we have data for this anime episode in AnimeWatched then update watched 
@@ -362,16 +361,9 @@ const AnimeVideo = ({ route, navigation }) => {
                 }}
                 onProgress={({ currentTime, seekableDuration, playableDuration }) => {
                   setVideoCurrentTime(currentTime);
-                  UpdateWatched({ currentTime, seekableDuration, playableDuration });
                 }}
                 onLoad={() => {
-                  if (AnimeWatched[AnimeName] && AnimeWatched[AnimeName]?.Episodes[link]) {
-                    console.log(AnimeWatched[AnimeName]?.Episodes[link], 'AnimeWatched');
-                    let currentTime = AnimeWatched[AnimeName]?.Episodes[link]?.EpisdoeProgress;
-                    console.log(currentTime, 'currentTime');
-                    videoRef.current.seek(currentTime ?? videoCurrentTime);
-                  } else if (videoCurrentTime > 0) {
-                    console.log(videoCurrentTime, 'videoCurrentTime');
+                  if (videoCurrentTime) {
                     videoRef.current.seek(videoCurrentTime);
                   }
                 }}

@@ -166,7 +166,7 @@ export function AnimeHome({ navigation }) {
                             episode: item?.ActiveEpisdoe,
                             imageUrl: item.imageUrl,
                             link: item.ActiveEpisdeLink,
-                            Progress: (item?.ActiveEpisdoeProgress / item?.ActiveEpisdoeDuration) * 100,
+                            // Progress: (item?.ActiveEpisdoeProgress / item?.ActiveEpisdoeDuration) * 100,
                           }}
                           index={index}
                           key={index}

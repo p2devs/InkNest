@@ -3,6 +3,6 @@ export const ComicHostName = {
   azcomic: 'https://azcomix.me/',
 };
 export const AnimeHostName = {
-  gogoanimes: 'https://ww8.gogoanimes.fi/',
-  s3taku: "https://s3taku.com/"
+  gogoanimes: 'https://ww12.gogoanimes.fi/',
+  s3taku: 'https://s3taku.com/',
 };
