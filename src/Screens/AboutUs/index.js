@@ -1,18 +1,18 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Linking } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {View, Text, TouchableOpacity, Linking} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Header from '../../Components/UIComp/Header';
 import Markdown from '../../Components/UIComp/MarkDown';
 
-export function AboutUs({ navigation }) {
+export function AboutUs({navigation}) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <Header
         style={{
           width: '100%',
@@ -34,7 +34,7 @@ export function AboutUs({ navigation }) {
             name="chevron-back"
             size={hp('3%')}
             color="#fff"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
         <Text
@@ -91,9 +91,9 @@ export function AboutUs({ navigation }) {
               }}>
               Contact Us
             </Text>
-            <View style={{ gap: 15, flexDirection: 'row' }}>
+            <View style={{gap: 15, flexDirection: 'row'}}>
               <TouchableOpacity
-                style={{ flexDirection: 'row', gap: 12 }}
+                style={{flexDirection: 'row', gap: 12}}
                 onPress={() => {
                   //open email app with pre-filled email
                   Linking.openURL('mailto:inknest@2hub.live');
@@ -103,7 +103,7 @@ export function AboutUs({ navigation }) {
 
               {/* //github page */}
               <TouchableOpacity
-                style={{ flexDirection: 'row', gap: 12 }}
+                style={{flexDirection: 'row', gap: 12}}
                 onPress={() => {
                   Linking.openURL('https://github.com/p2devs/inknest-release');
                 }}>
@@ -112,18 +112,18 @@ export function AboutUs({ navigation }) {
 
               {/* //Linkdin page */}
               <TouchableOpacity
-                style={{ flexDirection: 'row', gap: 12 }}
+                style={{flexDirection: 'row', gap: 12}}
                 onPress={() => {
                   Linking.openURL('https://www.linkedin.com/company/p2-devs/');
                 }}>
                 <Ionicons name="logo-linkedin" size={20} color="#007AFF" />
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flexDirection: 'row', gap: 12 }}
+                style={{flexDirection: 'row', gap: 12}}
                 onPress={() => {
-                  Linking.openURL('https://t.me/inknest');
+                  Linking.openURL('https://discord.gg/WYwJefvWNT');
                 }}>
-                <MaterialIcons name="telegram" size={20} color="#007AFF" />
+                <MaterialIcons name="discord" size={20} color="#007AFF" />
               </TouchableOpacity>
             </View>
           </View>
