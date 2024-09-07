@@ -9,7 +9,7 @@ import {
   Modal,
   FlatList,
   StyleSheet,
-  Image,
+  Share,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
@@ -21,6 +21,8 @@ import { getVersion, getBuildNumber } from 'react-native-device-info';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -239,6 +241,44 @@ export function Settings({ navigation }) {
 
         <TouchableOpacity
           onPress={() => {
+            Linking.openURL('https://t.me/inknest');
+          }}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: "row" }}>
+            <FontAwesome
+              name="telegram"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Telegram Channel
+            </Text>
+          </View>
+          <Feather
+            name="arrow-up-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
             Linking.openURL('https://2hub.live/InkNest/Privacy-Policy');
           }}
           style={{
@@ -249,26 +289,82 @@ export function Settings({ navigation }) {
             borderRadius: 5,
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <MaterialIcons
-            name="policy"
+          <View style={{ flexDirection: "row" }}>
+            <MaterialIcons
+              name="policy"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Privacy Policy
+            </Text>
+          </View>
+          <Feather
+            name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
             style={{ marginRight: 10 }}
           />
-          <Text
-            style={{
-              fontSize: hp('2%'),
-              fontWeight: 'bold',
-              color: '#000',
-            }}>
-            Privacy Policy
-          </Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          onPress={() => {
+            Share.share({
+              message: `📖✨ Explore Comics & Anime with InkNest!
+
+Dive into a universe of thrilling adventures and stunning artwork — all for free! InkNest gives you access to a vast collection of comic books and anime from top publishers and studios, right on your mobile device.
+
+Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has something for everyone. Discover new releases, timeless classics, and immerse yourself in your favorite stories anytime, anywhere!
+
+🚀 Download now and start exploring: https://p2devs.github.io/InkNest/
+`,
+            })
+          }}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: "row" }}>
+            <Entypo
+              name="slideshare"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Share App
+            </Text>
+          </View>
+          <Feather
+            name="arrow-up-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
       </ScrollView>
-      <View style={{ padding: 10, alignItems: 'center', justifyContent:"center"}}>
+      <View style={{ padding: 10, alignItems: 'center', justifyContent: "center" }}>
         <Text style={{ color: 'silver', fontSize: 13 }}>
           V {getVersion()} - {getBuildNumber()}
         </Text>
