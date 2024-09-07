@@ -12,7 +12,7 @@ const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
   const index = ComicBook?.volumes.findIndex(
     item => {
       const checklinkBaseUrl = item?.link.includes('readallcomics.com') ? 'readallcomics' : 'azcomic';
-      const currentComic = baseUrl == checklinkBaseUrl ?
+      const currentComic = "azcomic" == checklinkBaseUrl ?
         item.title.split("#")[1] === ComicBook?.title.split("#")[1] :
         item.title.replace('- Reading', '').trim() === ComicBook?.title;
       return currentComic
