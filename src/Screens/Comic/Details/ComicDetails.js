@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import {
   checkDownTime,
@@ -38,6 +39,7 @@ export function ComicDetails({ navigation, route }) {
   // console.log(ComicDetail, 'ComicDetails');
   const baseUrl = useSelector(state => state.data.baseUrl);
   const [TabSelected, setTabSelected] = useState(0);
+  const [sort, setSort] = useState(false);
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   useEffect(() => {
@@ -70,6 +72,11 @@ export function ComicDetails({ navigation, route }) {
       return;
     }
   };
+
+  const reverseChapterList = (chapterList) => {
+    if (!sort) return [...chapterList];
+    return [...chapterList].reverse();
+  }
 
   useEffect(() => {
     console.log(
@@ -248,26 +255,40 @@ export function ComicDetails({ navigation, route }) {
                 <DescriptionView key={index} index={index} vol={vol} />
               ))}
           {[1, 2].includes(TabSelected) ? (
-            <Text style={styles.chapterTitle}>
-              {TabSelected == 1 ? 'Chapters' : 'Bookmarks'} List:
-            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.chapterTitle}>
+                {TabSelected == 1 ? 'Chapters' : 'Bookmarks'} List:
+              </Text>
+              {(TabSelected == 1 && (ComicDetail?.issues?.length > 1 || ComicDetail?.chapters?.length > 1)) && <TouchableOpacity
+                onPress={() => {
+                  setSort(!sort);
+                }}>
+                <FontAwesome5
+                  name={`sort-numeric-down${!sort ? "-alt" : ""}`}
+                  size={heightPercentageToDP('2.4%')}
+                  color={"#000"}
+                />
+              </TouchableOpacity>}
+            </View>
           ) : null}
           {![1, 2].includes(TabSelected) ? null : !ComicDetail?.issues ? null :
-            ComicDetail?.issues.map((item, index) => (
+            reverseChapterList(ComicDetail?.issues).map((item, index) => (
               <ChaptersView
                 chapter={item}
                 key={index}
                 Bookmark={TabSelected == 2}
+                sortOrder={sort}
               />
             ))
 
           }
           {![1, 2].includes(TabSelected) ? null : !ComicDetail?.chapters ? null
-            : ComicDetail?.chapters.map((item, index) => (
+            : reverseChapterList(ComicDetail?.chapters).map((item, index) => (
               <ChaptersView
                 chapter={item}
                 key={index}
                 Bookmark={TabSelected == 2}
+                sortOrder={sort}
               />
             ))
           }
