@@ -1,20 +1,29 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { Search, Settings } from '../Screens';
-import { NAVIGATION } from '../Constants';
-import { useSelector } from 'react-redux';
-import { AnimeBookmarks, AnimeHome } from '../Screens/Anime';
-import { ComicBookmarks, Home, LocalComic } from '../Screens/Comic';
-import { View, StyleSheet } from 'react-native';
+import {Search, Settings} from '../Screens';
+import {NAVIGATION} from '../Constants';
+import {useSelector} from 'react-redux';
+import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
+import {ComicBookmarks, Home, LocalComic} from '../Screens/Comic';
+import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
 
 const BottomTab = createBottomTabNavigator();
 
+/**
+ * TabBarIcon component renders an icon based on the provided name prop.
+ *
+ * @param {Object} props - The properties object.
+ * @param {string} props.name - The name of the icon to render.
+ * @param {number} [props.size=24] - The size of the icon.
+ * @param {string} props.tintColor - The color of the icon.
+ * @returns {JSX.Element} The icon component.
+ */
 const TabBarIcon = props => {
   if (props.name === 'home') {
     return (
@@ -59,7 +68,12 @@ const TabBarIcon = props => {
   }
 };
 
-
+/**
+ * BottomNavigation component renders the bottom tab navigator with different screens.
+ * It uses Redux state to conditionally render components based on the state values.
+ *
+ * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
+ */
 export function BottomNavigation() {
   const animeActive = useSelector(state => state?.data?.Anime);
   const downTime = useSelector(state => state.data.downTime);
@@ -93,7 +107,7 @@ export function BottomNavigation() {
         name={NAVIGATION.home}
         component={downTime ? DownTime : animeActive ? AnimeHome : Home}
         options={{
-          tabBarIcon: ({ focused, color }) => (
+          tabBarIcon: ({focused, color}) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
           ),
         }}
@@ -103,27 +117,28 @@ export function BottomNavigation() {
         name={NAVIGATION.search}
         component={Search}
         options={{
-          tabBarIcon: ({ focused, color }) => (
+          tabBarIcon: ({focused, color}) => (
             <TabBarIcon focused={focused} tintColor={color} name="search" />
           ),
         }}
       />
-      {animeActive ? null :
+      {animeActive ? null : (
         <BottomTab.Screen
           name={NAVIGATION.localComic}
           component={LocalComic}
           options={{
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="reader" />
             ),
           }}
-        />}
+        />
+      )}
 
       <BottomTab.Screen
         name={NAVIGATION.bookmarks}
         component={animeActive ? AnimeBookmarks : ComicBookmarks}
         options={{
-          tabBarIcon: ({ focused, color }) => (
+          tabBarIcon: ({focused, color}) => (
             <TabBarIcon
               focused={focused}
               tintColor={color}
@@ -133,12 +148,11 @@ export function BottomNavigation() {
         }}
       />
 
-
       <BottomTab.Screen
         name={NAVIGATION.settings}
         component={Settings}
         options={{
-          tabBarIcon: ({ focused, color }) => (
+          tabBarIcon: ({focused, color}) => (
             <TabBarIcon focused={focused} tintColor={color} name="settings" />
           ),
         }}

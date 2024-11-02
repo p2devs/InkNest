@@ -12,6 +12,12 @@ import {ViewAll} from '../Screens/Anime/Home/ViewAll';
 
 const Stack = createNativeStackNavigator();
 
+/**
+ * AppNavigation component sets up the navigation stack for the application.
+ * It uses a Stack Navigator to define the different screens and their respective components.
+ *
+ * @returns {JSX.Element} The Stack Navigator with defined screens and options.
+ */
 export function AppNavigation() {
   const animeActive = useSelector(state => state?.data?.Anime);
   return (

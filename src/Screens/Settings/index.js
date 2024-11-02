@@ -17,6 +17,8 @@ import {
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import {getVersion, getBuildNumber} from 'react-native-device-info';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -32,6 +34,8 @@ import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
 import {BlurView} from '@react-native-community/blur';
 
+const appInstanceId = analytics().getAppInstanceId() ?? 'unknown';
+
 export function Settings({navigation}) {
   let Tag = Platform.OS === 'ios' ? BlurView : View;
   const dispatch = useDispatch();
@@ -40,14 +44,21 @@ export function Settings({navigation}) {
   const Anime = useSelector(state => state.data.Anime);
   const SwitchAnimeToggle = () => {
     dispatch(SwtichToAnime(!Anime));
-    if (Anime) dispatch(SwtichBaseUrl('readallcomics'));
-    if (!Anime) dispatch(SwtichBaseUrl('s3taku'));
+    if (Anime) {
+      crashlytics().log('Switched to Anime Mode');
+      dispatch(SwtichBaseUrl('readallcomics'));
+    }
+    if (!Anime) {
+      crashlytics().log('Switched to Comic Mode');
+      dispatch(SwtichBaseUrl('s3taku'));
+    }
     navigation.reset({
       index: 0,
       routes: [{name: NAVIGATION.home}],
     });
   };
   const ServerSwitch = async url => {
+    crashlytics().log(`Switched to server ${url}`);
     setSwitchServer(null);
     dispatch(SwtichBaseUrl(url));
     let timer = setTimeout(
@@ -78,7 +89,11 @@ export function Settings({navigation}) {
             flexDirection: 'row',
             alignItems: 'center',
           }}
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'About us screen',
+            });
             navigation.navigate(NAVIGATION.aboutUs);
           }}>
           <Ionicons
@@ -98,7 +113,11 @@ export function Settings({navigation}) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Update screen',
+            });
             navigation.navigate(NAVIGATION.update);
           }}
           style={{
@@ -128,7 +147,11 @@ export function Settings({navigation}) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Storage usage screen',
+            });
             Linking.openSettings();
           }}
           style={{
@@ -210,7 +233,11 @@ export function Settings({navigation}) {
         </View>
 
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Switch Server screen',
+            });
             setSwitchServer(baseUrl);
           }}
           style={{
@@ -266,7 +293,11 @@ export function Settings({navigation}) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Report Issue screen',
+            });
             Linking.openURL('https://discord.gg/WYwJefvWNT');
           }}
           style={{
@@ -304,7 +335,11 @@ export function Settings({navigation}) {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Privacy Policy screen',
+            });
             Linking.openURL('https://2hub.live/InkNest/Privacy-Policy');
           }}
           style={{
@@ -343,7 +378,11 @@ export function Settings({navigation}) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
+            await analytics().logEvent('user_clicked', {
+              userID: appInstanceId,
+              item: 'Share App screen',
+            });
             Share.share({
               message: `📖✨ Explore Comics & Anime with InkNest!
 
