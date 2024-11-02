@@ -22,9 +22,12 @@
     <img alt="GitHub" src="https://img.shields.io/github/license/p2devs/InkNest">
   </a>
 </div>
-<p align="center">
-  <img src="./.github/readme-images/screenshot.png" align="center" />
-</p>
+
+https://github.com/user-attachments/assets/09406399-b949-44be-b0cc-e54658c5ad8b
+
+https://github.com/user-attachments/assets/5cd29ece-4e9c-438a-9a82-aac53add640f
+
+
 
 ## Overview
 
