@@ -23,15 +23,15 @@
   </a>
 </div>
 
-https://github.com/user-attachments/assets/09406399-b949-44be-b0cc-e54658c5ad8b
+### InkNest Anime
+[InkNest Anime](https://github.com/user-attachments/assets/09406399-b949-44be-b0cc-e54658c5ad8b)
 
-https://github.com/user-attachments/assets/5cd29ece-4e9c-438a-9a82-aac53add640f
-
-
+### InkNest Comic
+[InkNest Comic](https://github.com/user-attachments/assets/5cd29ece-4e9c-438a-9a82-aac53add640f)
 
 ## Overview
 
-InkNest is a mobile application that allows users to explore comics for free. The application is built using React Native and includes features such as search functionality and versioned documentation managed by Docusaurus.
+InkNest is a mobile application that allows users to explore comics & anime for free. The application is built using React Native and includes features such as search functionality and versioned documentation managed by Docusaurus.
 
 ## Features
 
@@ -142,7 +142,13 @@ This project is licensed under the GNU General Public License. See the [LICENSE]
 
 ## Contact
 
-For any inquiries, please contact us at [inknest@2hub.live](mailto:inknest@2hub.live).
+For any inquiries, feel free to reach out through one of the following channels:
+
+- **Email**: [inknest@2hub.live](mailto:inknest@2hub.live)
+- **Discord**: Join our community on [Discord](https://discord.gg/WYwJefvWNT) for real-time support and discussion.
+- **GitHub Discussions**: Visit our [GitHub Discussions board](https://github.com/p2devs/InkNest/discussions) to engage with our community, ask questions, and find answers to common issues.
+
+We're here to help!
 
 ## Download
 
