@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -14,14 +14,16 @@ import {
   Switch,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from '@react-native-community/blur';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {BlurView} from '@react-native-community/blur';
+import crashlytics from '@react-native-firebase/crashlytics';
 
-import { FetchAnimeData, fetchComicsData } from '../../../Components/Func/HomeFunc';
-import { NAVIGATION } from '../../../Constants';
+import {
+  FetchAnimeData,
+  fetchComicsData,
+} from '../../../Components/Func/HomeFunc';
+import {NAVIGATION} from '../../../Constants';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import {
   heightPercentageToDP,
@@ -34,7 +36,7 @@ import ErrorCard from '../../../Components/UIComp/ErrorCard';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 import GridList from '../../../Components/UIComp/GridList';
 
-export function Home({ navigation }) {
+export function Home({navigation}) {
   const dispatch = useDispatch();
   const error = useSelector(state => state.data.error);
   const baseUrl = useSelector(state => state.data.baseUrl);
@@ -44,17 +46,25 @@ export function Home({ navigation }) {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
+
   let Tag = Platform.OS === 'ios' ? BlurView : View;
-  const loadComics = async ({ next = true, JumpToPage = false }) => {
+
+  const loadComics = async ({next = true, JumpToPage = false}) => {
     try {
+      if (baseUrl == 'azcomic') {
+        crashlytics().log('Setuping the data for azcomic anime.');
+      } else {
+        crashlytics().log('Setuping the data for readallcomics comics.');
+      }
+
       if (JumpToPage) setPageJumpTo(null);
       setLoading(true);
 
       let LoadingPage = JumpToPage
         ? Number(pageJumpTo.page)
         : next
-          ? page + 1
-          : page - 1;
+        ? page + 1
+        : page - 1;
       let filterType = 'ongoing-comics/';
       let url =
         baseUrl == 'azcomic'
@@ -69,7 +79,7 @@ export function Home({ navigation }) {
       });
       setLoading(false);
       if (flatListRef?.current)
-        flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+        flatListRef.current.scrollToOffset({animated: true, offset: 0});
       if (JumpToPage) {
         setPage(Number(pageJumpTo.page));
         return;
@@ -84,11 +94,11 @@ export function Home({ navigation }) {
   };
 
   useEffect(() => {
-    loadComics({ next: true });
+    loadComics({next: true});
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <View
         style={{
           flex: 1,
@@ -106,8 +116,7 @@ export function Home({ navigation }) {
             borderBottomWidth: 0.5,
             marginBottom: 5,
           }}>
-          <View
-            style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{flexDirection: 'row', gap: 12}}>
             <Text
               style={{
                 fontSize: heightPercentageToDP('2%'),
@@ -130,7 +139,8 @@ export function Home({ navigation }) {
               error={error}
               ButtonText="Reload"
               onPress={() => {
-                loadComics({ next: true });
+                crashlytics().log('Retrying to load comics data.');
+                loadComics({next: true});
               }}
             />
           </View>
@@ -138,8 +148,8 @@ export function Home({ navigation }) {
           <GridList
             refreshing={loading}
             onRefresh={async () => {
-              setPageJumpTo({ page: page.toString() });
-              loadComics({ JumpToPage: true });
+              setPageJumpTo({page: page.toString()});
+              loadComics({JumpToPage: true});
             }}
             ref={flatListRef}
             showsVerticalScrollIndicator={false}
@@ -149,7 +159,7 @@ export function Home({ navigation }) {
             }}
             data={comicsData?.data}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => (
+            renderItem={({item, index}) => (
               <HomeRenderItem
                 item={item}
                 index={index}
@@ -171,7 +181,7 @@ export function Home({ navigation }) {
                     title="Previous"
                     onPress={() => {
                       if (page === 1) return;
-                      loadComics({ next: false });
+                      loadComics({next: false});
                     }}
                     disabled={[0, 1].includes(
                       IsAnime ? AnimatedData.page : page,
@@ -180,7 +190,7 @@ export function Home({ navigation }) {
                   <Text
                     onPress={() => {
                       if (!comicsData?.lastPage) return;
-                      setPageJumpTo({ page: page.toString() });
+                      setPageJumpTo({page: page.toString()});
                     }}
                     style={{
                       color: 'white',
@@ -191,7 +201,7 @@ export function Home({ navigation }) {
                     title="Next"
                     onPress={() => {
                       if (page === comicsData?.lastPage) return;
-                      loadComics({ next: true });
+                      loadComics({next: true});
                     }}
                   />
                 </View>
@@ -254,7 +264,7 @@ export function Home({ navigation }) {
                   borderBottomWidth: 0.5,
                   borderColor: '#fff',
                 }}>
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
+                <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
                   Enter Jamp to Page
                 </Text>
                 <TouchableOpacity
@@ -265,7 +275,7 @@ export function Home({ navigation }) {
                     source={{
                       uri: 'https://cdn-icons-png.freepik.com/512/3588/3588762.png',
                     }}
-                    style={{ width: 30, height: 30 }}
+                    style={{width: 30, height: 30}}
                   />
                 </TouchableOpacity>
               </View>
@@ -302,28 +312,28 @@ export function Home({ navigation }) {
                       if (Number(page) < 1) return;
                       if (!/^\d+$/.test(page)) return;
                       if (Number(page) > comicsData?.lastPage) return;
-                      setPageJumpTo({ page });
+                      setPageJumpTo({page});
                     }}
                     value={pageJumpTo?.page}
                     placeholderTextColor={'#fff'}
-                    style={{ color: '#fff', fontSize: 20 }}
+                    style={{color: '#fff', fontSize: 20}}
                     onSubmitEditing={() => {
                       if (!pageJumpTo?.page) return;
                       if (Number(pageJumpTo?.page) > comicsData?.lastPage)
                         return;
                       if (Number(pageJumpTo?.page) < 1) return;
-                      loadComics({ JumpToPage: true });
+                      loadComics({JumpToPage: true});
                     }}
                   />
                   <Text
-                    style={{ color: '#fff', fontSize: 20, fontWeight: '500' }}>
+                    style={{color: '#fff', fontSize: 20, fontWeight: '500'}}>
                     / {comicsData?.lastPage}
                   </Text>
                 </View>
                 <Button
                   title="JumpTo"
                   onPress={() => {
-                    loadComics({ JumpToPage: true });
+                    loadComics({JumpToPage: true});
                   }}
                 />
               </View>

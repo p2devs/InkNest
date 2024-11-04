@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
-import { navigate } from '../../Navigation/NavigationService';
-import { NAVIGATION } from '../../Constants';
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, Platform} from 'react-native';
+import {navigate} from '../../Navigation/NavigationService';
+import {NAVIGATION} from '../../Constants';
 import Image from './Image';
-import { BlurView } from '@react-native-community/blur';
-import { useSelector } from 'react-redux';
+import {BlurView} from '@react-native-community/blur';
+import {useSelector} from 'react-redux';
+import crashlytics from '@react-native-firebase/crashlytics';
 
-const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
+const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
   let Tag = Platform.OS === 'ios' ? BlurView : View;
   const [showItem, setShowItem] = useState(true);
   const isAnime = useSelector(state => state?.data?.Anime);
@@ -30,16 +31,36 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
         }}
         onPress={async () => {
           if (isAnime) {
+            crashlytics().log('User click on the Anime.');
+
             const navigationTarget = search
               ? NAVIGATION.animeDetails
               : NAVIGATION.animeVideo;
+
+            await crashlytics().setAttributes({
+              link: item?.link?.toString(),
+              title: item?.title?.toString(),
+              imageUrl: item?.imageUrl?.toString(),
+              navigationPage: navigationTarget?.toString(),
+            });
+
             navigate(navigationTarget, {
               link: item.link,
               title: item.title,
               imageUrl: item.imageUrl,
             });
+
             return;
           }
+
+          crashlytics().log('User click on the Comic.');
+
+          await crashlytics().setAttributes({
+            link: item?.link?.toString(),
+            search: Showhistory?.toString(),
+            PageUrl: item?.link?.toString(),
+            navigationPage: NAVIGATION?.comicDetails?.toString(),
+          });
           navigate(NAVIGATION.comicDetails, {
             link: item.link,
             home: !Showhistory,
@@ -48,7 +69,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
           });
         }}>
         <Image
-          source={{ uri: item.imageUrl }}
+          source={{uri: item.imageUrl}}
           style={{
             width: 180,
             height: 180,
@@ -75,16 +96,16 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
             },
           ]}>
           <Text
-            style={{ color: 'white', fontWeight: '700', fontSize: 14 }}
+            style={{color: 'white', fontWeight: '700', fontSize: 14}}
             numberOfLines={1}>
             {item.title}
           </Text>
-          <Text style={{ color: 'white', width: '80%' }} numberOfLines={1}>
+          <Text style={{color: 'white', width: '80%'}} numberOfLines={1}>
             {item?.episode
               ? item?.episode
               : item?.genres
-                ? item?.genres.join(',')
-                : item.date}
+              ? item?.genres.join(',')
+              : item.date}
           </Text>
           {/* {
             //create a progress bar

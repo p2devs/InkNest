@@ -13,13 +13,51 @@ import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
 
+/**
+ * RootNavigation component handles the main navigation logic for the application.
+ * It sets up various configurations such as requesting user permissions, enabling analytics,
+ * crashlytics, and performance monitoring. It also manages the navigation state and logs screen views.
+ *
+ * @function RootNavigation
+ * @returns {JSX.Element} The navigation container with the app's navigation structure.
+ *
+ * @requires useDispatch from 'react-redux'
+ * @requires useNetInfo from '@react-native-community/netinfo'
+ * @requires useRef from 'react'
+ * @requires useEffect from 'react'
+ * @requires useLayoutEffect from 'react'
+ * @requires crashlytics from '@react-native-firebase/crashlytics'
+ * @requires messaging from '@react-native-firebase/messaging'
+ * @requires fire from '@react-native-firebase/app'
+ * @requires firebase from '@react-native-firebase/app'
+ * @requires PermissionsAndroid from 'react-native'
+ * @requires Platform from 'react-native'
+ * @requires StatusBar from 'react-native'
+ * @requires NavigationContainer from '@react-navigation/native'
+ * @requires navigationRef from './path/to/navigationRef'
+ * @requires AppNavigation from './path/to/AppNavigation'
+ * @requires Network from './path/to/Network'
+ * @requires ClearError from './path/to/actions'
+ */
 export function RootNavigation() {
   const dispatch = useDispatch();
   const {type, isConnected} = useNetInfo();
 
   const routeNameRef = useRef();
 
+  /**
+   * Requests notification permission from the user.
+   *
+   * Logs the request to Crashlytics and checks the authorization status.
+   * If the platform is Android, it requests the POST_NOTIFICATIONS permission.
+   * Logs the result of the permission request to Crashlytics and the console.
+   *
+   * @async
+   * @function requestUserPermission
+   * @returns {Promise<void>} A promise that resolves when the permission request is complete.
+   */
   async function requestUserPermission() {
+    crashlytics().log('Requesting the notification permission.');
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -30,8 +68,10 @@ export function RootNavigation() {
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
       if (PermissionAndroid === PermissionsAndroid.RESULTS.GRANTED) {
+        crashlytics().log('Notification permission granted by user in android');
         console.log('Permission Granted');
       } else {
+        crashlytics().log('Notification permission denied by user in android');
         console.log('Permission Denied');
       }
     }
@@ -41,14 +81,41 @@ export function RootNavigation() {
     }
   }
 
+  /**
+   * Enables analytics collection for the application.
+   *
+   * This function asynchronously sets the analytics collection to be enabled
+   * using the Firebase analytics service.
+   *
+   * @returns {Promise<void>} A promise that resolves when the analytics collection is enabled.
+   */
   async function AnalyticsEnabled() {
     await fire.analytics().setAnalyticsCollectionEnabled(true);
   }
 
+  /**
+   * Enables Crashlytics collection.
+   *
+   * This function asynchronously enables the Crashlytics collection by setting
+   * the Crashlytics collection enabled flag to true.
+   *
+   * @returns {Promise<void>} A promise that resolves when the Crashlytics collection is enabled.
+   */
   async function toggleCrashlytics() {
     await crashlytics().setCrashlyticsCollectionEnabled(true);
   }
 
+  /**
+   * Enables performance monitoring collection in the Firebase application.
+   *
+   * This function asynchronously enables the collection of performance data
+   * using Firebase Performance Monitoring. It sets the performance collection
+   * to be enabled, allowing the app to gather and report performance metrics.
+   *
+   * @async
+   * @function PerformanceMonitoring
+   * @returns {Promise<void>} A promise that resolves when the performance collection is enabled.
+   */
   async function PerformanceMonitoring() {
     await firebase.perf().setPerformanceCollectionEnabled(true);
   }
@@ -69,7 +136,6 @@ export function RootNavigation() {
   if (!isConnected) {
     return <Network />;
   }
-
 
   return (
     <NavigationContainer

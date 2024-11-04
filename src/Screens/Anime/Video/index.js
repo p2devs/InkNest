@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   ScrollView,
 } from 'react-native';
 import Header from '../../../Components/UIComp/Header';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   GetVideoLink,
   getEpisodes,
@@ -20,16 +20,16 @@ import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
 import Button from '../../../Components/UIComp/Button';
 import Video from 'react-native-video';
-import { NAVIGATION } from '../../../Constants';
+import {NAVIGATION} from '../../../Constants';
 import cheerio from 'cheerio';
 import APICaller from '../../../Redux/Controller/Interceptor';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { AnimeHistroy } from '../../../Redux/Actions/GlobalActions';
-import { AnimeHostName } from '../../../Utils/APIs';
+import {AnimeHistroy} from '../../../Redux/Actions/GlobalActions';
+import {AnimeHostName} from '../../../Utils/APIs';
 
-const AnimeVideo = ({ route, navigation }) => {
+const AnimeVideo = ({route, navigation}) => {
   const videoRef = useRef(null);
-  const { link, title, imageUrl = null } = route.params;
+  const {link, title, imageUrl = null} = route.params;
   const [fullDescription, setFullDescription] = useState(false);
   const baseUrl = useSelector(state => state.data.baseUrl);
   const dispatch = useDispatch();
@@ -42,29 +42,46 @@ const AnimeVideo = ({ route, navigation }) => {
   const [videoLoading, setVideoLoading] = useState(false);
   const [episodeLoading, setEpisodeLoading] = useState(false);
   const AnimeWatched = useSelector(state => state.data.AnimeWatched);
-  let AnimeName = `${videoData?.animeInfo?.title ?? videoData?.title}-${baseUrl}`
+  let AnimeName = `${
+    videoData?.animeInfo?.title ?? videoData?.title
+  }-${baseUrl}`;
   useLayoutEffect(() => {
     getData();
   }, []);
   useEffect(() => {
     //update watched episode once all loading is done and no error
     if (!loading && !error && !episodeLoading && !videoLoading) {
-      //check video player is ready then check we have data for this anime episode in AnimeWatched then update watched 
+      //check video player is ready then check we have data for this anime episode in AnimeWatched then update watched
       if (videoRef?.current) {
-        if (!AnimeWatched[AnimeName] && !AnimeWatched[AnimeName]?.Episodes[link]) {
+        if (
+          !AnimeWatched[AnimeName] &&
+          !AnimeWatched[AnimeName]?.Episodes[link]
+        ) {
           UpdateWatched({}); //if no data found then update with empty data
           return;
         } else {
           let currentTime = AnimeWatched[AnimeName]?.Episodes[link];
           if (!currentTime) return;
-          const { EpisdoeDuration = 0, EpisdoePlayable = 0, EpisdoeProgress = 0, } = currentTime;
-          UpdateWatched({ currentTime: EpisdoeProgress, seekableDuration: EpisdoeDuration, playableDuration: EpisdoePlayable });
+          const {
+            EpisdoeDuration = 0,
+            EpisdoePlayable = 0,
+            EpisdoeProgress = 0,
+          } = currentTime;
+          UpdateWatched({
+            currentTime: EpisdoeProgress,
+            seekableDuration: EpisdoeDuration,
+            playableDuration: EpisdoePlayable,
+          });
         }
       }
     }
   }, [loading, error, episodeLoading, videoLoading]);
 
-  const UpdateWatched = ({ currentTime = 0, seekableDuration = null, playableDuration = null }) => {
+  const UpdateWatched = ({
+    currentTime = 0,
+    seekableDuration = null,
+    playableDuration = null,
+  }) => {
     let currentIndex = videoData.episodes.findIndex(item => item.active);
     let data = {
       AnimeName,
@@ -76,28 +93,28 @@ const AnimeVideo = ({ route, navigation }) => {
       ActiveEpisdoePlayable: playableDuration,
       watchTime: new Date().getTime(),
     };
-    dispatch(AnimeHistroy({ data }));
-  }
+    dispatch(AnimeHistroy({data}));
+  };
   function sanitizeTitle(str) {
     const newstr = str
-      ?.replace(/\s+/g, '-')          // Replace whitespace with dash
-      .replace(/\./g, '-')            // Replace period with dash
-      .replace(/[()]/g, '')           // Remove parentheses
-      .replace(/:/g, '')              // Remove colon
-      .replace(/--/g, '-dub')         // Replace -- with -dub
-      .replace(/[éèëê]/g, 'e')        // Replace accented e with e
-      .replace(/[àâ]/g, 'a')          // Replace accented a with a
-      .replace(/ç/g, 'c')             // Replace ç with c
-      .replace(/[ôö]/g, 'o')          // Replace accented o with o
-      .replace(/[ûüù]/g, 'u')         // Replace accented u with u
-      .replace(/[îï]/g, 'i')          // Replace accented i with i
-      .replace(/ñ/g, 'n')             // Replace ñ with n
-      .replace(/'/g, '')              // Remove apostrophes
-      .replace(/!/g, '')              // Remove exclamation marks
-      .replace(/,/g, '')              // Remove commas
-      .replace(/[^a-zA-Z0-9-]/g, '')  // Remove any remaining special characters
-      .replace(/--+/g, '-')           // Replace double dashes with a single dash
-      .toLowerCase();                 // Convert to lowercase
+      ?.replace(/\s+/g, '-') // Replace whitespace with dash
+      .replace(/\./g, '-') // Replace period with dash
+      .replace(/[()]/g, '') // Remove parentheses
+      .replace(/:/g, '') // Remove colon
+      .replace(/--/g, '-dub') // Replace -- with -dub
+      .replace(/[éèëê]/g, 'e') // Replace accented e with e
+      .replace(/[àâ]/g, 'a') // Replace accented a with a
+      .replace(/ç/g, 'c') // Replace ç with c
+      .replace(/[ôö]/g, 'o') // Replace accented o with o
+      .replace(/[ûüù]/g, 'u') // Replace accented u with u
+      .replace(/[îï]/g, 'i') // Replace accented i with i
+      .replace(/ñ/g, 'n') // Replace ñ with n
+      .replace(/'/g, '') // Remove apostrophes
+      .replace(/!/g, '') // Remove exclamation marks
+      .replace(/,/g, '') // Remove commas
+      .replace(/[^a-zA-Z0-9-]/g, '') // Remove any remaining special characters
+      .replace(/--+/g, '-') // Replace double dashes with a single dash
+      .toLowerCase(); // Convert to lowercase
 
     return newstr;
   }
@@ -136,7 +153,7 @@ const AnimeVideo = ({ route, navigation }) => {
         .each((index, element) => {
           const link = $(element).attr('href');
           const quality = $(element).text().trim();
-          downloadLinks.push({ quality, link });
+          downloadLinks.push({quality, link});
         });
 
       // console.log(downloadLinks, 'downloadLinks');
@@ -187,7 +204,7 @@ const AnimeVideo = ({ route, navigation }) => {
 
   if (error) {
     return (
-      <SafeAreaView style={{ backgroundColor: '#000', flex: 1 }}>
+      <SafeAreaView style={{backgroundColor: '#000', flex: 1}}>
         <Header
           style={{
             width: '100%',
@@ -209,7 +226,7 @@ const AnimeVideo = ({ route, navigation }) => {
               name="chevron-back"
               size={hp('3%')}
               color="#fff"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
           </TouchableOpacity>
           <Text
@@ -237,7 +254,7 @@ const AnimeVideo = ({ route, navigation }) => {
   }
   if (Object?.keys(videoData ?? {}).length === 0) {
     return (
-      <SafeAreaView style={{ backgroundColor: '#222', flex: 1 }}>
+      <SafeAreaView style={{backgroundColor: '#222', flex: 1}}>
         <Header
           style={{
             width: '100%',
@@ -259,7 +276,7 @@ const AnimeVideo = ({ route, navigation }) => {
               name="chevron-back"
               size={hp('3%')}
               color="#fff"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
           </TouchableOpacity>
           <Text
@@ -280,15 +297,15 @@ const AnimeVideo = ({ route, navigation }) => {
             }}
           />
         </Header>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'white', fontSize: 16 }}>No Data Found</Text>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{color: 'white', fontSize: 16}}>No Data Found</Text>
         </View>
       </SafeAreaView>
     );
   }
   let currentIndex = videoData.episodes.findIndex(item => item.active);
   return (
-    <SafeAreaView style={{ backgroundColor: '#111', flex: 1 }}>
+    <SafeAreaView style={{backgroundColor: '#111', flex: 1}}>
       <Header
         style={{
           width: '100%',
@@ -310,7 +327,7 @@ const AnimeVideo = ({ route, navigation }) => {
             name="chevron-back"
             size={hp('3%')}
             color="#fff"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
         <Text
@@ -332,7 +349,7 @@ const AnimeVideo = ({ route, navigation }) => {
         />
       </Header>
 
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{flex: 1}}>
         {videoLoading ? (
           <View
             style={{
@@ -343,162 +360,217 @@ const AnimeVideo = ({ route, navigation }) => {
               ...styles.backgroundVideo,
             }}>
             <ActivityIndicator size="small" color="#007AFF" />
-            <Text style={{ color: '#007AFF' }}>Loading Video...</Text>
+            <Text style={{color: '#007AFF'}}>Loading Video...</Text>
           </View>
         ) : //if videoUrls is not empty then show no of servers try again
-          videoUrls.length == 0 ? (
-            <Text style={{ fontSize: 14, color: 'white', marginTop: 12 }}>
-              Oops!! something went wrong, Try after sometime...
-            </Text>
-          ) : (
-            <View>
-              <Video
-                source={{ uri: videoUrls[serverLink]?.link }}
-                ref={videoRef}
-                // Callback when video cannot be loaded
-                onError={onError => {
-                  alert('Error loading video, Try to switch quality');
-                }}
-                onProgress={({ currentTime, seekableDuration, playableDuration }) => {
-                  setVideoCurrentTime(currentTime);
-                }}
-                onLoad={() => {
-                  if (videoCurrentTime) {
-                    videoRef.current.seek(videoCurrentTime);
-                  }
-                }}
-                style={styles.backgroundVideo}
-                controls={true}
-                fullscreenAutorotate={true}
-                fullscreenOrientation="landscape"
-                pictureInPicture={true}
-                playInBackground={true}
-                paused={false}
-                onEnd={() => {
-                  //get index of current active episode then check for next index 
-                  let currentIndex = videoData.episodes.findIndex(item => item.active);
-                  let nextIndex = currentIndex - 1;
+        videoUrls.length == 0 ? (
+          <Text style={{fontSize: 14, color: 'white', marginTop: 12}}>
+            Oops!! something went wrong, Try after sometime...
+          </Text>
+        ) : (
+          <View>
+            <Video
+              source={{uri: videoUrls[serverLink]?.link}}
+              ref={videoRef}
+              // Callback when video cannot be loaded
+              onError={onError => {
+                alert('Error loading video, Try to switch quality');
+              }}
+              onProgress={({
+                currentTime,
+                seekableDuration,
+                playableDuration,
+              }) => {
+                setVideoCurrentTime(currentTime);
+              }}
+              onLoad={() => {
+                if (videoCurrentTime) {
+                  videoRef.current.seek(videoCurrentTime);
+                }
+              }}
+              style={styles.backgroundVideo}
+              controls={true}
+              fullscreenAutorotate={true}
+              fullscreenOrientation="landscape"
+              pictureInPicture={true}
+              playInBackground={true}
+              paused={false}
+              onEnd={() => {
+                //get index of current active episode then check for next index
+                let currentIndex = videoData.episodes.findIndex(
+                  item => item.active,
+                );
+                let nextIndex = currentIndex - 1;
+                //if next index is greater than total episodes then set next index to 0
+                if (nextIndex < 0) {
+                  nextIndex = 0;
+                  return;
+                }
+                //replace current episode with next episode
+                navigation.replace(NAVIGATION.animeVideo, {
+                  link: videoData.episodes[nextIndex].episodeLink,
+                  title: videoData.episodes[nextIndex].title,
+                  imageUrl,
+                });
+              }}
+              resizeMode="contain"
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: 4,
+                paddingHorizontal: 5,
+                alignItems: 'center',
+              }}>
+              <Button
+                onPress={() => {
+                  // //get index of current active episode then check for next index
+                  let currentIndex = videoData.episodes.findIndex(
+                    item => item.active,
+                  );
+                  let nextIndex = currentIndex + 1;
                   //if next index is greater than total episodes then set next index to 0
-                  if (nextIndex < 0) {
-                    nextIndex = 0
+                  if (nextIndex >= videoData.episodes.length) {
+                    nextIndex = 0;
                     return;
                   }
                   //replace current episode with next episode
                   navigation.replace(NAVIGATION.animeVideo, {
                     link: videoData.episodes[nextIndex].episodeLink,
                     title: videoData.episodes[nextIndex].title,
-                    imageUrl
+                    imageUrl: imageUrl,
                   });
-                }}
-                resizeMode="contain"
-              />
-              <View
-                style={{ flexDirection: 'row', justifyContent: "space-between", marginVertical: 4, paddingHorizontal: 5, alignItems: "center" }}
-              >
-
-                <Button
-                  onPress={() => {
-                    // //get index of current active episode then check for next index 
-                    let currentIndex = videoData.episodes.findIndex(item => item.active);
-                    let nextIndex = currentIndex + 1;
-                    //if next index is greater than total episodes then set next index to 0
-                    if (nextIndex >= videoData.episodes.length) {
-                      nextIndex = 0
-                      return;
-                    }
-                    //replace current episode with next episode
-                    navigation.replace(NAVIGATION.animeVideo, {
-                      link: videoData.episodes[nextIndex].episodeLink,
-                      title: videoData.episodes[nextIndex].title,
-                      imageUrl: imageUrl
-                    });
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: "center", }}>
-                    <AntDesign name="left" size={16} color={currentIndex + 1 >= videoData.episodes.length ? "silver" : "#007AFF"} />
-                    <Text
-                      style={{ color: currentIndex + 1 >= videoData.episodes.length ? "silver" : "#007AFF", fontSize: 16 }}
-                    >{videoData.episodes[currentIndex + 1 >= videoData.episodes.length ? currentIndex : currentIndex + 1]?.episodeNumber}
-                    </Text>
-                  </View>
-                </Button>
-                <Button
-                  onPress={() => {
-                    //get index of current active episode then check for next index 
-                    let currentIndex = videoData.episodes.findIndex(item => item.active);
-                    let nextIndex = currentIndex - 1;
-                    //if next index is greater than total episodes then set next index to 0
-                    if (nextIndex < 0) {
-                      nextIndex = 0
-                      return;
-                    }
-                    //replace current episode with next episode
-                    navigation.replace(NAVIGATION.animeVideo, {
-                      link: videoData.episodes[nextIndex].episodeLink,
-                      title: videoData.episodes[nextIndex].title,
-                      imageUrl: imageUrl
-                    });
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: "center" }}>
-                    <Text
-                      style={{ color: currentIndex - 1 < 0 ? "silver" : "#007AFF", fontSize: 16 }}>
-                      {videoData.episodes[currentIndex - 1 < 0 ? currentIndex : currentIndex - 1]?.episodeNumber}
-                    </Text>
-                    <AntDesign name="right" size={16} color={currentIndex - 1 < 0 ? "silver" : "#007AFF"} />
-                  </View>
-                </Button>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  marginTop: 12,
-                  paddingHorizontal: 12,
                 }}>
-                <Text style={{ fontSize: 14, color: 'white' }}>Quality:</Text>
-
-                {videoUrls?.map((server, index) => (
-                  <Button
-                    color={serverLink == index ? 'gold' : 'silver'}
-                    key={index}
-                    title={server.quality
-                      .replace('Download', '')
-                      .replace('- mp4)', '|')
-                      .replace('(', '')
-                      .trim()}
-                    onPress={() => {
-                      setServerLink(index);
-                    }}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <AntDesign
+                    name="left"
+                    size={16}
+                    color={
+                      currentIndex + 1 >= videoData.episodes.length
+                        ? 'silver'
+                        : '#007AFF'
+                    }
                   />
-                ))}
-              </View>
+                  <Text
+                    style={{
+                      color:
+                        currentIndex + 1 >= videoData.episodes.length
+                          ? 'silver'
+                          : '#007AFF',
+                      fontSize: 16,
+                    }}>
+                    {
+                      videoData.episodes[
+                        currentIndex + 1 >= videoData.episodes.length
+                          ? currentIndex
+                          : currentIndex + 1
+                      ]?.episodeNumber
+                    }
+                  </Text>
+                </View>
+              </Button>
+              <Button
+                onPress={() => {
+                  //get index of current active episode then check for next index
+                  let currentIndex = videoData.episodes.findIndex(
+                    item => item.active,
+                  );
+                  let nextIndex = currentIndex - 1;
+                  //if next index is greater than total episodes then set next index to 0
+                  if (nextIndex < 0) {
+                    nextIndex = 0;
+                    return;
+                  }
+                  //replace current episode with next episode
+                  navigation.replace(NAVIGATION.animeVideo, {
+                    link: videoData.episodes[nextIndex].episodeLink,
+                    title: videoData.episodes[nextIndex].title,
+                    imageUrl: imageUrl,
+                  });
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: currentIndex - 1 < 0 ? 'silver' : '#007AFF',
+                      fontSize: 16,
+                    }}>
+                    {
+                      videoData.episodes[
+                        currentIndex - 1 < 0 ? currentIndex : currentIndex - 1
+                      ]?.episodeNumber
+                    }
+                  </Text>
+                  <AntDesign
+                    name="right"
+                    size={16}
+                    color={currentIndex - 1 < 0 ? 'silver' : '#007AFF'}
+                  />
+                </View>
+              </Button>
             </View>
-          )}
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                marginTop: 12,
+                paddingHorizontal: 12,
+              }}>
+              <Text style={{fontSize: 14, color: 'white'}}>Quality:</Text>
+
+              {videoUrls?.map((server, index) => (
+                <Button
+                  color={serverLink == index ? 'gold' : 'silver'}
+                  key={index}
+                  title={server.quality
+                    .replace('Download', '')
+                    .replace('- mp4)', '|')
+                    .replace('(', '')
+                    .trim()}
+                  onPress={() => {
+                    setServerLink(index);
+                  }}
+                />
+              ))}
+            </View>
+          </View>
+        )}
 
         {link.includes('s3taku') ? (
           <View
-            style={{ flexDirection: 'column', gap: 4, paddingHorizontal: 12 }}>
+            style={{flexDirection: 'column', gap: 4, paddingHorizontal: 12}}>
             {/* <Text style={{ color: 'gold', fontSize: 16 }}>
               Title: {videoData.title}
             </Text> */}
             <Text
-              style={{ color: 'gold', fontSize: 16 }}
+              style={{color: 'gold', fontSize: 16}}
               onPress={() => {
                 navigation.replace(NAVIGATION.animeDetails, {
-                  link: `${AnimeHostName.gogoanimes}/category/${sanitizeTitle(videoData?.title)}`,
+                  link: `${AnimeHostName.gogoanimes}/category/${sanitizeTitle(
+                    videoData?.title,
+                  )}`,
                   title: videoData.title,
                 });
               }}>
-              Title: <Text style={{ color: "#007AFF" }} >{videoData.title}</Text>
+              Title: <Text style={{color: '#007AFF'}}>{videoData.title}</Text>
             </Text>
-            <Text style={{ color: 'gold', fontSize: 16 }}>
+            <Text style={{color: 'gold', fontSize: 16}}>
               Episode: {videoData.episode}
             </Text>
             {!videoData.description ? null : (
               <Text
-                style={{ color: 'gold', fontSize: 16, marginTop: 6 }}
+                style={{color: 'gold', fontSize: 16, marginTop: 6}}
                 numberOfLines={fullDescription ? 10000 : 3}
                 onPress={() => {
                   setFullDescription(!fullDescription);
@@ -509,24 +581,33 @@ const AnimeVideo = ({ route, navigation }) => {
           </View>
         ) : (
           <View
-            style={{ flexDirection: 'column', gap: 13, paddingHorizontal: 12 }}>
+            style={{flexDirection: 'column', gap: 13, paddingHorizontal: 12}}>
             <Text
-              style={{ color: 'gold', fontSize: 16 }}
+              style={{color: 'gold', fontSize: 16}}
               onPress={() => {
                 navigation.replace(NAVIGATION.animeDetails, {
                   link: videoData.animeInfo?.link,
                   title: videoData.animeInfo?.title,
                 });
               }}>
-              Title: <Text style={{ color: "#007AFF" }} >{videoData.animeInfo?.title}</Text>
+              Title:{' '}
+              <Text style={{color: '#007AFF'}}>
+                {videoData.animeInfo?.title}
+              </Text>
             </Text>
-            <Text style={{ color: 'gold', fontSize: 16 }}>
+            <Text style={{color: 'gold', fontSize: 16}}>
               Catagory: {videoData?.category?.title}
             </Text>
           </View>
         )}
 
-        <Text style={{ fontSize: 16, color: 'gold', marginTop: 12, paddingHorizontal: 12 }}>
+        <Text
+          style={{
+            fontSize: 16,
+            color: 'gold',
+            marginTop: 12,
+            paddingHorizontal: 12,
+          }}>
           Episodes:
         </Text>
         {link.includes('s3taku') ? null : (
@@ -564,7 +645,7 @@ const AnimeVideo = ({ route, navigation }) => {
             flexWrap: 'wrap',
             gap: 12,
             marginTop: 12,
-            paddingHorizontal: 12
+            paddingHorizontal: 12,
           }}>
           {episodeLoading ? (
             <View
@@ -575,7 +656,7 @@ const AnimeVideo = ({ route, navigation }) => {
                 alignItems: 'center',
               }}>
               <ActivityIndicator size="small" color="#007AFF" />
-              <Text style={{ color: '#007AFF' }}>Loading Episodes...</Text>
+              <Text style={{color: '#007AFF'}}>Loading Episodes...</Text>
             </View>
           ) : (
             //show all episodes
@@ -586,7 +667,7 @@ const AnimeVideo = ({ route, navigation }) => {
                   navigation.replace(NAVIGATION.animeVideo, {
                     link: episode.episodeLink,
                     title: episode.title ?? title,
-                    imageUrl: imageUrl
+                    imageUrl: imageUrl,
                   });
                 }}
                 style={{
