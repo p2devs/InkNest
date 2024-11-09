@@ -5,33 +5,30 @@
 <h1 align="center">
   InkNest
 </h1>
-<p align="center">
-  "InkNest" combines the imagery of ink, often used in comics, with the idea of a cozy or comfortable nest where readers can immerse themselves in their favorite comic books.
-</p>
+
 <div align="center">
-  <a href="https://discord.gg/WYwJefvWNT">
+  <a href="https://discord.gg/WYwJefvWNT" style={{ marginRight: '10px', marginBottom: '10px' }}>
     <img alt="Discord Chat" src="https://img.shields.io/discord/1281938822275403817.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48">
   </a>
-  <a href="https://p2devs.github.io/InkNest/">
+  <a href="https://p2devs.github.io/InkNest/" style={{ marginRight: '10px', marginBottom: '10px' }}>
     <img alt="Website" src="https://img.shields.io/badge/Website-000000?style=flat&logo=googlechrome&logoColor=white" >
   </a>
-  <a href="https://github.com/p2devs/InkNest/releases/latest">
+  <a href="https://github.com/p2devs/InkNest/releases/latest" style={{ marginRight: '10px', marginBottom: '10px' }}>
     <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/p2devs/InkNest">
   </a>
-  <a href="https://github.com/p2devs/InkNest/blob/main/LICENSE">
+  <a href="https://github.com/p2devs/InkNest/blob/main/LICENSE" style={{ marginRight: '10px', marginBottom: '10px' }}>
     <img alt="GitHub" src="https://img.shields.io/github/license/p2devs/InkNest">
   </a>
 </div>
 
-### InkNest Anime
-[InkNest Anime](https://github.com/user-attachments/assets/09406399-b949-44be-b0cc-e54658c5ad8b)
+<p align="left">
+  InkNest is a free mobile app offering a vast collection of comics and anime across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
+</p>
 
-### InkNest Comic
-[InkNest Comic](https://github.com/user-attachments/assets/5cd29ece-4e9c-438a-9a82-aac53add640f)
+### 🌟 Star this repository to support the developer and encourage further development of the application
 
-## Overview
-
-InkNest is a mobile application that allows users to explore comics & anime for free. The application is built using React Native and includes features such as search functionality and versioned documentation managed by Docusaurus.
+> **Warning**
+> Please do not attempt to upload InkNest or any of its forks to the Play Store, App Store, or any other stores on the internet. Doing so may infringe their terms and conditions, potentially resulting in legal action or immediate takedown of the app.
 
 ## Features
 
@@ -67,48 +64,48 @@ Before running the project, make sure to add the following files:
 
 1. Clone the repository:
 
-    ```sh
-    git clone https://github.com/p2devs/InkNest.git
-    cd InkNest
-    ```
+   ```sh
+   git clone https://github.com/p2devs/InkNest.git
+   cd InkNest
+   ```
 
 2. Install dependencies:
 
-    ```sh
-    yarn install
-    ```
+   ```sh
+   yarn install
+   ```
 
 3. Start the development server:
 
-    ```sh
-    yarn start
-    ```
+   ```sh
+   yarn start
+   ```
 
 ## Running on Android
 
 1. Start the Android emulator or connect an Android device.
 2. Run the following command:
 
-    ```sh
-    yarn android
-    ```
+   ```sh
+   yarn android
+   ```
 
 ## Running on iOS
 
 1. Install CocoaPods dependencies:
 
-    ```sh
-    cd ios
-    pod install
-    cd ..
-    ```
+   ```sh
+   cd ios
+   pod install
+   cd ..
+   ```
 
 2. Start the iOS simulator or connect an iOS device.
 3. Run the following command:
 
-    ```sh
-    yarn ios
-    ```
+   ```sh
+   yarn ios
+   ```
 
 ## Documentation
 
@@ -116,29 +113,34 @@ The documentation is managed using Docusaurus. To view the documentation locally
 
 1. Navigate to the `docs` directory:
 
-    ```sh
-    cd docs
-    ```
+   ```sh
+   cd docs
+   ```
 
 2. Install dependencies:
 
-    ```sh
-    yarn install
-    ```
+   ```sh
+   yarn install
+   ```
 
 3. Start the documentation server:
 
-    ```sh
-    yarn start
-    ```
+   ```sh
+   yarn start
+   ```
 
 ## Contributing
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
-## License
+## DISCLAIMER
 
-This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for more details.
+- InkNest only scrapes links from various websites, making it easier for users to find anime and comics.
+- Neither InkNest nor its developers/staff host any of the content found within the app. All images and anime/comic information in the app are sourced from various public APIs.
+- Additionally, all anime/comic links in InkNest are obtained from various third-party anime hosting websites.
+- InkNest and its owners aren't liable for any misuse of the content found inside or outside the app and cannot be held accountable for the distribution of any content found within the app.
+- By using InkNest, you agree that the developers are not responsible for any content found in the app; this content may or may not come from legitimate sources.
+- If internet infringement issues arise, please contact the source website. The developer does not assume any legal responsibility.
 
 ## Contact
 
@@ -153,6 +155,19 @@ We're here to help!
 ## Download
 
 Get the app from our [releases page](https://github.com/p2devs/InkNest/releases).
+
+## License
+
+This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for more details.
+
+## InkNest Sources
+
+InkNest uses the following sources to provide you with the best experience:
+
+- [readallcomics](https://readallcomics.com/)
+- [azcomix](https://azcomix.me/)
+- [gogoanimes](https://ww12.gogoanimes.fi/)
+- [s3taku](https://s3taku.com/)
 
 ## Acknowledgements
 

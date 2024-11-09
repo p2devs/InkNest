@@ -56,3 +56,35 @@
   background-color: #333;
   color: #fff;
 } */
+
+.features {
+  margin-top: 20px;
+}
+
+.featuresContainer {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.feature {
+  flex: 0 0 auto;
+  width: 250px; /* Set the width */
+  padding: 20px;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  color: #000;
+}
+
+.feature h3 {
+  font-size: 1.5em;
+}
+
+.disclaimer {
+  margin-top: 20px;
+}
+
+.contact {
+  margin-top: 20px;
+}
