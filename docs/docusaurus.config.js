@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'InkNest',
   tagline:
-    'Explore comics for free with InkNest: your ultimate mobile companion',
+    'Explore comics & anime for free with InkNest: your ultimate mobile companion',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -79,7 +79,11 @@ const config = {
           //   position: 'left',
           //   label: 'Tutorial',
           // },
-          // {to: '/blog', label: 'Blog', position: 'left'},
+          {
+            href: 'https://github.com/p2devs/InkNest/releases',
+            label: 'Release Notes',
+            position: 'right',
+          },
           {
             href: 'https://github.com/p2devs/InkNest',
             label: 'GitHub',

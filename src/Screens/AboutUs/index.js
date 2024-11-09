@@ -76,8 +76,7 @@ export function AboutUs({navigation}) {
           </Text>
 
           <Markdown
-            content={`InkNest is your ultimate app for enjoying a vast collection of comic books and anime right on your mobile device, completely free of charge. Dive into a universe where you can explore thrilling adventures, captivating stories, and stunning artwork from a wide range of genres and publishers. Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest offers a seamless reading and viewing experience with user-friendly navigation and customizable settings to enhance your enjoyment. Stay updated with the latest releases and classics alike.\nDiscover, read, watch, and immerse yourself in the world of comics and anime with InkNest, designed for enthusiasts of all ages. Enjoy content from popular anime studios like Studio Ghibli, Toei Animation, and Madhouse, as well as renowned comic publishers such as Marvel, DC Comics, and Dark Horse. With InkNest, your favorite stories and characters are always at your fingertips.
-`}
+            content={`InkNest is a free mobile app offering a vast collection of comics and anime across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.`}
           />
           <View
             style={{
