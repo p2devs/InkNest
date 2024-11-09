@@ -15,6 +15,7 @@
   <a href="https://p2devs.github.io/InkNest/">
     <img alt="Website" src="https://img.shields.io/badge/Website-000000?style=flat&logo=googlechrome&logoColor=white" >
   </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fp2devs%2FInkNest?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fp2devs%2FInkNest.svg?type=shield"/></a>
   <a href="https://github.com/p2devs/InkNest/releases/latest">
     <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/p2devs/InkNest">
   </a>
@@ -22,6 +23,9 @@
     <img alt="GitHub" src="https://img.shields.io/github/license/p2devs/InkNest">
   </a>
 </div>
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fp2devs%2FInkNest.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fp2devs%2FInkNest?ref=badge_large)
 
 ### InkNest Anime
 [InkNest Anime](https://github.com/user-attachments/assets/09406399-b949-44be-b0cc-e54658c5ad8b)
