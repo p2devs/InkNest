@@ -45,9 +45,11 @@ const AnimeVideo = ({route, navigation}) => {
   let AnimeName = `${
     videoData?.animeInfo?.title ?? videoData?.title
   }-${baseUrl}`;
+
   useLayoutEffect(() => {
     getData();
   }, []);
+
   useEffect(() => {
     //update watched episode once all loading is done and no error
     if (!loading && !error && !episodeLoading && !videoLoading) {
@@ -142,9 +144,13 @@ const AnimeVideo = ({route, navigation}) => {
         'x-requested-with': 'XMLHttpRequest',
       };
       let body = `captcha_v3=03AFcWeA5P0_zs3F-8qdJfYLpjVD42n5zRIvGqSRyZQZ6oMlWoEyuiDY6Xyt73A7SjE916iWJXTdfCBMmkWfQTwCQMqr5R2HXF72iupJ4I2DEAx8nn95yRQq1Oh9kLkwglJuF13UioP6bmDtAEps35tmpIOTpMM_na0Gw_NYiP_t8GvxbCBmcnpd7ehKr5UXJRQ5JeZ8WVk9Tf3Y1Qh0q9-ETGLidMmAsJ61pqIdJavLIP9-ISobzTXcLoWRKFLX4x-XM6pDAA2X9BW27m2KFZZysBEi-qz2Cx_vJl-sLk2hIqA9_yH1EvPrvbgSzA0aHJuFZB876viTIDMLbdtiDbVZQlqlrfFjFogOuunXXWpQ2OJeDykt_6n0TkC1ZQE3tJVSGYwfQ-QFjiyh_5v4dwV50SlV3JSy-Yrq-nGf1DVLnA1PYSfeKpMaB26x2_CBovZPrxXdB9KY2zLadZf0l9yQpYm7vAeHos8ytL0eMpy2S9lMdJppLVAwOENRwMwq_Y5Va-ljzPe2q6plxJEocZWsyHj-9869B7eqGTYf6S1afcGa32d5vT4I3iwFeFGbr5u1ScIzT6ipaYU0qs5a72RY1ylYHx5GcUCHaeHSd9bkfFJIoSguiHK6Fm92iX6i_AWmpcFHM7VaeVTpyjGMsFnQzhnHji31nzSBL0FRie2CVqDRu4tC1FCZ4&id=${id}`;
-      let response = await APICaller.post('https://s3taku.com/download', body, {
-        headers,
-      });
+      let response = await APICaller.post(
+        'https://s3embtaku.pro/download',
+        body,
+        {
+          headers,
+        },
+      );
       const $ = cheerio.load(response.data);
       const downloadLinks = [];
       $('.mirror_link')

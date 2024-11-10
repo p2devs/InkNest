@@ -3,13 +3,13 @@ PODS:
   - BVLinearGradient (2.8.3):
     - React-Core
   - DoubleConversion (1.1.6)
-  - FasterImage (1.6.2):
-    - FasterImage/Nuke (= 1.6.2)
-    - FasterImage/NukeUI (= 1.6.2)
+  - FasterImage (1.7.2):
+    - FasterImage/Nuke (= 1.7.2)
+    - FasterImage/NukeUI (= 1.7.2)
     - React-Core
-  - FasterImage/Nuke (1.6.2):
+  - FasterImage/Nuke (1.7.2):
     - React-Core
-  - FasterImage/NukeUI (1.6.2):
+  - FasterImage/NukeUI (1.7.2):
     - React-Core
   - FBLazyVector (0.74.1)
   - Firebase/Analytics (10.27.0):
@@ -1125,11 +1125,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-netinfo (11.3.2):
+  - react-native-netinfo (11.4.1):
     - React-Core
   - react-native-safe-area-context (4.10.3):
     - React-Core
-  - react-native-video (6.3.0):
+  - react-native-video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1143,7 +1143,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.3.0)
+    - react-native-video/Video (= 6.7.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1151,7 +1151,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.3.0):
+  - react-native-video/Video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1172,7 +1172,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-webview (13.10.5):
+  - react-native-webview (13.12.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1424,7 +1424,7 @@ PODS:
     - React-utils (= 0.74.1)
   - RNCAsyncStorage (1.23.1):
     - React-Core
-  - RNCPicker (2.7.7):
+  - RNCPicker (2.9.0):
     - React-Core
   - RNDeviceInfo (11.1.0):
     - React-Core
@@ -1440,12 +1440,12 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNFBMessaging (20.1.0):
+  - RNFBMessaging (20.5.0):
     - Firebase/Messaging (= 10.27.0)
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNFBPerf (20.1.0):
+  - RNFBPerf (20.5.0):
     - Firebase/Performance (= 10.27.0)
     - React-Core
     - RNFBApp
@@ -1513,7 +1513,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.3.0):
+  - RNSVG (15.8.0):
     - React-Core
   - SocketRocket (0.7.0)
   - Yoga (0.0.0)
@@ -1772,7 +1772,7 @@ SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
-  FasterImage: af05a76f042ca3654c962b658fdb01cb4d31caee
+  FasterImage: 5822257844dadd582de1cec096e8b006f32047d0
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
   Firebase: 26b040b20866a55f55eb3611b9fcf3ae64816b86
   FirebaseABTesting: 589bc28c0ab3e5554336895a34aa262e24276665
@@ -1822,10 +1822,10 @@ SPEC CHECKSUMS:
   React-logger: 7e7403a2b14c97f847d90763af76b84b152b6fce
   React-Mapbuffer: c5844bf3c2206f5475c0fc2340a89b049ea23c97
   react-native-blur: b58f3155f534d975b7647593d93a2e907513addd
-  react-native-netinfo: 076df4f9b07f6670acf4ce9a75aac8d34c2e2ccc
+  react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-safe-area-context: b01d8f42d4e62a7be5a3e69fd332e0c7e67584c7
-  react-native-video: 7c84d5a1cf8489303514249a7e3bafab7bcb22ac
-  react-native-webview: 04168cbda528df7154fdef3086b4644b9e6dd683
+  react-native-video: 0fd07ef09ed10052e3c009fa98e2790474b05c0d
+  react-native-webview: 91800ab1c604389120f4abe895328ff7736513fb
   React-nativeconfig: 21d89c65ca39875fad2c5c465e0e013e514eba21
   React-NativeModulesApple: e2e180dae4486b2978fcf3564cc4c8de4b453a68
   React-perflogger: 3d31e0d1e8ad891e43a09ac70b7b17a79773003a
@@ -1850,17 +1850,17 @@ SPEC CHECKSUMS:
   React-utils: 8e9c5cd66f0788e156a1fcb5cd69593ec8607611
   ReactCommon: eb4c4a9c43fcc0d93f922d0fdada24638429e515
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
-  RNCPicker: b7873ba797dc586bfaf3307d737cbdc620a9ff3e
+  RNCPicker: f963e01f78e546a93b98aa201501713dbda14e94
   RNDeviceInfo: b899ce37a403a4dea52b7cb85e16e49c04a5b88e
   RNFBAnalytics: 3f336502732e51de9f5a5be8b5e3df879bf2eca7
   RNFBApp: 9acbe359ef3559d6f8ca5c350db471f2b352f98a
   RNFBCrashlytics: a4a66785997e629313ec8005a0811765738239fd
-  RNFBMessaging: b82ef70d252500d3ad104284c0c7f8e1cd22b51e
-  RNFBPerf: fcba70beb746b76c11f05fb17c2446a87ac1ac6f
+  RNFBMessaging: a320716387dafcf3ca25636d029bb5c4c2ff0e9f
+  RNFBPerf: 724265432ee86d175e8391876372f64b8f997024
   RNGestureHandler: 20a4307fd21cbff339abfcfa68192f3f0a6a518b
   RNReanimated: 82d44098f1640ac390d073bca26264d52a67dc7d
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
-  RNSVG: a48668fd382115bc89761ce291a81c4ca5f2fd2e
+  RNSVG: 8b1a777d54096b8c2a0fd38fc9d5a454332bbb4d
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: dafebc41bc66910af33077aaa41078e89fd635bf
 
