@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   ScrollView,
   Text,
@@ -73,10 +73,14 @@ export function ComicDetails({ navigation, route }) {
     }
   };
 
-  const reverseChapterList = (chapterList) => {
-    if (!sort) return [...chapterList];
-    return [...chapterList].reverse();
-  }
+  const reverseChapterList = useMemo(() => {
+    const getReversedList = (chapterList) => {
+      if (!chapterList) return [];
+      if (!sort) return [...chapterList];
+      return [...chapterList].reverse();
+    }
+    return getReversedList;
+  }, [sort]);
 
   useEffect(() => {
     console.log(
