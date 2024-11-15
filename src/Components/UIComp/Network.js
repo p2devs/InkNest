@@ -1,6 +1,6 @@
 import React from 'react';
-import {View} from 'react-native';
-import {View as MView, Text} from 'moti';
+import {View, Text} from 'react-native';
+import {View as MView} from 'moti';
 const _size = 80;
 const _border = Math.round(_size / 10);
 export default function Network() {
@@ -47,23 +47,7 @@ export default function Network() {
           }}
         />
 
-        <Text
-          from={{
-            color: '#fff',
-            fontSize: 20,
-            marginTop: 20,
-          }}
-          animate={{
-            color: '#000',
-            fontSize: 22,
-            marginTop: 22,
-          }}
-          transition={{
-            type: 'timing',
-            duration: 500,
-            loop: true,
-          }}
-          style={{color: '#fff', fontSize: 20, marginTop: 20}}>
+        <Text style={{color: '#fff', fontSize: 20, marginTop: 20}}>
           Checking Network...
         </Text>
       </View>
