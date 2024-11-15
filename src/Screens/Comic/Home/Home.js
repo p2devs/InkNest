@@ -2,28 +2,21 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
-  // Image,
   TouchableOpacity,
-  FlatList,
-  // Button,
   Alert,
   Modal,
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Switch,
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {BlurView} from '@react-native-community/blur';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 import {
-  FetchAnimeData,
   fetchComicsData,
 } from '../../../Components/Func/HomeFunc';
-import {NAVIGATION} from '../../../Constants';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import {
   heightPercentageToDP,
@@ -47,7 +40,7 @@ export function Home({navigation}) {
   const [loading, setLoading] = useState(false);
   const [pageJumpTo, setPageJumpTo] = useState(null);
 
-  let Tag = Platform.OS === 'ios' ? BlurView : View;
+  let Tag = View;
 
   const loadComics = async ({next = true, JumpToPage = false}) => {
     try {

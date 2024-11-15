@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
-import { BlurView } from "@react-native-community/blur";
+import { View, Text, StyleSheet } from "react-native";
 import Button from "./Button";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 const ErrorCard = ({ error = "Oops!! something went wrong", style, Textstyle, onPress, ButtonText = "Reload", ButtonColor = "#007AFF", ButtonTextSize = 20 }) => {
-    const Tag = Platform.OS == "ios" ? BlurView : View;
+    const Tag = View;
     return (
         <Tag
             intensity={20}

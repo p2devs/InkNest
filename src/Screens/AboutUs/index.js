@@ -8,7 +8,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Header from '../../Components/UIComp/Header';
-import Markdown from '../../Components/UIComp/MarkDown';
 
 export function AboutUs({navigation}) {
   return (
@@ -75,9 +74,20 @@ export function AboutUs({navigation}) {
             InkNest
           </Text>
 
-          <Markdown
-            content={`InkNest is a free mobile app offering a vast collection of comics and anime across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.`}
-          />
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontSize: hp('2.2%'),
+              color: "#fff",
+            }}>
+            InkNest is a free mobile app offering a vast collection of comics
+            and anime across genres like superheroes, sci-fi, fantasy, and
+            manga. Enjoy a seamless experience with user-friendly navigation and
+            customizable settings. Stay updated with the latest releases and
+            classics. With InkNest, your favorite stories and characters are
+            always at your fingertips.
+          </Text>
+
           <View
             style={{
               marginVertical: hp('5%'),

@@ -1,18 +1,21 @@
 // import axios from 'axios';
 import cheerio from 'cheerio';
-import { checkDownTime } from '../../Redux/Actions/GlobalActions';
-import { fetchDataStart } from '../../Redux/Reducers';
-import { AnimeHostName, ComicHostName as HostName } from '../../Utils/APIs';
+import {checkDownTime} from '../../Redux/Actions/GlobalActions';
+import {fetchDataStart} from '../../Redux/Reducers';
+import {AnimeHostName, ComicHostName as HostName} from '../../Utils/APIs';
 import APICaller from '../../Redux/Controller/Interceptor';
 
 export const fetchComicsData = async (link, dispatch, baseUrl) => {
   console.log(baseUrl, 'baseUrl');
   if (!link) return;
+
   dispatch(fetchDataStart());
   try {
     // Fetch the HTML content from the website
     let url = `${HostName[baseUrl]}`;
+
     const response = await APICaller.get(`${url}${link}`);
+
     const html = response.data;
     // console.log(html, "html");
 
@@ -62,7 +65,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
         const link = $(element).find('h2 a').attr('href');
 
         // Push the extracted data into the array
-        comicsData.push({ title, date, imageUrl, link });
+        comicsData.push({title, date, imageUrl, link});
       });
       let page = link.split('/');
       page = page[page.length - 2];
@@ -75,7 +78,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
       }
     }
     dispatch(checkDownTime(response));
-    return { data: comicsData, lastPage };
+    return {data: comicsData, lastPage};
   } catch (error) {
     // console.log(link, 'link');
     console.log('Error fetching or parsing data Home:', error);
@@ -84,20 +87,19 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
   }
 };
 
-
 export const FetchAnimeData = async (link, dispatch, baseUrl) => {
   // console.log(baseUrl, link, 'baseUrl');
   if (!link) return;
   dispatch(fetchDataStart());
   try {
-    let url = "https://ajax.gogocdn.net/ajax/page-recent-release.html"
+    let url = 'https://ajax.gogocdn.net/ajax/page-recent-release.html';
     const baseUrlLink = AnimeHostName[baseUrl];
     //check if link have ?type= or not
-    if (!link.includes("type=")) {
-      url = AnimeHostName[baseUrl]
+    if (!link.includes('type=')) {
+      url = AnimeHostName[baseUrl];
     }
     console.log(`${url}${link}`, 'url');
-    url = baseUrl == "gogoanimes" ? `${url}${link}` : `${baseUrlLink}${link}`;
+    url = baseUrl == 'gogoanimes' ? `${url}${link}` : `${baseUrlLink}${link}`;
     // Fetch the HTML content from the website
     // console.log(url, 'url');
     const response = await APICaller.get(url);
@@ -112,7 +114,7 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
     let lastPage = null;
     // Extract data from the website
 
-    if (baseUrl == "gogoanimes") {
+    if (baseUrl == 'gogoanimes') {
       console.log('gogoanimes');
       $('.last_episodes .items li').each((index, element) => {
         let title = $(element).find('.name a').attr('title');
@@ -121,10 +123,11 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
         let episode = $(element).find('.episode').text();
         let date = $(element).find('.released').text().trim() || null;
         //if image missing hostName then add base url
-        if (!imageUrl.includes("https://")) imageUrl = `${baseUrlLink}${imageUrl.replace("/", "")}`;
+        if (!imageUrl.includes('https://'))
+          imageUrl = `${baseUrlLink}${imageUrl.replace('/', '')}`;
         AnimaData.push({
           title,
-          link: `${baseUrlLink}${link.replace("/", "")}`,
+          link: `${baseUrlLink}${link.replace('/', '')}`,
           imageUrl,
           episode,
           date,
@@ -142,12 +145,11 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
         const episodeMatch = title.match(/Episode (\d+)/);
         let episode = episodeMatch ? parseInt(episodeMatch[1], 10) : null;
 
-
         AnimaData.push({
           title,
           link: `${baseUrlLink}${link}`,
           imageUrl,
-          episode: "Episode " + episode,
+          episode: 'Episode ' + episode,
         });
       });
       // console.log(AnimaData, 'videos');
@@ -160,9 +162,9 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
     if (dispatch) dispatch(checkDownTime(error));
     return [];
   }
-}
+};
 
-export const checkServerDown = async ( url, dispatch) => {
+export const checkServerDown = async (url, dispatch) => {
   dispatch(fetchDataStart());
   try {
     const response = await APICaller.get(url);
@@ -176,4 +178,4 @@ export const checkServerDown = async ( url, dispatch) => {
     dispatch(checkDownTime(error));
     return true;
   }
-}
+};

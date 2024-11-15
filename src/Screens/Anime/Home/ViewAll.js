@@ -1,25 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Text,
     View,
-    // Image,
     TouchableOpacity,
-    FlatList,
-    // Button,
-    Alert,
-    Modal,
-    TextInput,
-    KeyboardAvoidingView,
-    Platform,
-    Switch,
-    Dimensions,
-    RefreshControl,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from '@react-native-community/blur';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import { FetchAnimeData } from '../../../Components/Func/HomeFunc';

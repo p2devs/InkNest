@@ -29,6 +29,9 @@ APICaller.interceptors.response.use(
     // Stop the trace when the response is received
     const {httpMetric} = response.config.metadata;
 
+    console.log(response, 'response', httpMetric);
+    
+
     httpMetric.setHttpResponseCode(response.status);
     httpMetric.setResponseContentType(response.headers['content-type']);
 
@@ -41,6 +44,10 @@ APICaller.interceptors.response.use(
       error.config.metadata &&
       error.config.metadata.httpMetric
     ) {
+
+      console.log(error, 'error');
+      
+
       const {httpMetric} = error.config.metadata;
 
       httpMetric.setHttpResponseCode(
