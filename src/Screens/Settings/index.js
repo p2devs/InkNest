@@ -32,12 +32,11 @@ import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
 import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
-import {BlurView} from '@react-native-community/blur';
 
 const appInstanceId = analytics().getAppInstanceId() ?? 'unknown';
 
 export function Settings({navigation}) {
-  let Tag = Platform.OS === 'ios' ? BlurView : View;
+  let Tag = View;
   const dispatch = useDispatch();
   const [SwitchServer, setSwitchServer] = useState(null);
   const baseUrl = useSelector(state => state.data.baseUrl);

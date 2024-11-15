@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Modal,
   Platform,
   Alert,
@@ -19,14 +18,12 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import { BlurView } from '@react-native-community/blur';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSearchComic } from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
-import { ScrollView } from 'react-native-gesture-handler';
 
 export function Search({ navigation }) {
   const dispatch = useDispatch();
@@ -38,7 +35,7 @@ export function Search({ navigation }) {
   const [viewAll, setViewAll] = useState(null);
   const [AnimeData, setAnimeData] = useState([]);
   const flatlistRef = React.useRef();
-  let Tag = Platform.OS === 'ios' ? BlurView : View;
+  let Tag = View;
 
   const fetchData = async () => {
 

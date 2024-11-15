@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, Platform} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {navigate} from '../../Navigation/NavigationService';
 import {NAVIGATION} from '../../Constants';
 import Image from './Image';
-import {BlurView} from '@react-native-community/blur';
 import {useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 
@@ -11,7 +10,6 @@ const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
   let Tag = View;
   const [showItem, setShowItem] = useState(true);
   const isAnime = useSelector(state => state?.data?.Anime);
-  // console.log('isAnime', isAnime);
   if (!showItem) return null;
   return (
     <View
