@@ -12,6 +12,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { navigate } from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
@@ -24,7 +25,7 @@ import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
 const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[chapter.link]);
-  const isComicDownload = Boolean(useSelector(state => state?.data?.DownloadComic?.[ComicDetail?.link]?.[chapter?.link]));
+  const isComicDownload = Boolean(useSelector(state => state?.data?.DownloadComic?.[ComicDetail?.link]?.comicBooks?.[chapter?.link]));
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
@@ -165,7 +166,12 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
             : ''}
         </Text>
       </Text>
-      {LoadingStatus ? <ActivityIndicator size="small" color="skyblue" /> : <Entypo name="download" size={24} color={isComicDownload ? "skyblue" : "black"} onPress={LoadingComic} />}
+      {LoadingStatus ? <ActivityIndicator size="small" color="skyblue" /> : null}
+      {LoadingStatus ? null :
+        !isComicDownload ? <Entypo name="download" size={24} color={"black"} onPress={LoadingComic} /> :
+          <MaterialIcons name="offline-pin" size={24} color="green" onPress={() => {
+            navigate(NAVIGATION.OfflineComic);
+          }} />}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {!numbersBookmarks ? null : (
           <View

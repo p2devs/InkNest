@@ -106,25 +106,8 @@ const Reducers = createSlice({
     },
     DownloadComicBook: (state, action) => {
       const { link, data, title, } = action.payload;
-      //i want to store comic main page name then i want to store the comic book name and the comic book data and keep the old data intact
-      // link is main page link
-      // title is main page title
-      // data is the comic book data which contains the title, link and images, comicbook data
-      //store them in main page link and in side main page link obj i want to store it title and link with the all comic book data
-      // e.g :{
-      //   mainPageLink : {
-      //     title: 'main page title',
-      //     link: 'main page link',
-      //     comicBooks: {
-      //       data.link(<comicBookLink>): data
-      //     }
-      //   }
-      // }
+      
       state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
-      console.log(state.DownloadComic, 'DownloadComic');
-      console.log({link, data, title}, 'action.payload');
-
-
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
