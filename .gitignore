@@ -84,3 +84,5 @@ global.jks
 
 #Files to ignore
 **/LocalComic/index.js
+**/Actions/Download.js
+**/OfflineComic/index.js

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@candlefinance/faster-image": "^1.7.2",
+    "@dr.pogodin/react-native-fs": "^2.29.1",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-native-firebase/analytics": "^21.4.0",

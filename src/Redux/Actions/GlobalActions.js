@@ -13,8 +13,8 @@ import {
   updateData,
   AnimeWatched,
 } from '../Reducers';
-import {Alert} from 'react-native';
-import {goBack} from '../../Navigation/NavigationService';
+import { Alert } from 'react-native';
+import { goBack } from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
 
 /**
@@ -89,139 +89,139 @@ export const checkDownTime = error => async dispatch => {
  */
 export const fetchComicDetails =
   (link, refresh = false) =>
-  async (dispatch, getState) => {
-    dispatch(fetchDataStart());
-    try {
-      let Data = getState().data.dataByUrl[link];
-      //if link contant readallcomics.com then set baseUrl to readallcomics
-      let checkUrl = link.includes('readallcomics.com')
-        ? 'readallcomics'
-        : 'azcomic';
-      if (!refresh && Data) {
-        dispatch(StopLoading());
-        dispatch(ClearError());
-        dispatch(checkDownTime());
-        return;
-      }
-      // console.log(link, "link");
-      const response = await APICaller.get(link);
-      const html = response.data;
-      // console.log(html, "html");
-      const $ = cheerio.load(html);
-      let comicDetails = {};
-      if (checkUrl == 'azcomic') {
-        // Extract comic details
-        const title = $('.anime-details .title').text().trim();
-        const imgSrc = $('.anime-details .anime-image img').attr('src');
-        const status = $('.anime-genres .status a').text().trim();
-        const genres = [];
-        $('.anime-genres li a').each((i, el) => {
-          const genre = $(el).text().trim();
-          if (genre !== 'Ongoing') {
-            genres.push(genre);
-          }
-        });
-        const yearOfRelease = $('.anime-desc span:contains("Year of Release:")')
-          .closest('tr')
-          .find('td')
-          .eq(1)
-          .text()
-          .trim();
-        const publisher =
-          $('.anime-desc span:contains("Author:")')
+    async (dispatch, getState) => {
+      dispatch(fetchDataStart());
+      try {
+        let Data = getState().data.dataByUrl[link];
+        //if link contant readallcomics.com then set baseUrl to readallcomics
+        let checkUrl = link.includes('readallcomics.com')
+          ? 'readallcomics'
+          : 'azcomic';
+        if (!refresh && Data) {
+          dispatch(StopLoading());
+          dispatch(ClearError());
+          dispatch(checkDownTime());
+          return;
+        }
+        // console.log(link, "link");
+        const response = await APICaller.get(link);
+        const html = response.data;
+        // console.log(html, "html");
+        const $ = cheerio.load(html);
+        let comicDetails = {};
+        if (checkUrl == 'azcomic') {
+          // Extract comic details
+          const title = $('.anime-details .title').text().trim();
+          const imgSrc = $('.anime-details .anime-image img').attr('src');
+          const status = $('.anime-genres .status a').text().trim();
+          const genres = [];
+          $('.anime-genres li a').each((i, el) => {
+            const genre = $(el).text().trim();
+            if (genre !== 'Ongoing') {
+              genres.push(genre);
+            }
+          });
+          const yearOfRelease = $('.anime-desc span:contains("Year of Release:")')
             .closest('tr')
             .find('td')
             .eq(1)
             .text()
-            .trim() || '';
+            .trim();
+          const publisher =
+            $('.anime-desc span:contains("Author:")')
+              .closest('tr')
+              .find('td')
+              .eq(1)
+              .text()
+              .trim() || '';
 
-        const issues = [];
-        $('.basic-list li').each((i, el) => {
-          const title = $(el).find('a.ch-name').text().trim();
-          const link = $(el).find('a.ch-name').attr('href');
-          const date = $(el).find('span').text().trim();
-          issues.push({
+          const issues = [];
+          $('.basic-list li').each((i, el) => {
+            const title = $(el).find('a.ch-name').text().trim();
+            const link = $(el).find('a.ch-name').attr('href');
+            const date = $(el).find('span').text().trim();
+            issues.push({
+              title,
+              link,
+              date,
+            });
+          });
+          // Create a comic detail object
+          comicDetails = {
             title,
-            link,
-            date,
+            imgSrc,
+            status,
+            genres,
+            yearOfRelease,
+            publisher,
+            issues,
+          };
+        } else {
+          const descriptionArchive = $('.description-archive');
+          // console.log(descriptionArchive, "descriptionArchive");
+
+          const title = descriptionArchive.find('h1').text().trim();
+          const imgSrc = descriptionArchive.find('img').attr('src');
+          const genres = descriptionArchive.find('p strong').eq(0).text().trim();
+          const publisher = descriptionArchive
+            .find('p strong')
+            .eq(1)
+            .text()
+            .trim();
+
+          const volumes = [];
+          // console.log(descriptionArchive.find('hr.style-six'));
+          descriptionArchive.find('hr.style-six').each((i, el) => {
+            // console.log($(el).nextAll("strong").text(),i);
+            const volume = $(el).next('span').text().trim();
+            const description = $(el).nextAll('strong').text();
+            volumes.push({ volume, description });
           });
-        });
-        // Create a comic detail object
-        comicDetails = {
-          title,
-          imgSrc,
-          status,
-          genres,
-          yearOfRelease,
-          publisher,
-          issues,
-        };
-      } else {
-        const descriptionArchive = $('.description-archive');
-        // console.log(descriptionArchive, "descriptionArchive");
 
-        const title = descriptionArchive.find('h1').text().trim();
-        const imgSrc = descriptionArchive.find('img').attr('src');
-        const genres = descriptionArchive.find('p strong').eq(0).text().trim();
-        const publisher = descriptionArchive
-          .find('p strong')
-          .eq(1)
-          .text()
-          .trim();
-
-        const volumes = [];
-        // console.log(descriptionArchive.find('hr.style-six'));
-        descriptionArchive.find('hr.style-six').each((i, el) => {
-          // console.log($(el).nextAll("strong").text(),i);
-          const volume = $(el).next('span').text().trim();
-          const description = $(el).nextAll('strong').text();
-          volumes.push({volume, description});
-        });
-
-        const chapters = [];
-        $('.list-story li a').each((i, el) => {
-          chapters.push({
-            title: $(el).attr('title'),
-            link: $(el).attr('href'),
+          const chapters = [];
+          $('.list-story li a').each((i, el) => {
+            chapters.push({
+              title: $(el).attr('title'),
+              link: $(el).attr('href'),
+            });
           });
-        });
-        // console.log({ title, imgSrc, genres, publisher, volumes, chapters }, 'Data');
+          // console.log({ title, imgSrc, genres, publisher, volumes, chapters }, 'Data');
 
-        comicDetails = {
-          title,
-          imgSrc,
-          genres,
-          publisher,
-          volumes,
-          chapters,
+          comicDetails = {
+            title,
+            imgSrc,
+            genres,
+            publisher,
+            volumes,
+            chapters,
+          };
+        }
+
+        // console.log({ data }, "Data");
+        let watchedData = {
+          title: comicDetails.title,
+          link,
+          imageUrl: comicDetails.imgSrc,
+          publisher: comicDetails.publisher,
         };
-      }
-
-      // console.log({ data }, "Data");
-      let watchedData = {
-        title: comicDetails.title,
-        link,
-        imageUrl: comicDetails.imgSrc,
-        publisher: comicDetails.publisher,
-      };
-      if (refresh) {
-        dispatch(updateData({url: link, data: comicDetails}));
+        if (refresh) {
+          dispatch(updateData({ url: link, data: comicDetails }));
+          dispatch(StopLoading());
+          return;
+        }
+        dispatch(WatchedData(watchedData));
+        dispatch(fetchDataSuccess({ url: link, data: comicDetails }));
+      } catch (error) {
+        console.error('Error fetching comic details:', error.response.status);
+        checkDownTime(error);
         dispatch(StopLoading());
-        return;
+        dispatch(ClearError());
+        dispatch(fetchDataFailure('Not Found'));
+        console.error('Error second fetching comic details:', error);
+        goBack();
+        Alert.alert('Error', 'Comic not found');
       }
-      dispatch(WatchedData(watchedData));
-      dispatch(fetchDataSuccess({url: link, data: comicDetails}));
-    } catch (error) {
-      console.error('Error fetching comic details:', error.response.status);
-      checkDownTime(error);
-      dispatch(StopLoading());
-      dispatch(ClearError());
-      dispatch(fetchDataFailure('Not Found'));
-      console.error('Error second fetching comic details:', error);
-      goBack();
-      Alert.alert('Error', 'Comic not found');
-    }
-  };
+    };
 
 /**
  * Fetches comic book data from a given URL and dispatches appropriate actions based on the result.
@@ -231,94 +231,95 @@ export const fetchComicDetails =
  * @returns {function} A thunk function that performs the async fetch operation.
  */
 export const fetchComicBook =
-  (comicBook, setPageLink = null) =>
-  async (dispatch, getState) => {
-    dispatch(fetchDataStart());
-    try {
-      // let baseUrl = getState().data.baseUrl;
-      let Data = getState().data.dataByUrl[comicBook];
+  (comicBook, setPageLink = null, isDownloadComic) =>
+    async (dispatch, getState) => {
+      if (!isDownloadComic) dispatch(fetchDataStart());
+      try {
+        // let baseUrl = getState().data.baseUrl;
+        let Data = getState().data.dataByUrl[comicBook];
 
-      //check if comicBook url contant readallcomics.com
-      const checkUrl = comicBook.includes('readallcomics.com')
-        ? 'readallcomics'
-        : 'azcomic';
+        //check if comicBook url contant readallcomics.com
+        const checkUrl = comicBook.includes('readallcomics.com')
+          ? 'readallcomics'
+          : 'azcomic';
 
-      Hiturl = checkUrl == 'azcomic' ? `${comicBook}/full` : comicBook;
-      // console.log(comicBook, "Data Comic Book");
-      if (Data) {
-        if (setPageLink) {
-          setPageLink(Data.ComicDetailslink);
+        Hiturl = checkUrl == 'azcomic' ? `${comicBook}/full` : comicBook;
+        // console.log(comicBook, "Data Comic Book");
+        if (Data) {
+          if (setPageLink) {
+            setPageLink(Data.ComicDetailslink);
+          }
+          dispatch(StopLoading());
+          dispatch(ClearError());
+          dispatch(checkDownTime());
+          return;
         }
-        dispatch(StopLoading());
-        dispatch(ClearError());
-        dispatch(checkDownTime());
-        return;
-      }
-      const response = await APICaller.get(Hiturl);
-      const html = response.data;
-      const $ = cheerio.load(html);
-      const targetDiv = $(
-        'div[style="margin:0px auto; max-width: 1000px; background:#fff; padding:20px 0px 10px 0px; border-radius: 15px;font-size: 22px; padding-top: 10px;"]',
-      );
-      let title = '';
-      const imgElements = targetDiv.find('img');
-      const imgSources = [];
-      const volumes = [];
-      if (checkUrl == 'azcomic') {
-        title = title = $('.title h1').text().trim();
-        $('.chapter-container img').each((index, element) => {
-          const imageUrl = $(element).attr('src');
-          // console.log(imageUrl, "imageUrl");
-          imgSources.push(imageUrl);
-        });
-        $('select.full-select option').each((index, element) => {
-          const title = $(element).text().trim();
-          const link = $(element).attr('value').replace('/full', '');
-          // console.log('title', title, 'link', link);
-          volumes.push({title, link});
-        });
-      } else {
-        title = targetDiv
-          .find('h3[style="color: #0363df;font-size: 20px; padding-top:5px;"]')
-          .text()
-          .trim();
-        imgElements.each((index, element) => {
-          imgSources.push($(element).attr('src'));
-        });
-        $('select option').each((index, element) => {
-          const title = $(element).text();
-          const link = $(element).attr('value');
-          volumes.push({title, link});
-        });
-      }
+        const response = await APICaller.get(Hiturl);
+        const html = response.data;
+        const $ = cheerio.load(html);
+        const targetDiv = $(
+          'div[style="margin:0px auto; max-width: 1000px; background:#fff; padding:20px 0px 10px 0px; border-radius: 15px;font-size: 22px; padding-top: 10px;"]',
+        );
+        let title = '';
+        const imgElements = targetDiv.find('img');
+        const imgSources = [];
+        const volumes = [];
+        if (checkUrl == 'azcomic') {
+          title = title = $('.title h1').text().trim();
+          $('.chapter-container img').each((index, element) => {
+            const imageUrl = $(element).attr('src');
+            // console.log(imageUrl, "imageUrl");
+            imgSources.push(imageUrl);
+          });
+          $('select.full-select option').each((index, element) => {
+            const title = $(element).text().trim();
+            const link = $(element).attr('value').replace('/full', '');
+            // console.log('title', title, 'link', link);
+            volumes.push({ title, link });
+          });
+        } else {
+          title = targetDiv
+            .find('h3[style="color: #0363df;font-size: 20px; padding-top:5px;"]')
+            .text()
+            .trim();
+          imgElements.each((index, element) => {
+            imgSources.push($(element).attr('src'));
+          });
+          $('select option').each((index, element) => {
+            const title = $(element).text();
+            const link = $(element).attr('value');
+            volumes.push({ title, link });
+          });
+        }
 
-      // console.log({ imgSources, title, volumes }, "Data Comic Book");
-      //remove duplicates in volumes
-      let unique = [
-        ...new Map(volumes.map(item => [item['title'], item])).values(),
-      ];
-      const data = {
-        images: imgSources,
-        title,
-        volumes: unique,
-        lastReadPage: 0,
-        BookmarkPages: [],
-      };
-      // console.log(data, "final data");
-      // console.log({ data }, "Data");
-      if (setPageLink) {
-        //get the title link
-        const link = $('a[rel="category tag"]').attr('href');
-        console.log(link, 'link');
-        data.ComicDetailslink = link;
-        setPageLink(link);
+        // console.log({ imgSources, title, volumes }, "Data Comic Book");
+        //remove duplicates in volumes
+        let unique = [
+          ...new Map(volumes.map(item => [item['title'], item])).values(),
+        ];
+        const data = {
+          images: imgSources,
+          title,
+          volumes: unique,
+          lastReadPage: 0,
+          BookmarkPages: [],
+        };
+        // console.log(data, "final data");
+        // console.log({ data }, "Data");
+        if (setPageLink) {
+          //get the title link
+          const link = $('a[rel="category tag"]').attr('href');
+          console.log(link, 'link');
+          data.ComicDetailslink = link;
+          setPageLink(link);
+        }
+        dispatch(fetchDataSuccess({ url: comicBook, data }));
+        if (isDownloadComic) return { url: comicBook, data };
+      } catch (error) {
+        dispatch(fetchDataFailure(error.message));
+        checkDownTime(error);
       }
-      dispatch(fetchDataSuccess({url: comicBook, data}));
-    } catch (error) {
-      dispatch(fetchDataFailure(error.message));
-      checkDownTime(error);
-    }
-  };
+    };
 
 /**
  * Fetches search results for a comic based on the provided search query.
@@ -330,7 +331,7 @@ export const fetchComicBook =
 export const fetchSearchComic = search => async (dispatch, getState) => {
   dispatch(fetchDataStart());
   try {
-    dispatch(UpdateSearch({user: 'user', query: search}));
+    dispatch(UpdateSearch({ user: 'user', query: search }));
     const response = await APICaller.get(
       `https://readallcomics.com/?story=${search.replaceAll(
         ' ',
@@ -346,14 +347,14 @@ export const fetchSearchComic = search => async (dispatch, getState) => {
       // console.log('element', element);
       const title = $(element).text().trim();
       const href = $(element).attr('href');
-      results.push({title, href});
+      results.push({ title, href });
     });
     dispatch(StopLoading());
     if (results.length === 0) {
-      dispatch(UpdateSearch({user: 'error', error: 'No results found'}));
+      dispatch(UpdateSearch({ user: 'error', error: 'No results found' }));
       return;
     }
-    dispatch(UpdateSearch({user: 'system', results}));
+    dispatch(UpdateSearch({ user: 'system', results }));
   } catch (error) {
     console.error('Error fetching data:', error);
     checkDownTime(error);
@@ -381,26 +382,26 @@ export const fetchSearchComic = search => async (dispatch, getState) => {
  * @returns {Function} A thunk function that dispatches the AnimeWatched action.
  */
 export const AnimeHistroy =
-  ({data}) =>
-  async (dispatch, getState) => {
-    //get data from state
-    let History = getState().data.AnimeWatched;
-    let WatchedEpisodes = History[data.AnimeName]?.Episodes;
-    let AnimeData = {
-      ...data,
-      Episodes: {
-        ...WatchedEpisodes,
-        [data.ActiveEpisdeLink]: {
-          Link: data.ActiveEpisdeLink,
-          Episode: data?.ActiveEpisdoe,
-          EpisdoeProgress: data?.ActiveEpisdoeProgress,
-          EpisdoeDuration: data?.ActiveEpisdoeDuration,
-          EpisdoePlayable: data?.ActiveEpisdoePlayable,
+  ({ data }) =>
+    async (dispatch, getState) => {
+      //get data from state
+      let History = getState().data.AnimeWatched;
+      let WatchedEpisodes = History[data.AnimeName]?.Episodes;
+      let AnimeData = {
+        ...data,
+        Episodes: {
+          ...WatchedEpisodes,
+          [data.ActiveEpisdeLink]: {
+            Link: data.ActiveEpisdeLink,
+            Episode: data?.ActiveEpisdoe,
+            EpisdoeProgress: data?.ActiveEpisdoeProgress,
+            EpisdoeDuration: data?.ActiveEpisdoeDuration,
+            EpisdoePlayable: data?.ActiveEpisdoePlayable,
+          },
         },
-      },
+      };
+      dispatch(AnimeWatched(AnimeData));
     };
-    dispatch(AnimeWatched(AnimeData));
-  };
 
 /**
  * Asynchronous action to clear error state.
@@ -427,7 +428,7 @@ export const clearError = () => async dispatch => {
 export const clearDataByUrl = url => async dispatch => {
   dispatch(fetchDataStart());
   dispatch(fetchDataFailure(null));
-  dispatch(fetchDataSuccess({url, data: null}));
+  dispatch(fetchDataSuccess({ url, data: null }));
 };
 
 /**

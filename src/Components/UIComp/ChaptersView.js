@@ -6,23 +6,30 @@ import {
   TouchableOpacity,
   // Image,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 import { navigate } from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
 import { updateData } from '../../Redux/Reducers';
 import { NAVIGATION } from '../../Constants';
 import Image from './Image';
+import { downloadComicBook } from '../../Redux/Actions/Download';
+import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
 
-const ChaptersView = ({ chapter, Bookmark, issue }) => {
+const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[chapter.link]);
+  const isComicDownload = Boolean(useSelector(state => state?.data?.DownloadComic?.[ComicDetail?.link]?.[chapter?.link]));
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
+  const [LoadingStatus, setLoadStatus] = useState(false);
+
   const RemoveBookMark = (link, removeItem) => {
     //find the item and remove from book mark Bookmarks is a list of numbers
     console.log(link, removeItem, Bookmarks);
@@ -36,6 +43,21 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
       }),
     );
   };
+
+  const LoadingComic = async () => {
+    if (LoadingStatus) return;
+    setLoadStatus(true);
+    if (!ComicBook?.images) {
+      let data = await dispatch(fetchComicBook(chapter.link, null, true));
+      DownloadedComic(data.data);
+      return;
+    }
+    DownloadedComic(ComicBook);
+  }
+  const DownloadedComic = async (data) => {
+    dispatch(downloadComicBook({ comicDetails: ComicDetail, comicBook: { ...data, link: chapter.link }, setLoadStatus }));
+  };
+
   if (Bookmark) {
     if (!numbersBookmarks) return null;
     return (
@@ -143,6 +165,7 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
             : ''}
         </Text>
       </Text>
+      {LoadingStatus ? <ActivityIndicator size="small" color="skyblue" /> : <Entypo name="download" size={24} color={isComicDownload ? "skyblue" : "black"} onPress={LoadingComic} />}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {!numbersBookmarks ? null : (
           <View

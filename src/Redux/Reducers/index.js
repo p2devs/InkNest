@@ -1,4 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   dataByUrl: {},
@@ -11,6 +11,7 @@ const initialState = {
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
+  DownloadComic: {},
 };
 
 /**
@@ -88,7 +89,7 @@ const Reducers = createSlice({
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -98,10 +99,32 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
+      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
       // state.dataByUrl[url] = data;
+    },
+    DownloadComicBook: (state, action) => {
+      const { link, data, title, } = action.payload;
+      //i want to store comic main page name then i want to store the comic book name and the comic book data and keep the old data intact
+      // link is main page link
+      // title is main page title
+      // data is the comic book data which contains the title, link and images, comicbook data
+      //store them in main page link and in side main page link obj i want to store it title and link with the all comic book data
+      // e.g :{
+      //   mainPageLink : {
+      //     title: 'main page title',
+      //     link: 'main page link',
+      //     comicBooks: {
+      //       data.link(<comicBookLink>): data
+      //     }
+      //   }
+      // }
+      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
+      console.log(state.DownloadComic, 'DownloadComic');
+      console.log({link, data, title}, 'action.payload');
+
+
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
@@ -166,5 +189,6 @@ export const {
   AnimeWatched,
   AddAnimeBookMark,
   RemoveAnimeBookMark,
+  DownloadComicBook,
 } = Reducers.actions;
 export default Reducers.reducer;

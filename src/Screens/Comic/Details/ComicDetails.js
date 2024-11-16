@@ -42,6 +42,7 @@ export function ComicDetails({ navigation, route }) {
   const [sort, setSort] = useState(false);
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
+  const comicDetailsDataForChapter = { link: search ? PageUrl : PageLink, title: ComicDetail?.title, imgSrc: ComicDetail?.imgSrc };
   useEffect(() => {
     ApiCall();
   }, [PageUrl, link, search, home, dispatch]);
@@ -282,6 +283,7 @@ export function ComicDetails({ navigation, route }) {
                 key={index}
                 Bookmark={TabSelected == 2}
                 sortOrder={sort}
+                ComicDetail={comicDetailsDataForChapter}
               />
             ))
 
@@ -293,6 +295,7 @@ export function ComicDetails({ navigation, route }) {
                 key={index}
                 Bookmark={TabSelected == 2}
                 sortOrder={sort}
+                ComicDetail={comicDetailsDataForChapter}
               />
             ))
           }
