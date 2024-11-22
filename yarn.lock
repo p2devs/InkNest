@@ -4016,6 +4016,7 @@ __metadata:
     react-native-screens: 3.35.0
     react-native-svg: ^15.8.0
     react-native-svg-transformer: ^1.5.0
+    react-native-toast-message: ^2.2.1
     react-native-vector-icons: ^10.2.0
     react-native-video: ^6.7.0
     react-native-webview: ^13.12.3
@@ -9820,6 +9821,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: ad9d6093f3aef0d53c5e2a562afb7805009f2bf50fd4ec6e77f8c18a6cb7e06a7793d55cc66d523c7d30c77cae170ee26767c72ad5b1a1f07032420ccf4162fe
+  languageName: node
+  linkType: hard
+
+"react-native-toast-message@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "react-native-toast-message@npm:2.2.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: c6b5d231b3b617b3d3d893023673534fe2cc0c5f32bb5fc4aecfe239e9de2fb9f0e9a4086d776e53daf3bc2376dce16dcec13e1b5cf1554dbf51808695fc2441
   languageName: node
   linkType: hard
 
