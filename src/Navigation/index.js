@@ -3,11 +3,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
 import {PermissionsAndroid, Platform, StatusBar} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {ClearError} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
-import {useNetInfo} from '@react-native-community/netinfo';
-import Network from '../Components/UIComp/Network';
 import messaging from '@react-native-firebase/messaging';
 import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
@@ -36,12 +34,10 @@ import {firebase as fire} from '@react-native-firebase/analytics';
  * @requires NavigationContainer from '@react-navigation/native'
  * @requires navigationRef from './path/to/navigationRef'
  * @requires AppNavigation from './path/to/AppNavigation'
- * @requires Network from './path/to/Network'
  * @requires ClearError from './path/to/actions'
  */
 export function RootNavigation() {
   const dispatch = useDispatch();
-  const {type, isConnected} = useNetInfo();
 
   const routeNameRef = useRef();
 
@@ -132,10 +128,6 @@ export function RootNavigation() {
   useLayoutEffect(() => {
     if (Platform.OS === 'android') StatusBar.setBackgroundColor('#222');
   }, []);
-
-  if (!isConnected) {
-    return <Network />;
-  }
 
   return (
     <NavigationContainer
