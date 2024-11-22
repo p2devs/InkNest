@@ -58,7 +58,6 @@ Before running the project, make sure to add the following files:
 
 1. `google-services.json` (for Android) in the `android/app` directory.
 2. `GoogleService-Info.plist` (for iOS) in the `ios` directory.
-3. Rename `/src/Screens/Comic/LocalComic/example.index.js` to `index.js`.
 
 ### Steps
 

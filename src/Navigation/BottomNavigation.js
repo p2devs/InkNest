@@ -9,7 +9,7 @@ import {Search, Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
 import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
-import {ComicBookmarks, Home, LocalComic} from '../Screens/Comic';
+import {ComicBookmarks, Home} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
 
@@ -122,17 +122,6 @@ export function BottomNavigation() {
           ),
         }}
       />
-      {animeActive ? null : (
-        <BottomTab.Screen
-          name={NAVIGATION.localComic}
-          component={LocalComic}
-          options={{
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon focused={focused} tintColor={color} name="reader" />
-            ),
-          }}
-        />
-      )}
 
       <BottomTab.Screen
         name={NAVIGATION.bookmarks}

@@ -1,5 +1,4 @@
-export const downloadComicBook = ()=>{
-    console.log('...downloadComicBook');
-    
-    return;
-}
+export const downloadComicBook = () => {
+  console.log('...downloadComicBook');
+  return;
+};
