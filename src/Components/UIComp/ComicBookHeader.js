@@ -9,7 +9,7 @@ import {updateData} from '../../Redux/Reducers';
 import {goBack} from '../../Navigation/NavigationService';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
-const ComicBookHeader = ({comicBook, PageIndex, ViewAll}) => {
+const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
   return (
@@ -45,12 +45,11 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll}) => {
           fontWeight: 'bold',
           color: '#FFF',
         }}>
-        {PageIndex + 1}/{ComicBook?.images.length}
-        {/* {ComicBook?.title} */}
+        {PageIndex + 1}/{comicBook?.images.length}
       </Text>
       {ViewAll ? (
         <View />
-      ) : (
+      ) : showBookmark ? (
         <TouchableOpacity
           onPress={() => {
             let BookmarksPages = ComicBook?.BookmarkPages
@@ -78,6 +77,9 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll}) => {
             }
           />
         </TouchableOpacity>
+      )
+      : (
+        <View />
       )}
     </View>
   );

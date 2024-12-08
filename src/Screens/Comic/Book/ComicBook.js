@@ -29,13 +29,15 @@ import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
 
 export function ComicBook({ navigation, route }) {
-  const { comicBook, pageJump } = route?.params;
+  const { comicBook, pageJump, isDownloadComic } = route?.params;
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+  const DownloadComic = useSelector(state => state?.data?.DownloadComic);
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   const [PageIndex, setPageIndex] = useState(pageJump ?? ComicBook?.lastReadPage ?? 0);
   const [ViewAll, setViewAll] = useState(false);
+  const [DownloadedBook, setDownloadedBook] = useState(null);
 
   const { width } = Dimensions.get('window');
   const numColumns = 3;
@@ -53,6 +55,22 @@ export function ComicBook({ navigation, route }) {
   let hideControlsTimeout;
 
   useEffect(() => {
+    if(isDownloadComic) {
+
+      const extractedData = DownloadComic[isDownloadComic]?.comicBooks;
+      {Object.keys(extractedData).slice(0, 1).map((key, index) => {
+        let data = extractedData[key];
+        console.log("DownloadedBook -->", data?.comicBook?.images);
+        setDownloadedBook(data?.comicBook);
+      });
+      }
+    }
+  }, [isDownloadComic]);
+
+  useEffect(() => {
+    if(isDownloadComic) { 
+      return;
+    }
     dispatch(fetchComicBook(comicBook));
   }, [comicBook, dispatch]);
 
@@ -112,11 +130,11 @@ export function ComicBook({ navigation, route }) {
     };
   });
 
-  if (loading) {
+  if (loading && !isDownloadComic) {
     return <Loading />;
   }
 
-  if (error) {
+  if (error && !isDownloadComic) {
     return <Error error={error} />;
   }
 
@@ -167,7 +185,7 @@ export function ComicBook({ navigation, route }) {
         <View style={{ flex: 1 }}>
           {ViewAll ? (
             <FlatList
-              data={ComicBook?.images}
+              data={isDownloadComic ? DownloadedBook?.images : ComicBook?.images}
               renderItem={({ item, index }) => <GridImageItem item={item} index={index} />}
               keyExtractor={(item, index) => index.toString()}
               numColumns={numColumns}
@@ -177,13 +195,15 @@ export function ComicBook({ navigation, route }) {
                 marginVertical: 60,
               }}
             />
-          ) : ComicBook?.images ? (
+          ) : DownloadedBook?.images||ComicBook?.images ? (
             <Gallery
-              data={ComicBook?.images}
+              data={isDownloadComic ? DownloadedBook?.images : ComicBook?.images}
               onIndexChange={newIndex => {
-                dispatch(
-                  updateData({ url: comicBook, data: { lastReadPage: newIndex } }),
-                );
+                if(!isDownloadComic) {
+                  dispatch(
+                    updateData({ url: comicBook, data: { lastReadPage: newIndex } }),
+                  );
+                }
                 setPageIndex(newIndex);
               }}
               initialIndex={PageIndex}
@@ -193,17 +213,19 @@ export function ComicBook({ navigation, route }) {
           {/* Conditionally render the header/footer only if showControls is true */}
           <Animated.View style={[{ position: 'absolute', top: 0, width: '100%' }, headerAnimatedStyle]}>
             <ComicBookHeader
-              comicBook={comicBook}
+              comicBook={isDownloadComic ? DownloadedBook : ComicBook}
               PageIndex={PageIndex}
               ViewAll={ViewAll}
+              showBookmark={isDownloadComic ? false : true}
             />
           </Animated.View>
           <Animated.View style={[{ position: 'absolute', bottom: 0, width: '100%' }, footerAnimatedStyle]}>
             <ComicBookFooter
-              comicBook={comicBook}
+              comicBook={isDownloadComic ? DownloadedBook : ComicBook}
               setViewAll={setViewAll}
               ViewAll={ViewAll}
               navigation={navigation}
+              showButton={isDownloadComic ? false : true}
             />
           </Animated.View>
         </View>

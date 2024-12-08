@@ -125,6 +125,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics' // Add firebase analytics
     implementation("com.google.firebase:firebase-crashlytics") // Add firebase crashlytics
 
+    implementation ('com.facebook.soloader:soloader:0.12.1+')
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

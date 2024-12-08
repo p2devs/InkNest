@@ -170,7 +170,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
       {LoadingStatus ? null :
         !isComicDownload ? <Entypo name="download" size={24} color={"black"} onPress={LoadingComic} /> :
           <MaterialIcons name="offline-pin" size={24} color="green" onPress={() => {
-            navigate(NAVIGATION.OfflineComic);
+            navigate(NAVIGATION.offlineComic);
           }} />}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {!numbersBookmarks ? null : (
