@@ -295,7 +295,7 @@ export function Settings({ navigation }) {
           onPress={async () => {
             await analytics().logEvent('user_clicked', {
               userID: appInstanceId,
-              item: 'Report Issue screen',
+              item: 'Discord Invite screen',
             });
             Linking.openURL('https://discord.gg/WYwJefvWNT');
           }}
@@ -422,49 +422,6 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
           </View>
           <Feather
             name="arrow-up-right"
-            size={hp('2.5%')}
-            color="#000"
-            style={{ marginRight: 10 }}
-          />
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
-              item: 'Privacy Policy screen',
-            });
-            navigation.navigate(NAVIGATION.OfflineComic);
-          }}
-          style={{
-            backgroundColor: '#FFF',
-            marginHorizontal: widthPercentageToDP('2%'),
-            marginVertical: hp('1%'),
-            paddingHorizontal: 10,
-            borderRadius: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingVertical: hp('1%'),
-          }}>
-          <View style={{ flexDirection: 'row' }}>
-            <MaterialIcons
-              name="download-for-offline"
-              size={hp('2.5%')}
-              color="#000"
-              style={{ marginRight: 10 }}
-            />
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              Offline Comic
-            </Text>
-          </View>
-          <Feather
-            name="arrow-right"
             size={hp('2.5%')}
             color="#000"
             style={{ marginRight: 10 }}

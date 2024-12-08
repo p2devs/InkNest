@@ -4,12 +4,13 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {Search, Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
 import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
-import {ComicBookmarks, Home} from '../Screens/Comic';
+import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
 
@@ -49,9 +50,9 @@ const TabBarIcon = props => {
         color={props.tintColor}
       />
     );
-  } else if (props.name === 'reader') {
+  } else if (props.name === 'download-for-offline') {
     return (
-      <Ionicons
+      <MaterialIcons
         name={props.name}
         size={props.size ? props.size : 24}
         color={props.tintColor}
@@ -132,6 +133,20 @@ export function BottomNavigation() {
               focused={focused}
               tintColor={color}
               name="book-bookmark"
+            />
+          ),
+        }}
+      />
+
+      <BottomTab.Screen
+        name={NAVIGATION.offlineComic}
+        component={OfflineComic}
+        options={{
+          tabBarIcon: ({focused, color}) => (
+            <TabBarIcon
+              focused={focused}
+              tintColor={color}
+              name="download-for-offline"
             />
           ),
         }}

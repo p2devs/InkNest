@@ -14,5 +14,5 @@ export const NAVIGATION = {
   animeDetails: 'AnimeDetails',
   moreDetails: 'MoreDetails',
   ViewAll: "ViewAll",
-  OfflineComic: "OfflineComic",
+  offlineComic: "Offline",
 };
