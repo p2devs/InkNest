@@ -2,7 +2,7 @@ import React, {useEffect, useLayoutEffect, useRef} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
-import {PermissionsAndroid, Platform, StatusBar} from 'react-native';
+import {Platform, StatusBar} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {ClearError} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
@@ -10,6 +10,15 @@ import messaging from '@react-native-firebase/messaging';
 import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
+import {
+  check,
+  request,
+  PERMISSIONS,
+  RESULTS,
+  requestNotifications,
+  checkNotifications,
+} from 'react-native-permissions';
+import mobileAds from 'react-native-google-mobile-ads';
 
 /**
  * RootNavigation component handles the main navigation logic for the application.
@@ -41,40 +50,37 @@ export function RootNavigation() {
 
   const routeNameRef = useRef();
 
-  /**
-   * Requests notification permission from the user.
-   *
-   * Logs the request to Crashlytics and checks the authorization status.
-   * If the platform is Android, it requests the POST_NOTIFICATIONS permission.
-   * Logs the result of the permission request to Crashlytics and the console.
-   *
-   * @async
-   * @function requestUserPermission
-   * @returns {Promise<void>} A promise that resolves when the permission request is complete.
-   */
+  // Request user permission for notifications on Android and iOS devices
   async function requestUserPermission() {
     crashlytics().log('Requesting the notification permission.');
+    checkNotifications();
+    requestNotifications(['alert', 'sound']);
+    FCMPushNotification();
+  }
+
+  // FCM Push Notification for Android and iOS devices using Firebase Cloud Messaging
+  async function FCMPushNotification() {
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (Platform.OS === 'android') {
-      const PermissionAndroid = PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-      if (PermissionAndroid === PermissionsAndroid.RESULTS.GRANTED) {
-        crashlytics().log('Notification permission granted by user in android');
-        console.log('Permission Granted');
-      } else {
-        crashlytics().log('Notification permission denied by user in android');
-        console.log('Permission Denied');
-      }
-    }
-
     if (enabled) {
       console.log('Authorization status:', authStatus);
     }
+  }
+
+  async function requestAppTrackingPermission() {
+    if (Platform.OS === 'ios') {
+      const result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+      if (result === RESULTS.DENIED) {
+        // The permission has not been requested, so request it.
+        await request(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+      }
+    }
+    const adapterStatuses = await mobileAds().initialize();
+
+    console.log('Adapter Statuses ->', adapterStatuses);
   }
 
   /**
@@ -118,6 +124,7 @@ export function RootNavigation() {
 
   useEffect(() => {
     requestUserPermission();
+    requestAppTrackingPermission();
     if (!__DEV__) {
       PerformanceMonitoring();
       toggleCrashlytics();

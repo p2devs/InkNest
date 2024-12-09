@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,29 +7,56 @@ import {
   // Image,
   FlatList,
   ActivityIndicator,
+  Platform,
+  StatusBar,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {
+  InterstitialAd,
+  TestIds,
+  AdEventType,
+} from 'react-native-google-mobile-ads';
+import {
+  android_admob_interstitial_unit_id_download,
+  ios_admob_interstitial_unit_id_download,
+} from '@env';
 
-import { navigate } from '../../Navigation/NavigationService';
+import {navigate} from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
-import { updateData } from '../../Redux/Reducers';
-import { NAVIGATION } from '../../Constants';
+import {updateData} from '../../Redux/Reducers';
+import {NAVIGATION} from '../../Constants';
 import Image from './Image';
-import { downloadComicBook } from '../../Redux/Actions/Download';
-import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
+import {downloadComicBook} from '../../Redux/Actions/Download';
+import {fetchComicBook} from '../../Redux/Actions/GlobalActions';
 
-const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : Platform.OS === 'ios'
+  ? ios_admob_interstitial_unit_id_download
+  : android_admob_interstitial_unit_id_download;
+
+const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+
+const ChaptersView = ({chapter, Bookmark, ComicDetail}) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[chapter.link]);
-  const isComicDownload = Boolean(useSelector(state => state?.data?.DownloadComic?.[ComicDetail?.link]?.comicBooks?.[chapter?.link]));
+  const isComicDownload = Boolean(
+    useSelector(
+      state =>
+        state?.data?.DownloadComic?.[ComicDetail?.link]?.comicBooks?.[
+          chapter?.link
+        ],
+    ),
+  );
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
   const [LoadingStatus, setLoadStatus] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const RemoveBookMark = (link, removeItem) => {
     //find the item and remove from book mark Bookmarks is a list of numbers
@@ -40,7 +67,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
     dispatch(
       updateData({
         url: link,
-        data: { BookmarkPages: NewBookmarksList },
+        data: {BookmarkPages: NewBookmarksList},
       }),
     );
   };
@@ -54,10 +81,54 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
       return;
     }
     DownloadedComic(ComicBook);
-  }
-  const DownloadedComic = async (data) => {
-    dispatch(downloadComicBook({ comicDetails: ComicDetail, comicBook: { ...data, link: chapter.link }, setLoadStatus }));
   };
+  const DownloadedComic = async data => {
+    dispatch(
+      downloadComicBook({
+        comicDetails: ComicDetail,
+        comicBook: {...data, link: chapter.link},
+        setLoadStatus,
+      }),
+    );
+  };
+
+  useEffect(() => {
+    const unsubscribeLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true);
+      },
+    );
+
+    const unsubscribeOpened = interstitial.addAdEventListener(
+      AdEventType.OPENED,
+      () => {
+        if (Platform.OS === 'ios') {
+          // Prevent the close button from being unreachable by hiding the status bar on iOS
+          StatusBar.setHidden(true);
+        }
+      },
+    );
+
+    const unsubscribeClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        if (Platform.OS === 'ios') {
+          StatusBar.setHidden(false);
+        }
+      },
+    );
+
+    // Start loading the interstitial straight away
+    interstitial.load();
+
+    // Unsubscribe from events on unmount
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeOpened();
+      unsubscribeClosed();
+    };
+  }, []);
 
   if (Bookmark) {
     if (!numbersBookmarks) return null;
@@ -83,7 +154,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
               });
             }}
             numberOfLines={2}
-            style={[styles.label, { width: "70%" }]}>
+            style={[styles.label, {width: '70%'}]}>
             {chapter.title}
           </Text>
           <View
@@ -106,32 +177,32 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
         <FlatList
           horizontal
           data={Bookmarks}
-          contentContainerStyle={{ gap: 12, marginVertical: 12 }}
+          contentContainerStyle={{gap: 12, marginVertical: 12}}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
+          renderItem={({item, index}) => {
             let comicImage = ComicBook?.images[item];
             return (
               <TouchableOpacity
                 onPress={() => {
-                  setOpenModal({ index, item });
+                  setOpenModal({index, item});
                 }}
                 style={{
                   borderRadius: 5,
                   overflow: 'hidden',
                   backgroundColor: 'white',
                   borderWidth: 0.5,
-                  borderColor: "black",
+                  borderColor: 'black',
                   width: 100,
                   height: 100,
                 }}>
                 <Image
-                  source={{ uri: comicImage }}
+                  source={{uri: comicImage}}
                   style={{
                     width: 100,
                     height: 100,
                     borderRadius: 5,
                   }}
-                  resizeMode={"contain"}
+                  resizeMode={'contain'}
                 />
               </TouchableOpacity>
             );
@@ -158,21 +229,47 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
         });
       }}
       style={styles.chapter}>
-      <Text style={[styles.label, { width: "80%" }]}>
-        {chapter?.title}{chapter?.date ? ` (${chapter?.date.split("/")[2]})` : ''}
-        <Text style={{ color: 'steelblue' }}>
+      <Text style={[styles.label, {width: '80%'}]}>
+        {chapter?.title}
+        {chapter?.date ? ` (${chapter?.date.split('/')[2]})` : ''}
+        <Text style={{color: 'steelblue'}}>
           {ComicBook
             ? ` - (${ComicBook?.lastReadPage + 1}/${ComicBook?.images.length})`
             : ''}
         </Text>
       </Text>
-      {LoadingStatus ? <ActivityIndicator size="small" color="skyblue" /> : null}
-      {LoadingStatus ? null :
-        !isComicDownload ? <Entypo name="download" size={24} color={"black"} onPress={LoadingComic} /> :
-          <MaterialIcons name="offline-pin" size={24} color="green" onPress={() => {
+      {LoadingStatus ? (
+        <ActivityIndicator size="small" color="skyblue" />
+      ) : null}
+      {LoadingStatus ? null : !isComicDownload ? (
+        <Entypo
+          name="download"
+          size={24}
+          color={'black'}
+          onPress={() => {
+            LoadingComic();
+            if (loaded) {
+              console.log("loaded ->", loaded);
+              setLoaded(false);
+              interstitial.show();
+            } else {
+              console.log("loaded 1 ->", loaded);
+              interstitial.load();
+              setLoaded(true);
+            }
+          }}
+        />
+      ) : (
+        <MaterialIcons
+          name="offline-pin"
+          size={24}
+          color="green"
+          onPress={() => {
             navigate(NAVIGATION.offlineComic);
-          }} />}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
+          }}
+        />
+      )}
+      <View style={{flexDirection: 'row', gap: 12}}>
         {!numbersBookmarks ? null : (
           <View
             style={{
