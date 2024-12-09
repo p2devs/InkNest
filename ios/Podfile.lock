@@ -1451,7 +1451,7 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-safe-area-context (4.14.0):
+  - react-native-safe-area-context (5.0.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1464,8 +1464,8 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-safe-area-context/common (= 4.14.0)
-    - react-native-safe-area-context/fabric (= 4.14.0)
+    - react-native-safe-area-context/common (= 5.0.0)
+    - react-native-safe-area-context/fabric (= 5.0.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1474,7 +1474,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (4.14.0):
+  - react-native-safe-area-context/common (5.0.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1495,7 +1495,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (4.14.0):
+  - react-native-safe-area-context/fabric (5.0.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2527,7 +2527,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 863cf40df7afe1a194a430f9485f30e1c6ef5941
   React-microtasksnativemodule: d6ae7d02a66b345794d9d81c038baa7e1931aace
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-safe-area-context: ee4151c59dc010b5211fe68eca73b0f98d17b224
+  react-native-safe-area-context: e9b890accad835990103058aeae3a3506bfc0276
   react-native-video: 6d495634696a5580559828544e3454c6ac27fbd7
   react-native-webview: d69374b3e1486abac8328524225c8ab7f0f0084d
   React-nativeconfig: e0b63af9169593319fb5ca10d051c9a803549a5d
