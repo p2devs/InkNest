@@ -29,9 +29,9 @@ import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
 
 export function ComicBook({ navigation, route }) {
-  const { comicBook, pageJump, isDownloadComic } = route?.params;
+  const { comicBookLink, pageJump, isDownloadComic } = route?.params;
   const dispatch = useDispatch();
-  const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+  const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
@@ -71,8 +71,8 @@ export function ComicBook({ navigation, route }) {
     if(isDownloadComic) { 
       return;
     }
-    dispatch(fetchComicBook(comicBook));
-  }, [comicBook, dispatch]);
+    dispatch(fetchComicBook(comicBookLink));
+  }, [comicBookLink, dispatch]);
 
   useEffect(() => {
     StatusBar.setHidden(true);
@@ -201,7 +201,7 @@ export function ComicBook({ navigation, route }) {
               onIndexChange={newIndex => {
                 if(!isDownloadComic) {
                   dispatch(
-                    updateData({ url: comicBook, data: { lastReadPage: newIndex } }),
+                    updateData({ url: comicBookLink, data: { lastReadPage: newIndex } }),
                   );
                 }
                 setPageIndex(newIndex);
@@ -213,7 +213,7 @@ export function ComicBook({ navigation, route }) {
           {/* Conditionally render the header/footer only if showControls is true */}
           <Animated.View style={[{ position: 'absolute', top: 0, width: '100%' }, headerAnimatedStyle]}>
             <ComicBookHeader
-              comicBook={isDownloadComic ? DownloadedBook : ComicBook}
+              comicBookLink={isDownloadComic ? DownloadedBook : comicBookLink}
               PageIndex={PageIndex}
               ViewAll={ViewAll}
               showBookmark={isDownloadComic ? false : true}
@@ -221,7 +221,7 @@ export function ComicBook({ navigation, route }) {
           </Animated.View>
           <Animated.View style={[{ position: 'absolute', bottom: 0, width: '100%' }, footerAnimatedStyle]}>
             <ComicBookFooter
-              comicBook={isDownloadComic ? DownloadedBook : ComicBook}
+              comicBookLink={isDownloadComic ? DownloadedBook : comicBookLink}
               setViewAll={setViewAll}
               ViewAll={ViewAll}
               navigation={navigation}

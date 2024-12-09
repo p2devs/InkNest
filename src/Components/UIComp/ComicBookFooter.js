@@ -7,15 +7,15 @@ import {heightPercentageToDP} from 'react-native-responsive-screen';
 import {NAVIGATION} from '../../Constants';
 
 const ComicBookFooter = ({
-  comicBook,
+  comicBookLink,
   setViewAll,
   ViewAll,
   navigation,
   showButton,
 }) => {
-  const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+  const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const baseUrl = useSelector(state => state.data.baseUrl);
-  const index = ComicBook?.volumes.findIndex(item => {
+  const index = ComicBook?.volumes?.findIndex(item => {
     const checklinkBaseUrl = item?.link.includes('readallcomics.com')
       ? 'readallcomics'
       : 'azcomic';
@@ -52,7 +52,7 @@ const ComicBookFooter = ({
             console.log(index, ComicBook?.volumes.length - 1, 'index');
             if (index < ComicBook?.volumes.length - 1 || index > 0) {
               navigation.replace(NAVIGATION.comicBook, {
-                comicBook: ComicBook?.volumes[index - 1]?.link,
+                comicBookLink: ComicBook?.volumes[index - 1]?.link,
               });
             }
           }}
@@ -86,7 +86,7 @@ const ComicBookFooter = ({
             onPress={() => {
               if (index < ComicBook?.volumes.length - 1) {
                 navigation.replace(NAVIGATION.comicBook, {
-                  comicBook: ComicBook?.volumes[index + 1].link,
+                  comicBookLink: ComicBook?.volumes[index + 1].link,
                 });
               }
             }}>

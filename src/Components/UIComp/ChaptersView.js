@@ -118,7 +118,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
           <Text
             onPress={() => {
               navigate(NAVIGATION.comicBook, {
-                comicBook: chapter.link,
+                comicBookLink: chapter?.link,
               });
             }}
             numberOfLines={2}
@@ -193,7 +193,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
     <TouchableOpacity
       onPress={() => {
         navigate(NAVIGATION.comicBook, {
-          comicBook: chapter?.link,
+          comicBookLink: chapter?.link,
         });
       }}
       style={styles.chapter}>

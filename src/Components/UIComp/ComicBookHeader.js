@@ -9,9 +9,9 @@ import {updateData} from '../../Redux/Reducers';
 import {goBack} from '../../Navigation/NavigationService';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
-const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
+const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
   const dispatch = useDispatch();
-  const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+  const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   return (
     <View
       style={{
@@ -47,8 +47,8 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
         }}>
         {PageIndex + 1}/
         {showBookmark
-          ? comicBook?.images?.length
-          : comicBook?.downloadedImagesPath?.length}
+          ? ComicBook?.images?.length
+          : comicBookLink?.downloadedImagesPath?.length}
       </Text>
       {ViewAll ? (
         <View />
@@ -67,7 +67,7 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
             }
             dispatch(
               updateData({
-                url: comicBook,
+                url: comicBookLink,
                 data: {BookmarkPages: BookmarksPages},
               }),
             );
