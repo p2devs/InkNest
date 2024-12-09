@@ -1,23 +1,30 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import {View, Text, TouchableOpacity, Image} from 'react-native';
 
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
-import { NAVIGATION } from '../../Constants';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
+import {NAVIGATION} from '../../Constants';
 
-const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
-  const ComicBook = useSelector(state => state.data.dataByUrl[comicBook]);
+const ComicBookFooter = ({
+  comicBookLink,
+  setViewAll,
+  ViewAll,
+  navigation,
+  showButton,
+}) => {
+  const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const baseUrl = useSelector(state => state.data.baseUrl);
-  const index = ComicBook?.volumes.findIndex(
-    item => {
-      const checklinkBaseUrl = item?.link.includes('readallcomics.com') ? 'readallcomics' : 'azcomic';
-      const currentComic = "azcomic" == checklinkBaseUrl ?
-        item.title.split("#")[1] === ComicBook?.title.split("#")[1] :
-        item.title.replace('- Reading', '').trim() === ComicBook?.title;
-      return currentComic
-    }
-  );
+  const index = ComicBook?.volumes?.findIndex(item => {
+    const checklinkBaseUrl = item?.link.includes('readallcomics.com')
+      ? 'readallcomics'
+      : 'azcomic';
+    const currentComic =
+      'azcomic' == checklinkBaseUrl
+        ? item.title.split('#')[1] === ComicBook?.title.split('#')[1]
+        : item.title.replace('- Reading', '').trim() === ComicBook?.title;
+    return currentComic;
+  });
 
   return (
     <View
@@ -37,15 +44,15 @@ const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
         marginBottom: 5,
         bottom: 0,
       }}>
-      {ComicBook?.volumes.length == 1 ?
+      {ComicBook?.volumes.length == 1 ? (
         <View />
-        :
+      ) : showButton ? (
         <TouchableOpacity
           onPress={() => {
             console.log(index, ComicBook?.volumes.length - 1, 'index');
             if (index < ComicBook?.volumes.length - 1 || index > 0) {
               navigation.replace(NAVIGATION.comicBook, {
-                comicBook: ComicBook?.volumes[index - 1]?.link,
+                comicBookLink: ComicBook?.volumes[index - 1]?.link,
               });
             }
           }}
@@ -58,7 +65,10 @@ const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
             }}>
             Previous Volume
           </Text>
-        </TouchableOpacity>}
+        </TouchableOpacity>
+      ) : (
+        <View />
+      )}
       <TouchableOpacity
         onPress={() => {
           setViewAll(!ViewAll);
@@ -67,30 +77,34 @@ const ComicBookFooter = ({ comicBook, setViewAll, ViewAll, navigation }) => {
           name={ViewAll ? 'book-outline' : 'grid-outline'}
           size={24}
           color="#fff"
-          style={{ marginRight: 10 }}
+          style={{marginRight: 10}}
         />
       </TouchableOpacity>
       {index !== ComicBook?.volumes.length - 1 ? (
-        <TouchableOpacity
-          onPress={() => {
-            if (index < ComicBook?.volumes.length - 1) {
-              navigation.replace(NAVIGATION.comicBook, {
-                comicBook: ComicBook?.volumes[index + 1].link,
-              });
-            }
-          }}>
-          <Text
-            style={{
-              fontSize: heightPercentageToDP('1.8%'),
-              fontWeight: 'bold',
-              color: '#FFF',
+        showButton ? (
+          <TouchableOpacity
+            onPress={() => {
+              if (index < ComicBook?.volumes.length - 1) {
+                navigation.replace(NAVIGATION.comicBook, {
+                  comicBookLink: ComicBook?.volumes[index + 1].link,
+                });
+              }
             }}>
-            Next Volume
-          </Text>
-        </TouchableOpacity>
-      ) :
+            <Text
+              style={{
+                fontSize: heightPercentageToDP('1.8%'),
+                fontWeight: 'bold',
+                color: '#FFF',
+              }}>
+              Next Volume
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View />
+        )
+      ) : (
         <View />
-      }
+      )}
     </View>
   );
 };

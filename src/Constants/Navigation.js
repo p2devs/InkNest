@@ -6,7 +6,6 @@ export const NAVIGATION = {
   comicBook: 'ComicBook',
   search: 'Search',
   bookmarks: 'History',
-  localComic: "LocalComic",
   settings: 'Settings',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
@@ -15,4 +14,5 @@ export const NAVIGATION = {
   animeDetails: 'AnimeDetails',
   moreDetails: 'MoreDetails',
   ViewAll: "ViewAll",
+  offlineComic: "Offline",
 };

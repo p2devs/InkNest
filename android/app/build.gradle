@@ -97,6 +97,9 @@ android {
         }
         release {
             storeFile file('global.jks')
+            storePassword MYAPP_UPLOAD_STORE_PASSWORD
+            keyAlias MYAPP_UPLOAD_KEY_ALIAS
+            keyPassword MYAPP_UPLOAD_KEY_PASSWORD
         }
     }
     buildTypes {
@@ -124,6 +127,8 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.1.0') // Add firebase bom
     implementation 'com.google.firebase:firebase-analytics' // Add firebase analytics
     implementation("com.google.firebase:firebase-crashlytics") // Add firebase crashlytics
+
+    implementation ('com.facebook.soloader:soloader:0.12.1+')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

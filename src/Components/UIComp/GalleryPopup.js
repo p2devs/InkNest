@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {
   View,
   Modal,
@@ -10,7 +10,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
-import { heightPercentageToDP } from 'react-native-responsive-screen';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,10 +21,10 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { navigate, replace } from '../../Navigation/NavigationService';
-import { NAVIGATION } from '../../Constants';
+import {navigate, replace} from '../../Navigation/NavigationService';
+import {NAVIGATION} from '../../Constants';
 
-const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
+const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
   const [PageIndex, setPageIndex] = useState(0);
   const [jumpToPage, setJumpToPage] = useState('');
   const GalleryRef = useRef(null);
@@ -39,7 +39,7 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
   // Control showing or hiding of the controls
   const [showControls, setShowControls] = useState(true);
 
-  let hideControlsTimeout;
+  const hideControlsTimeout = useRef(null);
 
   useEffect(() => {
     if (!isOpen) setPageIndex(0);
@@ -47,54 +47,54 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
   }, [isOpen]);
 
   // Function to hide controls with animation
-  const hideControls = () => {
+  const hideControls = useCallback(() => {
     headerOpacity.value = withTiming(0);
     headerTranslateY.value = withTiming(-50); // slide header up
     footerOpacity.value = withTiming(0);
     footerTranslateY.value = withTiming(50); // slide footer down
-  };
+  }, [headerOpacity, headerTranslateY, footerOpacity, footerTranslateY]);
 
   // Function to show controls with animation
-  const showControlsAnimation = () => {
+  const showControlsAnimation = useCallback(() => {
     headerOpacity.value = withTiming(1);
     headerTranslateY.value = withTiming(0);
     footerOpacity.value = withTiming(1);
     footerTranslateY.value = withTiming(0);
-  };
+  }, [headerOpacity, headerTranslateY, footerOpacity, footerTranslateY]);
 
   // Toggle controls
   const toggleControls = useCallback(() => {
     setShowControls(prev => !prev);
 
     if (!showControls) {
-      hideControlsTimeout = setTimeout(() => hideControls(), 5000);
+      hideControlsTimeout.current = setTimeout(() => hideControls(), 5000);
     }
-  }, [showControls]);
+  }, [showControls, hideControls]);
 
   useEffect(() => {
     if (showControls) {
       showControlsAnimation();
-      hideControlsTimeout = setTimeout(() => hideControls(), 5000);
+      hideControlsTimeout.current = setTimeout(() => hideControls(), 5000);
     } else {
       hideControls();
     }
 
     // Clear timeout when the component unmounts or showControls state changes
-    return () => clearTimeout(hideControlsTimeout);
-  }, [showControls]);
+    return () => clearTimeout(hideControlsTimeout.current);
+  }, [showControls, hideControls, showControlsAnimation]);
 
   // Animated styles for header and footer
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: headerOpacity.value,
-      transform: [{ translateY: headerTranslateY.value }],
+      transform: [{translateY: headerTranslateY.value}],
     };
   });
 
   const footerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: footerOpacity.value,
-      transform: [{ translateY: footerTranslateY.value }],
+      transform: [{translateY: footerTranslateY.value}],
     };
   });
 
@@ -105,7 +105,6 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
       onRequestClose={() => {
         setClose(null);
       }}>
-
       <TouchableWithoutFeedback onPress={toggleControls}>
         <SafeAreaView
           style={{
@@ -140,7 +139,7 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
                 name="chevron-back"
                 size={30}
                 color="#fff"
-                style={{ marginRight: 10 }}
+                style={{marginRight: 10}}
               />
             </TouchableOpacity>
             <Text
@@ -153,18 +152,14 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
             </Text>
 
             {!link ? (
-              <View style={{ width: 30 }} />
+              <View style={{width: 30}} />
             ) : (
               <TouchableOpacity
                 onPress={() => {
                   let RemoveIndex = images[PageIndex].id;
                   BookMarkRemove(link, RemoveIndex);
                 }}>
-                <FontAwesome6
-                  name="book-bookmark"
-                  size={24}
-                  color={'yellow'}
-                />
+                <FontAwesome6 name="book-bookmark" size={24} color={'yellow'} />
               </TouchableOpacity>
             )}
           </Animated.View>
@@ -201,7 +196,7 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
               footerAnimatedStyle,
             ]}>
             {!link ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TextInput
                   style={{
                     width: '25%',
@@ -240,7 +235,7 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
                   / {images.length}
                 </Text>
                 <TouchableOpacity
-                  style={{ marginLeft: 10 }}
+                  style={{marginLeft: 10}}
                   disabled={jumpToPage === ''}
                   onPress={() => {
                     if (jumpToPage === '') return;
@@ -261,17 +256,17 @@ const GalleryPopup = ({ images, setClose, isOpen, link, BookMarkRemove }) => {
                 onPress={() => {
                   if (link === undefined) return;
                   navigate(NAVIGATION.comicBook, {
-                    comicBook: link,
+                    comicBookLink: link,
                     pageJump: images[PageIndex]?.id,
                   });
                   setClose(null);
                 }}
-                style={{ flexDirection: 'row', alignItems: 'center' }}>
+                style={{flexDirection: 'row', alignItems: 'center'}}>
                 <MaterialCommunityIcons
                   name="book-open-page-variant-outline"
                   size={24}
                   color="#fff"
-                  style={{ marginRight: 10 }}
+                  style={{marginRight: 10}}
                 />
                 <Text
                   style={{

@@ -1,28 +1,68 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  // Image,
   FlatList,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Entypo from 'react-native-vector-icons/Entypo';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {
+  InterstitialAd,
+  TestIds,
+} from 'react-native-google-mobile-ads';
+import {
+  android_admob_interstitial_unit_id_download,
+  ios_admob_interstitial_unit_id_download,
+} from '@env';
 
 import { navigate } from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
 import { updateData } from '../../Redux/Reducers';
 import { NAVIGATION } from '../../Constants';
 import Image from './Image';
+import { downloadComicBook } from '../../Redux/Actions/Download';
+import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
 
-const ChaptersView = ({ chapter, Bookmark, issue }) => {
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : Platform.OS === 'ios'
+    ? ios_admob_interstitial_unit_id_download
+    : android_admob_interstitial_unit_id_download;
+
+const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+
+const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[chapter.link]);
+  const isComicDownload = Boolean(
+    useSelector(
+      state =>
+        state?.data?.DownloadComic?.[ComicDetail?.link]?.comicBooks?.[
+        chapter?.link
+        ],
+    ),
+  );
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
+  const [LoadingStatus, setLoadStatus] = useState(false);
+
+
+  useEffect(() => {
+    interstitial.load();
+  }, [LoadingStatus]);
+
+  const loadAdd = async () => {
+    interstitial.show();
+  };
+
   const RemoveBookMark = (link, removeItem) => {
     //find the item and remove from book mark Bookmarks is a list of numbers
     console.log(link, removeItem, Bookmarks);
@@ -36,6 +76,28 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
       }),
     );
   };
+
+  const LoadingComic = async () => {
+    if (LoadingStatus) return;
+    setLoadStatus(true);
+    if (!ComicBook?.images) {
+      let data = await dispatch(fetchComicBook(chapter.link, null, true));
+      DownloadedComic(data.data);
+      return;
+    }
+    DownloadedComic(ComicBook);
+  };
+  const DownloadedComic = async data => {
+    dispatch(
+      downloadComicBook({
+        comicDetails: ComicDetail,
+        comicBook: { ...data, link: chapter.link },
+        setLoadStatus,
+      }),
+    );
+  };
+
+
   if (Bookmark) {
     if (!numbersBookmarks) return null;
     return (
@@ -56,11 +118,11 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
           <Text
             onPress={() => {
               navigate(NAVIGATION.comicBook, {
-                comicBook: chapter.link,
+                comicBookLink: chapter?.link,
               });
             }}
             numberOfLines={2}
-            style={[styles.label, { width: "70%" }]}>
+            style={[styles.label, { width: '70%' }]}>
             {chapter.title}
           </Text>
           <View
@@ -97,7 +159,7 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
                   overflow: 'hidden',
                   backgroundColor: 'white',
                   borderWidth: 0.5,
-                  borderColor: "black",
+                  borderColor: 'black',
                   width: 100,
                   height: 100,
                 }}>
@@ -108,7 +170,7 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
                     height: 100,
                     borderRadius: 5,
                   }}
-                  resizeMode={"contain"}
+                  resizeMode={'contain'}
                 />
               </TouchableOpacity>
             );
@@ -131,18 +193,42 @@ const ChaptersView = ({ chapter, Bookmark, issue }) => {
     <TouchableOpacity
       onPress={() => {
         navigate(NAVIGATION.comicBook, {
-          comicBook: chapter?.link,
+          comicBookLink: chapter?.link,
         });
       }}
       style={styles.chapter}>
-      <Text style={[styles.label, { width: "80%" }]}>
-        {chapter?.title}{chapter?.date ? ` (${chapter?.date.split("/")[2]})` : ''}
+      <Text style={[styles.label, { width: '80%' }]}>
+        {chapter?.title}
+        {chapter?.date ? ` (${chapter?.date.split('/')[2]})` : ''}
         <Text style={{ color: 'steelblue' }}>
           {ComicBook
             ? ` - (${ComicBook?.lastReadPage + 1}/${ComicBook?.images.length})`
             : ''}
         </Text>
       </Text>
+      {LoadingStatus ? (
+        <ActivityIndicator size="small" color="skyblue" />
+      ) : null}
+      {LoadingStatus ? null : !isComicDownload ? (
+        <Entypo
+          name="download"
+          size={24}
+          color={'black'}
+          onPress={() => {
+            LoadingComic();
+            loadAdd();
+          }}
+        />
+      ) : (
+        <MaterialIcons
+          name="offline-pin"
+          size={24}
+          color="green"
+          onPress={() => {
+            navigate(NAVIGATION.offlineComic);
+          }}
+        />
+      )}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {!numbersBookmarks ? null : (
           <View

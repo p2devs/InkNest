@@ -4,6 +4,8 @@ import {persistor, store} from './src/Redux/Store';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {RootNavigation} from './src/Navigation';
 import Loading from './src/Components/UIComp/Loading';
+import Toast from 'react-native-toast-message';
+import {PaperProvider} from 'react-native-paper';
 
 /**
  * The main App component that sets up the root of the application.
@@ -18,7 +20,10 @@ const App = () => {
     <GestureHandlerRootView style={{flex: 1}}>
       <Provider store={store}>
         <PersistGate loading={<Loading />} persistor={persistor}>
-          <RootNavigation />
+          <PaperProvider>
+            <RootNavigation />
+            <Toast />
+          </PaperProvider>
         </PersistGate>
       </Provider>
     </GestureHandlerRootView>

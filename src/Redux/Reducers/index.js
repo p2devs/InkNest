@@ -1,4 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   dataByUrl: {},
@@ -11,6 +11,7 @@ const initialState = {
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
+  DownloadComic: {},
 };
 
 /**
@@ -88,7 +89,7 @@ const Reducers = createSlice({
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -98,10 +99,15 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
+      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
       // state.dataByUrl[url] = data;
+    },
+    DownloadComicBook: (state, action) => {
+      const { link, data, title, } = action.payload;
+      
+      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
@@ -166,5 +172,6 @@ export const {
   AnimeWatched,
   AddAnimeBookMark,
   RemoveAnimeBookMark,
+  DownloadComicBook,
 } = Reducers.actions;
 export default Reducers.reducer;
