@@ -97,6 +97,9 @@ android {
         }
         release {
             storeFile file('global.jks')
+            storePassword MYAPP_UPLOAD_STORE_PASSWORD
+            keyAlias MYAPP_UPLOAD_KEY_ALIAS
+            keyPassword MYAPP_UPLOAD_KEY_PASSWORD
         }
     }
     buildTypes {
