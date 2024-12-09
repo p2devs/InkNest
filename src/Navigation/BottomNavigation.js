@@ -138,19 +138,21 @@ export function BottomNavigation() {
         }}
       />
 
-      <BottomTab.Screen
-        name={NAVIGATION.offlineComic}
-        component={OfflineComic}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon
-              focused={focused}
-              tintColor={color}
-              name="download-for-offline"
-            />
-          ),
-        }}
-      />
+      {animeActive ? null : (
+        <BottomTab.Screen
+          name={NAVIGATION.offlineComic}
+          component={OfflineComic}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon
+                focused={focused}
+                tintColor={color}
+                name="download-for-offline"
+              />
+            ),
+          }}
+        />
+      )}
 
       <BottomTab.Screen
         name={NAVIGATION.settings}

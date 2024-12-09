@@ -60,8 +60,8 @@ export function ComicBook({ navigation, route }) {
       const extractedData = DownloadComic[isDownloadComic]?.comicBooks;
       {Object.keys(extractedData).slice(0, 1).map((key, index) => {
         let data = extractedData[key];
-        console.log("DownloadedBook -->", data?.comicBook?.images);
-        setDownloadedBook(data?.comicBook);
+        console.log("DownloadedBook -->", data?.downloadedImagesPath);
+        setDownloadedBook(data);
       });
       }
     }
@@ -185,7 +185,7 @@ export function ComicBook({ navigation, route }) {
         <View style={{ flex: 1 }}>
           {ViewAll ? (
             <FlatList
-              data={isDownloadComic ? DownloadedBook?.images : ComicBook?.images}
+              data={isDownloadComic ? DownloadedBook?.downloadedImagesPath : ComicBook?.images}
               renderItem={({ item, index }) => <GridImageItem item={item} index={index} />}
               keyExtractor={(item, index) => index.toString()}
               numColumns={numColumns}
@@ -195,9 +195,9 @@ export function ComicBook({ navigation, route }) {
                 marginVertical: 60,
               }}
             />
-          ) : DownloadedBook?.images||ComicBook?.images ? (
+          ) : DownloadedBook?.downloadedImagesPath||ComicBook?.images ? (
             <Gallery
-              data={isDownloadComic ? DownloadedBook?.images : ComicBook?.images}
+              data={isDownloadComic ? DownloadedBook?.downloadedImagesPath : ComicBook?.images}
               onIndexChange={newIndex => {
                 if(!isDownloadComic) {
                   dispatch(

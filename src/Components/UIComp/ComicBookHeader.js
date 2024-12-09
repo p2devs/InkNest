@@ -45,7 +45,10 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
           fontWeight: 'bold',
           color: '#FFF',
         }}>
-        {PageIndex + 1}/{comicBook?.images.length}
+        {PageIndex + 1}/
+        {showBookmark
+          ? comicBook?.images?.length
+          : comicBook?.downloadedImagesPath?.length}
       </Text>
       {ViewAll ? (
         <View />
@@ -77,8 +80,7 @@ const ComicBookHeader = ({comicBook, PageIndex, ViewAll, showBookmark}) => {
             }
           />
         </TouchableOpacity>
-      )
-      : (
+      ) : (
         <View />
       )}
     </View>
