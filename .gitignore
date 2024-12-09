@@ -89,3 +89,6 @@ global.jks
 
 #ignore app.json file
 app.json
+
+#ignore .env file
+.env
