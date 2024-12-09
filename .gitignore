@@ -86,3 +86,6 @@ global.jks
 **/LocalComic/index.js
 **/Actions/Download.js
 **/OfflineComic/index.js
+
+#ignore app.json file
+app.json
