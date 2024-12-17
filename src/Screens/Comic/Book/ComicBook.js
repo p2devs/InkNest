@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,38 +8,38 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withDelay,
-  runOnJS,
 } from 'react-native-reanimated';
 
-import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
+import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
 import Gallery from '../../../Components/Gallery/src/index';
-import { updateData } from '../../../Redux/Reducers';
+import {updateData} from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
 
-export function ComicBook({ navigation, route }) {
-  const { comicBookLink, pageJump, isDownloadComic } = route?.params;
+export function ComicBook({navigation, route}) {
+  const {comicBookLink, pageJump, isDownloadComic, chapterlink} = route?.params;
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
-  const [PageIndex, setPageIndex] = useState(pageJump ?? ComicBook?.lastReadPage ?? 0);
+  const [PageIndex, setPageIndex] = useState(
+    pageJump ?? ComicBook?.lastReadPage ?? 0,
+  );
   const [ViewAll, setViewAll] = useState(false);
   const [DownloadedBook, setDownloadedBook] = useState(null);
 
-  const { width } = Dimensions.get('window');
+  const {width} = Dimensions.get('window');
   const numColumns = 3;
   const imageSize = width / numColumns - 10;
 
@@ -55,20 +55,15 @@ export function ComicBook({ navigation, route }) {
   let hideControlsTimeout;
 
   useEffect(() => {
-    if(isDownloadComic) {
-
-      const extractedData = DownloadComic[isDownloadComic]?.comicBooks;
-      {Object.keys(extractedData).slice(0, 1).map((key, index) => {
-        let data = extractedData[key];
-        console.log("DownloadedBook -->", data?.downloadedImagesPath);
-        setDownloadedBook(data);
-      });
-      }
+    if (isDownloadComic) {
+      const extractedData =
+        DownloadComic[isDownloadComic]?.comicBooks[chapterlink];
+      setDownloadedBook(extractedData);
     }
   }, [isDownloadComic]);
 
   useEffect(() => {
-    if(isDownloadComic) { 
+    if (isDownloadComic) {
       return;
     }
     dispatch(fetchComicBook(comicBookLink));
@@ -119,14 +114,14 @@ export function ComicBook({ navigation, route }) {
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: headerOpacity.value,
-      transform: [{ translateY: headerTranslateY.value }],
+      transform: [{translateY: headerTranslateY.value}],
     };
   });
 
   const footerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: footerOpacity.value,
-      transform: [{ translateY: footerTranslateY.value }],
+      transform: [{translateY: footerTranslateY.value}],
     };
   });
 
@@ -139,7 +134,7 @@ export function ComicBook({ navigation, route }) {
   }
 
   const GridImageItem = props => {
-    const { item, index } = props;
+    const {item, index} = props;
     return (
       <TouchableOpacity
         key={index}
@@ -154,7 +149,7 @@ export function ComicBook({ navigation, route }) {
           backgroundColor: '#333',
         }}>
         <Image
-          source={{ uri: item }}
+          source={{uri: item}}
           style={{
             width: imageSize,
             height: imageSize,
@@ -179,14 +174,22 @@ export function ComicBook({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: 'black'}}
+      edges={['top', 'bottom']}>
       <TouchableWithoutFeedback onPress={toggleControls}>
         {/* Wrap the entire view with TouchableWithoutFeedback to detect taps */}
-        <View style={{ flex: 1 }}>
+        <View style={{flex: 1}}>
           {ViewAll ? (
             <FlatList
-              data={isDownloadComic ? DownloadedBook?.downloadedImagesPath : ComicBook?.images}
-              renderItem={({ item, index }) => <GridImageItem item={item} index={index} />}
+              data={
+                isDownloadComic
+                  ? DownloadedBook?.downloadedImagesPath
+                  : ComicBook?.images
+              }
+              renderItem={({item, index}) => (
+                <GridImageItem item={item} index={index} />
+              )}
               keyExtractor={(item, index) => index.toString()}
               numColumns={numColumns}
               key={numColumns}
@@ -195,13 +198,20 @@ export function ComicBook({ navigation, route }) {
                 marginVertical: 60,
               }}
             />
-          ) : DownloadedBook?.downloadedImagesPath||ComicBook?.images ? (
+          ) : DownloadedBook?.downloadedImagesPath || ComicBook?.images ? (
             <Gallery
-              data={isDownloadComic ? DownloadedBook?.downloadedImagesPath : ComicBook?.images}
+              data={
+                isDownloadComic
+                  ? DownloadedBook?.downloadedImagesPath
+                  : ComicBook?.images
+              }
               onIndexChange={newIndex => {
-                if(!isDownloadComic) {
+                if (!isDownloadComic) {
                   dispatch(
-                    updateData({ url: comicBookLink, data: { lastReadPage: newIndex } }),
+                    updateData({
+                      url: comicBookLink,
+                      data: {lastReadPage: newIndex},
+                    }),
                   );
                 }
                 setPageIndex(newIndex);
@@ -211,7 +221,11 @@ export function ComicBook({ navigation, route }) {
           ) : null}
 
           {/* Conditionally render the header/footer only if showControls is true */}
-          <Animated.View style={[{ position: 'absolute', top: 0, width: '100%' }, headerAnimatedStyle]}>
+          <Animated.View
+            style={[
+              {position: 'absolute', top: 0, width: '100%'},
+              headerAnimatedStyle,
+            ]}>
             <ComicBookHeader
               comicBookLink={isDownloadComic ? DownloadedBook : comicBookLink}
               PageIndex={PageIndex}
@@ -219,7 +233,11 @@ export function ComicBook({ navigation, route }) {
               showBookmark={isDownloadComic ? false : true}
             />
           </Animated.View>
-          <Animated.View style={[{ position: 'absolute', bottom: 0, width: '100%' }, footerAnimatedStyle]}>
+          <Animated.View
+            style={[
+              {position: 'absolute', bottom: 0, width: '100%'},
+              footerAnimatedStyle,
+            ]}>
             <ComicBookFooter
               comicBookLink={isDownloadComic ? DownloadedBook : comicBookLink}
               setViewAll={setViewAll}
