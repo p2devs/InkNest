@@ -22,6 +22,7 @@ import {
   android_admob_reward_unit_id_download,
   ios_admob_reward_unit_id_download,
 } from '@env';
+import analytics from '@react-native-firebase/analytics';
 
 import {navigate} from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
@@ -100,6 +101,10 @@ const ChaptersView = ({chapter, Bookmark, ComicDetail}) => {
   const LoadingComic = async () => {
     if (LoadingStatus) return;
     setLoadStatus(true);
+    await analytics().logEvent('download_comic', {
+      link: chapter?.link?.toString(),
+      title: chapter?.title?.toString(),
+    });
     if (!ComicBook?.images) {
       let data = await dispatch(fetchComicBook(chapter.link, null, true));
       DownloadedComic(data.data);
@@ -135,7 +140,11 @@ const ChaptersView = ({chapter, Bookmark, ComicDetail}) => {
             alignItems: 'center',
           }}>
           <Text
-            onPress={() => {
+            onPress={async () => {
+              await analytics().logEvent('open_bookmark_comic', {
+                link: chapter?.link?.toString(),
+                title: chapter?.title?.toString(),
+              });
               navigate(NAVIGATION.comicBook, {
                 comicBookLink: chapter?.link,
               });
@@ -210,7 +219,11 @@ const ChaptersView = ({chapter, Bookmark, ComicDetail}) => {
   }
   return (
     <TouchableOpacity
-      onPress={() => {
+      onPress={async () => {
+        await analytics().logEvent('open_comic_chapter', {
+          link: chapter?.link?.toString(),
+          title: chapter?.title?.toString(),
+        });
         navigate(NAVIGATION.comicBook, {
           comicBookLink: chapter?.link,
         });

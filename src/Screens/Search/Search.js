@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,21 +11,24 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { NAVIGATION } from '../../Constants';
+import {NAVIGATION} from '../../Constants';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSearchComic } from '../../Redux/Actions/GlobalActions';
+
+import analytics from '@react-native-firebase/analytics';
+
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchSearchComic} from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
+import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
 
-export function Search({ navigation }) {
+export function Search({navigation}) {
   const dispatch = useDispatch();
   const searchDatas = useSelector(state => state.data.Search);
   const loading = useSelector(state => state.data.loading);
@@ -38,66 +41,72 @@ export function Search({ navigation }) {
   let Tag = View;
 
   const fetchData = async () => {
-
     if (loading) return;
     if (!searchTerm.trim()) return;
     if (IsAnime) {
+      await analytics().logEvent('search_anime', {
+        search: searchTerm?.trim()?.toString(),
+      });
       let data = await SearchAnime(searchTerm, dispatch, baseUrl);
       setSearchTerm('');
       if (data.length == 0) {
         setAnimeData([]);
         Alert.alert('No results found');
-        return
+        return;
       }
       setAnimeData(data);
       return;
     }
+    await analytics().logEvent('search_comic', {
+      search: searchTerm?.trim()?.toString(),
+    });
     dispatch(fetchSearchComic(searchTerm));
     setSearchTerm('');
     //scroll to the top of the list
-    flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
+    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
   };
   useEffect(() => {
     // Scroll to the top of the list
-    flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
+    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
     return () => {
       setAnimeData([]);
       setSearchTerm('');
-    }
+    };
   }, [loading]);
 
-  const renderItem = ({ item, index }) => {
+  const renderItem = ({item, index}) => {
     const data = item.results ? item.results.slice(0, 10) : [];
     return (
-      <View key={index} style={{ borderRadius: 12 }}>
-        {item.user === "user" ? (
+      <View key={index} style={{borderRadius: 12}}>
+        {item.user === 'user' ? (
           <View
             style={{
               flex: 1,
               marginHorizontal: widthPercentageToDP('2%'),
               flexDirection: 'row',
               alignItems: 'center',
-              alignSelf: "flex-end",
+              alignSelf: 'flex-end',
               maxWidth: widthPercentageToDP('76%'),
             }}>
-
             <Tag
               intensity={60}
               tint="dark"
-              style={[{
-                marginVertical: 5,
-                marginHorizontal: 5,
-                borderRadius: 10,
-                padding: 5,
-                backgroundColor: 'white',
-                flexDirection: 'row',
-                gap: 5,
-              }, styles.itemContainer]}
-            >
+              style={[
+                {
+                  marginVertical: 5,
+                  marginHorizontal: 5,
+                  borderRadius: 10,
+                  padding: 5,
+                  backgroundColor: 'white',
+                  flexDirection: 'row',
+                  gap: 5,
+                },
+                styles.itemContainer,
+              ]}>
               <Text style={styles.title}>{item.query}</Text>
             </Tag>
           </View>
-        ) : item.user === "error" ? (
+        ) : item.user === 'error' ? (
           <View
             style={{
               flex: 1,
@@ -109,14 +118,16 @@ export function Search({ navigation }) {
             <Tag
               intensity={60}
               tint="dark"
-              style={[{
-                marginVertical: 5,
-                marginHorizontal: 5,
-                borderRadius: 10,
-                padding: 5,
-                backgroundColor: 'white',
-              }, styles.itemContainer]}
-            >
+              style={[
+                {
+                  marginVertical: 5,
+                  marginHorizontal: 5,
+                  borderRadius: 10,
+                  padding: 5,
+                  backgroundColor: 'white',
+                },
+                styles.itemContainer,
+              ]}>
               <Text style={styles.error}>{item.error}</Text>
             </Tag>
           </View>
@@ -128,64 +139,75 @@ export function Search({ navigation }) {
               flexDirection: 'row',
               alignItems: 'center',
               maxWidth: widthPercentageToDP('96%'),
-              position: "relative",
+              position: 'relative',
             }}>
             <Tag
               intensity={60}
               tint="dark"
-              style={[{
-                marginVertical: 5,
-                marginHorizontal: 5,
-                borderRadius: 10,
-                padding: 5,
-                backgroundColor: 'white',
-              }, styles.itemContainer]}
-            >
+              style={[
+                {
+                  marginVertical: 5,
+                  marginHorizontal: 5,
+                  borderRadius: 10,
+                  padding: 5,
+                  backgroundColor: 'white',
+                },
+                styles.itemContainer,
+              ]}>
               <View>
                 <Text style={styles.title}>Comic list:</Text>
-                {
-                  data.map((result, index) => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate(NAVIGATION.comicDetails, {
-                          PageUrl: result.href,
-                          search: true,
-                        });
-                      }}
-                      key={index}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, }}
-                    >
-                      <Text style={{ fontSize: 5, color: "white", marginLeft: 12 }}>{'\u2B24'}</Text>
-                      <Text style={styles.link}>{result.title}</Text>
-                    </TouchableOpacity>
-                  ))
-                }
-                {item.results.length > 10 &&
+                {data.map((result, index) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate(NAVIGATION.comicDetails, {
+                        PageUrl: result.href,
+                        search: true,
+                      });
+                    }}
+                    key={index}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}>
+                    <Text style={{fontSize: 5, color: 'white', marginLeft: 12}}>
+                      {'\u2B24'}
+                    </Text>
+                    <Text style={styles.link}>{result.title}</Text>
+                  </TouchableOpacity>
+                ))}
+                {item.results.length > 10 && (
                   <TouchableOpacity
                     onPress={() => {
                       setViewAll(item.results);
                     }}
-                    style={{ flexDirection: 'row', alignSelf: "flex-end", bottom: 6, marginRight: 6, }}
-                  >
+                    style={{
+                      flexDirection: 'row',
+                      alignSelf: 'flex-end',
+                      bottom: 6,
+                      marginRight: 6,
+                    }}>
                     <Text style={styles.link}>View all</Text>
-                  </TouchableOpacity>}
+                  </TouchableOpacity>
+                )}
               </View>
             </Tag>
           </View>
         )}
       </View>
-    )
+    );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <View style={styles.container}>
         <Header title="Search Bot" />
-        <View style={{
-          paddingHorizontal: widthPercentageToDP('2%'),
-          paddingVertical: heightPercentageToDP('2%'),
-          backgroundColor: '#000',
-        }} >
+        <View
+          style={{
+            paddingHorizontal: widthPercentageToDP('2%'),
+            paddingVertical: heightPercentageToDP('2%'),
+            backgroundColor: '#000',
+          }}>
           <View
             style={{
               flexDirection: 'row',
@@ -199,57 +221,77 @@ export function Search({ navigation }) {
             }}>
             <TextInput
               style={styles.input}
-              placeholder='Send us what you want to see...'
+              placeholder="Send us what you want to see..."
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
               placeholderTextColor={'#FFF'}
               keyboardType="web-search"
             />
-            <TouchableOpacity
-              disabled={loading}
-              onPress={fetchData}
-            >
-              {loading ?
+            <TouchableOpacity disabled={loading} onPress={fetchData}>
+              {loading ? (
                 <ActivityIndicator size="small" color="gold" />
-                :
-                <MaterialCommunityIcons name="cube-send" size={24} color={!loading ? "white" : "silver"} />
-              }
+              ) : (
+                <MaterialCommunityIcons
+                  name="cube-send"
+                  size={24}
+                  color={!loading ? 'white' : 'silver'}
+                />
+              )}
             </TouchableOpacity>
             {/* <Button title="Search" onPress={fetchData} /> */}
           </View>
         </View>
-        {!IsAnime ? <FlatList
-          scrollsToTop
-          ref={flatlistRef}
-          style={{ flex: 1, backgroundColor: '#000' }}
-          ListEmptyComponent={
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-
-              <MaterialCommunityIcons
-                name="book-open-page-variant-outline"
-                size={heightPercentageToDP('10%')}
-                color="gold"
-                style={{ marginRight: 10 }}
-              />
-              <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
-                Send us what you want to read
-              </Text>
-              <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
-                we will find it for you
-              </Text>
-              <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
-                and show you the results
-              </Text>
-            </View>
-          }
-          data={IsAnime ? AnimeData : searchDatas}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ListFooterComponent={<View style={{ marginVertical: heightPercentageToDP('6%'), }} />}
-        />
-          :
+        {!IsAnime ? (
+          <FlatList
+            scrollsToTop
+            ref={flatlistRef}
+            style={{flex: 1, backgroundColor: '#000'}}
+            ListEmptyComponent={
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <MaterialCommunityIcons
+                  name="book-open-page-variant-outline"
+                  size={heightPercentageToDP('10%')}
+                  color="gold"
+                  style={{marginRight: 10}}
+                />
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
+                  Send us what you want to read
+                </Text>
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
+                  we will find it for you
+                </Text>
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
+                  and show you the results
+                </Text>
+              </View>
+            }
+            data={IsAnime ? AnimeData : searchDatas}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{flexGrow: 1}}
+            ListFooterComponent={
+              <View style={{marginVertical: heightPercentageToDP('6%')}} />
+            }
+          />
+        ) : (
           <FlatList
             ref={flatlistRef}
             numColumns={2}
@@ -262,28 +304,54 @@ export function Search({ navigation }) {
             data={AnimeData}
             keyExtractor={(item, index) => index.toString()}
             ListEmptyComponent={
-              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
                 <MaterialCommunityIcons
                   name="search-web"
                   size={heightPercentageToDP('10%')}
                   color="gold"
-                  style={{ marginRight: 10 }}
+                  style={{marginRight: 10}}
                 />
-                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
                   Send us what you want to see
                 </Text>
-                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
                   we will find it for you
                 </Text>
-                <Text style={[styles.title, { fontSize: heightPercentageToDP('2%') }]} >
+                <Text
+                  style={[
+                    styles.title,
+                    {fontSize: heightPercentageToDP('2%')},
+                  ]}>
                   and show you the results
                 </Text>
               </View>
             }
-            renderItem={({ item, index }) => <HomeRenderItem item={item} index={index} key={index} search={true} />}
-            ListFooterComponent={<View style={{ marginVertical: heightPercentageToDP('6%'), }} />}
+            renderItem={({item, index}) => (
+              <HomeRenderItem
+                item={item}
+                index={index}
+                key={index}
+                search={true}
+              />
+            )}
+            ListFooterComponent={
+              <View style={{marginVertical: heightPercentageToDP('6%')}} />
+            }
           />
-        }
+        )}
         <Modal
           transparent
           animationType="slide"
@@ -311,13 +379,13 @@ export function Search({ navigation }) {
               right: 0,
               left: 0,
               // backgroundColor: 'rgba(255,255,255,0.5)',
-              backgroundColor: "steelblue",
+              backgroundColor: 'steelblue',
               flex: 1,
               maxHeight: heightPercentageToDP('60%'),
               width: '100%',
               borderRadius: 12,
             }}>
-            <View style={{ flexGrow: 1, zIndex: 10 }}>
+            <View style={{flexGrow: 1, zIndex: 10}}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -327,16 +395,16 @@ export function Search({ navigation }) {
                   borderBottomWidth: 0.5,
                   borderColor: '#fff',
                 }}>
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
+                <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
                   Comic List
                 </Text>
                 <TouchableOpacity
                   style={{
-                    width: heightPercentageToDP("3%"),
-                    height: heightPercentageToDP("3%"),
+                    width: heightPercentageToDP('3%'),
+                    height: heightPercentageToDP('3%'),
                     justifyContent: 'center',
                     alignItems: 'center',
-                    borderRadius: heightPercentageToDP("2.4%"),
+                    borderRadius: heightPercentageToDP('2.4%'),
                     backgroundColor: 'red',
                     //add shadow to the close button
                   }}
@@ -349,7 +417,11 @@ export function Search({ navigation }) {
                     }}
                     style={{ width: 30, height: 30 }}
                   /> */}
-                  <AntDesign name="close" size={heightPercentageToDP("2.4%")} color="white" />
+                  <AntDesign
+                    name="close"
+                    size={heightPercentageToDP('2.4%')}
+                    color="white"
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -361,7 +433,7 @@ export function Search({ navigation }) {
                 <FlatList
                   data={viewAll ?? []}
                   keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item, index }) => (
+                  renderItem={({item, index}) => (
                     <TouchableOpacity
                       onPress={() => {
                         navigation.navigate(NAVIGATION.comicDetails, {
@@ -379,18 +451,25 @@ export function Search({ navigation }) {
                         borderBottomWidth: 0.5,
                         borderColor: '#fff',
                       }}>
-                      <Text style={{ fontSize: 14, color: "white", marginLeft: 4 }}>{index + 1}.</Text>
+                      <Text
+                        style={{fontSize: 14, color: 'white', marginLeft: 4}}>
+                        {index + 1}.
+                      </Text>
                       <Text style={styles.link}>{item.title}</Text>
                     </TouchableOpacity>
                   )}
-                  ListFooterComponent={<View style={{ marginVertical: heightPercentageToDP('6%'), }} />}
+                  ListFooterComponent={
+                    <View
+                      style={{marginVertical: heightPercentageToDP('6%')}}
+                    />
+                  }
                 />
               </View>
             </View>
           </Tag>
         </Modal>
       </View>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }
 
@@ -407,11 +486,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   error: {
-    color: Platform.OS == "ios" ? '#FF0090' : "#FF004F",
+    color: Platform.OS == 'ios' ? '#FF0090' : '#FF004F',
     // marginTop: 10,
     // alignSelf: 'center',
     paddingVertical: 5,
-    flexWrap: "wrap",
+    flexWrap: 'wrap',
     maxWidth: widthPercentageToDP('70%'),
   },
   noResults: {
@@ -433,9 +512,9 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 14,
-    color: "gold",
+    color: 'gold',
     paddingVertical: 5,
-    flexWrap: "wrap",
+    flexWrap: 'wrap',
     maxWidth: widthPercentageToDP('70%'),
   },
 });
