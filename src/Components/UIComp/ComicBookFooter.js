@@ -44,6 +44,42 @@ const ComicBookFooter = ({
         marginBottom: 5,
         bottom: 0,
       }}>
+      {index !== ComicBook?.volumes.length - 1 ? (
+        showButton ? (
+          <TouchableOpacity
+            onPress={() => {
+              if (index < ComicBook?.volumes.length - 1) {
+                navigation.replace(NAVIGATION.comicBook, {
+                  comicBookLink: ComicBook?.volumes[index + 1].link,
+                });
+              }
+            }}>
+            <Text
+              style={{
+                fontSize: heightPercentageToDP('1.8%'),
+                fontWeight: 'bold',
+                color: '#FFF',
+              }}>
+              Previous Volume
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View />
+        )
+      ) : (
+        <View />
+      )}
+      <TouchableOpacity
+        onPress={() => {
+          setViewAll(!ViewAll);
+        }}>
+        <Ionicons
+          name={ViewAll ? 'book-outline' : 'grid-outline'}
+          size={24}
+          color="#fff"
+          style={{marginRight: 10}}
+        />
+      </TouchableOpacity>
       {ComicBook?.volumes.length == 1 ? (
         <View />
       ) : showButton ? (
@@ -63,45 +99,9 @@ const ComicBookFooter = ({
               fontWeight: 'bold',
               color: index == 0 ? '#555' : '#FFF',
             }}>
-            Previous Volume
+            Next Volume
           </Text>
         </TouchableOpacity>
-      ) : (
-        <View />
-      )}
-      <TouchableOpacity
-        onPress={() => {
-          setViewAll(!ViewAll);
-        }}>
-        <Ionicons
-          name={ViewAll ? 'book-outline' : 'grid-outline'}
-          size={24}
-          color="#fff"
-          style={{marginRight: 10}}
-        />
-      </TouchableOpacity>
-      {index !== ComicBook?.volumes.length - 1 ? (
-        showButton ? (
-          <TouchableOpacity
-            onPress={() => {
-              if (index < ComicBook?.volumes.length - 1) {
-                navigation.replace(NAVIGATION.comicBook, {
-                  comicBookLink: ComicBook?.volumes[index + 1].link,
-                });
-              }
-            }}>
-            <Text
-              style={{
-                fontSize: heightPercentageToDP('1.8%'),
-                fontWeight: 'bold',
-                color: '#FFF',
-              }}>
-              Next Volume
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <View />
-        )
       ) : (
         <View />
       )}
