@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,43 +9,44 @@ import {
   Platform,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
-  InterstitialAd,
+  RewardedAd,
+  RewardedAdEventType,
   TestIds,
 } from 'react-native-google-mobile-ads';
 import {
-  android_admob_interstitial_unit_id_download,
-  ios_admob_interstitial_unit_id_download,
+  android_admob_reward_unit_id_download,
+  ios_admob_reward_unit_id_download,
 } from '@env';
 
-import { navigate } from '../../Navigation/NavigationService';
+import {navigate} from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
-import { updateData } from '../../Redux/Reducers';
-import { NAVIGATION } from '../../Constants';
+import {updateData} from '../../Redux/Reducers';
+import {NAVIGATION} from '../../Constants';
 import Image from './Image';
-import { downloadComicBook } from '../../Redux/Actions/Download';
-import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
+import {downloadComicBook} from '../../Redux/Actions/Download';
+import {fetchComicBook} from '../../Redux/Actions/GlobalActions';
 
 const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
+  ? TestIds.REWARDED
   : Platform.OS === 'ios'
-    ? ios_admob_interstitial_unit_id_download
-    : android_admob_interstitial_unit_id_download;
+  ? ios_admob_reward_unit_id_download
+  : android_admob_reward_unit_id_download;
 
-const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+const rewarded = RewardedAd.createForAdRequest(adUnitId);
 
-const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
+const ChaptersView = ({chapter, Bookmark, ComicDetail}) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[chapter.link]);
   const isComicDownload = Boolean(
     useSelector(
       state =>
         state?.data?.DownloadComic?.[ComicDetail?.link]?.comicBooks?.[
-        chapter?.link
+          chapter?.link
         ],
     ),
   );
@@ -54,13 +55,32 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const [OpenModal, setOpenModal] = useState(null);
   const [LoadingStatus, setLoadStatus] = useState(false);
 
-
   useEffect(() => {
-    interstitial.load();
+    const unsubscribeLoaded = rewarded.addAdEventListener(
+      RewardedAdEventType.LOADED,
+      () => {
+        console.log('Ad loaded');
+      },
+    );
+    const unsubscribeEarned = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      reward => {
+        console.log('User earned reward of ', reward);
+      },
+    );
+
+    // Start loading the rewarded ad straight away
+    rewarded.load();
+
+    // Unsubscribe from events on unmount
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+    };
   }, [LoadingStatus]);
 
   const loadAdd = async () => {
-    interstitial.show();
+    rewarded.show();
   };
 
   const RemoveBookMark = (link, removeItem) => {
@@ -72,7 +92,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
     dispatch(
       updateData({
         url: link,
-        data: { BookmarkPages: NewBookmarksList },
+        data: {BookmarkPages: NewBookmarksList},
       }),
     );
   };
@@ -91,12 +111,11 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
     dispatch(
       downloadComicBook({
         comicDetails: ComicDetail,
-        comicBook: { ...data, link: chapter.link },
+        comicBook: {...data, link: chapter.link},
         setLoadStatus,
       }),
     );
   };
-
 
   if (Bookmark) {
     if (!numbersBookmarks) return null;
@@ -122,7 +141,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
               });
             }}
             numberOfLines={2}
-            style={[styles.label, { width: '70%' }]}>
+            style={[styles.label, {width: '70%'}]}>
             {chapter.title}
           </Text>
           <View
@@ -145,14 +164,14 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
         <FlatList
           horizontal
           data={Bookmarks}
-          contentContainerStyle={{ gap: 12, marginVertical: 12 }}
+          contentContainerStyle={{gap: 12, marginVertical: 12}}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
+          renderItem={({item, index}) => {
             let comicImage = ComicBook?.images[item];
             return (
               <TouchableOpacity
                 onPress={() => {
-                  setOpenModal({ index, item });
+                  setOpenModal({index, item});
                 }}
                 style={{
                   borderRadius: 5,
@@ -164,7 +183,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
                   height: 100,
                 }}>
                 <Image
-                  source={{ uri: comicImage }}
+                  source={{uri: comicImage}}
                   style={{
                     width: 100,
                     height: 100,
@@ -197,10 +216,10 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
         });
       }}
       style={styles.chapter}>
-      <Text style={[styles.label, { width: '80%' }]}>
+      <Text style={[styles.label, {width: '80%'}]}>
         {chapter?.title}
         {chapter?.date ? ` (${chapter?.date.split('/')[2]})` : ''}
-        <Text style={{ color: 'steelblue' }}>
+        <Text style={{color: 'steelblue'}}>
           {ComicBook
             ? ` - (${ComicBook?.lastReadPage + 1}/${ComicBook?.images.length})`
             : ''}
@@ -229,7 +248,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
           }}
         />
       )}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
+      <View style={{flexDirection: 'row', gap: 12}}>
         {!numbersBookmarks ? null : (
           <View
             style={{
