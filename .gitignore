@@ -93,3 +93,6 @@ app.json
 
 #ignore .env file
 .env
+
+## Ignore Manga Folder
+**/Manga/*
