@@ -1,18 +1,19 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {Search, Settings} from '../Screens';
-import {NAVIGATION} from '../Constants';
-import {useSelector} from 'react-redux';
-import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
-import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
-import {View, StyleSheet} from 'react-native';
+import { Search, Settings } from '../Screens';
+import { NAVIGATION } from '../Constants';
+import { useSelector } from 'react-redux';
+import { AnimeBookmarks, AnimeHome } from '../Screens/Anime';
+import { ComicBookmarks, Home, OfflineComic } from '../Screens/Comic';
+import { View, StyleSheet } from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
+import { MangaHome } from '../Screens/Manga/Home/Home';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -108,7 +109,7 @@ export function BottomNavigation() {
         name={NAVIGATION.home}
         component={downTime ? DownTime : animeActive ? AnimeHome : Home}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
           ),
         }}
@@ -118,17 +119,17 @@ export function BottomNavigation() {
         name={NAVIGATION.search}
         component={Search}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="search" />
           ),
         }}
       />
-
+      
       <BottomTab.Screen
         name={NAVIGATION.bookmarks}
         component={animeActive ? AnimeBookmarks : ComicBookmarks}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon
               focused={focused}
               tintColor={color}
@@ -143,7 +144,7 @@ export function BottomNavigation() {
           name={NAVIGATION.offlineComic}
           component={OfflineComic}
           options={{
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -158,7 +159,7 @@ export function BottomNavigation() {
         name={NAVIGATION.settings}
         component={Settings}
         options={{
-          tabBarIcon: ({focused, color}) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} tintColor={color} name="settings" />
           ),
         }}

@@ -29,7 +29,7 @@ APICaller.interceptors.response.use(
     // Stop the trace when the response is received
     const {httpMetric} = response.config.metadata;
 
-    console.log(response, 'response', httpMetric);
+    // console.log(response, 'response', httpMetric);
     
 
     httpMetric.setHttpResponseCode(response.status);
