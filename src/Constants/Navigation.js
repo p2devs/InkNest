@@ -1,4 +1,3 @@
-
 export const NAVIGATION = {
   splash: 'Splash',
   home: 'Home',
@@ -8,6 +7,7 @@ export const NAVIGATION = {
   search: 'Search',
   bookmarks: 'History',
   settings: 'Settings',
+  sources: 'Sources',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
   update: 'Update',
@@ -17,6 +17,6 @@ export const NAVIGATION = {
   mangaBook: 'MangaBook',
   mangaSearch: 'MangaSearch',
   mangaViewAll: 'MangaViewAll',
-  ViewAll: "ViewAll",
-  offlineComic: "Offline",
+  ViewAll: 'ViewAll',
+  offlineComic: 'Offline',
 };
