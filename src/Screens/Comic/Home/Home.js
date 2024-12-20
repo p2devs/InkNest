@@ -13,10 +13,9 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import crashlytics from '@react-native-firebase/crashlytics';
+import Feather from 'react-native-vector-icons/Feather';
 
-import {
-  fetchComicsData,
-} from '../../../Components/Func/HomeFunc';
+import {fetchComicsData} from '../../../Components/Func/HomeFunc';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import {
   heightPercentageToDP,
@@ -28,6 +27,7 @@ import Image from '../../../Components/UIComp/Image';
 import ErrorCard from '../../../Components/UIComp/ErrorCard';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 import GridList from '../../../Components/UIComp/GridList';
+import {NAVIGATION} from '../../../Constants';
 
 export function Home({navigation}) {
   const dispatch = useDispatch();
@@ -119,6 +119,14 @@ export function Home({navigation}) {
               {'InkNest Comics'}
             </Text>
           </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(NAVIGATION.search)}>
+            <Feather
+              name={'search'}
+              size={heightPercentageToDP('2.5%')}
+              color={'#FFF'}
+            />
+          </TouchableOpacity>
         </Header>
         {!loading && !comicsData?.data?.length && error ? (
           <View
