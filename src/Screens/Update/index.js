@@ -1,30 +1,23 @@
-import axios from 'axios';
-import React, {useLayoutEffect, useState} from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
-import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import React, { useLayoutEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Markdown from '../../Components/UIComp/MarkDown';
 import Header from '../../Components/UIComp/Header';
+import { getReleases } from '../../Components/Func/getReleases';
 
-const UpdateScreen = ({navigation}) => {
-  const [updateLogs, setUpdateLogs] = useState([]);
+const UpdateScreen = ({ navigation }) => {
+  const [updateLogs, setLogs] = useState([]);
   const [selected, setSelected] = useState(-1);
+
   useLayoutEffect(() => {
-    axios
-      .get('https://api.github.com/repos/p2devs/InkNest/releases')
-      .then(response => {
-        setUpdateLogs(response.data);
-      })
-      .catch(error => {
-        Alert.alert('Error', 'Failed to fetch update logs');
-        navigation.goBack();
-        console.log(error);
-      });
+    getReleases(setLogs, navigation);
   }, []);
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
       <Header
         style={{
           width: '100%',
@@ -46,7 +39,7 @@ const UpdateScreen = ({navigation}) => {
             name="chevron-back"
             size={hp('3%')}
             color="#fff"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
         <Text
@@ -89,7 +82,7 @@ const UpdateScreen = ({navigation}) => {
 
           {updateLogs.map((log, index) => {
             return (
-              <View key={index} style={{marginBottom: 10}}>
+              <View key={index} style={{ marginBottom: 10 }}>
                 <Text
                   onPress={() => {
                     if (selected == index) {
@@ -99,9 +92,9 @@ const UpdateScreen = ({navigation}) => {
                     }
                   }}
                   style={[
-                    {fontSize: hp('2%'), color: '#FFF', fontWeight: 'bold'},
+                    { fontSize: hp('2%'), color: '#FFF', fontWeight: 'bold' },
                     selected == index
-                      ? {fontSize: hp('3%'), color: 'gold'}
+                      ? { fontSize: hp('3%'), color: 'gold' }
                       : null,
                   ]}>
                   {log.name}

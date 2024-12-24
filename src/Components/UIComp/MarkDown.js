@@ -12,10 +12,16 @@ const parseMarkdown = (text) => {
             return <Text key={index} style={styles.h2}>{line.substring(3)}</Text>;
         } else if (line.startsWith('### ')) {
             return <Text key={index} style={styles.h3}>{line.substring(4)}</Text>;
+        } else if (line.startsWith('**') && line.includes('**')) {
+            return <Text key={index} style={styles.bold}>{line.replaceAll('**', '')}</Text>;
         } else if (line.startsWith('* ')) {
             return <Text key={index} style={styles.listItem}>{'\u2022'} {line.substring(2)}</Text>;
         } else if (line.startsWith('- ')) {
             return <Text key={index} style={styles.listItem}>{'\u2022'} {line.substring(2)}</Text>;
+        } else if (line.startsWith('   - ')) {
+            return <Text key={index} style={styles.subListItem}>{'\u2219'} {line.substring(4)}</Text>;
+        } else if (line.startsWith('      - ')) {
+            return <Text key={index} style={styles.subSubListItem}>{'\u2023'} {line.substring(7)}</Text>;
         } else if (line.startsWith('> ')) {
             return <Text key={index} style={styles.blockquote}>{line.substring(2)}</Text>;
         } else if (line.startsWith('```')) {
@@ -26,8 +32,7 @@ const parseMarkdown = (text) => {
             const url = line.substring(endIndex + 2, line.length - 1);
             return <Text key={index} style={styles.link} onPress={() => Linking.openURL(url)}> {text}</Text >;
         } else {
-            return <Text key={index} style={styles.paragraph
-            } > {line}</Text >;
+            return <Text key={index} style={styles.paragraph} > {line}</Text >;
         }
     });
 
@@ -50,30 +55,43 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
     },
     h2: {
         color: "white",
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
     },
     h3: {
         color: "white",
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
     },
     paragraph: {
         color: "white",
         fontSize: 16,
-        marginBottom: 10,
+    },
+    bold: {
+        fontWeight: 'bold',
+        color: "white",
+        fontSize: 16,
     },
     listItem: {
         color: "white",
         fontSize: 16,
         marginBottom: 5,
-        paddingLeft: 20,
+        paddingLeft: 15,
+    },
+    subListItem: {
+        color: "white",
+        fontSize: 16,
+        marginBottom: 5,
+        paddingLeft: 30,
+    },
+    subSubListItem: {
+        color: "white",
+        fontSize: 16,
+        marginBottom: 5,
+        paddingLeft: 50,
     },
     blockquote: {
         color: "white",
@@ -82,7 +100,6 @@ const styles = StyleSheet.create({
         borderLeftWidth: 4,
         borderLeftColor: '#ddd',
         paddingLeft: 10,
-        marginBottom: 10,
     },
     codeBlock: {
         color: "white",
@@ -90,7 +107,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#f4f4f4',
         padding: 10,
         borderRadius: 5,
-        marginBottom: 10,
     },
     link: {
         color: 'steelblue',

@@ -28,10 +28,7 @@ APICaller.interceptors.response.use(
   async response => {
     // Stop the trace when the response is received
     const {httpMetric} = response.config.metadata;
-
-    console.log(response, 'response', httpMetric);
     
-
     httpMetric.setHttpResponseCode(response.status);
     httpMetric.setResponseContentType(response.headers['content-type']);
 
