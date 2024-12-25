@@ -1,4 +1,3 @@
-
 export const NAVIGATION = {
   splash: 'Splash',
   home: 'Home',
@@ -7,6 +6,7 @@ export const NAVIGATION = {
   search: 'Search',
   bookmarks: 'History',
   settings: 'Settings',
+  sources: 'Sources',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
   update: 'Update',
