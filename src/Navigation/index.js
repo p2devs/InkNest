@@ -10,6 +10,8 @@ import messaging from '@react-native-firebase/messaging';
 import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
+import inAppMessaging from '@react-native-firebase/in-app-messaging';
+
 import {
   check,
   request,
@@ -84,6 +86,17 @@ export function RootNavigation() {
   }
 
   /**
+   * Enables the reception of in-app messages by disabling message display suppression.
+   *
+   * @async
+   * @function allowToReceiveInAppMessages
+   * @returns {Promise<void>} Resolves when in-app messages can be received.
+   */
+  async function allowToReceiveInAppMessages() {
+    await inAppMessaging().setMessagesDisplaySuppressed(false);
+  }
+
+  /**
    * Enables analytics collection for the application.
    *
    * This function asynchronously sets the analytics collection to be enabled
@@ -123,6 +136,7 @@ export function RootNavigation() {
   }
 
   useEffect(() => {
+    allowToReceiveInAppMessages();
     requestUserPermission();
     requestAppTrackingPermission();
     if (!__DEV__) {

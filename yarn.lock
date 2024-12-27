@@ -3035,6 +3035,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/in-app-messaging@npm:^21.6.1":
+  version: 21.6.1
+  resolution: "@react-native-firebase/in-app-messaging@npm:21.6.1"
+  peerDependencies:
+    "@react-native-firebase/analytics": 21.6.1
+    "@react-native-firebase/app": 21.6.1
+  checksum: e086fb9319ab79c8300a2a3461c5af2db7e881f49a71790feb0a16d1a77420a5dc43f29ed74078e56b040c1058782b80b927511736190bd52e25f3d4513fdc90
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/messaging@npm:^21.4.0":
   version: 21.4.0
   resolution: "@react-native-firebase/messaging@npm:21.4.0"
@@ -4002,6 +4012,7 @@ __metadata:
     "@react-native-firebase/analytics": ^21.4.0
     "@react-native-firebase/app": ^21.4.0
     "@react-native-firebase/crashlytics": ^21.4.0
+    "@react-native-firebase/in-app-messaging": ^21.6.1
     "@react-native-firebase/messaging": ^21.4.0
     "@react-native-firebase/perf": ^21.4.0
     "@react-native-picker/picker": ^2.9.0
