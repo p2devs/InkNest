@@ -61,6 +61,9 @@ PODS:
   - Firebase/Crashlytics (11.4.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 11.4.0)
+  - Firebase/InAppMessaging (11.4.0):
+    - Firebase/CoreOnly
+    - FirebaseInAppMessaging (~> 11.4.0-beta)
   - Firebase/Messaging (11.4.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 11.4.0)
@@ -104,6 +107,13 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
+  - FirebaseInAppMessaging (11.4.0-beta):
+    - FirebaseABTesting (~> 11.0)
+    - FirebaseCore (~> 11.0)
+    - FirebaseInstallations (~> 11.0)
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - nanopb (~> 3.30910.0)
   - FirebaseInstallations (11.4.0):
     - FirebaseCore (~> 11.0)
     - GoogleUtilities/Environment (~> 8.0)
@@ -1926,6 +1936,10 @@ PODS:
     - FirebaseCoreExtension (<= 11.4.0)
     - React-Core
     - RNFBApp
+  - RNFBInAppMessaging (21.6.1):
+    - Firebase/InAppMessaging (= 11.4.0)
+    - React-Core
+    - RNFBApp
   - RNFBMessaging (21.4.0):
     - Firebase/Messaging (<= 11.4.0)
     - FirebaseCoreExtension (<= 11.4.0)
@@ -2256,6 +2270,7 @@ DEPENDENCIES:
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
+  - "RNFBInAppMessaging (from `../node_modules/@react-native-firebase/in-app-messaging`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - "RNFBPerf (from `../node_modules/@react-native-firebase/perf`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -2275,6 +2290,7 @@ SPEC REPOS:
     - FirebaseCoreExtension
     - FirebaseCoreInternal
     - FirebaseCrashlytics
+    - FirebaseInAppMessaging
     - FirebaseInstallations
     - FirebaseMessaging
     - FirebasePerformance
@@ -2445,6 +2461,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBCrashlytics:
     :path: "../node_modules/@react-native-firebase/crashlytics"
+  RNFBInAppMessaging:
+    :path: "../node_modules/@react-native-firebase/in-app-messaging"
   RNFBMessaging:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNFBPerf:
@@ -2478,6 +2496,7 @@ SPEC CHECKSUMS:
   FirebaseCoreExtension: 4445e4cd877e0790c4af33bedca61eaef27b7513
   FirebaseCoreInternal: f47dd28ae7782e6a4738aad3106071a8fe0af604
   FirebaseCrashlytics: 41bbdd2b514a8523cede0c217aee6ef7ecf38401
+  FirebaseInAppMessaging: 711d4357e9e6cfab5123f67ce1ea1f63bbb6442d
   FirebaseInstallations: 6ef4a1c7eb2a61ee1f74727d7f6ce2e72acf1414
   FirebaseMessaging: f8a160d99c2c2e5babbbcc90c4a3e15db036aee2
   FirebasePerformance: 89f9e52ea9d86d1819cde923a7ca397743df8593
@@ -2563,6 +2582,7 @@ SPEC CHECKSUMS:
   RNFBAnalytics: e4b4e0d20810d12309e5522432fbf4c0f2b2c2e1
   RNFBApp: 21cbda2e7d2657cd3c92f490c050f5f0905d2ff0
   RNFBCrashlytics: 1f0f79d23fc26cebc5325edf685f69bb5b9493e2
+  RNFBInAppMessaging: 1500674838d6f688f8dac648b16b9cad3898505d
   RNFBMessaging: 5bc9395c4d411f0411e6ea939dd61fd5247a3db8
   RNFBPerf: 816ff369b041978ab7a10dcbdafff0e88dc6b39c
   RNGestureHandler: 1e33ee267aaf61bbab6089d32df3b38c3024e3dd

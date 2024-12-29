@@ -13,6 +13,7 @@
     "messaging_auto_init_enabled": true,
     "messaging_android_notification_channel_id": "high-priority",
     "perf_auto_collection_enabled": false,
-    "google_analytics_automatic_screen_reporting_enabled": true
+    "google_analytics_automatic_screen_reporting_enabled": true,
+    "in_app_messaging_auto_collection_enabled": true
   }
 }
