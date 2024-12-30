@@ -106,8 +106,16 @@ const Reducers = createSlice({
     },
     DownloadComicBook: (state, action) => {
       const { link, data, title, } = action.payload;
-      
+
       state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
+    },
+    DeleteDownloadedComicBook: (state, action) => {
+      const { comicBooksLink, ChapterLink } = action.payload;
+      delete state.DownloadComic[comicBooksLink]?.comicBooks[ChapterLink];
+      if (Object.keys(state.DownloadComic[comicBooksLink]?.comicBooks).length === 0) {
+        delete state.DownloadComic[comicBooksLink];
+      }
+
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
@@ -173,5 +181,6 @@ export const {
   AddAnimeBookMark,
   RemoveAnimeBookMark,
   DownloadComicBook,
+  DeleteDownloadedComicBook
 } = Reducers.actions;
 export default Reducers.reducer;

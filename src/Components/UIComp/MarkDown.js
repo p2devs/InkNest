@@ -29,7 +29,8 @@ const parseMarkdown = (text) => {
         } else if (line.startsWith('[') && line.includes('](')) {
             const endIndex = line.indexOf('](');
             const text = line.substring(1, endIndex);
-            const url = line.substring(endIndex + 2, line.length - 1);
+            const url = line.substring(endIndex + 2, line.length - 1).replace(/[()]/g, '')
+            
             return <Text key={index} style={styles.link} onPress={() => Linking.openURL(url)}> {text}</Text >;
         } else {
             return <Text key={index} style={styles.paragraph} > {line}</Text >;
