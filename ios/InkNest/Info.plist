@@ -34,6 +34,10 @@
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+    	<true/>
+    	<key>NSAllowsArbitraryLoadsInWebContent</key>
+    	<true/>
 	</dict>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We will be used to deliver personalized ads to you.</string>
