@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,31 +11,30 @@ import {
   StyleSheet,
   Share,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import { getVersion, getBuildNumber } from 'react-native-device-info';
+import {getVersion, getBuildNumber} from 'react-native-device-info';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { NAVIGATION } from '../../Constants';
+import {NAVIGATION} from '../../Constants';
 import Header from '../../Components/UIComp/Header';
-import { useDispatch, useSelector } from 'react-redux';
-import { AnimeHostName, ComicHostName } from '../../Utils/APIs';
-import { SwtichBaseUrl, SwtichToAnime } from '../../Redux/Reducers';
+import {useDispatch, useSelector} from 'react-redux';
+import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
+import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
+import {showRewardedAd} from '../../Redux/Actions/Download';
 
-const appInstanceId = analytics().getAppInstanceId() ?? 'unknown';
-
-export function Settings({ navigation }) {
+export function Settings({navigation}) {
   let Tag = View;
   const dispatch = useDispatch();
   const [SwitchServer, setSwitchServer] = useState(null);
@@ -53,7 +52,7 @@ export function Settings({ navigation }) {
     }
     navigation.reset({
       index: 0,
-      routes: [{ name: NAVIGATION.home }],
+      routes: [{name: NAVIGATION.home}],
     });
   };
   const ServerSwitch = async url => {
@@ -64,7 +63,7 @@ export function Settings({ navigation }) {
       () => {
         navigation.reset({
           index: 0,
-          routes: [{ name: NAVIGATION.home }],
+          routes: [{name: NAVIGATION.home}],
         });
         clearTimeout(timer);
       },
@@ -73,7 +72,7 @@ export function Settings({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <Header title="Settings" />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -89,8 +88,7 @@ export function Settings({ navigation }) {
             alignItems: 'center',
           }}
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('about_us', {
               item: 'About us screen',
             });
             navigation.navigate(NAVIGATION.aboutUs);
@@ -99,7 +97,7 @@ export function Settings({ navigation }) {
             name="information-circle-outline"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -113,8 +111,7 @@ export function Settings({ navigation }) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('update_screen', {
               item: 'Update screen',
             });
             navigation.navigate(NAVIGATION.update);
@@ -133,7 +130,7 @@ export function Settings({ navigation }) {
             name="update"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -147,8 +144,7 @@ export function Settings({ navigation }) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('storage_usage', {
               item: 'Storage usage screen',
             });
             Linking.openSettings();
@@ -168,7 +164,7 @@ export function Settings({ navigation }) {
             name="database"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
           <Text
             style={{
@@ -192,12 +188,12 @@ export function Settings({ navigation }) {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{flexDirection: 'row'}}>
             <MaterialIcons
               name="burst-mode"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 4 }}
+              style={{marginRight: 4}}
             />
             <Text
               style={{
@@ -215,17 +211,17 @@ export function Settings({ navigation }) {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <Text style={{ color: '#000', fontSize: 18, fontWeight: 'bold' }}>
+            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
               Comic
             </Text>
             <Switch
-              trackColor={{ false: '#32de84', true: '#81b0ff' }}
+              trackColor={{false: '#32de84', true: '#81b0ff'}}
               thumbColor={!Anime ? '#66FF00' : '#007AFF'}
               ios_backgroundColor={!Anime ? '#32de84' : '#81b0ff'}
               onValueChange={SwitchAnimeToggle}
               value={Anime}
             />
-            <Text style={{ color: '#000', fontSize: 18, fontWeight: 'bold' }}>
+            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
               Anime
             </Text>
           </View>
@@ -233,8 +229,7 @@ export function Settings({ navigation }) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('server_switch', {
               item: 'Switch Server screen',
             });
             setSwitchServer(baseUrl);
@@ -261,7 +256,7 @@ export function Settings({ navigation }) {
               name="language"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 4 }}
+              style={{marginRight: 4}}
             />
             <Text
               style={{
@@ -293,8 +288,7 @@ export function Settings({ navigation }) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('discord_open', {
               item: 'Discord Invite screen',
             });
             Linking.openURL('https://discord.gg/WYwJefvWNT');
@@ -310,12 +304,12 @@ export function Settings({ navigation }) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{flexDirection: 'row'}}>
             <MaterialIcons
               name="discord"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
             <Text
               style={{
@@ -330,13 +324,12 @@ export function Settings({ navigation }) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('privacy_policy_open', {
               item: 'Privacy Policy screen',
             });
             Linking.openURL('https://2hub.live/InkNest/Privacy-Policy');
@@ -352,12 +345,12 @@ export function Settings({ navigation }) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{flexDirection: 'row'}}>
             <MaterialIcons
               name="policy"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
             <Text
               style={{
@@ -372,13 +365,12 @@ export function Settings({ navigation }) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('user_clicked', {
-              userID: appInstanceId,
+            await analytics().logEvent('share_app', {
               item: 'Share App screen',
             });
             Share.share({
@@ -403,12 +395,12 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{flexDirection: 'row'}}>
             <Entypo
               name="slideshare"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
             <Text
               style={{
@@ -423,12 +415,16 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => {
+            analytics().logEvent('open_manga', {
+              item: 'Open_Manga',
+            });
+            showRewardedAd();
             navigation.navigate(NAVIGATION.homeManga);
           }}
           style={{
@@ -442,12 +438,12 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{flexDirection: 'row'}}>
             <Entypo
               name="open-book"
               size={hp('2.5%')}
               color="#000"
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
             <Text
               style={{
@@ -462,13 +458,13 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{ marginRight: 10 }}
+            style={{marginRight: 10}}
           />
         </TouchableOpacity>
       </ScrollView>
       <View
-        style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: 'silver', fontSize: 13 }}>
+        style={{padding: 10, alignItems: 'center', justifyContent: 'center'}}>
+        <Text style={{color: 'silver', fontSize: 13}}>
           V {getVersion()} - {getBuildNumber()}
         </Text>
       </View>
@@ -506,7 +502,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             width: '100%',
             borderRadius: 12,
           }}>
-          <View style={{ flexGrow: 1, zIndex: 10 }}>
+          <View style={{flexGrow: 1, zIndex: 10}}>
             <View
               style={{
                 flexDirection: 'row',
@@ -516,7 +512,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                 borderBottomWidth: 0.5,
                 borderColor: '#fff',
               }}>
-              <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
+              <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
                 Server List
               </Text>
               <TouchableOpacity
@@ -548,7 +544,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                     : Object.keys(ComicHostName)
                 }
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item, index }) => (
+                renderItem={({item, index}) => (
                   <TouchableOpacity
                     onPress={() => {
                       ServerSwitch(item);
@@ -586,7 +582,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                       <Text
                         style={[
                           styles.link,
-                          { color: baseUrl == item ? '#66FF00' : 'gold' },
+                          {color: baseUrl == item ? '#66FF00' : 'gold'},
                         ]}>
                         {item.toLocaleUpperCase()}
                       </Text>
@@ -594,7 +590,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                   </TouchableOpacity>
                 )}
                 ListFooterComponent={
-                  <View style={{ marginVertical: hp('6%') }} />
+                  <View style={{marginVertical: hp('6%')}} />
                 }
               />
             </View>
