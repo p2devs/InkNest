@@ -375,7 +375,6 @@ export function Settings({ navigation }) {
             style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={async () => {
             await analytics().logEvent('user_clicked', {
@@ -428,6 +427,44 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
           />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate(NAVIGATION.homeManga);
+          }}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: 'row' }}>
+            <Entypo
+              name="open-book"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Manga reader
+            </Text>
+          </View>
+          <Feather
+            name="arrow-up-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
       </ScrollView>
       <View
         style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>

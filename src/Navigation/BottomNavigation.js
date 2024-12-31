@@ -13,6 +13,7 @@ import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
 import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
+import {MangaHome} from '../Screens/Manga/Home/Home';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -27,14 +28,6 @@ const BottomTab = createBottomTabNavigator();
  */
 const TabBarIcon = props => {
   if (props.name === 'home') {
-    return (
-      <Feather
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
-    );
-  } else if (props.name === 'search') {
     return (
       <Feather
         name={props.name}
@@ -110,16 +103,6 @@ export function BottomNavigation() {
         options={{
           tabBarIcon: ({focused, color}) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
-          ),
-        }}
-      />
-
-      <BottomTab.Screen
-        name={NAVIGATION.search}
-        component={Search}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon focused={focused} tintColor={color} name="search" />
           ),
         }}
       />

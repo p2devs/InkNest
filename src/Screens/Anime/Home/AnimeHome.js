@@ -1,9 +1,10 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react';
-import {Text, View, FlatList} from 'react-native';
+import {Text, View, FlatList, TouchableOpacity} from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import crashlytics from '@react-native-firebase/crashlytics';
+import Feather from 'react-native-vector-icons/Feather';
 
 import {FetchAnimeData} from '../../../Components/Func/HomeFunc';
 import {NAVIGATION} from '../../../Constants';
@@ -130,6 +131,14 @@ export function AnimeHome({navigation}) {
             }}>
             InkNest Anime
           </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(NAVIGATION.search)}>
+            <Feather
+              name={'search'}
+              size={heightPercentageToDP('2.5%')}
+              color={'#FFF'}
+            />
+          </TouchableOpacity>
         </Header>
 
         <View

@@ -20,6 +20,7 @@ import {
 } from 'react-native-responsive-screen';
 
 import analytics from '@react-native-firebase/analytics';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchSearchComic} from '../../Redux/Actions/GlobalActions';
@@ -201,7 +202,38 @@ export function Search({navigation}) {
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
       <View style={styles.container}>
-        <Header title="Search Bot" />
+        <Header
+          style={{
+            width: '100%',
+            height: heightPercentageToDP('4%'),
+            backgroundColor: '#222',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+            borderBottomColor: '#fff',
+            borderBottomWidth: 0.5,
+            marginBottom: 5,
+          }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons
+              name={'arrow-back'}
+              size={heightPercentageToDP('2.5%')}
+              color={'#FFF'}
+            />
+          </TouchableOpacity>
+          <View style={{flexDirection: 'row', gap: 12}}>
+            <Text
+              style={{
+                fontSize: heightPercentageToDP('2%'),
+                fontWeight: 'bold',
+                color: '#FFF',
+              }}>
+              {'Search'}
+            </Text>
+          </View>
+          <View style={{flex: 0.1}} />
+        </Header>
         <View
           style={{
             paddingHorizontal: widthPercentageToDP('2%'),

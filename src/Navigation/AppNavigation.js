@@ -1,7 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {NAVIGATION} from '../Constants';
-import {AboutUs} from '../Screens';
+import {AboutUs, Search} from '../Screens';
 import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import AnimeVideo from '../Screens/Anime/Video';
@@ -9,6 +9,11 @@ import {useSelector} from 'react-redux';
 import {Details} from '../Screens/Anime';
 import {ComicBook, ComicDetails} from '../Screens/Comic';
 import {ViewAll} from '../Screens/Anime/Home/ViewAll';
+import {MangaDetails} from '../Screens/Manga/Details/MangaDetails';
+import {MangaBook} from '../Screens/Manga/Book/MangaBook';
+import {MangaHome} from '../Screens/Manga/Home/Home';
+import MangaSearch from '../Screens/Manga/Search/Search';
+import {MangaViewAll} from '../Screens/Manga/Home/ViewAll';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,7 +41,13 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.update} component={UpdateScreen} />
       <Stack.Screen name={NAVIGATION.animeVideo} component={AnimeVideo} />
       <Stack.Screen name={NAVIGATION.animeDetails} component={Details} />
+      <Stack.Screen name={NAVIGATION.mangaDetails} component={MangaDetails} />
+      <Stack.Screen name={NAVIGATION.mangaBook} component={MangaBook} />
       <Stack.Screen name={NAVIGATION.ViewAll} component={ViewAll} />
+      <Stack.Screen name={NAVIGATION.homeManga} component={MangaHome} />
+      <Stack.Screen name={NAVIGATION.mangaViewAll} component={MangaViewAll} />
+      <Stack.Screen name={NAVIGATION.mangaSearch} component={MangaSearch} />
+      <Stack.Screen name={NAVIGATION.search} component={Search} />
     </Stack.Navigator>
   );
 }
