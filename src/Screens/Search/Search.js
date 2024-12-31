@@ -229,7 +229,7 @@ export function Search({navigation}) {
                 fontWeight: 'bold',
                 color: '#FFF',
               }}>
-              {'Search Bot'}
+              {'Search'}
             </Text>
           </View>
           <View style={{flex: 0.1}} />

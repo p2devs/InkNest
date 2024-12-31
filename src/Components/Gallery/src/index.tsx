@@ -89,6 +89,9 @@ const defaultRenderImage = ({
         url: item,
         progressiveLoadingEnabled: true,
         allowHardware: true,
+        headers: {
+          Referer: item,
+        }
       }}
       style={StyleSheet.absoluteFillObject}
     />
