@@ -7,18 +7,23 @@ const DescriptionView = ({ vol, index }) => {
     }
     return (
         <React.Fragment key={index}>
-            <Text style={styles.volume}><Text style={styles.label}>{vol.volume}:</Text> {vol.description}</Text>
+
+            <Text style={styles.description}><Text style={styles.label}>{vol.volume}:</Text> {vol.description}</Text>
         </React.Fragment>
     );
 }
 
 const styles = StyleSheet.create({
     label: {
+        fontSize: 14,
         fontWeight: 'bold',
+        color: 'rgba(255, 255, 255, 0.5)',
     },
-    volume: {
-        fontSize: 16,
+    description: {
+        fontSize: 12,
         marginBottom: 10,
+        color: 'rgba(255, 255, 255, 0.5)',
+
     },
 });
 
