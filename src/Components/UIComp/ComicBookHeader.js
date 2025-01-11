@@ -3,7 +3,7 @@ import {View, Text, TouchableOpacity, Image} from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Feather from 'react-native-vector-icons/Feather';
 
 import {updateData} from '../../Redux/Reducers';
 import {goBack} from '../../Navigation/NavigationService';
@@ -18,13 +18,11 @@ const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
         position: 'absolute',
         width: '100%',
         height: heightPercentageToDP('4%'),
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'transparent',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 12,
-        borderBottomColor: '#fff',
-        borderBottomWidth: 0.5,
         marginBottom: 5,
       }}>
       <TouchableOpacity
@@ -33,17 +31,19 @@ const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
         }}
         style={{flexDirection: 'row', alignItems: 'center'}}>
         <Ionicons
-          name="chevron-back"
-          size={30}
+          name="arrow-back"
+          size={24}
           color="#fff"
-          style={{marginRight: 10}}
+          style={{marginRight: 10, opacity: 0.9}}
         />
       </TouchableOpacity>
       <Text
         style={{
-          fontSize: heightPercentageToDP('2%'),
-          fontWeight: 'bold',
-          color: '#FFF',
+          fontSize: 14,
+          fontWeight: '700',
+          textAlign: 'center',
+          color: '#fff',
+          opacity: 0.9,
         }}>
         {PageIndex + 1}/
         {showBookmark
@@ -72,12 +72,13 @@ const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
               }),
             );
           }}>
-          <FontAwesome6
-            name="book-bookmark"
+          <Feather
+            name="bookmark"
             size={24}
             color={
               ComicBook?.BookmarkPages?.includes(PageIndex) ? 'yellow' : '#FFF'
             }
+            style={{opacity: 0.9}}
           />
         </TouchableOpacity>
       ) : (

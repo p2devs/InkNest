@@ -93,6 +93,15 @@ export const fetchComicDetails =
       dispatch(fetchDataStart());
       try {
         let Data = getState().data.dataByUrl[link];
+
+        let watchedData = {
+          title: Data?.title,
+          link,
+          image: Data?.imgSrc,
+          publisher: Data?.publisher,
+          genres: Data?.genres,
+          lastOpenAt: new Date().getTime(),
+        };
         //if link contant readallcomics.com then set baseUrl to readallcomics
         let checkUrl = link.includes('readallcomics.com')
           ? 'readallcomics'
@@ -101,6 +110,7 @@ export const fetchComicDetails =
           dispatch(StopLoading());
           dispatch(ClearError());
           dispatch(checkDownTime());
+          dispatch(WatchedData(watchedData));
           return;
         }
         // console.log(link, "link");
@@ -198,11 +208,13 @@ export const fetchComicDetails =
         }
 
         // console.log({ data }, "Data");
-        let watchedData = {
+        watchedData = {
           title: comicDetails.title,
           link,
-          imageUrl: comicDetails.imgSrc,
+          image: comicDetails.imgSrc,
           publisher: comicDetails.publisher,
+          genres: comicDetails.genres,
+          lastOpenAt: new Date().getTime(),
         };
         if (refresh) {
           dispatch(updateData({ url: link, data: comicDetails }));
@@ -292,7 +304,11 @@ export const fetchComicBook =
           });
         }
 
-        // console.log({ imgSources, title, volumes }, "Data Comic Book");
+        let link = $('a[rel="category tag"]').attr('href');
+        if (!link) {
+          link = $('.title a').attr('href');
+        }
+
         //remove duplicates in volumes
         let unique = [
           ...new Map(volumes.map(item => [item['title'], item])).values(),
@@ -303,12 +319,12 @@ export const fetchComicBook =
           volumes: unique,
           lastReadPage: 0,
           BookmarkPages: [],
+          ComicDetailslink: link,
         };
         // console.log(data, "final data");
         // console.log({ data }, "Data");
         if (setPageLink) {
           //get the title link
-          const link = $('a[rel="category tag"]').attr('href');
           console.log(link, 'link');
           data.ComicDetailslink = link;
           setPageLink(link);

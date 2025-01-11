@@ -99,9 +99,17 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const { url, data } = action.payload;
+      const { url, data, ComicDetailslink, imageLength } = action.payload;
       //keep the old data and update the new data
       state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
+      state.history[ComicDetailslink] = {
+        ...state?.history?.[ComicDetailslink],
+        readComics: {
+          ...state?.history?.[ComicDetailslink]?.readComics,
+          [url]: { totalPage: imageLength, lastReadPage: data.lastReadPage }
+        }
+      }
+
       // state.dataByUrl[url] = data;
     },
     DownloadComicBook: (state, action) => {
