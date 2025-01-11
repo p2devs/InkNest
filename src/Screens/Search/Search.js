@@ -200,19 +200,18 @@ export function Search({navigation}) {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#14142a'}} edges={['top']}>
       <View style={styles.container}>
         <Header
           style={{
             width: '100%',
             height: heightPercentageToDP('4%'),
-            backgroundColor: '#222',
+            backgroundColor: '#14142a',
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 12,
-            borderBottomColor: '#fff',
-            borderBottomWidth: 0.5,
+            borderBottomWidth: 0,
             marginBottom: 5,
           }}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -238,7 +237,7 @@ export function Search({navigation}) {
           style={{
             paddingHorizontal: widthPercentageToDP('2%'),
             paddingVertical: heightPercentageToDP('2%'),
-            backgroundColor: '#000',
+            backgroundColor: '#14142a',
           }}>
           <View
             style={{
@@ -249,7 +248,7 @@ export function Search({navigation}) {
               borderColor: '#FFF',
               borderRadius: 12,
               alignItems: 'center',
-              backgroundColor: '#000',
+              backgroundColor: '#14142a',
             }}>
             <TextInput
               style={styles.input}
@@ -278,7 +277,7 @@ export function Search({navigation}) {
           <FlatList
             scrollsToTop
             ref={flatlistRef}
-            style={{flex: 1, backgroundColor: '#000'}}
+            style={{flex: 1, backgroundColor: '#14142a'}}
             ListEmptyComponent={
               <View
                 style={{
@@ -331,7 +330,7 @@ export function Search({navigation}) {
             showsVerticalScrollIndicator={false}
             style={{
               flex: 1,
-              backgroundColor: '#000',
+              backgroundColor: '#14142a',
             }}
             data={AnimeData}
             keyExtractor={(item, index) => index.toString()}
