@@ -27,7 +27,7 @@ import ChapterCard from './ChapterCard';
 
 export function ComicDetails({ navigation, route }) {
 
-  const { link, image, isComicBookLink } = route.params
+  const { link, image, title, isComicBookLink } = route.params
   const [PageLink, setPageLink] = useState(isComicBookLink ? null : link);
   const [tabBar, setTabBar] = useState([
     { name: 'Chapters', active: true },
@@ -76,10 +76,13 @@ export function ComicDetails({ navigation, route }) {
   // }, [readMore, description]);
 
 
+
   useEffect(() => {
     if (isComicBookLink && !PageLink) {
       dispatch(fetchComicBook(link, setPageLink));
     } else {
+      console.log("ComicDetail", PageLink);
+
       dispatch(fetchComicDetails(PageLink));
     }
   }, [PageLink]);
@@ -176,7 +179,7 @@ export function ComicDetails({ navigation, route }) {
               marginVertical: 16,
               width: widthPercentageToDP('60%'),
             }}>
-            {ComicDetail?.title}
+            {ComicDetail?.title ?? title}
           </Text>
         </View>
 
@@ -185,13 +188,14 @@ export function ComicDetails({ navigation, route }) {
             paddingHorizontal: 16,
             gap: 6,
           }}>
-          <Text
-            style={{
-              fontSize: 12,
-              color: '#fff',
-              opacity: 0.8,
-            }}>{`${ComicDetail?.genres?.toString()} · ${ComicDetail?.yearOfRelease ? ComicDetail?.yearOfRelease + " · " : ""}${ComicDetail?.status ? ComicDetail?.status + " · " : ""}By - ${ComicDetail?.publisher}`}</Text>
-
+          {
+            <Text
+              style={{
+                fontSize: 12,
+                color: '#fff',
+                opacity: 0.8,
+              }}>{`${ComicDetail?.genres ? ComicDetail?.genres?.toString() + " · " : ""}${ComicDetail?.yearOfRelease ? ComicDetail?.yearOfRelease + " · " : ""}${ComicDetail?.status ? ComicDetail?.status + " · " : ""}${ComicDetail?.publisher ? "By - " + ComicDetail?.publisher : ""}`}</Text>
+          }
           {ComicDetail?.volumes && <View>
 
             {ComicDetail?.volumes.map((vol, index) => (

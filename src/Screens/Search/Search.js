@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,9 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {NAVIGATION} from '../../Constants';
+import { NAVIGATION } from '../../Constants';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
@@ -22,14 +22,14 @@ import {
 import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchSearchComic} from '../../Redux/Actions/GlobalActions';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSearchComic } from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
+import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
 
-export function Search({navigation}) {
+export function Search({ navigation }) {
   const dispatch = useDispatch();
   const searchDatas = useSelector(state => state.data.Search);
   const loading = useSelector(state => state.data.loading);
@@ -64,21 +64,21 @@ export function Search({navigation}) {
     dispatch(fetchSearchComic(searchTerm));
     setSearchTerm('');
     //scroll to the top of the list
-    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
+    flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
   };
   useEffect(() => {
     // Scroll to the top of the list
-    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
+    flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
     return () => {
       setAnimeData([]);
       setSearchTerm('');
     };
   }, [loading]);
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }) => {
     const data = item.results ? item.results.slice(0, 10) : [];
     return (
-      <View key={index} style={{borderRadius: 12}}>
+      <View key={index} style={{ borderRadius: 12 }}>
         {item.user === 'user' ? (
           <View
             style={{
@@ -161,8 +161,8 @@ export function Search({navigation}) {
                   <TouchableOpacity
                     onPress={() => {
                       navigation.navigate(NAVIGATION.comicDetails, {
-                        PageUrl: result.href,
-                        search: true,
+                        link: result.href,
+                        title: result.title,
                       });
                     }}
                     key={index}
@@ -171,7 +171,7 @@ export function Search({navigation}) {
                       alignItems: 'center',
                       gap: 12,
                     }}>
-                    <Text style={{fontSize: 5, color: 'white', marginLeft: 12}}>
+                    <Text style={{ fontSize: 5, color: 'white', marginLeft: 12 }}>
                       {'\u2B24'}
                     </Text>
                     <Text style={styles.link}>{result.title}</Text>
@@ -200,7 +200,7 @@ export function Search({navigation}) {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#14142a'}} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#14142a' }} edges={['top']}>
       <View style={styles.container}>
         <Header
           style={{
@@ -221,7 +221,7 @@ export function Search({navigation}) {
               color={'#FFF'}
             />
           </TouchableOpacity>
-          <View style={{flexDirection: 'row', gap: 12}}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <Text
               style={{
                 fontSize: heightPercentageToDP('2%'),
@@ -231,7 +231,7 @@ export function Search({navigation}) {
               {'Search'}
             </Text>
           </View>
-          <View style={{flex: 0.1}} />
+          <View style={{ flex: 0.1 }} />
         </Header>
         <View
           style={{
@@ -277,7 +277,7 @@ export function Search({navigation}) {
           <FlatList
             scrollsToTop
             ref={flatlistRef}
-            style={{flex: 1, backgroundColor: '#14142a'}}
+            style={{ flex: 1, backgroundColor: '#14142a' }}
             ListEmptyComponent={
               <View
                 style={{
@@ -289,26 +289,26 @@ export function Search({navigation}) {
                   name="book-open-page-variant-outline"
                   size={heightPercentageToDP('10%')}
                   color="gold"
-                  style={{marginRight: 10}}
+                  style={{ marginRight: 10 }}
                 />
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   Send us what you want to read
                 </Text>
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   we will find it for you
                 </Text>
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   and show you the results
                 </Text>
@@ -317,9 +317,9 @@ export function Search({navigation}) {
             data={IsAnime ? AnimeData : searchDatas}
             renderItem={renderItem}
             keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{flexGrow: 1}}
+            contentContainerStyle={{ flexGrow: 1 }}
             ListFooterComponent={
-              <View style={{marginVertical: heightPercentageToDP('6%')}} />
+              <View style={{ marginVertical: heightPercentageToDP('6%') }} />
             }
           />
         ) : (
@@ -345,32 +345,32 @@ export function Search({navigation}) {
                   name="search-web"
                   size={heightPercentageToDP('10%')}
                   color="gold"
-                  style={{marginRight: 10}}
+                  style={{ marginRight: 10 }}
                 />
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   Send us what you want to see
                 </Text>
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   we will find it for you
                 </Text>
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    { fontSize: heightPercentageToDP('2%') },
                   ]}>
                   and show you the results
                 </Text>
               </View>
             }
-            renderItem={({item, index}) => (
+            renderItem={({ item, index }) => (
               <HomeRenderItem
                 item={item}
                 index={index}
@@ -379,7 +379,7 @@ export function Search({navigation}) {
               />
             )}
             ListFooterComponent={
-              <View style={{marginVertical: heightPercentageToDP('6%')}} />
+              <View style={{ marginVertical: heightPercentageToDP('6%') }} />
             }
           />
         )}
@@ -416,7 +416,7 @@ export function Search({navigation}) {
               width: '100%',
               borderRadius: 12,
             }}>
-            <View style={{flexGrow: 1, zIndex: 10}}>
+            <View style={{ flexGrow: 1, zIndex: 10 }}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -426,7 +426,7 @@ export function Search({navigation}) {
                   borderBottomWidth: 0.5,
                   borderColor: '#fff',
                 }}>
-                <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
+                <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
                   Comic List
                 </Text>
                 <TouchableOpacity
@@ -464,12 +464,12 @@ export function Search({navigation}) {
                 <FlatList
                   data={viewAll ?? []}
                   keyExtractor={(item, index) => index.toString()}
-                  renderItem={({item, index}) => (
+                  renderItem={({ item, index }) => (
                     <TouchableOpacity
                       onPress={() => {
                         navigation.navigate(NAVIGATION.comicDetails, {
-                          PageUrl: item.href,
-                          search: true,
+                          link: item.href,
+                          title: item.title,
                         });
                         setViewAll(null);
                       }}
@@ -483,7 +483,7 @@ export function Search({navigation}) {
                         borderColor: '#fff',
                       }}>
                       <Text
-                        style={{fontSize: 14, color: 'white', marginLeft: 4}}>
+                        style={{ fontSize: 14, color: 'white', marginLeft: 4 }}>
                         {index + 1}.
                       </Text>
                       <Text style={styles.link}>{item.title}</Text>
@@ -491,7 +491,7 @@ export function Search({navigation}) {
                   )}
                   ListFooterComponent={
                     <View
-                      style={{marginVertical: heightPercentageToDP('6%')}}
+                      style={{ marginVertical: heightPercentageToDP('6%') }}
                     />
                   }
                 />

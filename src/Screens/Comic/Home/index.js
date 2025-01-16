@@ -33,10 +33,10 @@ export function Home({ navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.rectangle}>
+        <TouchableOpacity style={styles.rectangle} onPress={() => navigation.navigate(NAVIGATION.search)}>
           <AntDesign name="search1" size={20} color="#fff" />
           <Text style={styles.searchPeopleBy}>Search here</Text>
-        </View>
+        </TouchableOpacity>
         {!Object.values(History).length ? null :
           <View style={styles.gameDetailsParent}>
             <View

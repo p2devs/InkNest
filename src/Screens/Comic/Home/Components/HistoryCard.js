@@ -18,7 +18,7 @@ const HistoryCard = ({ item, index }) => {
     }, [ComicDetail])
 
 
-    if (!item?.title && !item?.link && !ComicDetail) return null;
+    if (!item?.title || !item?.link || !ComicDetail) return null;
 
     return (
         <TouchableOpacity

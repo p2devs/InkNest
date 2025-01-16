@@ -1,13 +1,13 @@
-import React, {useState} from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
-import {navigate} from '../../Navigation/NavigationService';
-import {NAVIGATION} from '../../Constants';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { navigate } from '../../Navigation/NavigationService';
+import { NAVIGATION } from '../../Constants';
 import Image from './Image';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
-const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
+const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
   let Tag = View;
   const [showItem, setShowItem] = useState(true);
   const isAnime = useSelector(state => state?.data?.Anime);
@@ -49,11 +49,11 @@ const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
               imageUrl: item.imageUrl?.toString(),
             });
 
-            navigate(navigationTarget, {
-              link: item.link,
-              title: item.title,
-              imageUrl: item.imageUrl,
-            });
+            // navigate(navigationTarget, {
+            //   link: item.link,
+            //   title: item.title,
+            //   imageUrl: item.imageUrl,
+            // });
 
             return;
           }
@@ -74,16 +74,17 @@ const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
             PageUrl: item.link?.toString(),
             title: item.title?.toString(),
           });
+          navigate(NAVIGATION.comicDetails, { ...item });
 
-          navigate(NAVIGATION.comicDetails, {
-            link: item.link,
-            home: !Showhistory,
-            search: Showhistory,
-            PageUrl: item.link,
-          });
+          // navigate(NAVIGATION.comicDetails, {
+          //   link: item.link,
+          //   home: !Showhistory,
+          //   search: Showhistory,
+          //   PageUrl: item.link,
+          // });
         }}>
         <Image
-          source={{uri: item.imageUrl}}
+          source={{ uri: item.imageUrl }}
           style={{
             width: 180,
             height: 180,
@@ -110,16 +111,16 @@ const HomeRenderItem = ({item, index, Showhistory, search = false}) => {
             },
           ]}>
           <Text
-            style={{color: 'white', fontWeight: '700', fontSize: 14}}
+            style={{ color: 'white', fontWeight: '700', fontSize: 14 }}
             numberOfLines={1}>
             {item.title}
           </Text>
-          <Text style={{color: 'white', width: '80%'}} numberOfLines={1}>
+          <Text style={{ color: 'white', width: '80%' }} numberOfLines={1}>
             {item?.episode
               ? item?.episode
               : item?.genres
-              ? item?.genres.join(',')
-              : item.date}
+                ? item?.genres.join(',')
+                : item.date}
           </Text>
           {/* {
             //create a progress bar
