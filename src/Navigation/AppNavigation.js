@@ -7,7 +7,7 @@ import UpdateScreen from '../Screens/Update';
 import AnimeVideo from '../Screens/Anime/Video';
 import {useSelector} from 'react-redux';
 import {Details} from '../Screens/Anime';
-import {ComicBook, ComicDetails} from '../Screens/Comic';
+import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';
 import {ViewAll} from '../Screens/Anime/Home/ViewAll';
 import {MangaDetails} from '../Screens/Manga/Details/MangaDetails';
 import {MangaBook} from '../Screens/Manga/Book/MangaBook';
@@ -48,6 +48,7 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.mangaViewAll} component={MangaViewAll} />
       <Stack.Screen name={NAVIGATION.mangaSearch} component={MangaSearch} />
       <Stack.Screen name={NAVIGATION.search} component={Search} />
+      <Stack.Screen name={NAVIGATION.seeAll} component={SeeAll} />
     </Stack.Navigator>
   );
 }

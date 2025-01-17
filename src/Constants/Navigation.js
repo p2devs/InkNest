@@ -19,4 +19,5 @@ export const NAVIGATION = {
   mangaViewAll: 'MangaViewAll',
   ViewAll: "ViewAll",
   offlineComic: "Offline",
+  seeAll: "SeeAll",
 };
