@@ -25,6 +25,7 @@ import { updateData } from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
+import { AppendAd } from '../../../Components/Ads/AppendAd';
 
 export function ComicBook({ navigation, route }) {
   const { comicBookLink, pageJump, isDownloadComic, chapterlink } = route?.params;
@@ -203,7 +204,7 @@ export function ComicBook({ navigation, route }) {
               data={
                 isDownloadComic
                   ? DownloadedBook?.downloadedImagesPath
-                  : ComicBook?.images
+                  : AppendAd(ComicBook?.images)
               }
               onIndexChange={newIndex => {
                 if (!isDownloadComic) {

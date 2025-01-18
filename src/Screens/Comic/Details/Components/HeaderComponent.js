@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import React, { memo, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 
 import {
@@ -13,17 +14,23 @@ import {
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 
 import Header from '../../../../Components/UIComp/Header';
 import DescriptionView from '../../../../Components/UIComp/DescriptionView';
 import { goBack } from '../../../../Navigation/NavigationService';
+import { updateData } from '../../../../Redux/Reducers';
+import { useDispatch, useSelector } from 'react-redux';
 
-const HeaderComponent = memo(({ComicDetail, image, title, tabBar, onTabBar}) => {
+const HeaderComponent = memo(({ image, title, link, tabBar, onTabBar }) => {
+  const dispatch = useDispatch();
+  const ComicDetail = useSelector(state => state.data.dataByUrl[link]);
 
   return (
     <SafeAreaView
-      style={[styles.container, {marginBottom: 16}]}
+      style={[styles.container, { marginBottom: 16 }]}
       edges={['top']}>
+
       <View style={styles.headerContainer}>
         <Image
           style={{
@@ -59,7 +66,7 @@ const HeaderComponent = memo(({ComicDetail, image, title, tabBar, onTabBar}) => 
               name="arrow-back"
               size={24}
               color="#fff"
-              style={{marginRight: 10, opacity: 0.9}}
+              style={{ marginRight: 10, opacity: 0.9 }}
             />
           </TouchableOpacity>
           <Text
@@ -72,7 +79,21 @@ const HeaderComponent = memo(({ComicDetail, image, title, tabBar, onTabBar}) => 
             Comic Details
           </Text>
 
-          <View style={{flex: 0.15}} />
+          <TouchableOpacity
+            onPress={() => {
+              dispatch(
+                updateData({
+                  url: link,
+                  data: { Bookmark: !ComicDetail?.Bookmark },
+                }),
+              );
+            }}>
+            <Fontisto
+              name={`bookmark${ComicDetail?.Bookmark ? "-alt" : ""}`}
+              size={heightPercentageToDP('2.4%')}
+              color={ComicDetail?.Bookmark ? 'yellow' : '#FFF'}
+            />
+          </TouchableOpacity>
         </Header>
 
         <View
@@ -124,15 +145,12 @@ const HeaderComponent = memo(({ComicDetail, image, title, tabBar, onTabBar}) => 
                 fontSize: 12,
                 color: '#fff',
                 opacity: 0.8,
-              }}>{`${
-              ComicDetail?.genres ? ComicDetail?.genres?.toString() + ' · ' : ''
-            }${
-              ComicDetail?.yearOfRelease
-                ? ComicDetail?.yearOfRelease + ' · '
-                : ''
-            }${ComicDetail?.status ? ComicDetail?.status + ' · ' : ''}${
-              ComicDetail?.publisher ? 'By - ' + ComicDetail?.publisher : ''
-            }`}</Text>
+              }}>{`${ComicDetail?.genres ? ComicDetail?.genres?.toString() + ' · ' : ''
+                }${ComicDetail?.yearOfRelease
+                  ? ComicDetail?.yearOfRelease + ' · '
+                  : ''
+                }${ComicDetail?.status ? ComicDetail?.status + ' · ' : ''}${ComicDetail?.publisher ? 'By - ' + ComicDetail?.publisher : ''
+                }`}</Text>
           }
           {ComicDetail?.volumes && (
             <View>

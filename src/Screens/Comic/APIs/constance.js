@@ -33,6 +33,7 @@ export const HomePageCardClasses = {
             genresClass: null, // Not applicable for readallcomics
             statusClass: null, // Not applicable for readallcomics
             dateClass: '.pinbin-copy span', // Date is inside this span tag
+            lastPageClass: '.pagenavi span.page-numbers.dots'
         }
     }
 };

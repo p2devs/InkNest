@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,27 +8,55 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 import Card from '../Components/Card';
-import {getComicsHome} from '../APIs/Home';
+import { getComics } from '../APIs/Home';
 import Header from '../../../Components/UIComp/Header';
-import {goBack} from '../../../Navigation/NavigationService';
+import { goBack } from '../../../Navigation/NavigationService';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
+import Toast from 'react-native-toast-message';
+import { AppendAd } from '../../../Components/Ads/AppendAd';
+import AdBanner from '../../../Components/Ads/BannerAds';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
-export function SeeAll({route}) {
-  const [comicsData, setComicsData] = useState({});
+export function SeeAll({ route }) {
+  const { title, data, key, hostName, lastPage } = route.params;
+  const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    getComicsHome(setComicsData, setLoading);
-  }, []);
+  const fetchComics = async (page = 1) => {
+
+
+    if (lastPage && page > lastPage) return;
+    if (page < 1) return;
+
+    setLoading(true);
+
+    const type = key === 'readallcomics' ? null : key;
+
+    const response = await getComics(hostName, page, type);
+
+    if (response) {
+      setPage(page);
+      setComicsData(response?.comicsData);
+      setLoading(false);
+      return;
+    }
+    return Toast.show({
+      type: 'error',
+      text1: 'Oops! Something went wrong',
+    });
+  };
+
+
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -52,7 +80,7 @@ export function SeeAll({route}) {
             name="arrow-back"
             size={24}
             color="#fff"
-            style={{marginRight: 10, opacity: 0.9}}
+            style={{ marginRight: 10, opacity: 0.9 }}
           />
         </TouchableOpacity>
         <Text
@@ -62,70 +90,72 @@ export function SeeAll({route}) {
             color: '#fff',
             opacity: 0.9,
           }}>
-          {route?.params?.title ?? 'See All'}
+          {title ?? 'Comics'}
         </Text>
 
-        <View style={{flex: 0.15}} />
+        <View style={{ flex: 0.15 }} />
       </Header>
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
-        Object.keys(comicsData)
-          .slice(0, 1)
-          .map((key, index) => (
-            <View key={index}>
-              <FlatList
-                data={comicsData?.[key]?.data}
-                renderItem={({item, index}) => (
-                  <Card
-                    item={item}
-                    index={index}
-                    onPress={() => {
-                      console.log('Pressed');
-                    }}
-                    containerStyle={{
-                      width: widthPercentageToDP('44%'),
-                    }}
-                  />
-                )}
-                showsVerticalScrollIndicator={false}
-                numColumns={2}
-                ListFooterComponent={
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginVertical: heightPercentageToDP('2%'),
-                      marginBottom: heightPercentageToDP('12%'),
-                    }}>
-                    <Button
-                      title="Previous"
-                      onPress={() => {
-                        console.log('Previous');
-                      }}
-                    />
-                    <Text
-                      onPress={() => {
-                        console.log('Text Pressed');
-                      }}
-                      style={{
-                        color: 'white',
-                      }}>
-                      1 / 10
-                    </Text>
+        <FlatList
+          data={comicsData}
+          renderItem={({ item, index }) => (
+            <Card
+              item={item}
+              index={index}
+              onPress={() => {
+                console.log('Pressed');
+              }}
+              containerStyle={{
+                width: widthPercentageToDP('44%'),
+              }}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, index) => index.toString()}
+          ItemSeparatorComponent={
+            <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+          }
+          numColumns={2}
+          ListFooterComponent={
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginVertical: heightPercentageToDP('2%'),
+                marginBottom: heightPercentageToDP('12%'),
+              }}>
+              <Button
+                title="Previous"
+                color={page == 1 ? 'silver' : '#007AFF'}
+                onPress={() => {
+                  if (page > 1) {
+                    fetchComics(page - 1);
+                  }
+                }}
+              />
+              <Text
+                onPress={() => {
+                  fetchComics(lastPage)
+                }}
+                style={{
+                  color: 'white',
+                }}>
+                {page} {lastPage ? "of" : ""} {lastPage}
+              </Text>
 
-                    <Button
-                      title="Next"
-                      onPress={() => {
-                        console.log('Next');
-                      }}
-                    />
-                  </View>
-                }
+              <Button
+                title="Next"
+                color={lastPage && page == lastPage ? 'silver' : '#007AFF'}
+                onPress={() => {
+                  fetchComics(page + 1);
+                }}
               />
             </View>
-          ))
+          }
+        />
       )}
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,17 +10,19 @@ import {
   ScrollView
 } from 'react-native';
 
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import crashlytics from '@react-native-firebase/crashlytics';
 
-import {NAVIGATION} from '../../../Constants';
-import {useSelector} from 'react-redux';
-import {getComicsHome} from '../APIs/Home';
+import { NAVIGATION } from '../../../Constants';
+import { useSelector } from 'react-redux';
+import { getComicsHome } from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
+import { AppendAd } from '../../../Components/Ads/AppendAd';
 
-export function Home({navigation}) {
+export function Home({ navigation }) {
+  const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
   const History = useSelector(state => state.data.history);
@@ -63,7 +65,7 @@ export function Home({navigation}) {
                 (a, b) => b.lastOpenAt - a.lastOpenAt,
               )}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({item, index}) => (
+              renderItem={({ item, index }) => (
                 <HistoryCard item={item} index={index} key={index} />
               )}
               horizontal
@@ -95,7 +97,11 @@ export function Home({navigation}) {
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate(NAVIGATION.seeAll, {
+                      key,
                       title: comicsData?.[key]?.title,
+                      data: comicsData?.[key]?.data,
+                      lastPage: comicsData?.[key]?.lastPage,
+                      hostName: comicsData?.[key]?.hostName,
                     });
                   }}>
                   <Text
@@ -108,10 +114,12 @@ export function Home({navigation}) {
                   </Text>
                 </TouchableOpacity>
               </View>
-
+              {/* // append an type ad in this add and this should be in every 4th index */}
               <FlatList
-                data={comicsData?.[key]?.data}
-                renderItem={({item, index}) => (
+                data={AppendAd(comicsData?.[key]?.data)}
+                keyExtractor={(item, index) => index.toString()}
+                ref={flatListRef}
+                renderItem={({ item, index }) => (
                   <Card
                     item={item}
                     index={index}
@@ -130,6 +138,7 @@ export function Home({navigation}) {
           ))
         )}
       </ScrollView>
+
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import {Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import { Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import AdBanner from '../../../Components/Ads/BannerAds';
 
 export default function Card({
   item,
@@ -10,6 +11,7 @@ export default function Card({
   titleStyle,
   genresStyle,
 }) {
+  if (item.type == "ad") return <AdBanner />
   return (
     <TouchableOpacity
       id={index}

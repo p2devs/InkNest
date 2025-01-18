@@ -29,75 +29,77 @@ export function Bookmarks({ navigation }) {
   const getKey = title => {
     return Object.keys(data).find(key => data[key].title === title);
   };
+
   return (
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={bookmarks}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => {
-            return (
-              <TouchableOpacity
-                onPress={async () => {
-                  navigation.navigate(NAVIGATION.comicDetails, {
-                    search: true,
-                    PageUrl: getKey(item.title),
-                  });
-                }}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  // alignItems: 'center',
-                  padding: 10,
-                  borderBottomColor: '#fff',
-                  borderBottomWidth: 0.5,
-                }}>
-                <Image source={{ uri: item?.imgSrc }} style={styles.image} />
-                <View
-                  style={{
-                    width: Dimensions.get('window').width - 150,
-                    alignItems: 'flex-start',
-                    paddingHorizontal: 10,
-                    gap: 8,
-                  }}>
-                  <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-                  <Text style={styles.text}>
-                    <Text>Genres:</Text> {item?.genres}
-                  </Text>
-                  <Text style={styles.text}>
-                    <Text>Publisher:</Text> {item?.publisher}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    dispatch(
-                      updateData({
-                        url: getKey(item.title),
-                        data: { Bookmark: false },
-                      }),
-                    );
-                  }}>
-                  <FontAwesome6
-                    name="book-bookmark"
-                    size={24}
-                    color={'yellow'}
-                  />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            );
-          }}
-          ListEmptyComponent={() => (
+    <FlatList
+      showsVerticalScrollIndicator={false}
+      data={bookmarks}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => {
+        return (
+          <TouchableOpacity
+            onPress={async () => {
+              navigation.navigate(NAVIGATION.comicDetails, {
+                title: item.title,
+                image: item.imgSrc,
+                link: getKey(item.title),
+              });
+            }}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              // alignItems: 'center',
+              padding: 10,
+              borderBottomColor: '#fff',
+              borderBottomWidth: 0.5,
+            }}>
+            <Image source={{ uri: item?.imgSrc }} style={styles.image} />
             <View
               style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: heightPercentageToDP('80%'),
+                width: Dimensions.get('window').width - 150,
+                alignItems: 'flex-start',
+                paddingHorizontal: 10,
+                gap: 8,
               }}>
-              <MaterialCommunityIcons name="comment-bookmark-outline" size={heightPercentageToDP("10%")} color="gold" />
-              <Text style={[styles.title,{marginTop:12}]}>No Bookmarks Found</Text>
+              <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+              <Text style={styles.text}>
+                <Text>Genres:</Text> {item?.genres}
+              </Text>
+              <Text style={styles.text}>
+                <Text>Publisher:</Text> {item?.publisher}
+              </Text>
             </View>
-          )}
-        />
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(
+                  updateData({
+                    url: getKey(item.title),
+                    data: { Bookmark: false },
+                  }),
+                );
+              }}>
+              <FontAwesome6
+                name="book-bookmark"
+                size={24}
+                color={'yellow'}
+              />
+            </TouchableOpacity>
+          </TouchableOpacity>
+        );
+      }}
+      ListEmptyComponent={() => (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: heightPercentageToDP('80%'),
+          }}>
+          <MaterialCommunityIcons name="comment-bookmark-outline" size={heightPercentageToDP("10%")} color="gold" />
+          <Text style={[styles.title, { marginTop: 12 }]}>No Bookmarks Found</Text>
+        </View>
+      )}
+    />
   );
 }
 

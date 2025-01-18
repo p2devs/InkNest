@@ -4,7 +4,7 @@ import { ComicHostName } from "../../../Utils/APIs";
 import { HomePageCardClasses } from "./constance";
 
 
-const getComics = async (hostName, page = 1, type = null) => {
+export const getComics = async (hostName, page = 1, type = null) => {
     try {
         const hostKey = Object.keys(ComicHostName).find(key => ComicHostName[key] === hostName);
 
@@ -16,6 +16,7 @@ const getComics = async (hostName, page = 1, type = null) => {
         const $ = cheerio.load(html);
 
         let comicsData = [];
+        let lastPage = null;
 
         // Get the tag configuration for the specified host and type
         const tagConfig = HomePageCardClasses[hostKey]?.[type ?? "all-comic"]; // Default to 'all-comic' for readallcomics
@@ -48,10 +49,22 @@ const getComics = async (hostName, page = 1, type = null) => {
                     status,
                     publishDate
                 });
+
+
             });
+
+            if (tagConfig.lastPageClass) {
+                if (page == 1) {
+                    lastPage = $(tagConfig.lastPageClass)
+                        .next()
+                        .text()
+                        .trim()
+                        .replaceAll(',', '');
+                }
+            }
         }
 
-        return comicsData;
+        return { comicsData, lastPage };
     } catch (error) {
         console.error('Error fetching comics data:', error);
         return null;
@@ -74,28 +87,36 @@ export const getComicsHome = async (setComics, setLoading) => {
         if (readallcomics) {
             ComicHomeList.readallcomics = {
                 title: 'Read All Comics',
-                data: readallcomics
+                data: readallcomics?.comicsData,
+                hostName: ComicHostName.readallcomics,
+                lastPage: readallcomics?.lastPage
             }
         }
 
         if (az_on_going) {
             ComicHomeList['ongoing-comics'] = {
                 title: 'Latest',
-                data: az_on_going
+                data: az_on_going?.comicsData,
+                hostName: ComicHostName.azcomic,
+                lastPage: az_on_going?.lastPage
             }
         }
 
         if (az_porpular) {
             ComicHomeList['popular-comics'] = {
                 title: 'Popular',
-                data: az_porpular
+                data: az_porpular?.comicsData,
+                hostName: ComicHostName.azcomic,
+                lastPage: az_porpular?.lastPage
             }
         }
 
         if (az_upcoming) {
             ComicHomeList['new-comics'] = {
                 title: 'New Arrivals',
-                data: az_upcoming
+                data: az_upcoming?.comicsData,
+                hostName: ComicHostName.azcomic,
+                lastPage: az_upcoming?.lastPage
             }
         }
 

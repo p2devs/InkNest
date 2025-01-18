@@ -4,6 +4,8 @@ import { TouchableOpacity, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 import { navigate } from "../../../Navigation/NavigationService";
 import { NAVIGATION } from "../../../Constants";
+import AdBanner from "../../../Components/Ads/BannerAds";
+import { BannerAdSize } from "react-native-google-mobile-ads";
 
 const ChapterCard = ({ item, index, isBookmark }) => {
     const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);
@@ -21,6 +23,7 @@ const ChapterCard = ({ item, index, isBookmark }) => {
 
     if (isBookmark && !numbersBookmarks) return null
 
+    if (item.type === 'ad') return <AdBanner size={BannerAdSize.BANNER} />
     return (
         <TouchableOpacity
             key={index}
