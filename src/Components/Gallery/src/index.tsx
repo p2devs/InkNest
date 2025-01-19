@@ -1021,7 +1021,7 @@ const GalleryComponent = <T extends any>(
               key={
                 keyExtractor
                   ? keyExtractor(item, i)
-                  : item.id || item.key || item._id || item
+                  : item.id || item.key || item._id || i
               }
               style={[
                 dimensions,

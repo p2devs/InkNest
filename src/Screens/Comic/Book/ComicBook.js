@@ -191,9 +191,7 @@ export function ComicBook({ navigation, route }) {
               renderItem={({ item, index }) => (
                 <GridImageItem item={item} index={index} />
               )}
-              keyExtractor={(item, index) => index.toString()}
               numColumns={numColumns}
-              key={numColumns}
               style={{
                 flex: 1,
                 marginVertical: 60,

@@ -165,6 +165,7 @@ export const fetchComicDetails =
             yearOfRelease,
             publisher,
             issues,
+            link,
           };
         } else {
           const descriptionArchive = $('.description-archive');
@@ -230,6 +231,7 @@ export const fetchComicDetails =
             publisher,
             volumes,
             chapters,
+            link,
           };
         }
 

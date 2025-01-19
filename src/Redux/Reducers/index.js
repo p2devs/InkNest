@@ -118,7 +118,11 @@ const Reducers = createSlice({
     DownloadComicBook: (state, action) => {
       const { link, data, title, } = action.payload;
 
-      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
+      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data?.link]: data } };
+      console.log('action.payload', link, data, title);
+
+      console.log('state.DownloadComic', state.DownloadComic);
+
     },
     DeleteDownloadedComicBook: (state, action) => {
       const { comicBooksLink, ChapterLink } = action.payload;

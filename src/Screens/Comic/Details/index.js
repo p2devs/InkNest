@@ -1,16 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  View,
-} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {FlatList, StyleSheet, View} from 'react-native';
 
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   fetchComicBook,
   fetchComicDetails,
@@ -19,14 +15,14 @@ import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
-import { AppendAd } from '../../../Components/Ads/AppendAd';
+import {AppendAd} from '../../../Components/Ads/AppendAd';
 
-export function ComicDetails({ route }) {
-  const { link, image, title, isComicBookLink } = route.params;
+export function ComicDetails({route}) {
+  const {link, image, title, isComicBookLink} = route.params;
   const [PageLink, setPageLink] = useState(isComicBookLink ? null : link);
   const [tabBar, setTabBar] = useState([
-    { name: 'Chapters', active: true },
-    { name: 'Bookmarks', active: false },
+    {name: 'Chapters', active: true},
+    {name: 'Bookmarks', active: false},
   ]);
 
   const [sort, setSort] = useState(false);
@@ -54,35 +50,40 @@ export function ComicDetails({ route }) {
 
   if (error) return <Error error={error} />;
 
-
   return (
     <>
       <LoadingModal loading={loading} />
       <FlatList
-        ListHeaderComponent={<HeaderComponent
-          link={PageLink}
-          image={image}
-          title={title}
-          tabBar={tabBar}
-          onTabBar={index => {
-            tabBar.map(tab => (tab.active = false));
-            tabBar[index].active = true;
-            setTabBar([...tabBar]);
-            setSort(!sort);
-          }}
-        />}
+        ListHeaderComponent={
+          <HeaderComponent
+            link={PageLink}
+            image={image}
+            title={title}
+            tabBar={tabBar}
+            onTabBar={index => {
+              tabBar.map(tab => (tab.active = false));
+              tabBar[index].active = true;
+              setTabBar([...tabBar]);
+            }}
+            sort={sort}
+            setSORT={() => {
+              setSort(!sort);
+            }}
+          />
+        }
         data={AppendAd(reverseChapterList())}
         style={styles.container}
-        renderItem={({ item, index }) => (
+        renderItem={({item, index}) => (
           <ChapterCard
             item={item}
             index={index}
             isBookmark={tabBar[1]?.active}
+            detailPageLink={PageLink}
           />
         )}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
-          <View style={{ height: heightPercentageToDP('5%') }} />
+          <View style={{height: heightPercentageToDP('5%')}} />
         }
       />
     </>
