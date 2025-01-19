@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,30 +11,31 @@ import {
   StyleSheet,
   Share,
 } from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import {getVersion, getBuildNumber} from 'react-native-device-info';
+import { getVersion, getBuildNumber } from 'react-native-device-info';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {NAVIGATION} from '../../Constants';
+import { NAVIGATION } from '../../Constants';
 import Header from '../../Components/UIComp/Header';
-import {useDispatch, useSelector} from 'react-redux';
-import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
-import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
-import {showRewardedAd} from '../../Redux/Actions/Download';
+import { useDispatch, useSelector } from 'react-redux';
+import { AnimeHostName, ComicHostName } from '../../Utils/APIs';
+import { SwtichBaseUrl, SwtichToAnime } from '../../Redux/Reducers';
+import { showRewardedAd } from '../../Redux/Actions/Download';
+import { navigate } from '../../Navigation/NavigationService';
 
-export function Settings({navigation}) {
+export function Settings({ navigation }) {
   let Tag = View;
   const dispatch = useDispatch();
   const [SwitchServer, setSwitchServer] = useState(null);
@@ -50,10 +51,14 @@ export function Settings({navigation}) {
       crashlytics().log('Switched to Comic Mode');
       dispatch(SwtichBaseUrl('s3taku'));
     }
+
     navigation.reset({
       index: 0,
-      routes: [{name: NAVIGATION.home}],
+      routes: [{ name: NAVIGATION.home }],
     });
+
+    showRewardedAd();
+
   };
   const ServerSwitch = async url => {
     crashlytics().log(`Switched to server ${url}`);
@@ -63,7 +68,7 @@ export function Settings({navigation}) {
       () => {
         navigation.reset({
           index: 0,
-          routes: [{name: NAVIGATION.home}],
+          routes: [{ name: NAVIGATION.home }],
         });
         clearTimeout(timer);
       },
@@ -72,7 +77,7 @@ export function Settings({navigation}) {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#222' }} edges={['top']}>
       <Header title="Settings" />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -97,7 +102,7 @@ export function Settings({navigation}) {
             name="information-circle-outline"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -130,7 +135,7 @@ export function Settings({navigation}) {
             name="update"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -164,7 +169,7 @@ export function Settings({navigation}) {
             name="database"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -176,66 +181,9 @@ export function Settings({navigation}) {
           </Text>
         </TouchableOpacity>
 
-        <View
-          style={{
-            paddingVertical: hp('1%'),
-            backgroundColor: '#FFF',
-            marginHorizontal: widthPercentageToDP('2%'),
-            marginVertical: hp('1%'),
-            paddingHorizontal: 10,
-            borderRadius: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <View style={{flexDirection: 'row'}}>
-            <MaterialIcons
-              name="burst-mode"
-              size={hp('2.5%')}
-              color="#000"
-              style={{marginRight: 4}}
-            />
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              {`Mode:`}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 13,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
-              Comic
-            </Text>
-            <Switch
-              trackColor={{false: '#32de84', true: '#81b0ff'}}
-              thumbColor={!Anime ? '#66FF00' : '#007AFF'}
-              ios_backgroundColor={!Anime ? '#32de84' : '#81b0ff'}
-              onValueChange={SwitchAnimeToggle}
-              value={Anime}
-            />
-            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
-              Anime
-            </Text>
-          </View>
-        </View>
-
         <TouchableOpacity
-          onPress={async () => {
-            await analytics().logEvent('server_switch', {
-              item: 'Switch Server screen',
-            });
-            setSwitchServer(baseUrl);
-          }}
+          onPress={SwitchAnimeToggle}
           style={{
-            paddingVertical: hp('1%'),
             backgroundColor: '#FFF',
             marginHorizontal: widthPercentageToDP('2%'),
             marginVertical: hp('1%'),
@@ -244,19 +192,14 @@ export function Settings({navigation}) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
           }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 4,
-              justifyContent: 'center',
-              alignContent: 'center',
-            }}>
-            <MaterialIcons
-              name="language"
+          <View style={{ flexDirection: 'row' }}>
+            <Entypo
+              name={!Anime ? "tv" : "open-book"}
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 4}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -264,27 +207,77 @@ export function Settings({navigation}) {
                 fontWeight: 'bold',
                 color: '#000',
               }}>
-              {`Switch Server:`}
+              {!Anime ? "Watch Anime" : "Read Comics"}
             </Text>
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 2,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              {baseUrl.toLocaleUpperCase()}
-            </Text>
-            <Ionicons name="chevron-down" size={24} color="black" />
-          </View>
+          <Feather
+            name="arrow-up-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
+          />
         </TouchableOpacity>
+
+        {Anime ?
+          <TouchableOpacity
+            onPress={async () => {
+              await analytics().logEvent('server_switch', {
+                item: 'Switch Server screen',
+              });
+              setSwitchServer(baseUrl);
+            }}
+            style={{
+              paddingVertical: hp('1%'),
+              backgroundColor: '#FFF',
+              marginHorizontal: widthPercentageToDP('2%'),
+              marginVertical: hp('1%'),
+              paddingHorizontal: 10,
+              borderRadius: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 4,
+                justifyContent: 'center',
+                alignContent: 'center',
+              }}>
+              <MaterialIcons
+                name="language"
+                size={hp('2.5%')}
+                color="#000"
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                style={{
+                  fontSize: hp('2%'),
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}>
+                {`Switch Server:`}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 2,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  fontSize: hp('2%'),
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}>
+                {baseUrl.toLocaleUpperCase()}
+              </Text>
+              <Ionicons name="chevron-down" size={24} color="black" />
+            </View>
+          </TouchableOpacity>
+          : null}
 
         <TouchableOpacity
           onPress={async () => {
@@ -304,12 +297,12 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <MaterialIcons
               name="discord"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -324,7 +317,7 @@ export function Settings({navigation}) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -345,12 +338,12 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <MaterialIcons
               name="policy"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -365,7 +358,7 @@ export function Settings({navigation}) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -395,12 +388,12 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Entypo
               name="slideshare"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -415,7 +408,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
 
@@ -425,7 +418,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
               item: 'Open_Manga',
             });
             showRewardedAd();
-            navigation.navigate(NAVIGATION.homeManga);
+            navigate(NAVIGATION.homeManga);
           }}
           style={{
             backgroundColor: '#FFF',
@@ -438,12 +431,12 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Entypo
               name="open-book"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -458,13 +451,14 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
+
       </ScrollView>
       <View
-        style={{padding: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Text style={{color: 'silver', fontSize: 13}}>
+        style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: 'silver', fontSize: 13 }}>
           V {getVersion()} - {getBuildNumber()}
         </Text>
       </View>
@@ -502,7 +496,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
             width: '100%',
             borderRadius: 12,
           }}>
-          <View style={{flexGrow: 1, zIndex: 10}}>
+          <View style={{ flexGrow: 1, zIndex: 10 }}>
             <View
               style={{
                 flexDirection: 'row',
@@ -512,7 +506,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                 borderBottomWidth: 0.5,
                 borderColor: '#fff',
               }}>
-              <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
+              <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
                 Server List
               </Text>
               <TouchableOpacity
@@ -538,13 +532,9 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                 flexGrow: 1,
               }}>
               <FlatList
-                data={
-                  Anime
-                    ? Object.keys(AnimeHostName)
-                    : Object.keys(ComicHostName)
-                }
+                data={Object.keys(AnimeHostName)}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({item, index}) => (
+                renderItem={({ item, index }) => (
                   <TouchableOpacity
                     onPress={() => {
                       ServerSwitch(item);
@@ -582,7 +572,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                       <Text
                         style={[
                           styles.link,
-                          {color: baseUrl == item ? '#66FF00' : 'gold'},
+                          { color: baseUrl == item ? '#66FF00' : 'gold' },
                         ]}>
                         {item.toLocaleUpperCase()}
                       </Text>
@@ -590,14 +580,14 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                   </TouchableOpacity>
                 )}
                 ListFooterComponent={
-                  <View style={{marginVertical: hp('6%')}} />
+                  <View style={{ marginVertical: hp('6%') }} />
                 }
               />
             </View>
           </View>
         </Tag>
       </Modal>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
