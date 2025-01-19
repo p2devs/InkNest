@@ -202,7 +202,7 @@ export function ComicBook({ navigation, route }) {
               data={
                 isDownloadComic
                   ? DownloadedBook?.downloadedImagesPath
-                  : AppendAd(ComicBook?.images)
+                  : ComicBook?.images
               }
               onIndexChange={newIndex => {
                 if (!isDownloadComic) {

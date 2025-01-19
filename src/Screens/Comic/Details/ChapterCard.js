@@ -112,7 +112,7 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
             {item?.date}
           </Text>
         ) : null}
-        {ComicBook ? (
+        {ComicBook?.lastReadPage || isBookmark ? (
           <>
             <Text style={{ color: 'steelblue' }}>
               {!isBookmark && ComicBook?.lastReadPage + 1 > 1
