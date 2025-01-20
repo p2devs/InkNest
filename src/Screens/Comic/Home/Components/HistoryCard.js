@@ -24,7 +24,7 @@ const HistoryCard = ({item, index}) => {
 
   return (
     <TouchableOpacity
-      id={index}
+      key={index}
       style={{
         height: 144,
         width: 264,
