@@ -14,7 +14,7 @@ export default function Card({
   if (item.type == "ad") return <AdBanner />
   return (
     <TouchableOpacity
-      id={index}
+      key={index}
       style={[styles.container, containerStyle]}
       onPress={() => {
         onPress();
