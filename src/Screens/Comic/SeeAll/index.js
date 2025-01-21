@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,33 +8,32 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 import Card from '../Components/Card';
-import { getComics } from '../APIs/Home';
+import {getComics} from '../APIs/Home';
 import Header from '../../../Components/UIComp/Header';
-import { goBack } from '../../../Navigation/NavigationService';
+import {goBack} from '../../../Navigation/NavigationService';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Toast from 'react-native-toast-message';
-import { AppendAd } from '../../../Components/Ads/AppendAd';
+import {AppendAd} from '../../../Components/Ads/AppendAd';
 import AdBanner from '../../../Components/Ads/BannerAds';
-import { BannerAdSize } from 'react-native-google-mobile-ads';
+import {BannerAdSize} from 'react-native-google-mobile-ads';
+import { NAVIGATION } from '../../../Constants';
 
-export function SeeAll({ route }) {
-  const { title, data, key, hostName, lastPage } = route.params;
+export function SeeAll({navigation, route}) {
+  const {title, data, key, hostName, lastPage} = route.params;
   const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
   const fetchComics = async (page = 1) => {
-
-
     if (lastPage && page > lastPage) return;
     if (page < 1) return;
 
@@ -55,8 +54,6 @@ export function SeeAll({ route }) {
       text1: 'Oops! Something went wrong',
     });
   };
-
-
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -80,7 +77,7 @@ export function SeeAll({ route }) {
             name="arrow-back"
             size={24}
             color="#fff"
-            style={{ marginRight: 10, opacity: 0.9 }}
+            style={{marginRight: 10, opacity: 0.9}}
           />
         </TouchableOpacity>
         <Text
@@ -93,19 +90,22 @@ export function SeeAll({ route }) {
           {title ?? 'Comics'}
         </Text>
 
-        <View style={{ flex: 0.15 }} />
+        <View style={{flex: 0.15}} />
       </Header>
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
         <FlatList
           data={comicsData}
-          renderItem={({ item, index }) => (
+          renderItem={({item, index}) => (
             <Card
               item={item}
               index={index}
               onPress={() => {
-                console.log('Pressed');
+                navigation.navigate(NAVIGATION.comicDetails, {
+                  ...item,
+                  isComicBookLink: key === 'readallcomics',
+                });
               }}
               containerStyle={{
                 width: widthPercentageToDP('44%'),
@@ -138,12 +138,12 @@ export function SeeAll({ route }) {
               />
               <Text
                 onPress={() => {
-                  fetchComics(lastPage)
+                  fetchComics(lastPage);
                 }}
                 style={{
                   color: 'white',
                 }}>
-                {page} {lastPage ? "of" : ""} {lastPage}
+                {page} {lastPage ? 'of' : ''} {lastPage}
               </Text>
 
               <Button

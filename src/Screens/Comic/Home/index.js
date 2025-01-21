@@ -7,7 +7,8 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView
+  ScrollView,
+  Platform
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#14142A',
     paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 20 : 0,
   },
   rectangle: {
     borderRadius: 100,

@@ -49,11 +49,11 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
               imageUrl: item.imageUrl?.toString(),
             });
 
-            // navigate(navigationTarget, {
-            //   link: item.link,
-            //   title: item.title,
-            //   imageUrl: item.imageUrl,
-            // });
+            navigate(navigationTarget, {
+              link: item.link,
+              title: item.title,
+              imageUrl: item.imageUrl,
+            });
 
             return;
           }
