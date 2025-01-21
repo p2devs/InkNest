@@ -42,7 +42,7 @@ const HistoryCard = ({item, index}) => {
       }}
       onPress={() => {
         crashlytics().log('History Card Comic Details button clicked');
-        analytics().logEvent('history_card_comic_details_button_clicked', {
+        analytics().logEvent('history_card_comic_details_button', {
           link: item?.link?.toString(),
           title: item?.title?.toString(),
         });

@@ -167,7 +167,7 @@ export function SeeAll({navigation, route}) {
                 color={lastPage && page == lastPage ? 'silver' : '#007AFF'}
                 onPress={() => {
                   crashlytics().log('See All Comics Next Button clicked');
-                  analytics().logEvent('see_all_comics_next_button_clicked', {
+                  analytics().logEvent('see_all_comics_next_button', {
                     page: page?.toString(),
                     lastPage: lastPage?.toString(),
                   });
