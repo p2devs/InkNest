@@ -4,23 +4,22 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  // Image,
   FlatList,
   Dimensions,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-
-import { updateData } from '../../../Redux/Reducers';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
-import Header from '../../../Components/UIComp/Header';
-import Image from '../../../Components/UIComp/Image';
-import { NAVIGATION } from '../../../Constants';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 
-export function Bookmarks({ navigation }) {
+import {updateData} from '../../../Redux/Reducers';
+import Image from '../../../Components/UIComp/Image';
+import {NAVIGATION} from '../../../Constants';
+
+export function Bookmarks({navigation}) {
   const dispatch = useDispatch();
   const data = useSelector(state => state.data.dataByUrl);
   //filter the data to get only the bookmarks data is an object
@@ -35,10 +34,15 @@ export function Bookmarks({ navigation }) {
       showsVerticalScrollIndicator={false}
       data={bookmarks}
       keyExtractor={(item, index) => index.toString()}
-      renderItem={({ item }) => {
+      renderItem={({item}) => {
         return (
           <TouchableOpacity
             onPress={async () => {
+              crashlytics().log('Comic Bookmark clicked');
+              analytics().logEvent('Comic_Bookmark_clicked', {
+                title: item?.title?.toString(),
+                link: getKey(item.title)?.toString(),
+              });
               navigation.navigate(NAVIGATION.comicDetails, {
                 title: item.title,
                 image: item.imgSrc,
@@ -48,12 +52,11 @@ export function Bookmarks({ navigation }) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              // alignItems: 'center',
               padding: 10,
               borderBottomColor: '#fff',
               borderBottomWidth: 0.5,
             }}>
-            <Image source={{ uri: item?.imgSrc }} style={styles.image} />
+            <Image source={{uri: item?.imgSrc}} style={styles.image} />
             <View
               style={{
                 width: Dimensions.get('window').width - 150,
@@ -61,7 +64,9 @@ export function Bookmarks({ navigation }) {
                 paddingHorizontal: 10,
                 gap: 8,
               }}>
-              <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+              <Text style={styles.title} numberOfLines={2}>
+                {item.title}
+              </Text>
               <Text style={styles.text}>
                 <Text>Genres:</Text> {item?.genres}
               </Text>
@@ -71,18 +76,18 @@ export function Bookmarks({ navigation }) {
             </View>
             <TouchableOpacity
               onPress={() => {
+                crashlytics().log('Comic Bookmark removed');
+                analytics().logEvent('Comic_Bookmark_removed', {
+                  url: getKey(item.title)?.toString(),
+                });
                 dispatch(
                   updateData({
                     url: getKey(item.title),
-                    data: { Bookmark: false },
+                    data: {Bookmark: false},
                   }),
                 );
               }}>
-              <FontAwesome6
-                name="book-bookmark"
-                size={24}
-                color={'yellow'}
-              />
+              <FontAwesome6 name="book-bookmark" size={24} color={'yellow'} />
             </TouchableOpacity>
           </TouchableOpacity>
         );
@@ -95,8 +100,14 @@ export function Bookmarks({ navigation }) {
             alignItems: 'center',
             height: heightPercentageToDP('80%'),
           }}>
-          <MaterialCommunityIcons name="comment-bookmark-outline" size={heightPercentageToDP("10%")} color="gold" />
-          <Text style={[styles.title, { marginTop: 12 }]}>No Bookmarks Found</Text>
+          <MaterialCommunityIcons
+            name="comment-bookmark-outline"
+            size={heightPercentageToDP('10%')}
+            color="gold"
+          />
+          <Text style={[styles.title, {marginTop: 12}]}>
+            No Bookmarks Found
+          </Text>
         </View>
       )}
     />
