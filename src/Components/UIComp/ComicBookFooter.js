@@ -31,80 +31,104 @@ const ComicBookFooter = ({
       style={{
         position: 'absolute',
         width: '100%',
-        height: 50,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'transparent',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 12,
-        borderBottomColor: '#fff',
-        borderBottomWidth: 0.5,
-        borderTopColor: '#fff',
-        borderTopWidth: 0.5,
-        marginBottom: 5,
+        paddingHorizontal: 16,
         bottom: 0,
       }}>
-      {index !== ComicBook?.volumes.length - 1 ? (
-        showButton ? (
-          <TouchableOpacity
-            onPress={() => {
-              if (index < ComicBook?.volumes.length - 1) {
-                navigation.replace(NAVIGATION.comicBook, {
-                  comicBookLink: ComicBook?.volumes[index + 1].link,
-                });
-              }
-            }}>
-            <Text
-              style={{
-                fontSize: heightPercentageToDP('1.8%'),
-                fontWeight: 'bold',
-                color: '#FFF',
-              }}>
-              Previous Volume
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <View />
-        )
-      ) : (
-        <View />
-      )}
       <TouchableOpacity
         onPress={() => {
           setViewAll(!ViewAll);
         }}>
         <Ionicons
-          name={ViewAll ? 'book-outline' : 'grid-outline'}
+          name={ViewAll ? 'book-outline' : 'grid'}
           size={24}
           color="#fff"
-          style={{marginRight: 10}}
         />
+        <Text
+          style={{
+            fontSize: 12,
+            color: '#fff',
+            opacity: 0.5,
+          }}>
+          Grid
+        </Text>
       </TouchableOpacity>
-      {ComicBook?.volumes.length == 1 ? (
-        <View />
-      ) : showButton ? (
-        <TouchableOpacity
-          onPress={() => {
-            console.log(index, ComicBook?.volumes.length - 1, 'index');
-            if (index < ComicBook?.volumes.length - 1 || index > 0) {
-              navigation.replace(NAVIGATION.comicBook, {
-                comicBookLink: ComicBook?.volumes[index - 1]?.link,
-              });
-            }
-          }}
-          disabled={index == 0}>
-          <Text
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+        {index !== ComicBook?.volumes.length - 1 ? (
+          showButton ? (
+            <TouchableOpacity
+              onPress={() => {
+                if (index < ComicBook?.volumes.length - 1) {
+                  navigation.replace(NAVIGATION.comicBook, {
+                    comicBookLink: ComicBook?.volumes[index + 1].link,
+                  });
+                }
+              }}
+              style={{
+                alignItems: 'center',
+              }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color="#fff"
+                style={{marginRight: 10, opacity: 0.9}}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#fff',
+                  opacity: 0.5,
+                }}>
+                Back Vol
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View />
+          )
+        ) : null}
+        {ComicBook?.volumes.length == 1 ? (
+          <View />
+        ) : showButton ? (
+          <TouchableOpacity
+            onPress={() => {
+              console.log(index, ComicBook?.volumes.length - 1, 'index');
+              if (index < ComicBook?.volumes.length - 1 || index > 0) {
+                navigation.replace(NAVIGATION.comicBook, {
+                  comicBookLink: ComicBook?.volumes[index - 1]?.link,
+                });
+              }
+            }}
             style={{
-              fontSize: heightPercentageToDP('1.8%'),
-              fontWeight: 'bold',
-              color: index == 0 ? '#555' : '#FFF',
-            }}>
-            Next Volume
-          </Text>
-        </TouchableOpacity>
-      ) : (
-        <View />
-      )}
+              alignItems: 'center',
+            }}
+            disabled={index == 0}>
+            <Ionicons
+              name="arrow-forward"
+              size={24}
+              color="#fff"
+              style={{marginRight: 10, opacity: 0.9}}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: '#fff',
+                opacity: 0.5,
+              }}>
+              Next Vol
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View />
+        )}
+      </View>
     </View>
   );
 };

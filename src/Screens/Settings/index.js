@@ -33,6 +33,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
 import {showRewardedAd} from '../../Redux/Actions/Download';
+import {navigate} from '../../Navigation/NavigationService';
 
 export function Settings({navigation}) {
   let Tag = View;
@@ -50,10 +51,13 @@ export function Settings({navigation}) {
       crashlytics().log('Switched to Comic Mode');
       dispatch(SwtichBaseUrl('s3taku'));
     }
+
     navigation.reset({
       index: 0,
       routes: [{name: NAVIGATION.home}],
     });
+
+    showRewardedAd();
   };
   const ServerSwitch = async url => {
     crashlytics().log(`Switched to server ${url}`);
@@ -72,7 +76,7 @@ export function Settings({navigation}) {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#222'}} edges={['top']}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}} edges={['top']}>
       <Header title="Settings" />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -176,9 +180,9 @@ export function Settings({navigation}) {
           </Text>
         </TouchableOpacity>
 
-        <View
+        <TouchableOpacity
+          onPress={SwitchAnimeToggle}
           style={{
-            paddingVertical: hp('1%'),
             backgroundColor: '#FFF',
             marginHorizontal: widthPercentageToDP('2%'),
             marginVertical: hp('1%'),
@@ -187,13 +191,14 @@ export function Settings({navigation}) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
           }}>
           <View style={{flexDirection: 'row'}}>
-            <MaterialIcons
-              name="burst-mode"
+            <Entypo
+              name={!Anime ? 'tv' : 'open-book'}
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 4}}
+              style={{marginRight: 10}}
             />
             <Text
               style={{
@@ -201,90 +206,77 @@ export function Settings({navigation}) {
                 fontWeight: 'bold',
                 color: '#000',
               }}>
-              {`Mode:`}
+              {!Anime ? 'Watch Anime' : 'Read Comics'}
             </Text>
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 13,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
-              Comic
-            </Text>
-            <Switch
-              trackColor={{false: '#32de84', true: '#81b0ff'}}
-              thumbColor={!Anime ? '#66FF00' : '#007AFF'}
-              ios_backgroundColor={!Anime ? '#32de84' : '#81b0ff'}
-              onValueChange={SwitchAnimeToggle}
-              value={Anime}
-            />
-            <Text style={{color: '#000', fontSize: 18, fontWeight: 'bold'}}>
-              Anime
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={async () => {
-            await analytics().logEvent('server_switch', {
-              item: 'Switch Server screen',
-            });
-            setSwitchServer(baseUrl);
-          }}
-          style={{
-            paddingVertical: hp('1%'),
-            backgroundColor: '#FFF',
-            marginHorizontal: widthPercentageToDP('2%'),
-            marginVertical: hp('1%'),
-            paddingHorizontal: 10,
-            borderRadius: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 4,
-              justifyContent: 'center',
-              alignContent: 'center',
-            }}>
-            <MaterialIcons
-              name="language"
-              size={hp('2.5%')}
-              color="#000"
-              style={{marginRight: 4}}
-            />
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              {`Switch Server:`}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 2,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              {baseUrl.toLocaleUpperCase()}
-            </Text>
-            <Ionicons name="chevron-down" size={24} color="black" />
-          </View>
+          <Feather
+            name="arrow-up-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{marginRight: 10}}
+          />
         </TouchableOpacity>
+
+        {Anime ? (
+          <TouchableOpacity
+            onPress={async () => {
+              await analytics().logEvent('server_switch', {
+                item: 'Switch Server screen',
+              });
+              setSwitchServer(baseUrl);
+            }}
+            style={{
+              paddingVertical: hp('1%'),
+              backgroundColor: '#FFF',
+              marginHorizontal: widthPercentageToDP('2%'),
+              marginVertical: hp('1%'),
+              paddingHorizontal: 10,
+              borderRadius: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 4,
+                justifyContent: 'center',
+                alignContent: 'center',
+              }}>
+              <MaterialIcons
+                name="language"
+                size={hp('2.5%')}
+                color="#000"
+                style={{marginRight: 4}}
+              />
+              <Text
+                style={{
+                  fontSize: hp('2%'),
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}>
+                {`Switch Server:`}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 2,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  fontSize: hp('2%'),
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}>
+                {baseUrl.toLocaleUpperCase()}
+              </Text>
+              <Ionicons name="chevron-down" size={24} color="black" />
+            </View>
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity
           onPress={async () => {
@@ -425,7 +417,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
               item: 'Open_Manga',
             });
             showRewardedAd();
-            navigation.navigate(NAVIGATION.homeManga);
+            navigate(NAVIGATION.homeManga);
           }}
           style={{
             backgroundColor: '#FFF',
@@ -484,7 +476,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: '#14142A',
           }}
         />
         <Tag
@@ -538,11 +530,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                 flexGrow: 1,
               }}>
               <FlatList
-                data={
-                  Anime
-                    ? Object.keys(AnimeHostName)
-                    : Object.keys(ComicHostName)
-                }
+                data={Object.keys(AnimeHostName)}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({item, index}) => (
                   <TouchableOpacity
@@ -584,7 +572,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                           styles.link,
                           {color: baseUrl == item ? '#66FF00' : 'gold'},
                         ]}>
-                        {item.toLocaleUpperCase()}
+                        {item?.toLocaleUpperCase()}
                       </Text>
                     </View>
                   </TouchableOpacity>

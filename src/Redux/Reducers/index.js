@@ -99,15 +99,30 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const { url, data } = action.payload;
+      const { url, data, ComicDetailslink, imageLength } = action.payload;
       //keep the old data and update the new data
       state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
+
+      if (ComicDetailslink && imageLength) {
+        state.history[ComicDetailslink] = {
+          ...state?.history?.[ComicDetailslink],
+          readComics: {
+            ...state?.history?.[ComicDetailslink]?.readComics,
+            [url]: { totalPage: imageLength, lastReadPage: data.lastReadPage }
+          }
+        }
+      }
+
       // state.dataByUrl[url] = data;
     },
     DownloadComicBook: (state, action) => {
       const { link, data, title, } = action.payload;
 
-      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data.link]: data } };
+      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data?.link]: data } };
+      console.log('action.payload', link, data, title);
+
+      console.log('state.DownloadComic', state.DownloadComic);
+
     },
     DeleteDownloadedComicBook: (state, action) => {
       const { comicBooksLink, ChapterLink } = action.payload;

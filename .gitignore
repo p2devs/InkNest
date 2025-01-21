@@ -96,3 +96,6 @@ app.json
 
 ## Ignore Manga Folder
 **/Manga/*
+
+## Ignore Ads Folder for Banner
+**/Ads/*

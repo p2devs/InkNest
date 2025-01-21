@@ -93,6 +93,15 @@ export const fetchComicDetails =
       dispatch(fetchDataStart());
       try {
         let Data = getState().data.dataByUrl[link];
+
+        let watchedData = {
+          title: Data?.title,
+          link,
+          image: Data?.imgSrc,
+          publisher: Data?.publisher,
+          genres: Data?.genres,
+          lastOpenAt: new Date().getTime(),
+        };
         //if link contant readallcomics.com then set baseUrl to readallcomics
         let checkUrl = link.includes('readallcomics.com')
           ? 'readallcomics'
@@ -101,6 +110,7 @@ export const fetchComicDetails =
           dispatch(StopLoading());
           dispatch(ClearError());
           dispatch(checkDownTime());
+          dispatch(WatchedData(watchedData));
           return;
         }
         // console.log(link, "link");
@@ -155,6 +165,7 @@ export const fetchComicDetails =
             yearOfRelease,
             publisher,
             issues,
+            link,
           };
         } else {
           const descriptionArchive = $('.description-archive');
@@ -162,12 +173,38 @@ export const fetchComicDetails =
 
           const title = descriptionArchive.find('h1').text().trim();
           const imgSrc = descriptionArchive.find('img').attr('src');
-          const genres = descriptionArchive.find('p strong').eq(0).text().trim();
-          const publisher = descriptionArchive
+          // const genres = descriptionArchive.find('p strong').eq(0).text().trim();
+          // const publisher = descriptionArchive
+          //   .find('p strong')
+          //   .eq(1)
+          //   .text()
+          //   .trim();
+
+          // Initialize placeholders for Genres and Publisher
+          let genres = descriptionArchive.find('p strong').eq(0).text().trim();
+          let publisher = descriptionArchive
             .find('p strong')
             .eq(1)
             .text()
             .trim();
+
+          // Look for Genres and Publisher in both cases (inside and outside <p> tags)
+          descriptionArchive.contents().each(function () {
+            const text = $(this).text().trim();
+
+            // Check for Genres
+            if (text.startsWith('Genres:' && !genres)) {
+              genres = $(this).find('strong').first().text().trim() || text.replace('Genres:', '').trim();
+            }
+
+            // Check for Publisher
+            if (text.startsWith('Publisher:' && !publisher)) {
+              publisher = $(this).find('strong').first().text().trim() || text.replace('Publisher:', '').trim();
+            }
+
+          });
+
+          console.log(genres, "publisher", publisher);
 
           const volumes = [];
           // console.log(descriptionArchive.find('hr.style-six'));
@@ -194,15 +231,18 @@ export const fetchComicDetails =
             publisher,
             volumes,
             chapters,
+            link,
           };
         }
 
         // console.log({ data }, "Data");
-        let watchedData = {
+        watchedData = {
           title: comicDetails.title,
           link,
-          imageUrl: comicDetails.imgSrc,
+          image: comicDetails.imgSrc,
           publisher: comicDetails.publisher,
+          genres: comicDetails.genres,
+          lastOpenAt: new Date().getTime(),
         };
         if (refresh) {
           dispatch(updateData({ url: link, data: comicDetails }));
@@ -292,7 +332,11 @@ export const fetchComicBook =
           });
         }
 
-        // console.log({ imgSources, title, volumes }, "Data Comic Book");
+        let link = $('a[rel="category tag"]').attr('href');
+        if (!link) {
+          link = $('.title a').attr('href');
+        }
+
         //remove duplicates in volumes
         let unique = [
           ...new Map(volumes.map(item => [item['title'], item])).values(),
@@ -303,12 +347,12 @@ export const fetchComicBook =
           volumes: unique,
           lastReadPage: 0,
           BookmarkPages: [],
+          ComicDetailslink: link,
         };
         // console.log(data, "final data");
         // console.log({ data }, "Data");
         if (setPageLink) {
           //get the title link
-          const link = $('a[rel="category tag"]').attr('href');
           console.log(link, 'link');
           data.ComicDetailslink = link;
           setPageLink(link);
