@@ -1,8 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {TouchableOpacity, Image, View, Text, Animated} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {TouchableOpacity, Image, View, Text} from 'react-native';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
+import {useSelector} from 'react-redux';
+
 import {navigate} from '../../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../../Constants';
-import {useSelector} from 'react-redux';
 
 const HistoryCard = ({item, index}) => {
   const ComicDetail = useSelector(state => state.data.dataByUrl[item.link]);
@@ -38,6 +41,11 @@ const HistoryCard = ({item, index}) => {
         gap: 12,
       }}
       onPress={() => {
+        crashlytics().log('History Card Comic Details button clicked');
+        analytics().logEvent('history_card_comic_details_button_clicked', {
+          link: item?.link?.toString(),
+          title: item?.title?.toString(),
+        });
         navigate(NAVIGATION.comicDetails, item);
       }}>
       <Image
@@ -70,7 +78,8 @@ const HistoryCard = ({item, index}) => {
             opacity: 0.5,
             color: '#fff',
             fontSize: 12,
-          }} numberOfLines={1}>
+          }}
+          numberOfLines={1}>
           {item?.genres}
         </Text>
 

@@ -1,21 +1,24 @@
-import React, { memo, useState } from 'react';
-import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { navigate } from '../../../Navigation/NavigationService';
-import { NAVIGATION } from '../../../Constants';
-import AdBanner from '../../../Components/Ads/BannerAds';
-import { BannerAdSize } from 'react-native-google-mobile-ads';
-import Entypo from 'react-native-vector-icons/Entypo';
+import React, {memo, useState} from 'react';
+import {TouchableOpacity, Text, View, ActivityIndicator} from 'react-native';
+
+import {useDispatch, useSelector} from 'react-redux';
+import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
-import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
+import {BannerAdSize} from 'react-native-google-mobile-ads';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {widthPercentageToDP} from 'react-native-responsive-screen';
+import Entypo from 'react-native-vector-icons/Entypo';
+
+import {navigate} from '../../../Navigation/NavigationService';
+import {NAVIGATION} from '../../../Constants';
+import AdBanner from '../../../Components/Ads/BannerAds';
+import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../Redux/Actions/Download';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { widthPercentageToDP } from 'react-native-responsive-screen';
 
-const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
+const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);
   const ComicDetail = useSelector(
     state => state.data.dataByUrl[detailPageLink],
@@ -23,9 +26,7 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
   const isComicDownload = Boolean(
     useSelector(
       state =>
-        state?.data?.DownloadComic?.[detailPageLink]?.comicBooks?.[
-        item?.link
-        ],
+        state?.data?.DownloadComic?.[detailPageLink]?.comicBooks?.[item?.link],
     ),
   );
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
@@ -33,7 +34,8 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
   const dispatch = useDispatch();
 
   const handleClick = async () => {
-    await analytics().logEvent('open_comic_book', {
+    crashlytics().log('ChapterCard clicked');
+    await analytics().logEvent('newUI_open_comic_book', {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
@@ -45,7 +47,8 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
   const LoadingComic = async () => {
     if (LoadingStatus) return;
     setLoadStatus(true);
-    await analytics().logEvent('download_comic', {
+    crashlytics().log('ChapterCard download clicked');
+    await analytics().logEvent('newUI_download_comic', {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
@@ -58,6 +61,11 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
   };
 
   const DownloadedComic = async data => {
+    crashlytics().log('ChapterCard download started');
+    await analytics().logEvent('newUI_download_started', {
+      link: detailPageLink?.toString(),
+      title: item?.title?.toString(),
+    });
     dispatch(
       downloadComicBook({
         comicDetails: {
@@ -65,7 +73,7 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
           title: ComicDetail?.title,
           imgSrc: ComicDetail?.imgSrc,
         },
-        comicBook: { ...data, link: item.link },
+        comicBook: {...data, link: item.link},
         setLoadStatus,
       }),
     );
@@ -114,16 +122,17 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
         ) : null}
         {ComicBook?.lastReadPage || isBookmark ? (
           <>
-            <Text style={{ color: 'steelblue' }}>
+            <Text style={{color: 'steelblue'}}>
               {!isBookmark && ComicBook?.lastReadPage + 1 > 1
-                ? ` · (${ComicBook?.lastReadPage + 1}/${ComicBook?.images.length
-                })`
+                ? ` · (${ComicBook?.lastReadPage + 1}/${
+                    ComicBook?.images.length
+                  })`
                 : ''}
 
               {isBookmark && numbersBookmarks
                 ? ` · (${ComicBook?.BookmarkPages.map(
-                  item => item + 1,
-                ).toString()})`
+                    item => item + 1,
+                  ).toString()})`
                 : ''}
             </Text>
           </>
@@ -148,6 +157,11 @@ const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
           size={24}
           color="green"
           onPress={() => {
+            crashlytics().log('ChapterCard offline clicked');
+            analytics().logEvent('newUI_open_offline_comic', {
+              link: item?.link?.toString(),
+              title: item?.title?.toString(),
+            });
             navigate(NAVIGATION.offlineComic);
           }}
         />

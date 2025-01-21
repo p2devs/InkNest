@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,21 +8,22 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  Platform
+  Platform,
 } from 'react-native';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 
-import { NAVIGATION } from '../../../Constants';
-import { useSelector } from 'react-redux';
-import { getComicsHome } from '../APIs/Home';
+import {NAVIGATION} from '../../../Constants';
+import {useSelector} from 'react-redux';
+import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
-import { AppendAd } from '../../../Components/Ads/AppendAd';
+import {AppendAd} from '../../../Components/Ads/AppendAd';
 
-export function Home({ navigation }) {
+export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,10 @@ export function Home({ navigation }) {
       <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={styles.rectangle}
-          onPress={() => navigation.navigate(NAVIGATION.search)}>
+          onPress={() => {
+            crashlytics().log('Home Search button clicked');
+            navigation.navigate(NAVIGATION.search);
+          }}>
           <AntDesign name="search1" size={20} color="#fff" />
           <Text style={styles.searchPeopleBy}>Search here</Text>
         </TouchableOpacity>
@@ -66,7 +70,7 @@ export function Home({ navigation }) {
                 (a, b) => b.lastOpenAt - a.lastOpenAt,
               )}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => (
+              renderItem={({item, index}) => (
                 <HistoryCard item={item} index={index} key={index} />
               )}
               horizontal
@@ -97,6 +101,14 @@ export function Home({ navigation }) {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
+                    crashlytics().log('See All (Home) button clicked');
+                    analytics().logEvent('see_all_button_clicked', {
+                      key: key?.toString(),
+                      title: comicsData?.[key]?.title?.toString(),
+                      data: comicsData?.[key]?.data?.toString(),
+                      lastPage: comicsData?.[key]?.lastPage?.toString(),
+                      hostName: comicsData?.[key]?.hostName?.toString(),
+                    });
                     navigation.navigate(NAVIGATION.seeAll, {
                       key,
                       title: comicsData?.[key]?.title,
@@ -120,11 +132,17 @@ export function Home({ navigation }) {
                 data={AppendAd(comicsData?.[key]?.data)}
                 keyExtractor={(item, index) => index.toString()}
                 ref={flatListRef}
-                renderItem={({ item, index }) => (
+                renderItem={({item, index}) => (
                   <Card
                     item={item}
                     index={index}
                     onPress={() => {
+                      crashlytics().log('Comic Details button clicked');
+                      analytics().logEvent('comic_details_button_clicked', {
+                        link: item?.link?.toString(),
+                        title: item?.title?.toString(),
+                        isComicBookLink: key === 'readallcomics',
+                      });
                       navigation.navigate(NAVIGATION.comicDetails, {
                         ...item,
                         isComicBookLink: key === 'readallcomics',
@@ -139,7 +157,6 @@ export function Home({ navigation }) {
           ))
         )}
       </ScrollView>
-
     </SafeAreaView>
   );
 }

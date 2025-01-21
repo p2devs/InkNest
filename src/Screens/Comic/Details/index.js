@@ -1,12 +1,14 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-
 import {useDispatch, useSelector} from 'react-redux';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
+
 import {
   fetchComicBook,
   fetchComicDetails,
@@ -61,12 +63,18 @@ export function ComicDetails({route}) {
             title={title}
             tabBar={tabBar}
             onTabBar={index => {
+              crashlytics().log('Comic Details Tab Clicked');
+              analytics().logEvent('Comic_Details_Tab_Clicked', {
+                TabName: tabBar[index].name?.toString(),
+              });
               tabBar.map(tab => (tab.active = false));
               tabBar[index].active = true;
               setTabBar([...tabBar]);
             }}
             sort={sort}
             setSORT={() => {
+              crashlytics().log('Comic Details Sort Clicked');
+              analytics().logEvent('Comic_Details_Sort_Clicked');
               setSort(!sort);
             }}
           />

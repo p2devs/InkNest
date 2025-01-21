@@ -11,6 +11,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 
 import Card from '../Components/Card';
 import {getComics} from '../APIs/Home';
@@ -25,7 +26,7 @@ import Toast from 'react-native-toast-message';
 import {AppendAd} from '../../../Components/Ads/AppendAd';
 import AdBanner from '../../../Components/Ads/BannerAds';
 import {BannerAdSize} from 'react-native-google-mobile-ads';
-import { NAVIGATION } from '../../../Constants';
+import {NAVIGATION} from '../../../Constants';
 
 export function SeeAll({navigation, route}) {
   const {title, data, key, hostName, lastPage} = route.params;
@@ -102,6 +103,13 @@ export function SeeAll({navigation, route}) {
               item={item}
               index={index}
               onPress={() => {
+                crashlytics().log('See All Comics Card clicked');
+                analytics().logEvent('see_all_comics_card_clicked', {
+                  key: key?.toString(),
+                  title: title?.toString(),
+                  isComicBookLink: key === 'readallcomics',
+                  link: item?.link?.toString(),
+                });
                 navigation.navigate(NAVIGATION.comicDetails, {
                   ...item,
                   isComicBookLink: key === 'readallcomics',
@@ -132,6 +140,14 @@ export function SeeAll({navigation, route}) {
                 color={page == 1 ? 'silver' : '#007AFF'}
                 onPress={() => {
                   if (page > 1) {
+                    crashlytics().log('See All Comics Previous Button clicked');
+                    analytics().logEvent(
+                      'see_all_comics_previous_button_clicked',
+                      {
+                        page: page?.toString(),
+                        lastPage: lastPage?.toString(),
+                      },
+                    );
                     fetchComics(page - 1);
                   }
                 }}
@@ -150,6 +166,11 @@ export function SeeAll({navigation, route}) {
                 title="Next"
                 color={lastPage && page == lastPage ? 'silver' : '#007AFF'}
                 onPress={() => {
+                  crashlytics().log('See All Comics Next Button clicked');
+                  analytics().logEvent('see_all_comics_next_button_clicked', {
+                    page: page?.toString(),
+                    lastPage: lastPage?.toString(),
+                  });
                   fetchComics(page + 1);
                 }}
               />
