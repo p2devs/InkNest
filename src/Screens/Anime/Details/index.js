@@ -26,6 +26,7 @@ import {
 } from '../../../Components/Func/AnimeVideoFunc';
 import { NAVIGATION } from '../../../Constants';
 import { AddAnimeBookMark, RemoveAnimeBookMark } from '../../../Redux/Reducers';
+import { serverStatusUp } from '../../../Components/Func/HomeFunc';
 
 
 export function Details({ navigation, route }) {
@@ -33,6 +34,9 @@ export function Details({ navigation, route }) {
   const dispatch = useDispatch();
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
+  const isServerUp = useSelector(state => state.data.isServerUp);
+  const isDisabled = serverStatusUp(isServerUp);
+
   const [TabSelected, setTabSelected] = useState(0);
   const [data, setData] = useState(null);
   const [episodeLoading, setEpisodeLoading] = useState(false);
@@ -284,6 +288,7 @@ export function Details({ navigation, route }) {
                   data?.episodes?.map((episode, index) => (
                     <TouchableOpacity
                       key={index}
+                      disabled={!isDisabled}
                       onPress={() => {
                         navigation.navigate(NAVIGATION.animeVideo, {
                           link: episode.episodeLink,

@@ -20,6 +20,7 @@ import { NAVIGATION } from '../../Constants';
 import Image from './Image';
 import { downloadComicBook, showRewardedAd } from '../../Redux/Actions/Download';
 import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
+import { serverStatusUp } from '../Func/HomeFunc';
 
 const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const dispatch = useDispatch();
@@ -32,6 +33,9 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
         ],
     ),
   );
+  const isServerUp = useSelector(state => state.data.isServerUp);
+  const isDisabled = serverStatusUp(isServerUp);
+
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
@@ -181,6 +185,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
           comicBookLink: chapter?.link,
         });
       }}
+      disabled={!isDisabled}
       style={styles.chapter}>
       <Text style={[styles.label, { width: '80%' }]}>
         {chapter?.title}

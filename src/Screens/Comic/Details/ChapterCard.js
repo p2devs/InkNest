@@ -1,25 +1,29 @@
-import React, {memo, useState} from 'react';
-import {TouchableOpacity, Text, View, ActivityIndicator} from 'react-native';
+import React, { memo, useState } from 'react';
+import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
 
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
-import {BannerAdSize} from 'react-native-google-mobile-ads';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {widthPercentageToDP} from 'react-native-responsive-screen';
+import { widthPercentageToDP } from 'react-native-responsive-screen';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-import {navigate} from '../../../Navigation/NavigationService';
-import {NAVIGATION} from '../../../Constants';
+import { navigate } from '../../../Navigation/NavigationService';
+import { NAVIGATION } from '../../../Constants';
 import AdBanner from '../../../Components/Ads/BannerAds';
-import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
+import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
 import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../Redux/Actions/Download';
+import { serverStatusUp } from '../../../Components/Func/HomeFunc';
 
-const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
+const ChapterCard = ({ item, index, isBookmark, detailPageLink }) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);
+  const isServerUp = useSelector(state => state.data.isServerUp);
+  const isDisabled = serverStatusUp(isServerUp);
+
   const ComicDetail = useSelector(
     state => state.data.dataByUrl[detailPageLink],
   );
@@ -39,6 +43,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
+
     navigate(NAVIGATION.comicBook, {
       comicBookLink: item?.link,
     });
@@ -73,7 +78,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           title: ComicDetail?.title,
           imgSrc: ComicDetail?.imgSrc,
         },
-        comicBook: {...data, link: item.link},
+        comicBook: { ...data, link: item.link },
         setLoadStatus,
       }),
     );
@@ -85,6 +90,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   return (
     <TouchableOpacity
       key={index}
+      disabled={isDisabled}
       style={{
         borderRadius: 8,
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -122,17 +128,16 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         ) : null}
         {ComicBook?.lastReadPage || isBookmark ? (
           <>
-            <Text style={{color: 'steelblue'}}>
+            <Text style={{ color: 'steelblue' }}>
               {!isBookmark && ComicBook?.lastReadPage + 1 > 1
-                ? ` · (${ComicBook?.lastReadPage + 1}/${
-                    ComicBook?.images.length
-                  })`
+                ? ` · (${ComicBook?.lastReadPage + 1}/${ComicBook?.images.length
+                })`
                 : ''}
 
               {isBookmark && numbersBookmarks
                 ? ` · (${ComicBook?.BookmarkPages.map(
-                    item => item + 1,
-                  ).toString()})`
+                  item => item + 1,
+                ).toString()})`
                 : ''}
             </Text>
           </>
@@ -141,31 +146,32 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       {LoadingStatus ? (
         <ActivityIndicator size="small" color="skyblue" />
       ) : null}
-      {LoadingStatus ? null : !isComicDownload ? (
-        <Entypo
-          name="download"
-          size={24}
-          color={'#fff'}
-          onPress={() => {
-            LoadingComic();
-            showRewardedAd();
-          }}
-        />
-      ) : (
-        <MaterialIcons
-          name="offline-pin"
-          size={24}
-          color="green"
-          onPress={() => {
-            crashlytics().log('ChapterCard offline clicked');
-            analytics().logEvent('newUI_open_offline_comic', {
-              link: item?.link?.toString(),
-              title: item?.title?.toString(),
-            });
-            navigate(NAVIGATION.offlineComic);
-          }}
-        />
-      )}
+      {isDisabled ? null :
+        LoadingStatus ? null : !isComicDownload ? (
+          <Entypo
+            name="download"
+            size={24}
+            color={'#fff'}
+            onPress={() => {
+              LoadingComic();
+              showRewardedAd();
+            }}
+          />
+        ) : (
+          <MaterialIcons
+            name="offline-pin"
+            size={24}
+            color="green"
+            onPress={() => {
+              crashlytics().log('ChapterCard offline clicked');
+              analytics().logEvent('newUI_open_offline_comic', {
+                link: item?.link?.toString(),
+                title: item?.title?.toString(),
+              });
+              navigate(NAVIGATION.offlineComic);
+            }}
+          />
+        )}
     </TouchableOpacity>
   );
 };

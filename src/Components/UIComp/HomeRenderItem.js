@@ -6,11 +6,15 @@ import Image from './Image';
 import { useSelector } from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+import { serverStatusUp } from '../Func/HomeFunc';
 
 const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
   let Tag = View;
   const [showItem, setShowItem] = useState(true);
   const isAnime = useSelector(state => state?.data?.Anime);
+  const isServerUp = useSelector(state => state.data.isServerUp);
+  const isDisabled = serverStatusUp(isServerUp);
+
   if (!showItem) return null;
   return (
     <View
@@ -20,6 +24,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
         alignItems: 'center',
       }}>
       <TouchableOpacity
+        disabled={isDisabled}
         style={{
           marginVertical: 5,
           marginHorizontal: 5,

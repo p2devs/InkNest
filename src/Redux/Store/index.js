@@ -1,12 +1,12 @@
-import {configureStore} from '@reduxjs/toolkit';
-import {persistStore, persistReducer} from 'redux-persist';
-import {storage} from '../Storage/Storage';
+import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import { storage } from '../Storage/Storage';
 import Reducers from '../Reducers';
 
 const persistConfig = {
   key: 'root',
   storage: storage,
-  blacklist: ['error', 'status', 'loading', 'downTime'],
+  blacklist: ['error', 'status', 'loading', 'downTime', 'isServerUp'],
 };
 
 const persistedReducer = persistReducer(persistConfig, Reducers);
@@ -31,4 +31,4 @@ const store = configureStore({
 
 const persistor = persistStore(store);
 
-export {store, persistor};
+export { store, persistor };

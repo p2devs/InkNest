@@ -12,6 +12,7 @@ import {
   DownTime,
   updateData,
   AnimeWatched,
+  ServerState,
 } from '../Reducers';
 import { Alert } from 'react-native';
 import { goBack } from '../../Navigation/NavigationService';
@@ -483,4 +484,15 @@ export const clearDataByUrl = url => async dispatch => {
  */
 export const clearAllData = () => async dispatch => {
   dispatch(clearData());
+};
+
+
+
+export const CheckServerUp = () => async dispatch => {
+  APICaller.get('https://server-log-eaaf80cd7f57.herokuapp.com/')
+    .then(response => {
+      dispatch(ServerState(response?.status));
+    }).catch(error => {
+      dispatch(ServerState(error?.response?.status ?? 500));
+    });
 };

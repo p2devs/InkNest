@@ -28,6 +28,7 @@ import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import { serverStatusUp } from '../../Components/Func/HomeFunc';
 
 export function Search({ navigation }) {
   const dispatch = useDispatch();
@@ -35,6 +36,9 @@ export function Search({ navigation }) {
   const loading = useSelector(state => state.data.loading);
   const IsAnime = useSelector(state => state.data.Anime);
   const baseUrl = useSelector(state => state.data.baseUrl);
+  const isServerUp = useSelector(state => state.data.isServerUp);
+  const isDisabled = serverStatusUp(isServerUp);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
   const [AnimeData, setAnimeData] = useState([]);
@@ -159,6 +163,7 @@ export function Search({ navigation }) {
                 <Text style={styles.title}>Comic list:</Text>
                 {data.map((result, index) => (
                   <TouchableOpacity
+                    disabled={isDisabled}
                     onPress={() => {
                       navigation.navigate(NAVIGATION.comicDetails, {
                         link: result.href,
@@ -442,12 +447,6 @@ export function Search({ navigation }) {
                   onPress={() => {
                     setViewAll(null);
                   }}>
-                  {/* <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.freepik.com/512/3588/3588762.png',
-                    }}
-                    style={{ width: 30, height: 30 }}
-                  /> */}
                   <AntDesign
                     name="close"
                     size={heightPercentageToDP('2.4%')}
@@ -466,6 +465,7 @@ export function Search({ navigation }) {
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={({ item, index }) => (
                     <TouchableOpacity
+                      disabled={isDisabled}
                       onPress={() => {
                         navigation.navigate(NAVIGATION.comicDetails, {
                           link: item.href,

@@ -12,6 +12,7 @@ const initialState = {
   AnimeWatched: {},
   AnimeBookMarks: {},
   DownloadComic: {},
+  isServerUp: 500
 };
 
 /**
@@ -150,7 +151,7 @@ const Reducers = createSlice({
     clearData: state => {
       state.loading = false;
       state.error = null;
-      dataByUrl = {};
+      state.dataByUrl = {};
     },
     DownTime: (state, action) => {
       state.loading = false;
@@ -176,6 +177,9 @@ const Reducers = createSlice({
     RemoveAnimeBookMark: (state, action) => {
       delete state.AnimeBookMarks[action?.payload?.url];
     },
+    ServerState: (state, action) => {
+      state.isServerUp = action.payload
+    }
   },
 });
 
@@ -196,6 +200,7 @@ export const {
   AddAnimeBookMark,
   RemoveAnimeBookMark,
   DownloadComicBook,
-  DeleteDownloadedComicBook
+  DeleteDownloadedComicBook,
+  ServerState
 } = Reducers.actions;
 export default Reducers.reducer;

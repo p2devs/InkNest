@@ -1,8 +1,8 @@
 // import axios from 'axios';
 import cheerio from 'cheerio';
-import {checkDownTime} from '../../Redux/Actions/GlobalActions';
-import {fetchDataStart} from '../../Redux/Reducers';
-import {AnimeHostName, ComicHostName as HostName} from '../../Utils/APIs';
+import { checkDownTime } from '../../Redux/Actions/GlobalActions';
+import { fetchDataStart } from '../../Redux/Reducers';
+import { AnimeHostName, ComicHostName as HostName } from '../../Utils/APIs';
 import APICaller from '../../Redux/Controller/Interceptor';
 
 export const fetchComicsData = async (link, dispatch, baseUrl) => {
@@ -65,7 +65,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
         const link = $(element).find('h2 a').attr('href');
 
         // Push the extracted data into the array
-        comicsData.push({title, date, imageUrl, link});
+        comicsData.push({ title, date, imageUrl, link });
       });
       let page = link.split('/');
       page = page[page.length - 2];
@@ -78,7 +78,7 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
       }
     }
     dispatch(checkDownTime(response));
-    return {data: comicsData, lastPage};
+    return { data: comicsData, lastPage };
   } catch (error) {
     // console.log(link, 'link');
     console.log('Error fetching or parsing data Home:', error);
@@ -179,3 +179,6 @@ export const checkServerDown = async (url, dispatch) => {
     return true;
   }
 };
+
+
+export const serverStatusUp = (serverStatus) => !(serverStatus && serverStatus >= 500)
