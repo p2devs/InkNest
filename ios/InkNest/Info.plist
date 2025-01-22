@@ -39,6 +39,12 @@
     	<key>NSAllowsArbitraryLoadsInWebContent</key>
     	<true/>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+    	<string>about</string>
+    	<string>http</string>
+    	<string>https</string>
+	</array>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We will be used to deliver personalized ads to you.</string>
 	<key>UIAppFonts</key>
