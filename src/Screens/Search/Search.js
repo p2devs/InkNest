@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,50 +18,77 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSearchComic } from '../../Redux/Actions/GlobalActions';
+import { SearchComicByReadAllComics, SearchComicByAzComic } from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { SearchAnime } from '../../Components/Func/AnimeVideoFunc';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import { Switch } from 'react-native-paper';
+import Card from '../Comic/Components/Card';
 
 export function Search({ navigation }) {
   const dispatch = useDispatch();
   const searchDatas = useSelector(state => state.data.Search);
   const loading = useSelector(state => state.data.loading);
   const IsAnime = useSelector(state => state.data.Anime);
-  const baseUrl = useSelector(state => state.data.baseUrl);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
-  const [AnimeData, setAnimeData] = useState([]);
+  const [searchData, setSearchData] = useState([]);
+  const [comicSearchBy, setComicSearchBy] = useState(false);
   const flatlistRef = React.useRef();
   let Tag = View;
 
   const fetchData = async () => {
+    console.log('fetchData', searchTerm, loading, comicSearchBy);
+
     if (loading) return;
     if (!searchTerm.trim()) return;
     if (IsAnime) {
+      console.log('searching by anime');
+
       await analytics().logEvent('search_anime', {
         search: searchTerm?.trim()?.toString(),
       });
-      let data = await SearchAnime(searchTerm, dispatch, baseUrl);
+      let data = await SearchAnime(searchTerm, dispatch);
       setSearchTerm('');
       if (data.length == 0) {
-        setAnimeData([]);
+        setSearchData([]);
         Alert.alert('No results found');
         return;
       }
-      setAnimeData(data);
+      setSearchData(data);
       return;
     }
-    await analytics().logEvent('search_comic', {
+
+    if (comicSearchBy) {
+      console.log('searching by comic az');
+      await analytics().logEvent('search_comic_by_AZcomicx', {
+        search: searchTerm?.trim()?.toString(),
+      });
+      let data = await SearchComicByAzComic(searchTerm, dispatch);
+      console.log(data);
+      setSearchTerm('');
+      if (!data || data.length == 0) {
+        setSearchData([]);
+        Alert.alert('No results found');
+        return;
+      }
+      setSearchData(data);
+      return;
+    }
+    console.log('searching by readall');
+
+
+    await analytics().logEvent('search_comic_by_ReadAll', {
       search: searchTerm?.trim()?.toString(),
     });
-    dispatch(fetchSearchComic(searchTerm));
+    dispatch(SearchComicByReadAllComics(searchTerm));
     setSearchTerm('');
     //scroll to the top of the list
     flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
@@ -70,7 +97,7 @@ export function Search({ navigation }) {
     // Scroll to the top of the list
     flatlistRef.current.scrollToOffset({ offset: 0, animated: true });
     return () => {
-      setAnimeData([]);
+      setSearchData([]);
       setSearchTerm('');
     };
   }, [loading]);
@@ -231,7 +258,27 @@ export function Search({ navigation }) {
               {'Search'}
             </Text>
           </View>
-          <View style={{ flex: 0.1 }} />
+          {!IsAnime &&
+            <View style={{ flexDirection: 'row', gap: 6, justifyContent: 'center', alignItems: 'center' }}>
+              <Text
+                style={!comicSearchBy ? [styles.SwitchSelectedText, { color: "#FF004F" }] : styles.SwitchUnselectedText}>
+                {'R'}
+              </Text>
+              <Switch
+                disabled={loading}
+                trackColor={{ false: "#FF004F", true: '#FF0090' }}
+                ios_backgroundColor="#FF004F"
+                style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                value={comicSearchBy} onValueChange={setComicSearchBy} />
+              <Text
+                style={comicSearchBy ? styles.SwitchSelectedText : styles.SwitchUnselectedText}>
+                {'A'}
+              </Text>
+            </View>}
+          {
+            IsAnime &&
+            <View style={{ flex: 0.1 }} />
+          }
         </Header>
         <View
           style={{
@@ -273,116 +320,137 @@ export function Search({ navigation }) {
             {/* <Button title="Search" onPress={fetchData} /> */}
           </View>
         </View>
-        {!IsAnime ? (
-          <FlatList
-            scrollsToTop
-            ref={flatlistRef}
-            style={{ flex: 1, backgroundColor: '#14142a' }}
-            ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <MaterialCommunityIcons
-                  name="book-open-page-variant-outline"
-                  size={heightPercentageToDP('10%')}
-                  color="gold"
-                  style={{ marginRight: 10 }}
-                />
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  Send us what you want to read
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  we will find it for you
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  and show you the results
-                </Text>
-              </View>
-            }
-            data={IsAnime ? AnimeData : searchDatas}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{ flexGrow: 1 }}
-            ListFooterComponent={
-              <View style={{ marginVertical: heightPercentageToDP('6%') }} />
-            }
-          />
-        ) : (
-          <FlatList
-            ref={flatlistRef}
-            numColumns={2}
-            key={2}
-            showsVerticalScrollIndicator={false}
-            style={{
-              flex: 1,
-              backgroundColor: '#14142a',
-            }}
-            data={AnimeData}
-            keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <MaterialCommunityIcons
-                  name="search-web"
-                  size={heightPercentageToDP('10%')}
-                  color="gold"
-                  style={{ marginRight: 10 }}
-                />
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  Send us what you want to see
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  we will find it for you
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    { fontSize: heightPercentageToDP('2%') },
-                  ]}>
-                  and show you the results
-                </Text>
-              </View>
-            }
-            renderItem={({ item, index }) => (
-              <HomeRenderItem
-                item={item}
-                index={index}
-                key={index}
-                search={true}
-              />
-            )}
-            ListFooterComponent={
-              <View style={{ marginVertical: heightPercentageToDP('6%') }} />
-            }
-          />
-        )}
+        {
+          !IsAnime && !comicSearchBy ? (
+            <FlatList
+              scrollsToTop
+              ref={flatlistRef}
+              style={{ flex: 1, backgroundColor: '#14142a' }}
+              ListEmptyComponent={
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <MaterialCommunityIcons
+                    name="book-open-page-variant-outline"
+                    size={heightPercentageToDP('10%')}
+                    color="gold"
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    Send us what you want to read
+                  </Text>
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    we will find it for you
+                  </Text>
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    and show you the results
+                  </Text>
+                </View>
+              }
+              data={IsAnime ? searchData : searchDatas}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={{ flexGrow: 1 }}
+              ListFooterComponent={
+                <View style={{ marginVertical: heightPercentageToDP('6%') }} />
+              }
+            />
+          ) : (
+            <FlatList
+              ref={flatlistRef}
+              numColumns={2}
+              key={2}
+              showsVerticalScrollIndicator={false}
+              style={{
+                flex: 1,
+                backgroundColor: '#14142a',
+              }}
+              data={searchData}
+              keyExtractor={(item, index) => index.toString()}
+              ListEmptyComponent={
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <MaterialCommunityIcons
+                    name="search-web"
+                    size={heightPercentageToDP('10%')}
+                    color="gold"
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    Send us what you want to see
+                  </Text>
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    we will find it for you
+                  </Text>
+                  <Text
+                    style={[
+                      styles.title,
+                      { fontSize: heightPercentageToDP('2%') },
+                    ]}>
+                    and show you the results
+                  </Text>
+                </View>
+              }
+              renderItem={({ item, index }) => {
+                if (comicSearchBy) {
+                  return (
+                    <Card
+                      item={item}
+                      index={index}
+                      onPress={() => {
+                        crashlytics().log('Comic Details button clicked');
+                        analytics().logEvent('comic_details_button_clicked', {
+                          link: item?.link?.toString(),
+                          title: item?.title?.toString(),
+                          isComicBookLink: false,
+                        });
+                        navigation.navigate(NAVIGATION.comicDetails, item);
+                      }}
+                    />
+                  )
+                }
+                return (
+                  <HomeRenderItem
+                    item={item}
+                    index={index}
+                    key={index}
+                    search={true}
+                  />
+                )
+              }}
+              ListFooterComponent={
+                <View style={{ marginVertical: heightPercentageToDP('6%') }} />
+              }
+            />
+          )
+        }
         <Modal
           transparent
           animationType="slide"
@@ -499,8 +567,8 @@ export function Search({ navigation }) {
             </View>
           </Tag>
         </Modal>
-      </View>
-    </SafeAreaView>
+      </View >
+    </SafeAreaView >
   );
 }
 
@@ -548,4 +616,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     maxWidth: widthPercentageToDP('70%'),
   },
+  SwitchSelectedText: {
+    fontSize: heightPercentageToDP('2%'),
+    fontWeight: 'bold',
+    color: '#FF0090',
+  },
+  SwitchUnselectedText: {
+    fontSize: heightPercentageToDP('1.5%'),
+    fontWeight: '500',
+    color: '#FFF',
+  }
 });

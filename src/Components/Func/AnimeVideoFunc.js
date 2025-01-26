@@ -240,7 +240,7 @@ export const getAnimeInfo = async (link, dispatch) => {
     }
 }
 
-export const SearchAnime = async (search, dispatch, baseUrl) => {
+export const SearchAnime = async (search, dispatch) => {
     dispatch(fetchDataStart());
     try {
         let host = AnimeHostName["gogoanimes"];
@@ -249,8 +249,6 @@ export const SearchAnime = async (search, dispatch, baseUrl) => {
         const $ = cheerio.load(response.data);
 
         const result = [];
-        // if (baseUrl == "gogoanimes") {
-        // Extract information from the list items
         $('ul.items li').each((i, el) => {
             const title = $(el).find('.name a').attr('title').trim();
             const link = $(el).find('.name a').attr('href');
@@ -260,26 +258,6 @@ export const SearchAnime = async (search, dispatch, baseUrl) => {
             if (!imageUrl.includes("https://")) imageUrl = `${host}${imageUrl.replace("/", "")}`;
             result.push({ title, link: `${host}${link}`, imageUrl, date });
         });
-        // }
-        // if (baseUrl == "s3taku") {
-        //     $('ul.listing.items li.video-block').each((index, element) => {
-        //         const link = $(element).find('a').attr('href');
-        //         const image = $(element).find('img').attr('src');
-        //         const title = $(element).find('div.name').text().trim();
-        //         const date = $(element).find('span.date').text().trim();
-
-        //         result.push({
-        //             link,
-        //             image,
-        //             title,
-        //             date
-        //         });
-        //     });
-
-        // }
-
-        // Log the extracted information
-        console.log(result);
 
         dispatch(checkDownTime(response));
         return result;
