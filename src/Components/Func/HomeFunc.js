@@ -179,3 +179,6 @@ export const checkServerDown = async (url, dispatch) => {
     return true;
   }
 };
+
+export const serverStatusUp = serverStatus =>
+  !(serverStatus && serverStatus >= 500);

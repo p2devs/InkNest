@@ -21,7 +21,7 @@ import {useSelector} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
-import {AppendAd} from '../../../Components/Ads/AppendAd';
+import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);

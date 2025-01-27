@@ -18,7 +18,7 @@ import GalleryPopup from './GalleryPopup';
 import { updateData } from '../../Redux/Reducers';
 import { NAVIGATION } from '../../Constants';
 import Image from './Image';
-import { downloadComicBook, showRewardedAd } from '../../Redux/Actions/Download';
+import { downloadComicBook, showRewardedAd } from '../../InkNest-Externals/Redux/Actions/Download';
 import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
 
 const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {

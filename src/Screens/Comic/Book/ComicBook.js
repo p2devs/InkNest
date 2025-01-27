@@ -25,7 +25,7 @@ import { updateData } from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
-import { AppendAd } from '../../../Components/Ads/AppendAd';
+import { AppendAd } from '../../../InkNest-Externals/Ads/AppendAd';
 
 export function ComicBook({ navigation, route }) {
   const { comicBookLink, pageJump, isDownloadComic, chapterlink } = route?.params;

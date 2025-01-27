@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import AdBanner from '../../../Components/Ads/BannerAds';
+import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
 
 export default function Card({
   item,

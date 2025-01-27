@@ -8,9 +8,9 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import { updateData } from '../../Redux/Reducers';
 import { goBack } from '../../Navigation/NavigationService';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
-import AdBanner from '../Ads/BannerAds';
+import AdBanner from '../../InkNest-Externals/Ads/BannerAds';
 import { BannerAdSize } from 'react-native-google-mobile-ads';
-import { showRewardedAd } from '../../Redux/Actions/Download';
+import { showRewardedAd } from '../../InkNest-Externals/Redux/Actions/Download';
 
 const ComicBookHeader = ({ comicBookLink, PageIndex, ViewAll, showBookmark }) => {
   const dispatch = useDispatch();

@@ -11,12 +11,12 @@ import Entypo from 'react-native-vector-icons/Entypo';
 
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
-import AdBanner from '../../../Components/Ads/BannerAds';
+import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
 import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import {
   downloadComicBook,
   showRewardedAd,
-} from '../../../Redux/Actions/Download';
+} from '../../../InkNest-Externals/Redux/Actions/Download';
 
 const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);

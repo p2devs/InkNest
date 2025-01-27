@@ -40,7 +40,7 @@ import {
   resizeImage,
 } from './utils';
 import { FasterImageView as Image } from '@candlefinance/faster-image';
-import AdBanner from '../../Ads/BannerAds';
+import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
 import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 const rtl = I18nManager.isRTL;

@@ -94,8 +94,6 @@ app.json
 #ignore .env file
 .env
 
-## Ignore Manga Folder
-**/Manga/*
 
-## Ignore Ads Folder for Banner
-**/Ads/*
+## InkNest Some Files
+**/InkNest-Externals/*

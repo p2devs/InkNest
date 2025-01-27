@@ -23,8 +23,8 @@ import {
 } from 'react-native-responsive-screen';
 import Button from '../../../Components/UIComp/Button';
 import Toast from 'react-native-toast-message';
-import {AppendAd} from '../../../Components/Ads/AppendAd';
-import AdBanner from '../../../Components/Ads/BannerAds';
+import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
 import {BannerAdSize} from 'react-native-google-mobile-ads';
 import {NAVIGATION} from '../../../Constants';
 

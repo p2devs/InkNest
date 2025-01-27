@@ -32,7 +32,7 @@ import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
 import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
-import {showRewardedAd} from '../../Redux/Actions/Download';
+import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
 import {navigate} from '../../Navigation/NavigationService';
 
 export function Settings({navigation}) {

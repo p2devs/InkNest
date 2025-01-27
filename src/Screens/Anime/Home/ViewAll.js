@@ -33,7 +33,6 @@ export function ViewAll({ navigation, route }) {
 
 
     const animatedCall = async (page) => {
-        console.log('page', page);
         try {
             setLoading(true);
             let url = AnimeHostName[baseUrl] == AnimeHostName.gogoanimes ? (PageLink ? `${PageLink}?page=${page}` : `?page=${page}&type=${type}`) : `${type ? type : ""}?page=${page}`

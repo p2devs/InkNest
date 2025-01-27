@@ -8,7 +8,7 @@ import {
   Modal,
   Linking,
 } from 'react-native';
-import {checkUpdate} from './Func';
+import {checkUpdate} from '../../InkNest-Externals/ForceUpdate/Func';
 
 const ForceUpdate = () => {
   const [isForceUpdate, setIsForceUpdate] = useState(false);

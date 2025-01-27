@@ -17,7 +17,7 @@ import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
-import {AppendAd} from '../../../Components/Ads/AppendAd';
+import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 
 export function ComicDetails({route}) {
   const {link, image, title, isComicBookLink} = route.params;
