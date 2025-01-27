@@ -283,7 +283,7 @@ export const fetchComicBook =
           ? 'readallcomics'
           : 'azcomic';
 
-        Hiturl = checkUrl == 'azcomic' ? `${comicBook}/full` : comicBook;
+        const Hiturl = checkUrl == 'azcomic' ? `${comicBook}/full` : comicBook;
         // console.log(comicBook, "Data Comic Book");
         if (Data) {
           if (setPageLink) {
@@ -372,7 +372,7 @@ export const fetchComicBook =
  * @param {string} search - The search query for the comic.
  * @returns {Function} A thunk function that performs the search and dispatches actions.
  */
-export const fetchSearchComic = search => async (dispatch, getState) => {
+export const SearchComicByReadAllComics = search => async (dispatch) => {
   dispatch(fetchDataStart());
   try {
     dispatch(UpdateSearch({ user: 'user', query: search }));
@@ -409,6 +409,50 @@ export const fetchSearchComic = search => async (dispatch, getState) => {
         error: 'Oops!! something went wrong, please try again...',
       }),
     );
+  }
+};
+/**
+ * Fetches search results for a comic from azcomix.me based on the provided search query.
+ *
+ * @param {string} searchKey - The search query for the comic.
+ * @returns {Promise<Array>} A promise that resolves to an array of comic details.
+ */
+export const SearchComicByAzComic = async (searchKey, dispatch) => {
+  dispatch(fetchDataStart());
+  try {
+    const formattedKey = searchKey.replaceAll(/\s+/g, '+');
+    const url = `https://azcomix.me/advanced-search?key=${formattedKey}`;
+
+    const response = await APICaller.get(url);
+    const $ = cheerio.load(response.data);
+
+    const comics = [];
+    $('.detailed-list .dl-box').each((index, element) => {
+      const title = $(element).find('.dlb-title').text().trim();
+      const image = $(element).find('.dlb-image img').attr('src');
+      const link = $(element).find('.dlb-title').attr('href');
+      const genres = $(element)
+        .find('.dlb-details strong:contains("Genre :")')
+        .next()
+        .text()
+        .trim();
+
+      comics.push({
+        title,
+        image,
+        link,
+        genres,
+      });
+    });
+
+    dispatch(checkDownTime(response));
+    return comics;
+  } catch (error) {
+    console.error('Error fetching data for search Comic AZ:', error);
+    if (dispatch) {
+      dispatch(checkDownTime(error));
+    }
+    return null;
   }
 };
 
