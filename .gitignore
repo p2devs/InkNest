@@ -74,12 +74,9 @@ package-lock.json
 !.yarn/sdks
 !.yarn/versions
 
-/android/app/global.jks
-/android/app/google-services.json
-/ios/GoogleService-Info.plist
-google-services.json
-GoogleService-Info.plist
-global.jks
+**/global.jks
+**/google-services.json
+**/GoogleService-Info.plist
 
 
 #Files to ignore
