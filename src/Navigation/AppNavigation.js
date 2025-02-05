@@ -5,15 +5,14 @@ import {AboutUs, Search} from '../Screens';
 import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import AnimeVideo from '../Screens/Anime/Video';
-import {useSelector} from 'react-redux';
 import {Details} from '../Screens/Anime';
 import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';
 import {ViewAll} from '../Screens/Anime/Home/ViewAll';
 import {MangaDetails} from '../InkNest-Externals/Screens/Manga/Details/MangaDetails';
 import {MangaBook} from '../InkNest-Externals/Screens/Manga/Book/MangaBook';
-import {MangaHome} from '../InkNest-Externals/Screens/Manga/Home/Home';
 import {MangaViewAll} from '../InkNest-Externals/Screens/Manga/Home/ViewAll';
 import MangaSearch from '../InkNest-Externals/Screens/Manga/Search/Search';
+import {MangaHome} from '../InkNest-Externals/Screens/Manga/Home';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +23,6 @@ const Stack = createNativeStackNavigator();
  * @returns {JSX.Element} The Stack Navigator with defined screens and options.
  */
 export function AppNavigation() {
-  const animeActive = useSelector(state => state?.data?.Anime);
   return (
     <Stack.Navigator
       screenOptions={{
