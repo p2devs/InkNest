@@ -1,131 +1,156 @@
-import APICaller from "../../../Redux/Controller/Interceptor";
-import cheerio from "cheerio";
-import { ComicHostName } from "../../../Utils/APIs";
-import { HomePageCardClasses } from "./constance";
+import APICaller from '../../../Redux/Controller/Interceptor';
+import cheerio from 'cheerio';
+import {ComicHostName} from '../../../Utils/APIs';
+import {HomePageCardClasses} from './constance';
 
+export const getComics = async (
+  hostName,
+  page = 1,
+  type = null,
+  HTML = null,
+) => {
+  try {
+    const hostKey = Object.keys(ComicHostName).find(
+      key => ComicHostName[key] === hostName,
+    );
+    let response = null;
+    if (!HTML) {
+      const parms =
+        hostName === ComicHostName.readallcomics
+          ? `page/${page}/`
+          : `${type}?page=${page}`;
 
-export const getComics = async (hostName, page = 1, type = null) => {
-    try {
-        const hostKey = Object.keys(ComicHostName).find(key => ComicHostName[key] === hostName);
+      response = await APICaller.get(`${hostName}${parms}`);
+    } else {
+      response = {data: HTML};
+    }
 
-        // Construct the URL and parameters based on the host and type
-        const parms = hostName === ComicHostName.readallcomics ? `page/${page}/` : `${type}?page=${page}`;
+    // Construct the URL and parameters based on the host and type
+    const html = response.data;
+    const $ = cheerio.load(html);
 
-        const response = await APICaller.get(`${hostName}${parms}`);
-        const html = response.data;
-        const $ = cheerio.load(html);
+    let comicsData = [];
+    let lastPage = null;
 
-        let comicsData = [];
-        let lastPage = null;
+    // Get the tag configuration for the specified host and type
+    const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic']; // Default to 'all-comic' for readallcomics
 
-        // Get the tag configuration for the specified host and type
-        const tagConfig = HomePageCardClasses[hostKey]?.[type ?? "all-comic"]; // Default to 'all-comic' for readallcomics
+    if (tagConfig) {
+      // Extract comics data based on the selected configuration
+      $(tagConfig.cardClass).each((index, element) => {
+        const title = $(element).find(tagConfig.cardTitleClass).text().trim();
+        const link = $(element).find(tagConfig.cardTitleClass).attr('href');
+        const image = $(element).find(tagConfig.imageClass).attr('src');
 
-        if (tagConfig) {
-            // Extract comics data based on the selected configuration
-            $(tagConfig.cardClass).each((index, element) => {
-                const title = $(element).find(tagConfig.cardTitleClass).text().trim();
-                const link = $(element).find(tagConfig.cardTitleClass).attr('href');
-                const image = $(element).find(tagConfig.imageClass).attr('src');
-
-                // Handle genres only if the genres class is defined
-                const genres = [];
-                if (tagConfig.genresClass) {
-                    $(element).find(tagConfig.genresClass).each((i, genreElem) => {
-                        genres.push($(genreElem).text().trim());
-                    });
-                }
-
-                const status = tagConfig.statusClass ? $(element).find(tagConfig.statusClass).text().trim() : null;
-
-                // Handle date if available for certain hosts/types
-                const publishDate = tagConfig.dateClass ? $(element).find(tagConfig.dateClass).text().trim() : null;
-
-                comicsData.push({
-                    title,
-                    link,
-                    image,
-                    genres: genres.length > 0 ? genres[0] : null,
-                    status,
-                    publishDate
-                });
-
-
+        // Handle genres only if the genres class is defined
+        const genres = [];
+        if (tagConfig.genresClass) {
+          $(element)
+            .find(tagConfig.genresClass)
+            .each((i, genreElem) => {
+              genres.push($(genreElem).text().trim());
             });
-
-            if (tagConfig.lastPageClass) {
-                if (page == 1) {
-                    lastPage = $(tagConfig.lastPageClass)
-                        .next()
-                        .text()
-                        .trim()
-                        .replaceAll(',', '');
-                }
-            }
         }
 
-        return { comicsData, lastPage };
-    } catch (error) {
-        console.error('Error fetching comics data:', error);
-        return null;
+        const status = tagConfig.statusClass
+          ? $(element).find(tagConfig.statusClass).text().trim()
+          : null;
+
+        // Handle date if available for certain hosts/types
+        const publishDate = tagConfig.dateClass
+          ? $(element).find(tagConfig.dateClass).text().trim()
+          : null;
+
+        comicsData.push({
+          title,
+          link,
+          image,
+          genres: genres.length > 0 ? genres[0] : null,
+          status,
+          publishDate,
+        });
+      });
+
+      if (tagConfig.lastPageClass) {
+        if (page == 1) {
+          lastPage = $(tagConfig.lastPageClass)
+            .next()
+            .text()
+            .trim()
+            .replaceAll(',', '');
+        }
+      }
     }
+
+    return {comicsData, lastPage};
+  } catch (error) {
+    console.error('Error fetching comics data:', error.response);
+    return {isCapture: error.response?.status === 403, error: error.response};
+  }
 };
 
-
 export const getComicsHome = async (setComics, setLoading) => {
-    setLoading(true);
-    try {
-        const [
-            readallcomics,
-            az_on_going,
-            az_porpular,
-            az_upcoming,
-        ] = await Promise.all([getComics(ComicHostName.readallcomics), getComics(ComicHostName.azcomic, 1, 'ongoing-comics'), getComics(ComicHostName.azcomic, 1, 'popular-comics'), getComics(ComicHostName.azcomic, 1, 'new-comics')]);
+  setLoading(true);
+  try {
+    const [readallcomics, az_on_going, az_porpular, az_upcoming] =
+      await Promise.all([
+        getComics(ComicHostName.readallcomics),
+        getComics(ComicHostName.azcomic, 1, 'ongoing-comics'),
+        getComics(ComicHostName.azcomic, 1, 'popular-comics'),
+        getComics(ComicHostName.azcomic, 1, 'new-comics'),
+      ]);
 
-        const ComicHomeList = {}
+    const ComicHomeList = {};
 
-        if (readallcomics) {
-            ComicHomeList.readallcomics = {
-                title: 'Read All Comics',
-                data: readallcomics?.comicsData,
-                hostName: ComicHostName.readallcomics,
-                lastPage: readallcomics?.lastPage
-            }
-        }
-
-        if (az_on_going) {
-            ComicHomeList['ongoing-comics'] = {
-                title: 'Latest',
-                data: az_on_going?.comicsData,
-                hostName: ComicHostName.azcomic,
-                lastPage: az_on_going?.lastPage
-            }
-        }
-
-        if (az_porpular) {
-            ComicHomeList['popular-comics'] = {
-                title: 'Popular',
-                data: az_porpular?.comicsData,
-                hostName: ComicHostName.azcomic,
-                lastPage: az_porpular?.lastPage
-            }
-        }
-
-        if (az_upcoming) {
-            ComicHomeList['new-comics'] = {
-                title: 'New Arrivals',
-                data: az_upcoming?.comicsData,
-                hostName: ComicHostName.azcomic,
-                lastPage: az_upcoming?.lastPage
-            }
-        }
-
-        setComics(ComicHomeList);
-
-        setLoading(false);
-    } catch (error) {
-        console.error('Error fetching manga Home data:', error);
-        setLoading(false);
+    if (!readallcomics?.error) {
+      ComicHomeList.readallcomics = {
+        title: 'Read All Comics',
+        data: readallcomics?.comicsData,
+        hostName: ComicHostName.readallcomics,
+        lastPage: readallcomics?.lastPage,
+      };
+    } else if (readallcomics?.isCapture) {
+      ComicHomeList.readallcomics = {
+        title: 'Read All Comics',
+        data: null,
+        hostName: ComicHostName.readallcomics,
+        lastPage: null,
+        isCapture: readallcomics?.isCapture,
+      };
     }
 
-}
+    if (!az_on_going?.error) {
+      ComicHomeList['ongoing-comics'] = {
+        title: 'Latest',
+        data: az_on_going?.comicsData,
+        hostName: ComicHostName.azcomic,
+        lastPage: az_on_going?.lastPage,
+      };
+    }
+
+    if (!az_porpular?.error) {
+      ComicHomeList['popular-comics'] = {
+        title: 'Popular',
+        data: az_porpular?.comicsData,
+        hostName: ComicHostName.azcomic,
+        lastPage: az_porpular?.lastPage,
+      };
+    }
+
+    if (!az_upcoming?.error) {
+      ComicHomeList['new-comics'] = {
+        title: 'New Arrivals',
+        data: az_upcoming?.comicsData,
+        hostName: ComicHostName.azcomic,
+        lastPage: az_upcoming?.lastPage,
+      };
+    }
+
+    setComics(ComicHomeList);
+
+    setLoading(false);
+  } catch (error) {
+    console.error('Error fetching manga Home data:', error);
+    setLoading(false);
+  }
+};

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 
 import {
@@ -18,9 +18,11 @@ import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import WebView from 'react-native-webview';
 
 export function ComicDetails({route}) {
   const {link, image, title, isComicBookLink} = route.params;
+  const webviewRef = useRef(null);
   const [PageLink, setPageLink] = useState(isComicBookLink ? null : link);
   const [tabBar, setTabBar] = useState([
     {name: 'Chapters', active: true},
@@ -50,7 +52,56 @@ export function ComicDetails({route}) {
     }
   }, [PageLink]);
 
-  if (error) return <Error error={error} />;
+  if (error) {
+    if (error.includes('403')) {
+      const injectedJS = `
+          (function() {
+              const logoElement = document.querySelector('a[title="Read All Comics Online"]');
+            if (logoElement) {
+              window.ReactNativeWebView.postMessage(document.documentElement.outerHTML);
+            } else {
+              let previousKey = '';
+              const observer = new MutationObserver(() => {
+                const key = document.querySelector('meta[name="key"]').getAttribute('content');
+                if (key !== previousKey) {
+                  previousKey = key;
+                  window.ReactNativeWebView.postMessage('Key changed: ' + key);
+                }
+              });
+              observer.observe(document, { attributes: true, childList: true, subtree: true });
+            }
+          })();
+        `;
+
+      const onMessage = async event => {
+        const {data} = event.nativeEvent;
+        const html = data;
+        if (isComicBookLink && !PageLink) {
+          dispatch(fetchComicBook(link, setPageLink, false, html));
+        } else {
+          dispatch(fetchComicDetails(PageLink, false, html));
+        }
+      };
+
+      return (
+        <WebView
+          ref={webviewRef}
+          source={{uri: PageLink ?? link}}
+          injectedJavaScript={injectedJS}
+          onMessage={onMessage}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          originWhitelist={['*']}
+          mixedContentMode="always"
+          onError={syntheticEvent => {
+            const {nativeEvent} = syntheticEvent;
+            console.log('WebView error:', nativeEvent);
+          }}
+        />
+      );
+    }
+    return <Error error={error} />;
+  }
 
   return (
     <>
