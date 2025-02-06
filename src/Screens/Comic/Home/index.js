@@ -87,10 +87,6 @@ export function Home({navigation}) {
           domStorageEnabled={true}
           originWhitelist={['*']}
           mixedContentMode="always"
-          onError={syntheticEvent => {
-            const {nativeEvent} = syntheticEvent;
-            console.log('WebView error:', nativeEvent);
-          }}
         />
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>

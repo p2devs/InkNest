@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   dataByUrl: {},
@@ -86,10 +86,11 @@ const Reducers = createSlice({
   reducers: {
     fetchDataStart: state => {
       state.loading = true;
+      console.log('fetchDataStart');
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const { url, data } = action.payload;
+      const {url, data} = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -99,38 +100,46 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const { url, data, ComicDetailslink, imageLength } = action.payload;
+      const {url, data, ComicDetailslink, imageLength} = action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
+      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
 
       if (ComicDetailslink && imageLength) {
         state.history[ComicDetailslink] = {
           ...state?.history?.[ComicDetailslink],
           readComics: {
             ...state?.history?.[ComicDetailslink]?.readComics,
-            [url]: { totalPage: imageLength, lastReadPage: data.lastReadPage }
-          }
-        }
+            [url]: {totalPage: imageLength, lastReadPage: data.lastReadPage},
+          },
+        };
       }
 
       // state.dataByUrl[url] = data;
     },
     DownloadComicBook: (state, action) => {
-      const { link, data, title, } = action.payload;
+      const {link, data, title} = action.payload;
 
-      state.DownloadComic[link] = { title, link, comicBooks: { ...state.DownloadComic[link]?.comicBooks, [data?.link]: data } };
+      state.DownloadComic[link] = {
+        title,
+        link,
+        comicBooks: {
+          ...state.DownloadComic[link]?.comicBooks,
+          [data?.link]: data,
+        },
+      };
       console.log('action.payload', link, data, title);
 
       console.log('state.DownloadComic', state.DownloadComic);
-
     },
     DeleteDownloadedComicBook: (state, action) => {
-      const { comicBooksLink, ChapterLink } = action.payload;
+      const {comicBooksLink, ChapterLink} = action.payload;
       delete state.DownloadComic[comicBooksLink]?.comicBooks[ChapterLink];
-      if (Object.keys(state.DownloadComic[comicBooksLink]?.comicBooks).length === 0) {
+      if (
+        Object.keys(state.DownloadComic[comicBooksLink]?.comicBooks).length ===
+        0
+      ) {
         delete state.DownloadComic[comicBooksLink];
       }
-
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
@@ -145,11 +154,14 @@ const Reducers = createSlice({
       state.loading = false;
     },
     ClearError: state => {
-      state.error = null;
+      console.log('ClearError');
+      // state.error = null;
     },
     clearData: state => {
       state.loading = false;
       state.error = null;
+      console.log('clearData');
+      
       dataByUrl = {};
     },
     DownTime: (state, action) => {
@@ -196,6 +208,6 @@ export const {
   AddAnimeBookMark,
   RemoveAnimeBookMark,
   DownloadComicBook,
-  DeleteDownloadedComicBook
+  DeleteDownloadedComicBook,
 } = Reducers.actions;
 export default Reducers.reducer;

@@ -76,6 +76,7 @@ export function ComicDetails({route}) {
       const onMessage = async event => {
         const {data} = event.nativeEvent;
         const html = data;
+
         if (isComicBookLink && !PageLink) {
           dispatch(fetchComicBook(link, setPageLink, false, html));
         } else {
@@ -86,7 +87,7 @@ export function ComicDetails({route}) {
       return (
         <WebView
           ref={webviewRef}
-          source={{uri: PageLink ?? link}}
+          source={{uri: PageLink ? PageLink : link}}
           injectedJavaScript={injectedJS}
           onMessage={onMessage}
           javaScriptEnabled={true}

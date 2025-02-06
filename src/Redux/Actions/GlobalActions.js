@@ -261,7 +261,7 @@ export const fetchComicDetails =
       checkDownTime(error);
       dispatch(StopLoading());
       dispatch(ClearError());
-      dispatch(fetchDataFailure('Not Found'));
+      dispatch(fetchDataFailure('Not Found ' + error.response.status));
       console.error('Error second fetching comic details:', error);
       // goBack();
       Alert.alert('Error', 'Comic not found');
@@ -294,11 +294,13 @@ export const fetchComicBook =
         if (setPageLink) {
           setPageLink(Data.ComicDetailslink);
         }
+        console.log('Data', Data);
         dispatch(StopLoading());
         dispatch(ClearError());
         dispatch(checkDownTime());
         return;
       }
+      console.log(Hiturl, 'Hiturl');
 
       let response = null;
 
@@ -370,8 +372,11 @@ export const fetchComicBook =
         setPageLink(link);
       }
       dispatch(fetchDataSuccess({url: comicBook, data}));
+      console.log('fetchDataSuccess', {url: comicBook, data});
       if (isDownloadComic) return {url: comicBook, data};
     } catch (error) {
+      console.log('Error fetching comic book:', error);
+
       dispatch(fetchDataFailure(error.message));
       checkDownTime(error);
     }
