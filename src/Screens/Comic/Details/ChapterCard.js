@@ -29,6 +29,9 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         state?.data?.DownloadComic?.[detailPageLink]?.comicBooks?.[item?.link],
     ),
   );
+
+  console.log("detailPageLink", detailPageLink);
+  
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [LoadingStatus, setLoadStatus] = useState(false);
   const dispatch = useDispatch();
@@ -108,7 +111,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             fontSize: 14,
             maxWidth: widthPercentageToDP('50%'),
           }}>
-          {item.title}
+          {item?.title}
         </Text>
         {item?.date ? (
           <Text
@@ -141,7 +144,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       {LoadingStatus ? (
         <ActivityIndicator size="small" color="skyblue" />
       ) : null}
-      {LoadingStatus ? null : !isComicDownload ? (
+      {/* {LoadingStatus ? null : !isComicDownload ? (
         <Entypo
           name="download"
           size={24}
@@ -165,7 +168,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             navigate(NAVIGATION.offlineComic);
           }}
         />
-      )}
+      )} */}
     </TouchableOpacity>
   );
 };

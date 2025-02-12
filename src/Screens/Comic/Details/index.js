@@ -36,7 +36,7 @@ export function ComicDetails({route}) {
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
 
   const reverseChapterList = () => {
-    const chapterList = ComicDetail?.issues ?? ComicDetail?.chapters;
+    const chapterList = ComicDetail?.chapters;
     if (!chapterList) return [];
     if (!sort) return [...chapterList];
     return [...chapterList].reverse();

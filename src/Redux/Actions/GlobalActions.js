@@ -178,7 +178,6 @@ export const fetchComicDetails =
       };
 
       console.log('comicDetails', comicDetails);
-      
 
       watchedData = {
         title: comicDetails.title,
@@ -221,16 +220,7 @@ export const fetchComicBook =
   async (dispatch, getState) => {
     if (!isDownloadComic) dispatch(fetchDataStart());
     try {
-      // let baseUrl = getState().data.baseUrl;
-      let Data = getState().data.dataByUrl[comicBook];
-
-      //check if comicBook url contant readallcomics.com
-      const checkUrl = comicBook.includes('readallcomics.com')
-        ? 'readallcomics'
-        : 'azcomic';
-
-      const Hiturl = checkUrl == 'azcomic' ? `${comicBook}/full` : comicBook;
-      // console.log(comicBook, "Data Comic Book");
+      const Data = getState().data.dataByUrl[comicBook];
       if (Data) {
         if (setPageLink) {
           setPageLink(Data.ComicDetailslink);
@@ -240,68 +230,39 @@ export const fetchComicBook =
         dispatch(checkDownTime());
         return;
       }
-      const response = await APICaller.get(Hiturl);
+      const response = await APICaller.get(comicBook);
       const html = response.data;
       const $ = cheerio.load(html);
-      const targetDiv = $(
-        'div[style="margin:0px auto; max-width: 1000px; background:#fff; padding:20px 0px 10px 0px; border-radius: 15px;font-size: 22px; padding-top: 10px;"]',
-      );
-      let title = '';
-      const imgElements = targetDiv.find('img');
+
+      // New API: Extract chapter images using data-src attribute
+      const imageContainer = $('.imagecnt');
       const imgSources = [];
-      const volumes = [];
-      if (checkUrl == 'azcomic') {
-        title = title = $('.title h1').text().trim();
-        $('.chapter-container img').each((index, element) => {
-          const imageUrl = $(element).attr('src');
-          // console.log(imageUrl, "imageUrl");
-          imgSources.push(imageUrl);
+      imageContainer
+        .find('img.img-responsive[data-src]')
+        .each((index, element) => {
+          const src = $(element).attr('data-src')?.trim();
+          if (src) {
+            imgSources.push(src);
+          }
         });
-        $('select.full-select option').each((index, element) => {
-          const title = $(element).text().trim();
-          const link = $(element).attr('value').replace('/full', '');
-          // console.log('title', title, 'link', link);
-          volumes.push({title, link});
-        });
-      } else {
-        title = targetDiv
-          .find('h3[style="color: #0363df;font-size: 20px; padding-top:5px;"]')
-          .text()
-          .trim();
-        imgElements.each((index, element) => {
-          imgSources.push($(element).attr('src'));
-        });
-        $('select option').each((index, element) => {
-          const title = $(element).text();
-          const link = $(element).attr('value');
-          volumes.push({title, link});
-        });
-      }
 
-      let link = $('a[rel="category tag"]').attr('href');
-      if (!link) {
-        link = $('.title a').attr('href');
-      }
-
-      //remove duplicates in volumes
-      let unique = [
-        ...new Map(volumes.map(item => [item['title'], item])).values(),
-      ];
       const data = {
         images: imgSources,
-        title,
-        volumes: unique,
+        // It is assumed the chapter title is embedded in the alt text of the first image.
+        // Adjust the extraction as needed.
+        title:
+          imageContainer
+            .find('img.img-responsive')
+            .first()
+            .attr('alt')
+            ?.trim() || '',
         lastReadPage: 0,
         BookmarkPages: [],
-        ComicDetailslink: link,
+        ComicDetailslink: '',
       };
-      // console.log(data, "final data");
-      // console.log({ data }, "Data");
+
       if (setPageLink) {
-        //get the title link
-        console.log(link, 'link');
-        data.ComicDetailslink = link;
-        setPageLink(link);
+        setPageLink(data.ComicDetailslink);
       }
       dispatch(fetchDataSuccess({url: comicBook, data}));
       if (isDownloadComic) return {url: comicBook, data};
