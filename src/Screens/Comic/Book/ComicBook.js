@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,8 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Animated, {
   useSharedValue,
@@ -17,18 +17,17 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
+import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
 import Gallery from '../../../Components/Gallery/src/index';
-import { updateData } from '../../../Redux/Reducers';
+import {updateData} from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
-import { AppendAd } from '../../../InkNest-Externals/Ads/AppendAd';
 
-export function ComicBook({ navigation, route }) {
-  const { comicBookLink, pageJump, isDownloadComic, chapterlink } = route?.params;
+export function ComicBook({navigation, route}) {
+  const {comicBookLink, pageJump, isDownloadComic, chapterlink} = route?.params;
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
@@ -40,7 +39,7 @@ export function ComicBook({ navigation, route }) {
   const [ViewAll, setViewAll] = useState(false);
   const [DownloadedBook, setDownloadedBook] = useState(null);
 
-  const { width } = Dimensions.get('window');
+  const {width} = Dimensions.get('window');
   const numColumns = 3;
   const imageSize = width / numColumns - 10;
 
@@ -115,14 +114,14 @@ export function ComicBook({ navigation, route }) {
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: headerOpacity.value,
-      transform: [{ translateY: headerTranslateY.value }],
+      transform: [{translateY: headerTranslateY.value}],
     };
   });
 
   const footerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: footerOpacity.value,
-      transform: [{ translateY: footerTranslateY.value }],
+      transform: [{translateY: footerTranslateY.value}],
     };
   });
 
@@ -135,7 +134,7 @@ export function ComicBook({ navigation, route }) {
   }
 
   const GridImageItem = props => {
-    const { item, index } = props;
+    const {item, index} = props;
     return (
       <TouchableOpacity
         key={index}
@@ -150,7 +149,7 @@ export function ComicBook({ navigation, route }) {
           backgroundColor: '#333',
         }}>
         <Image
-          source={{ uri: item }}
+          source={{uri: item}}
           style={{
             width: imageSize,
             height: imageSize,
@@ -176,11 +175,11 @@ export function ComicBook({ navigation, route }) {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: '#14142a' }}
+      style={{flex: 1, backgroundColor: '#14142a'}}
       edges={['top', 'bottom']}>
       <TouchableWithoutFeedback onPress={toggleControls}>
         {/* Wrap the entire view with TouchableWithoutFeedback to detect taps */}
-        <View style={{ flex: 1 }}>
+        <View style={{flex: 1}}>
           {ViewAll ? (
             <FlatList
               data={
@@ -188,7 +187,7 @@ export function ComicBook({ navigation, route }) {
                   ? DownloadedBook?.downloadedImagesPath
                   : ComicBook?.images
               }
-              renderItem={({ item, index }) => (
+              renderItem={({item, index}) => (
                 <GridImageItem item={item} index={index} />
               )}
               numColumns={numColumns}
@@ -209,7 +208,7 @@ export function ComicBook({ navigation, route }) {
                   dispatch(
                     updateData({
                       url: comicBookLink,
-                      data: { lastReadPage: newIndex },
+                      data: {lastReadPage: newIndex},
                       imageLength: ComicBook?.images?.length,
                       ComicDetailslink: ComicBook?.ComicDetailslink,
                     }),
@@ -224,7 +223,7 @@ export function ComicBook({ navigation, route }) {
           {/* Conditionally render the header/footer only if showControls is true */}
           <Animated.View
             style={[
-              { position: 'absolute', top: 0, width: '100%' },
+              {position: 'absolute', top: 0, width: '100%'},
               headerAnimatedStyle,
             ]}>
             <ComicBookHeader
@@ -236,7 +235,7 @@ export function ComicBook({ navigation, route }) {
           </Animated.View>
           <Animated.View
             style={[
-              { position: 'absolute', bottom: 0, width: '100%' },
+              {position: 'absolute', bottom: 0, width: '100%'},
               footerAnimatedStyle,
             ]}>
             <ComicBookFooter
