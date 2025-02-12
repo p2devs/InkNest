@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, {memo, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -12,25 +12,25 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import Header from '../../../../Components/UIComp/Header';
 import DescriptionView from '../../../../Components/UIComp/DescriptionView';
-import { goBack } from '../../../../Navigation/NavigationService';
-import { updateData } from '../../../../Redux/Reducers';
-import { fetchComicDetails } from '../../../../Redux/Actions/GlobalActions';
+import {goBack} from '../../../../Navigation/NavigationService';
+import {updateData} from '../../../../Redux/Reducers';
+import {fetchComicDetails} from '../../../../Redux/Actions/GlobalActions';
 
 const HeaderComponent = memo(
-  ({ image, title, link, tabBar, onTabBar, sort, setSORT }) => {
+  ({image, title, link, tabBar, onTabBar, sort, setSORT}) => {
     const dispatch = useDispatch();
     const ComicDetail = useSelector(state => state.data.dataByUrl[link]);
 
     return (
       <SafeAreaView
-        style={[styles.container, { marginBottom: 16 }]}
+        style={[styles.container, {marginBottom: 16}]}
         edges={['top']}>
         <View style={styles.headerContainer}>
           <Image
@@ -67,7 +67,7 @@ const HeaderComponent = memo(
                 name="arrow-back"
                 size={24}
                 color="#fff"
-                style={{ marginRight: 10, opacity: 0.9 }}
+                style={{marginRight: 10, opacity: 0.9}}
               />
             </TouchableOpacity>
             <Text
@@ -80,13 +80,13 @@ const HeaderComponent = memo(
               Comic Details
             </Text>
 
-            <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={{flexDirection: 'row', gap: 16}}>
               <TouchableOpacity
                 onPress={() => {
                   dispatch(
                     updateData({
                       url: link,
-                      data: { Bookmark: !ComicDetail?.Bookmark },
+                      data: {Bookmark: !ComicDetail?.Bookmark},
                     }),
                   );
                 }}>
@@ -107,7 +107,6 @@ const HeaderComponent = memo(
                 />
               </TouchableOpacity>
             </View>
-
           </Header>
 
           <View
@@ -159,22 +158,23 @@ const HeaderComponent = memo(
                   fontSize: 12,
                   color: '#fff',
                   opacity: 0.8,
-                }}>{`${ComicDetail?.genres
+                }}>{`${
+                ComicDetail?.genres
                   ? ComicDetail?.genres?.toString() + ' · '
+                  : ComicDetail?.tags
+                  ? ComicDetail?.tags?.toString() + ' · '
                   : ''
-                  }${ComicDetail?.yearOfRelease
-                    ? ComicDetail?.yearOfRelease + ' · '
-                    : ''
-                  }${ComicDetail?.status ? ComicDetail?.status + ' · ' : ''}${ComicDetail?.publisher ? 'By - ' + ComicDetail?.publisher : ''
-                  }`}</Text>
+              }${
+                ComicDetail?.yearOfRelease
+                  ? ComicDetail?.yearOfRelease + ' · '
+                  : ''
+              }${ComicDetail?.status ? ComicDetail?.status + ' · ' : ''}${
+                ComicDetail?.publisher ? 'By - ' + ComicDetail?.publisher : ''
+              }`}</Text>
             }
-            {ComicDetail?.volumes && (
-              <View>
-                {ComicDetail?.volumes.map((vol, index) => (
-                  <DescriptionView key={index} index={index} vol={vol} />
-                ))}
-              </View>
-            )}
+            {ComicDetail?.summary ? (
+              <DescriptionView vol={ComicDetail?.summary} />
+            ) : null}
           </View>
 
           <View

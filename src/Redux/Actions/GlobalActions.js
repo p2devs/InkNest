@@ -92,171 +92,118 @@ export const fetchComicDetails =
   async (dispatch, getState) => {
     dispatch(fetchDataStart());
     try {
-      let Data = getState().data.dataByUrl[link];
-
+      const stateData = getState().data.dataByUrl[link];
       let watchedData = {
-        title: Data?.title,
+        title: stateData?.title,
         link,
-        image: Data?.imgSrc,
-        publisher: Data?.publisher,
-        genres: Data?.genres,
+        image: stateData?.imgSrc,
         lastOpenAt: new Date().getTime(),
       };
-      //if link contant readallcomics.com then set baseUrl to readallcomics
-      let checkUrl = link.includes('readallcomics.com')
-        ? 'readallcomics'
-        : 'azcomic';
-      if (!refresh && Data) {
+
+      if (!refresh && stateData) {
         dispatch(StopLoading());
         dispatch(ClearError());
         dispatch(checkDownTime());
         dispatch(WatchedData(watchedData));
         return;
       }
-      // console.log(link, "link");
+
       const response = await APICaller.get(link);
       const html = response.data;
-      // console.log(html, "html");
       const $ = cheerio.load(html);
-      let comicDetails = {};
-      if (checkUrl == 'azcomic') {
-        // Extract comic details
-        const title = $('.anime-details .title').text().trim();
-        const imgSrc = $('.anime-details .anime-image img').attr('src');
-        const status = $('.anime-genres .status a').text().trim();
-        const genres = [];
-        $('.anime-genres li a').each((i, el) => {
-          const genre = $(el).text().trim();
-          if (genre !== 'Ongoing') {
-            genres.push(genre);
-          }
-        });
-        const yearOfRelease = $('.anime-desc span:contains("Year of Release:")')
-          .closest('tr')
-          .find('td')
-          .eq(1)
-          .text()
-          .trim();
-        const publisher =
-          $('.anime-desc span:contains("Author:")')
-            .closest('tr')
-            .find('td')
-            .eq(1)
-            .text()
-            .trim() || '';
 
-        const issues = [];
-        $('.basic-list li').each((i, el) => {
-          const title = $(el).find('a.ch-name').text().trim();
-          const link = $(el).find('a.ch-name').attr('href');
-          const date = $(el).find('span').text().trim();
-          issues.push({
-            title,
-            link,
-            date,
-          });
-        });
-        // Create a comic detail object
-        comicDetails = {
-          title,
-          imgSrc,
-          status,
-          genres,
-          yearOfRelease,
-          publisher,
-          issues,
-          link,
-        };
-      } else {
-        const descriptionArchive = $('.description-archive');
-        // console.log(descriptionArchive, "descriptionArchive");
-
-        const title = descriptionArchive.find('h1').text().trim();
-        const imgSrc = descriptionArchive.find('img').attr('src');
-        // const genres = descriptionArchive.find('p strong').eq(0).text().trim();
-        // const publisher = descriptionArchive
-        //   .find('p strong')
-        //   .eq(1)
-        //   .text()
-        //   .trim();
-
-        // Initialize placeholders for Genres and Publisher
-        let genres = descriptionArchive.find('p strong').eq(0).text().trim();
-        let publisher = descriptionArchive.find('p strong').eq(1).text().trim();
-
-        // Look for Genres and Publisher in both cases (inside and outside <p> tags)
-        descriptionArchive.contents().each(function () {
-          const text = $(this).text().trim();
-
-          // Check for Genres
-          if (text.startsWith('Genres:' && !genres)) {
-            genres =
-              $(this).find('strong').first().text().trim() ||
-              text.replace('Genres:', '').trim();
-          }
-
-          // Check for Publisher
-          if (text.startsWith('Publisher:' && !publisher)) {
-            publisher =
-              $(this).find('strong').first().text().trim() ||
-              text.replace('Publisher:', '').trim();
-          }
-        });
-
-        console.log(genres, 'publisher', publisher);
-
-        const volumes = [];
-        // console.log(descriptionArchive.find('hr.style-six'));
-        descriptionArchive.find('hr.style-six').each((i, el) => {
-          // console.log($(el).nextAll("strong").text(),i);
-          const volume = $(el).next('span').text().trim();
-          const description = $(el).nextAll('strong').text();
-          volumes.push({volume, description});
-        });
-
-        const chapters = [];
-        $('.list-story li a').each((i, el) => {
-          chapters.push({
-            title: $(el).attr('title'),
-            link: $(el).attr('href'),
-          });
-        });
-        // console.log({ title, imgSrc, genres, publisher, volumes, chapters }, 'Data');
-
-        comicDetails = {
-          title,
-          imgSrc,
-          genres,
-          publisher,
-          volumes,
-          chapters,
-          link,
-        };
+      // Details Section
+      const detailsContainer = $('.list-container');
+      const title = $('img.img-responsive').attr('alt')?.trim();
+      let imgSrc = detailsContainer
+        .find('.boxed img.img-responsive')
+        .attr('src');
+      if (imgSrc && imgSrc.startsWith('//')) {
+        imgSrc = 'https:' + imgSrc;
       }
 
-      // console.log({ data }, "Data");
+      // Build a details map from the <dl class="dl-horizontal">
+      const details = {};
+      detailsContainer.find('dl.dl-horizontal dt').each((i, el) => {
+        const key = $(el).text().trim().replace(':', '');
+        const dd = $(el).next('dd');
+        if (key === 'Tags') {
+          const tags = [];
+          dd.find('a').each((j, a) => {
+            tags.push($(a).text().trim());
+          });
+          details[key] = tags;
+        } else if (key === 'Categories') {
+          details[key] = dd.find('a').first().text().trim();
+        } else if (key === 'Rating') {
+          details[key] = dd.text().trim();
+        } else {
+          details[key] = dd.text().trim();
+        }
+      });
+
+      // Summary Section
+      const summary = $('div.manga.well p').text().trim();
+
+      // Chapters Section
+      const chapters = [];
+      $('ul.chapters li').each((i, el) => {
+        const chapterTitle = $(el).find('h5.chapter-title-rtl a').text().trim();
+        const chapterLink = $(el).find('h5.chapter-title-rtl a').attr('href');
+        const chapterDate = $(el)
+          .find('div.date-chapter-title-rtl')
+          .text()
+          .trim();
+        chapters.push({
+          title: chapterTitle,
+          link: chapterLink,
+          date: chapterDate,
+        });
+      });
+
+      // Create comic details object using the new API structure
+      const comicDetails = {
+        title,
+        imgSrc,
+        type: details['Type'] || null,
+        status: details['Status'] || null,
+        releaseDate: details['Date of release'] || null,
+        categories: details['Categories'] || null,
+        tags: details['Tags'] || [],
+        views: details['Views'] || null,
+        rating: details['Rating'] || null,
+        summary,
+        chapters,
+        link,
+      };
+
+      console.log('comicDetails', comicDetails);
+      
+
       watchedData = {
         title: comicDetails.title,
         link,
         image: comicDetails.imgSrc,
-        publisher: comicDetails.publisher,
-        genres: comicDetails.genres,
         lastOpenAt: new Date().getTime(),
       };
+
       if (refresh) {
         dispatch(updateData({url: link, data: comicDetails}));
         dispatch(StopLoading());
         return;
       }
+
       dispatch(WatchedData(watchedData));
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
-      console.error('Error fetching comic details:', error.response.status);
+      console.error(
+        'Error fetching comic details:',
+        error.response?.status || error,
+      );
       checkDownTime(error);
       dispatch(StopLoading());
       dispatch(ClearError());
       dispatch(fetchDataFailure('Not Found'));
-      console.error('Error second fetching comic details:', error);
       goBack();
       Alert.alert('Error', 'Comic not found');
     }
