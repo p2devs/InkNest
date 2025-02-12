@@ -99,33 +99,35 @@ export function Home({navigation}) {
                   }}>
                   {comicsData?.[key]?.title}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    crashlytics().log('See All (Home) button clicked');
-                    analytics().logEvent('see_all_button_clicked', {
-                      key: key?.toString(),
-                      title: comicsData?.[key]?.title?.toString(),
-                      data: comicsData?.[key]?.data?.toString(),
-                      lastPage: comicsData?.[key]?.lastPage?.toString(),
-                      hostName: comicsData?.[key]?.hostName?.toString(),
-                    });
-                    navigation.navigate(NAVIGATION.seeAll, {
-                      key,
-                      title: comicsData?.[key]?.title,
-                      data: comicsData?.[key]?.data,
-                      lastPage: comicsData?.[key]?.lastPage,
-                      hostName: comicsData?.[key]?.hostName,
-                    });
-                  }}>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: '#2767f2',
-                      textAlign: 'right',
+                {comicsData?.[key]?.title !== 'Latest Release' ? null : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      crashlytics().log('See All (Home) button clicked');
+                      analytics().logEvent('see_all_button_clicked', {
+                        key: key?.toString(),
+                        title: comicsData?.[key]?.title?.toString(),
+                        data: comicsData?.[key]?.data?.toString(),
+                        lastPage: comicsData?.[key]?.lastPage?.toString(),
+                        hostName: comicsData?.[key]?.hostName?.toString(),
+                      });
+                      navigation.navigate(NAVIGATION.seeAll, {
+                        key,
+                        title: comicsData?.[key]?.title,
+                        data: comicsData?.[key]?.data,
+                        lastPage: comicsData?.[key]?.lastPage,
+                        hostName: comicsData?.[key]?.hostName,
+                      });
                     }}>
-                    See All
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: '#2767f2',
+                        textAlign: 'right',
+                      }}>
+                      See All
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
               {/* // append an type ad in this add and this should be in every 4th index */}
               <FlatList
@@ -141,7 +143,6 @@ export function Home({navigation}) {
                       analytics().logEvent('comic_details_button_clicked', {
                         link: item?.link?.toString(),
                         title: item?.title?.toString(),
-                        isComicBookLink: key === 'readallcomics',
                       });
                       navigation.navigate(NAVIGATION.comicDetails, {
                         ...item,

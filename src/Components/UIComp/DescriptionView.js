@@ -14,7 +14,7 @@ const DescriptionView = ({vol, index}) => {
   };
 
   useEffect(() => {
-    const targetHeight = readMore ? calculateHeight(vol?.description) : 60;
+    const targetHeight = readMore ? calculateHeight(vol) : 60;
     Animated.timing(animation, {
       toValue: targetHeight,
       duration: 300,
@@ -22,16 +22,10 @@ const DescriptionView = ({vol, index}) => {
     }).start();
   }, [readMore]);
 
-  if (!vol?.volume) {
-    return null;
-  }
-
   return (
     <React.Fragment key={index}>
       <Animated.View style={{height: animation}}>
-        <Text style={styles.description}>
-          <Text style={styles.label}>{vol.volume}:</Text> {vol.description}
-        </Text>
+        <Text style={styles.description}>{vol}</Text>
       </Animated.View>
 
       <TouchableOpacity

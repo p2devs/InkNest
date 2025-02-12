@@ -3,7 +3,6 @@ import {View, Text, TouchableOpacity, Image} from 'react-native';
 
 import {useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {heightPercentageToDP} from 'react-native-responsive-screen';
 import {NAVIGATION} from '../../Constants';
 
 const ComicBookFooter = ({
@@ -14,7 +13,6 @@ const ComicBookFooter = ({
   showButton,
 }) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
-  const baseUrl = useSelector(state => state.data.baseUrl);
   const index = ComicBook?.volumes?.findIndex(item => {
     const checklinkBaseUrl = item?.link.includes('readallcomics.com')
       ? 'readallcomics'
@@ -62,7 +60,7 @@ const ComicBookFooter = ({
           alignItems: 'center',
           gap: 10,
         }}>
-        {index !== ComicBook?.volumes.length - 1 ? (
+        {/* {index !== ComicBook?.volumes?.length - 1 ? (
           showButton ? (
             <TouchableOpacity
               onPress={() => {
@@ -94,7 +92,7 @@ const ComicBookFooter = ({
             <View />
           )
         ) : null}
-        {ComicBook?.volumes.length == 1 ? (
+        {ComicBook?.volumes?.length == 1 ? (
           <View />
         ) : showButton ? (
           <TouchableOpacity
@@ -127,7 +125,7 @@ const ComicBookFooter = ({
           </TouchableOpacity>
         ) : (
           <View />
-        )}
+        )} */}
       </View>
     </View>
   );

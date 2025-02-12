@@ -20,4 +20,5 @@ export const NAVIGATION = {
   ViewAll: "ViewAll",
   offlineComic: "Offline",
   seeAll: "SeeAll",
+  sources: "Sources",
 };

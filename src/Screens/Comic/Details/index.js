@@ -20,8 +20,7 @@ import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 
 export function ComicDetails({route}) {
-  const {link, image, title, isComicBookLink} = route.params;
-  const [PageLink, setPageLink] = useState(isComicBookLink ? null : link);
+  const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
     {name: 'Chapters', active: true},
     {name: 'Bookmarks', active: false},
@@ -36,18 +35,14 @@ export function ComicDetails({route}) {
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
 
   const reverseChapterList = () => {
-    const chapterList = ComicDetail?.issues ?? ComicDetail?.chapters;
+    const chapterList = ComicDetail?.chapters;
     if (!chapterList) return [];
     if (!sort) return [...chapterList];
     return [...chapterList].reverse();
   };
 
   useEffect(() => {
-    if (isComicBookLink && !PageLink) {
-      dispatch(fetchComicBook(link, setPageLink));
-    } else {
-      dispatch(fetchComicDetails(PageLink));
-    }
+    dispatch(fetchComicDetails(PageLink));
   }, [PageLink]);
 
   if (error) return <Error error={error} />;
@@ -59,8 +54,8 @@ export function ComicDetails({route}) {
         ListHeaderComponent={
           <HeaderComponent
             link={PageLink}
-            image={image}
-            title={title}
+            image={route?.params?.image}
+            title={route?.params?.title}
             tabBar={tabBar}
             onTabBar={index => {
               crashlytics().log('Comic Details Tab Clicked');
