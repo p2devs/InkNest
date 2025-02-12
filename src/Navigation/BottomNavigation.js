@@ -6,7 +6,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {Search, Settings} from '../Screens';
+import {Search, Settings, Sources} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
 import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
@@ -54,6 +54,14 @@ const TabBarIcon = props => {
   } else if (props.name === 'settings') {
     return (
       <Feather
+        name={props.name}
+        size={props.size ? props.size : 24}
+        color={props.tintColor}
+      />
+    );
+  } else if (props.name === 'source') {
+    return (
+      <MaterialIcons
         name={props.name}
         size={props.size ? props.size : 24}
         color={props.tintColor}
@@ -136,6 +144,16 @@ export function BottomNavigation() {
           }}
         />
       )}
+
+      <BottomTab.Screen
+        name={NAVIGATION.sources}
+        component={Sources}
+        options={{
+          tabBarIcon: ({focused, color}) => (
+            <TabBarIcon focused={focused} tintColor={color} name="source" />
+          ),
+        }}
+      />
 
       <BottomTab.Screen
         name={NAVIGATION.settings}
