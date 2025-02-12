@@ -8,7 +8,6 @@ import {
   StopLoading,
   ClearError,
   pushHistory,
-  UpdateSearch,
   DownTime,
   updateData,
   AnimeWatched,
@@ -273,97 +272,6 @@ export const fetchComicBook =
   };
 
 /**
- * Fetches search results for a comic based on the provided search query.
- * Dispatches actions to update the search state and handle loading states.
- *
- * @param {string} search - The search query for the comic.
- * @returns {Function} A thunk function that performs the search and dispatches actions.
- */
-export const SearchComicByReadAllComics = search => async dispatch => {
-  dispatch(fetchDataStart());
-  try {
-    dispatch(UpdateSearch({user: 'user', query: search}));
-    const response = await APICaller.get(
-      `https://readallcomics.com/?story=${search.replaceAll(
-        ' ',
-        '+',
-      )}&s=&type=comic`,
-    );
-    const html = response.data;
-    const $ = cheerio.load(html);
-    const results = [];
-
-    // Find all <a> elements with class "list-story categories"
-    $('ul.list-story.categories li a').each((index, element) => {
-      // console.log('element', element);
-      const title = $(element).text().trim();
-      const href = $(element).attr('href');
-      results.push({title, href});
-    });
-    dispatch(StopLoading());
-    if (results.length === 0) {
-      dispatch(UpdateSearch({user: 'error', error: 'No results found'}));
-      return;
-    }
-    dispatch(UpdateSearch({user: 'system', results}));
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    checkDownTime(error);
-    dispatch(StopLoading());
-    dispatch(
-      UpdateSearch({
-        user: 'error',
-        error: 'Oops!! something went wrong, please try again...',
-      }),
-    );
-  }
-};
-/**
- * Fetches search results for a comic from azcomix.me based on the provided search query.
- *
- * @param {string} searchKey - The search query for the comic.
- * @returns {Promise<Array>} A promise that resolves to an array of comic details.
- */
-export const SearchComicByAzComic = async (searchKey, dispatch) => {
-  dispatch(fetchDataStart());
-  try {
-    const formattedKey = searchKey.replaceAll(/\s+/g, '+');
-    const url = `https://azcomix.me/advanced-search?key=${formattedKey}`;
-
-    const response = await APICaller.get(url);
-    const $ = cheerio.load(response.data);
-
-    const comics = [];
-    $('.detailed-list .dl-box').each((index, element) => {
-      const title = $(element).find('.dlb-title').text().trim();
-      const image = $(element).find('.dlb-image img').attr('src');
-      const link = $(element).find('.dlb-title').attr('href');
-      const genres = $(element)
-        .find('.dlb-details strong:contains("Genre :")')
-        .next()
-        .text()
-        .trim();
-
-      comics.push({
-        title,
-        image,
-        link,
-        genres,
-      });
-    });
-
-    dispatch(checkDownTime(response));
-    return comics;
-  } catch (error) {
-    console.error('Error fetching data for search Comic AZ:', error);
-    if (dispatch) {
-      dispatch(checkDownTime(error));
-    }
-    return null;
-  }
-};
-
-/**
  * Redux action to update the anime history in the state.
  *
  * @param {Object} params - The parameters object.
@@ -434,4 +342,113 @@ export const clearDataByUrl = url => async dispatch => {
  */
 export const clearAllData = () => async dispatch => {
   dispatch(clearData());
+};
+
+/**
+ * Fetches available advanced search filter options from readcomicsonline.
+ * This function performs a GET request to the advanced search page,
+ * dispatches fetch start and error actions, and parses the options.
+ *
+ * @param {Function} dispatch - Redux dispatch function.
+ * @returns {Promise<Object|null>} An object with filter options, or null on error.
+ */
+export const getAdvancedSearchFilters = () => async dispatch => {
+  dispatch(fetchDataStart());
+  const url = 'https://readcomicsonline.ru/advanced-search';
+  try {
+    const response = await APICaller.get(url);
+    const $ = cheerio.load(response.data);
+
+    // Extract categories filter options
+    let categoryOptions = [];
+    if (
+      $('select[name="categories[]"]').next('.selectize-control').length > 0
+    ) {
+      categoryOptions = $('select[name="categories[]"]')
+        .next('.selectize-control')
+        .find('.option')
+        .map((i, el) => {
+          const value = $(el).attr('data-value');
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    } else {
+      categoryOptions = $('select[name="categories[]"]')
+        .find('option')
+        .map((i, el) => {
+          const value = $(el).attr('value')?.trim();
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    }
+
+    // Extract status filter options
+    let statusOptions = [];
+    if ($('select[name="status[]"]').next('.selectize-control').length > 0) {
+      statusOptions = $('select[name="status[]"]')
+        .next('.selectize-control')
+        .find('.option')
+        .map((i, el) => {
+          const value = $(el).attr('data-value');
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    } else {
+      statusOptions = $('select[name="status[]"]')
+        .find('option')
+        .map((i, el) => {
+          const value = $(el).attr('value')?.trim();
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    }
+
+    // Extract types filter options
+    let typesOptions = [];
+    if ($('select[name="types[]"]').next('.selectize-control').length > 0) {
+      typesOptions = $('select[name="types[]"]')
+        .next('.selectize-control')
+        .find('.option')
+        .map((i, el) => {
+          const value = $(el).attr('data-value');
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    } else {
+      typesOptions = $('select[name="types[]"]')
+        .find('option')
+        .map((i, el) => {
+          const value = $(el).attr('value')?.trim();
+          const text = $(el).text().trim();
+          return value && text ? {value, text} : null;
+        })
+        .get();
+    }
+
+    dispatch(
+      checkDownTime({
+        filters: {
+          categories: categoryOptions,
+          status: statusOptions,
+          types: typesOptions,
+        },
+      }),
+    );
+
+    return {
+      categories: categoryOptions,
+      status: statusOptions,
+      types: typesOptions,
+    };
+  } catch (error) {
+    console.error('Error fetching advanced search filters:', error);
+    dispatch(checkDownTime(error));
+    dispatch(fetchDataFailure(error.message));
+    return null;
+  }
 };

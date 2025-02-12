@@ -29,8 +29,6 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         state?.data?.DownloadComic?.[detailPageLink]?.comicBooks?.[item?.link],
     ),
   );
-
-  console.log("detailPageLink", detailPageLink);
   
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [LoadingStatus, setLoadStatus] = useState(false);

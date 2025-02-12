@@ -1,18 +1,18 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, {memo, useEffect, useMemo, useState} from 'react';
+import {View, Text, TouchableOpacity, Image} from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 
-import { updateData } from '../../Redux/Reducers';
-import { goBack } from '../../Navigation/NavigationService';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
+import {updateData} from '../../Redux/Reducers';
+import {goBack} from '../../Navigation/NavigationService';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 import AdBanner from '../../InkNest-Externals/Ads/BannerAds';
-import { BannerAdSize } from 'react-native-google-mobile-ads';
-import { showRewardedAd } from '../../InkNest-Externals/Redux/Actions/Download';
+import {BannerAdSize} from 'react-native-google-mobile-ads';
+import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
 
-const ComicBookHeader = ({ comicBookLink, PageIndex, ViewAll, showBookmark }) => {
+const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
   const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const [isAdSeen, setIsAdSeen] = useState(false);
@@ -20,18 +20,19 @@ const ComicBookHeader = ({ comicBookLink, PageIndex, ViewAll, showBookmark }) =>
   useEffect(() => {
     if (!isAdSeen) {
       if (PageIndex === Math.floor(ComicBook?.images?.length / 2)) {
-        showRewardedAd()
+        showRewardedAd();
         setIsAdSeen(true);
       }
     }
   }, [PageIndex]);
 
   return (
-    <View style={{
-      position: 'absolute',
-      width: '100%',
-      flexDirection: 'column',
-    }}>
+    <View
+      style={{
+        position: 'absolute',
+        width: '100%',
+        flexDirection: 'column',
+      }}>
       <AdBanner size={BannerAdSize.BANNER} />
       <View
         style={{
@@ -47,12 +48,12 @@ const ComicBookHeader = ({ comicBookLink, PageIndex, ViewAll, showBookmark }) =>
           onPress={() => {
             goBack();
           }}
-          style={{ flexDirection: 'row', alignItems: 'center' }}>
+          style={{flexDirection: 'row', alignItems: 'center'}}>
           <Ionicons
             name="arrow-back"
             size={24}
             color="#fff"
-            style={{ marginRight: 10, opacity: 0.9 }}
+            style={{marginRight: 10, opacity: 0.9}}
           />
         </TouchableOpacity>
         <Text
@@ -86,20 +87,29 @@ const ComicBookHeader = ({ comicBookLink, PageIndex, ViewAll, showBookmark }) =>
               dispatch(
                 updateData({
                   url: comicBookLink,
-                  data: { BookmarkPages: BookmarksPages },
+                  data: {BookmarkPages: BookmarksPages},
                 }),
               );
             }}>
             <Fontisto
-              name={`bookmark${ComicBook?.BookmarkPages?.includes(PageIndex) ? '-alt' : ''}`}
+              name={`bookmark${
+                ComicBook?.BookmarkPages?.includes(PageIndex) ? '-alt' : ''
+              }`}
               size={heightPercentageToDP('2.4%')}
-              color={ComicBook?.BookmarkPages?.includes(PageIndex) ? 'yellow' : '#FFF'}
+              color={
+                ComicBook?.BookmarkPages?.includes(PageIndex)
+                  ? 'yellow'
+                  : '#FFF'
+              }
             />
           </TouchableOpacity>
         ) : (
           <View />
         )}
       </View>
+      <Text style={{color: '#fff', fontSize: 12, opacity: 0.9, padding: 10}}>
+        Images may take time to load due to high quality.
+      </Text>
     </View>
   );
 };

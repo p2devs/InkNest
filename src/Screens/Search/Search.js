@@ -10,6 +10,7 @@ import {
   Modal,
   Platform,
   Alert,
+  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,15 +25,9 @@ import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  SearchComicByReadAllComics,
-  SearchComicByAzComic,
-} from '../../Redux/Actions/GlobalActions';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
-import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
-import {Switch} from 'react-native-paper';
 import Card from '../Comic/Components/Card';
 
 export function Search({navigation}) {
@@ -43,13 +38,10 @@ export function Search({navigation}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState([]);
-  const [comicSearchBy, setComicSearchBy] = useState(false);
   const flatlistRef = React.useRef();
   let Tag = View;
 
   const fetchData = async () => {
-    console.log('fetchData', searchTerm, loading, comicSearchBy);
-
     if (loading) return;
     if (!searchTerm.trim()) return;
     if (IsAnime) {
@@ -69,31 +61,26 @@ export function Search({navigation}) {
       return;
     }
 
-    if (comicSearchBy) {
-      console.log('searching by comic az');
-      await analytics().logEvent('search_comic_by_AZcomicx', {
-        search: searchTerm?.trim()?.toString(),
-      });
-      let data = await SearchComicByAzComic(searchTerm, dispatch);
-      console.log(data);
-      setSearchTerm('');
-      if (!data || data.length == 0) {
-        setSearchData([]);
-        Alert.alert('No results found');
-        return;
-      }
-      setSearchData(data);
-      return;
-    }
-    console.log('searching by readall');
-
-    await analytics().logEvent('search_comic_by_ReadAll', {
+    await analytics().logEvent('search_comic', {
       search: searchTerm?.trim()?.toString(),
     });
-    dispatch(SearchComicByReadAllComics(searchTerm));
-    setSearchTerm('');
-    //scroll to the top of the list
-    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
+
+    // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
+    let link = searchTerm.trim();
+    if (
+      !link.startsWith('https://readcomicsonline.ru/comic/') ||
+      !link.includes('comic/')
+    ) {
+      Alert.alert('Invalid link');
+      return;
+    }
+    // remove the last element if present in the link like 5, 100, etc
+    link = link.replace(/\/\d+$/, '');
+
+    // navigate to the comic details screen
+    navigation.navigate(NAVIGATION.comicDetails, {
+      link: link,
+    });
   };
   useEffect(() => {
     // Scroll to the top of the list
@@ -264,41 +251,7 @@ export function Search({navigation}) {
               {'Search'}
             </Text>
           </View>
-          {!IsAnime && (
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: 6,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text
-                style={
-                  !comicSearchBy
-                    ? [styles.SwitchSelectedText, {color: '#FF004F'}]
-                    : styles.SwitchUnselectedText
-                }>
-                {'R'}
-              </Text>
-              <Switch
-                disabled={loading}
-                trackColor={{false: '#FF004F', true: '#FF0090'}}
-                ios_backgroundColor="#FF004F"
-                style={{transform: [{scaleX: 0.7}, {scaleY: 0.7}]}}
-                value={comicSearchBy}
-                onValueChange={setComicSearchBy}
-              />
-              <Text
-                style={
-                  comicSearchBy
-                    ? styles.SwitchSelectedText
-                    : styles.SwitchUnselectedText
-                }>
-                {'A'}
-              </Text>
-            </View>
-          )}
-          {IsAnime && <View style={{flex: 0.1}} />}
+          <View style={{flex: 0.2}} />
         </Header>
         <View
           style={{
@@ -319,7 +272,11 @@ export function Search({navigation}) {
             }}>
             <TextInput
               style={styles.input}
-              placeholder="Send us what you want to see..."
+              placeholder={
+                IsAnime
+                  ? 'Send us what you want to see...'
+                  : 'Please paste the comic link here'
+              }
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
@@ -337,10 +294,9 @@ export function Search({navigation}) {
                 />
               )}
             </TouchableOpacity>
-            {/* <Button title="Search" onPress={fetchData} /> */}
           </View>
         </View>
-        {!IsAnime && !comicSearchBy ? (
+        {IsAnime ? (
           <FlatList
             scrollsToTop
             ref={flatlistRef}
@@ -419,51 +375,53 @@ export function Search({navigation}) {
                     styles.title,
                     {fontSize: heightPercentageToDP('2%')},
                   ]}>
-                  Send us what you want to see
+                  Please provide the comic link
                 </Text>
                 <Text
                   style={[
                     styles.title,
                     {fontSize: heightPercentageToDP('2%')},
                   ]}>
-                  we will find it for you
+                  So we can find it for you
                 </Text>
                 <Text
                   style={[
                     styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
+                    {
+                      fontSize: heightPercentageToDP('2%'),
+                    },
                   ]}>
                   and show you the results
+                </Text>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      fontSize: heightPercentageToDP('2%'),
+                    },
+                  ]}>
+                  (example link:
+                  https://readcomicsonline.ru/comic/creepshow-in-love-2025)
                 </Text>
               </View>
             }
             renderItem={({item, index}) => {
-              if (comicSearchBy) {
-                return (
-                  <Card
-                    item={item}
-                    index={index}
-                    onPress={() => {
-                      crashlytics().log('Comic Details button clicked');
-                      analytics().logEvent('comic_details_button_clicked', {
-                        link: item?.link?.toString(),
-                        title: item?.title?.toString(),
-                        isComicBookLink: false,
-                      });
-                      navigation.navigate(NAVIGATION.comicDetails, item);
-                    }}
-                    containerStyle={{
-                      width: widthPercentageToDP('44%'),
-                    }}
-                  />
-                );
-              }
               return (
-                <HomeRenderItem
+                <Card
                   item={item}
                   index={index}
-                  key={index}
-                  search={true}
+                  onPress={() => {
+                    crashlytics().log('Comic Details button clicked');
+                    analytics().logEvent('comic_details_button_clicked', {
+                      link: item?.link?.toString(),
+                      title: item?.title?.toString(),
+                      isComicBookLink: false,
+                    });
+                    navigation.navigate(NAVIGATION.comicDetails, item);
+                  }}
+                  containerStyle={{
+                    width: widthPercentageToDP('44%'),
+                  }}
                 />
               );
             }}

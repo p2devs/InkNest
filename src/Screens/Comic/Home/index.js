@@ -143,7 +143,6 @@ export function Home({navigation}) {
                       analytics().logEvent('comic_details_button_clicked', {
                         link: item?.link?.toString(),
                         title: item?.title?.toString(),
-                        isComicBookLink: key === 'readallcomics',
                       });
                       navigation.navigate(NAVIGATION.comicDetails, {
                         ...item,
