@@ -452,3 +452,30 @@ export const getAdvancedSearchFilters = () => async dispatch => {
     return null;
   }
 };
+
+/**
+ * Fetches search results for a given query by appending the query value to the search API URL.
+ * Returns the parsed result back to the caller.
+ *
+ * @param {string} queryValue - The value to be appended to the search URL.
+ * @returns {Function} A thunk function that performs the async operation and returns the result.
+ */
+export const searchComic = (queryValue) => async dispatch => {
+  dispatch(fetchDataStart());
+  const url = `https://readcomicsonline.ru/search?query=${encodeURIComponent(
+    queryValue,
+  )}`;
+  try {
+    const response = await APICaller.get(url);
+    dispatch(fetchDataSuccess({url, data: response?.data}));
+    dispatch(StopLoading());
+    dispatch(ClearError());
+    dispatch(checkDownTime());
+    return response?.data;
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    dispatch(fetchDataFailure(error.message));
+    dispatch(checkDownTime(error));
+    return null;
+  }
+};
