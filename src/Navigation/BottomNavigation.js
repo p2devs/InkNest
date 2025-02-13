@@ -3,17 +3,15 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {Search, Settings, Sources} from '../Screens';
+import {Settings, Sources} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
 import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
 import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
-import {MangaHome} from '../Screens/Manga/Home/Home';
 
 const BottomTab = createBottomTabNavigator();
 
