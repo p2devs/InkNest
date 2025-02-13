@@ -85,8 +85,8 @@ android {
         applicationId "com.p2devs.inknest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 17
-        versionName "1.2.8"
+        versionCode 18
+        versionName "1.2.9"
     }
     signingConfigs {
         debug {
