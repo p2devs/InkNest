@@ -10,7 +10,6 @@ import {
   Modal,
   Platform,
   Alert,
-  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -29,10 +28,11 @@ import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
 import Card from '../Comic/Components/Card';
+import {searchComic} from '../../Redux/Actions/GlobalActions';
+import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
 
 export function Search({navigation}) {
   const dispatch = useDispatch();
-  const searchDatas = useSelector(state => state.data.Search);
   const loading = useSelector(state => state.data.loading);
   const IsAnime = useSelector(state => state.data.Anime);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,7 +51,6 @@ export function Search({navigation}) {
         search: searchTerm?.trim()?.toString(),
       });
       let data = await SearchAnime(searchTerm, dispatch);
-      setSearchTerm('');
       if (data.length == 0) {
         setSearchData([]);
         Alert.alert('No results found');
@@ -71,7 +70,13 @@ export function Search({navigation}) {
       !link.startsWith('https://readcomicsonline.ru/comic/') ||
       !link.includes('comic/')
     ) {
-      Alert.alert('Invalid link');
+      const result = await dispatch(searchComic(link));
+      if (result?.suggestions) {
+        if (result?.suggestions.length == 0) {
+          Alert.alert('No results found');
+        }
+        setSearchData(result.suggestions);
+      }
       return;
     }
     // remove the last element if present in the link like 5, 100, etc
@@ -82,17 +87,8 @@ export function Search({navigation}) {
       link: link,
     });
   };
-  useEffect(() => {
-    // Scroll to the top of the list
-    flatlistRef.current.scrollToOffset({offset: 0, animated: true});
-    return () => {
-      setSearchData([]);
-      setSearchTerm('');
-    };
-  }, [loading]);
 
   const renderItem = ({item, index}) => {
-    const data = item.results ? item.results.slice(0, 10) : [];
     return (
       <View key={index} style={{borderRadius: 12}}>
         {item.user === 'user' ? (
@@ -172,28 +168,29 @@ export function Search({navigation}) {
                 styles.itemContainer,
               ]}>
               <View>
-                <Text style={styles.title}>Comic list:</Text>
-                {data.map((result, index) => (
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate(NAVIGATION.comicDetails, {
-                        link: result.href,
-                        title: result.title,
-                      });
-                    }}
-                    key={index}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 12,
-                    }}>
-                    <Text style={{fontSize: 5, color: 'white', marginLeft: 12}}>
-                      {'\u2B24'}
-                    </Text>
-                    <Text style={styles.link}>{result.title}</Text>
-                  </TouchableOpacity>
-                ))}
-                {item.results.length > 10 && (
+                {index === 0 && (
+                  <Text style={styles.title}>
+                    Total results: {searchData?.length}
+                  </Text>
+                )}
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate(NAVIGATION.comicDetails, {
+                      link: `https://readcomicsonline.ru/comic/${item?.data}`,
+                    });
+                  }}
+                  key={index}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}>
+                  <Text style={{fontSize: 5, color: 'white', marginLeft: 12}}>
+                    {'\u2B24'}
+                  </Text>
+                  <Text style={styles.link}>{item?.value}</Text>
+                </TouchableOpacity>
+                {item?.results?.length > 10 && (
                   <TouchableOpacity
                     onPress={() => {
                       setViewAll(item.results);
@@ -275,7 +272,7 @@ export function Search({navigation}) {
               placeholder={
                 IsAnime
                   ? 'Send us what you want to see...'
-                  : 'Please paste the comic link here'
+                  : 'Find a comic and share its link!'
               }
               value={searchTerm}
               onChangeText={setSearchTerm}
@@ -296,7 +293,7 @@ export function Search({navigation}) {
             </TouchableOpacity>
           </View>
         </View>
-        {IsAnime ? (
+        {!IsAnime ? (
           <FlatList
             scrollsToTop
             ref={flatlistRef}
@@ -337,7 +334,7 @@ export function Search({navigation}) {
                 </Text>
               </View>
             }
-            data={IsAnime ? searchData : searchDatas}
+            data={searchData}
             renderItem={renderItem}
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={{flexGrow: 1}}
@@ -348,8 +345,6 @@ export function Search({navigation}) {
         ) : (
           <FlatList
             ref={flatlistRef}
-            numColumns={2}
-            key={2}
             showsVerticalScrollIndicator={false}
             style={{
               flex: 1,
@@ -375,53 +370,17 @@ export function Search({navigation}) {
                     styles.title,
                     {fontSize: heightPercentageToDP('2%')},
                   ]}>
-                  Please provide the comic link
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
-                  ]}>
-                  So we can find it for you
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    {
-                      fontSize: heightPercentageToDP('2%'),
-                    },
-                  ]}>
-                  and show you the results
-                </Text>
-                <Text
-                  style={[
-                    styles.title,
-                    {
-                      fontSize: heightPercentageToDP('2%'),
-                    },
-                  ]}>
-                  (example link:
-                  https://readcomicsonline.ru/comic/creepshow-in-love-2025)
+                  Search for your favorite anime
                 </Text>
               </View>
             }
             renderItem={({item, index}) => {
               return (
-                <Card
+                <HomeRenderItem
                   item={item}
                   index={index}
-                  onPress={() => {
-                    crashlytics().log('Comic Details button clicked');
-                    analytics().logEvent('comic_details_button_clicked', {
-                      link: item?.link?.toString(),
-                      title: item?.title?.toString(),
-                      isComicBookLink: false,
-                    });
-                    navigation.navigate(NAVIGATION.comicDetails, item);
-                  }}
-                  containerStyle={{
-                    width: widthPercentageToDP('44%'),
-                  }}
+                  key={index}
+                  search={true}
                 />
               );
             }}
