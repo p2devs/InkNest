@@ -29,9 +29,10 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         state?.data?.DownloadComic?.[detailPageLink]?.comicBooks?.[item?.link],
     ),
   );
-  
+
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [LoadingStatus, setLoadStatus] = useState(false);
+  const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const dispatch = useDispatch();
 
   const handleClick = async () => {
@@ -48,6 +49,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   const LoadingComic = async () => {
     if (LoadingStatus) return;
     setLoadStatus(true);
+    setProgress({downloaded: 0, total: 0});
     crashlytics().log('ChapterCard download clicked');
     await analytics().logEvent('newUI_download_comic', {
       link: item?.link?.toString(),
@@ -76,6 +78,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         },
         comicBook: {...data, link: item.link},
         setLoadStatus,
+        onProgress: (downloaded, total) => setProgress({downloaded, total}),
       }),
     );
   };
@@ -107,7 +110,10 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           style={{
             color: '#eaebea',
             fontSize: 14,
-            maxWidth: widthPercentageToDP('50%'),
+            maxWidth:
+              LoadingStatus && progress
+                ? widthPercentageToDP('30%')
+                : widthPercentageToDP('50%'),
           }}>
           {item?.title}
         </Text>
@@ -140,9 +146,13 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
         ) : null}
       </View>
       {LoadingStatus ? (
-        <ActivityIndicator size="small" color="skyblue" />
-      ) : null}
-      {/* {LoadingStatus ? null : !isComicDownload ? (
+        <View style={{alignItems: 'center'}}>
+          <ActivityIndicator size="small" color="skyblue" />
+          <Text style={{fontSize: 12, color: '#fff', marginTop: 4}}>
+            {progress.downloaded} / {progress.total}
+          </Text>
+        </View>
+      ) : !isComicDownload ? (
         <Entypo
           name="download"
           size={24}
@@ -166,7 +176,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             navigate(NAVIGATION.offlineComic);
           }}
         />
-      )} */}
+      )}
     </TouchableOpacity>
   );
 };

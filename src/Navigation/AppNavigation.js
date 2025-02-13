@@ -8,11 +8,7 @@ import AnimeVideo from '../Screens/Anime/Video';
 import {Details} from '../Screens/Anime';
 import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';
 import {ViewAll} from '../Screens/Anime/Home/ViewAll';
-import {MangaDetails} from '../InkNest-Externals/Screens/Manga/Details/MangaDetails';
-import {MangaBook} from '../InkNest-Externals/Screens/Manga/Book/MangaBook';
-import {MangaViewAll} from '../InkNest-Externals/Screens/Manga/Home/ViewAll';
-import MangaSearch from '../InkNest-Externals/Screens/Manga/Search/Search';
-import {MangaHome} from '../InkNest-Externals/Screens/Manga/Home';
+import { MangaBook, MangaDetails, MangaHome, MangaSearch, MangaViewAll } from '../InkNest-Externals/Screens/Manga';
 
 const Stack = createNativeStackNavigator();
 
