@@ -169,7 +169,7 @@ export function Sources({navigation}) {
           marginVertical: heightPercentageToDP('1%'),
           textAlign: 'center',
         }}>
-        Later on more sources added please be patecent
+        More sources will be added later, please be patient
       </Text>
     </SafeAreaView>
   );
