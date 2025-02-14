@@ -7,11 +7,7 @@ import Loading from './src/Components/UIComp/Loading';
 import Toast from 'react-native-toast-message';
 import {PaperProvider} from 'react-native-paper';
 import ForceUpdate from './src/Components/ForceUpdate';
-import {
-  ConfigCatProvider,
-  createConsoleLogger,
-  LogLevel,
-} from 'configcat-react';
+import {ConfigCatProvider} from 'configcat-react';
 import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
 
 /**
@@ -23,13 +19,10 @@ import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
  * @returns {JSX.Element} The root component of the application.
  */
 const App = () => {
-  const logger = createConsoleLogger(LogLevel.Info);
-
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <ConfigCatProvider
-        sdkKey={__DEV__ ? CONFIGCAT_SDK_KEY_TEST : CONFIGCAT_SDK_KEY_PROD}
-        options={{logger}}>
+        sdkKey={__DEV__ ? CONFIGCAT_SDK_KEY_TEST : CONFIGCAT_SDK_KEY_PROD}>
         <Provider store={store}>
           <PersistGate loading={<Loading />} persistor={persistor}>
             <PaperProvider>
