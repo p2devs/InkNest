@@ -8,6 +8,8 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+import {getVersion} from 'react-native-device-info';
+import {useFeatureFlag} from 'configcat-react';
 
 import {
   fetchComicBook,
@@ -25,6 +27,10 @@ export function ComicDetails({route}) {
     {name: 'Chapters', active: true},
     {name: 'Bookmarks', active: false},
   ]);
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    'Default',
+  );
 
   const [sort, setSort] = useState(false);
 
@@ -35,10 +41,37 @@ export function ComicDetails({route}) {
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
 
   const reverseChapterList = () => {
-    const chapterList = ComicDetail?.chapters;
-    if (!chapterList) return [];
-    if (!sort) return [...chapterList];
-    return [...chapterList].reverse();
+    if (getVersion() === forIosValue && forIosLoading === false) {
+      return [
+        {
+          link: 'https://comicbookplus.com/?dlid=16848',
+          date: 'December 4, 2010',
+          title: 'Issues 1',
+        },
+        {
+          link: 'https://comicbookplus.com/?dlid=15946',
+          date: 'November 27, 2010',
+          title: 'Issues 2',
+        },
+        {
+          link: 'https://comicbookplus.com/?dlid=16857',
+          date: 'December 4, 2010',
+          title: 'Issues 3',
+        },
+        {
+          link: 'https://comicbookplus.com/?cid=860',
+          date: 'August 7, 2015',
+          title: 'Issues 4',
+        },
+      ];
+    } else {
+      if (forIosLoading === false) {
+        const chapterList = ComicDetail?.chapters;
+        if (!chapterList) return [];
+        if (!sort) return [...chapterList];
+        return [...chapterList].reverse();
+      }
+    }
   };
 
   useEffect(() => {
@@ -74,7 +107,7 @@ export function ComicDetails({route}) {
             }}
           />
         }
-        data={AppendAd(reverseChapterList())}
+        data={forIosLoading === false ? AppendAd(reverseChapterList()) : []}
         style={styles.container}
         renderItem={({item, index}) => (
           <ChapterCard

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {getVersion, getBuildNumber} from 'react-native-device-info';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -12,6 +13,7 @@ import {AnimeBookmarks, AnimeHome} from '../Screens/Anime';
 import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
+import {useFeatureFlag} from 'configcat-react';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -77,6 +79,7 @@ const TabBarIcon = props => {
 export function BottomNavigation() {
   const animeActive = useSelector(state => state?.data?.Anime);
   const downTime = useSelector(state => state.data.downTime);
+  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
 
   return (
     <BottomTab.Navigator
@@ -143,25 +146,29 @@ export function BottomNavigation() {
         />
       )}
 
-      <BottomTab.Screen
-        name={NAVIGATION.sources}
-        component={Sources}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon focused={focused} tintColor={color} name="source" />
-          ),
-        }}
-      />
+      {getVersion() !== forIosValue && (
+        <BottomTab.Screen
+          name={NAVIGATION.sources}
+          component={Sources}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon focused={focused} tintColor={color} name="source" />
+            ),
+          }}
+        />
+      )}
 
-      <BottomTab.Screen
-        name={NAVIGATION.settings}
-        component={Settings}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon focused={focused} tintColor={color} name="settings" />
-          ),
-        }}
-      />
+      {getVersion() !== forIosValue && (
+        <BottomTab.Screen
+          name={NAVIGATION.settings}
+          component={Settings}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon focused={focused} tintColor={color} name="settings" />
+            ),
+          }}
+        />
+      )}
     </BottomTab.Navigator>
   );
 }

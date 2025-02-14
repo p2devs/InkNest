@@ -16,6 +16,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import {getVersion} from 'react-native-device-info';
+import {useFeatureFlag} from 'configcat-react';
 
 import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
@@ -34,10 +36,15 @@ export function ComicBook({navigation, route}) {
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   const [PageIndex, setPageIndex] = useState(
-    pageJump ?? ComicBook?.lastReadPage ?? 0,
+    pageJump ?? ComicBook?.lastReadPage ?? 1,
   );
   const [ViewAll, setViewAll] = useState(false);
   const [DownloadedBook, setDownloadedBook] = useState(null);
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    'Default',
+  );
+  const [images, setImages] = useState([]);
 
   const {width} = Dimensions.get('window');
   const numColumns = 3;
@@ -73,6 +80,35 @@ export function ComicBook({navigation, route}) {
     StatusBar.setHidden(true);
     return () => StatusBar.setHidden(false);
   }, []);
+
+  useEffect(() => {
+    let newImages = [];
+    if (
+      comicBookLink === 'https://comicbookplus.com/?dlid=16848' ||
+      comicBookLink === 'https://comicbookplus.com/?dlid=15946'
+    ) {
+      for (let index = 0; index < 35; index++) {
+        newImages.push(
+          `https://box01.comicbookplus.com/viewer/4a/4af4d2facd653c6fee0013367c681f6a/${index}.jpg`,
+        );
+      }
+    } else if (
+      comicBookLink === 'https://comicbookplus.com/?dlid=16857' ||
+      comicBookLink === 'https://comicbookplus.com/?cid=860'
+    ) {
+      for (let index = 0; index < 35; index++) {
+        newImages.push(
+          `https://box01.comicbookplus.com/viewer/7c/7ce6723c8f20d1ce3b78c2cda1debc50/${index}.jpg`,
+        );
+      }
+    }
+
+    // Only update state if newImages differs from the current images state.
+    if (JSON.stringify(newImages) !== JSON.stringify(images)) {
+      setImages(newImages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comicBookLink, forIosValue, forIosLoading]);
 
   // Function to hide/show controls with animation
   const toggleControls = useCallback(() => {
@@ -133,14 +169,13 @@ export function ComicBook({navigation, route}) {
     return <Error error={error} />;
   }
 
-  const GridImageItem = props => {
-    const {item, index} = props;
+  const GridImageItem = ({item, index}) => {
     return (
       <TouchableOpacity
         key={index}
         onPress={() => {
           setPageIndex(index);
-          setViewAll(false);
+          setViewAll(!ViewAll);
         }}
         style={{
           margin: 5,
@@ -172,6 +207,42 @@ export function ComicBook({navigation, route}) {
       </TouchableOpacity>
     );
   };
+
+  if (getVersion() === forIosValue && forIosLoading === false) {
+    return (
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: '#14142a'}}
+        edges={['top', 'bottom']}>
+        <TouchableWithoutFeedback onPress={toggleControls}>
+          <View style={{flex: 1}}>
+            {ViewAll ? (
+              <TouchableOpacity
+                style={{flex: 1}}
+                onPress={() => setViewAll(false)}>
+                <Image
+                  source={{uri: images[PageIndex]}}
+                  style={{flex: 1}}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            ) : (
+              <FlatList
+                data={images}
+                renderItem={({item, index}) => (
+                  <GridImageItem item={item} index={index} />
+                )}
+                numColumns={numColumns}
+                style={{
+                  flex: 1,
+                  marginVertical: 60,
+                }}
+              />
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView

@@ -15,6 +15,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+import {getVersion} from 'react-native-device-info';
+import {useFeatureFlag} from 'configcat-react';
 
 import {NAVIGATION} from '../../../Constants';
 import {useSelector} from 'react-redux';
@@ -28,10 +30,61 @@ export function Home({navigation}) {
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
   const History = useSelector(state => state.data.history);
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    'Default',
+  );
 
   useEffect(() => {
-    getComicsHome(setComicsData, setLoading);
-  }, []);
+    if (getVersion() === forIosValue && forIosLoading === false) {
+      setComicsData({
+        'most-viewed': {
+          data: [
+            {
+              genres: null,
+              image: 'https://box01.comicbookplus.com/thumbs/ace/AllLove.png',
+              link: 'https://comicbookplus.com/?cid=3245',
+              publishDate: 'May 1949 - May 1950',
+              status: null,
+              title: 'All Love',
+            },
+            {
+              genres: null,
+              image:
+                'https://box01.comicbookplus.com/thumbs/ace/AllRomances.png',
+              link: 'https://comicbookplus.com/?cid=858',
+              publishDate: 'Aug 1949 - Aug 1950',
+              status: null,
+              title: 'All Romances',
+            },
+            {
+              genres: null,
+              image: 'https://box01.comicbookplus.com/thumbs/ace/Andy.png',
+              link: 'https://comicbookplus.com/?cid=859',
+              publishDate: 'Jun 1948 - Aug 1948',
+              status: null,
+              title: 'Andy Comics',
+            },
+            {
+              genres: null,
+              image: 'https://box01.comicbookplus.com/thumbs/ace/AtomicWar.png',
+              link: 'https://comicbookplus.com/?cid=860',
+              publishDate: 'Nov 1952 - Apr 1953',
+              status: null,
+              title: 'Atomic War!',
+            },
+          ],
+          hostName: 'https://readcomicsonline.ru/',
+          lastPage: null,
+          title: 'Most Viewed',
+        },
+      });
+    } else {
+      if (forIosLoading === false) {
+        getComicsHome(setComicsData, setLoading);
+      }
+    }
+  }, [forIosValue, forIosLoading]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
