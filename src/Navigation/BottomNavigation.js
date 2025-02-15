@@ -77,7 +77,6 @@ const TabBarIcon = props => {
  * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
  */
 export function BottomNavigation() {
-  const animeActive = useSelector(state => state?.data?.Anime);
   const downTime = useSelector(state => state.data.downTime);
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
 
@@ -108,7 +107,7 @@ export function BottomNavigation() {
       }}>
       <BottomTab.Screen
         name={NAVIGATION.home}
-        component={downTime ? DownTime : animeActive ? AnimeHome : Home}
+        component={downTime ? DownTime : Home}
         options={{
           tabBarIcon: ({focused, color}) => (
             <TabBarIcon focused={focused} tintColor={color} name="home" />
@@ -118,7 +117,7 @@ export function BottomNavigation() {
 
       <BottomTab.Screen
         name={NAVIGATION.bookmarks}
-        component={animeActive ? AnimeBookmarks : ComicBookmarks}
+        component={ComicBookmarks}
         options={{
           tabBarIcon: ({focused, color}) => (
             <TabBarIcon
@@ -130,21 +129,7 @@ export function BottomNavigation() {
         }}
       />
 
-      {animeActive ? null : (
-        <BottomTab.Screen
-          name={NAVIGATION.offlineComic}
-          component={OfflineComic}
-          options={{
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="download-for-offline"
-              />
-            ),
-          }}
-        />
-      )}
+    
 
       {getVersion() !== forIosValue && (
         <BottomTab.Screen

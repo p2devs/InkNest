@@ -10,7 +10,6 @@ import {
   pushHistory,
   DownTime,
   updateData,
-  AnimeWatched,
 } from '../Reducers';
 import {Alert} from 'react-native';
 import {goBack} from '../../Navigation/NavigationService';
@@ -271,40 +270,7 @@ export const fetchComicBook =
     }
   };
 
-/**
- * Redux action to update the anime history in the state.
- *
- * @param {Object} params - The parameters object.
- * @param {Object} params.data - The data object containing anime information.
- * @param {string} params.data.AnimeName - The name of the anime.
- * @param {string} params.data.ActiveEpisdeLink - The link to the active episode.
- * @param {number} params.data.ActiveEpisdoe - The active episode number.
- * @param {number} params.data.ActiveEpisdoeProgress - The progress of the active episode.
- * @param {number} params.data.ActiveEpisdoeDuration - The duration of the active episode.
- * @param {boolean} params.data.ActiveEpisdoePlayable - Whether the active episode is playable.
- * @returns {Function} A thunk function that dispatches the AnimeWatched action.
- */
-export const AnimeHistroy =
-  ({data}) =>
-  async (dispatch, getState) => {
-    //get data from state
-    let History = getState().data.AnimeWatched;
-    let WatchedEpisodes = History[data.AnimeName]?.Episodes;
-    let AnimeData = {
-      ...data,
-      Episodes: {
-        ...WatchedEpisodes,
-        [data.ActiveEpisdeLink]: {
-          Link: data.ActiveEpisdeLink,
-          Episode: data?.ActiveEpisdoe,
-          EpisdoeProgress: data?.ActiveEpisdoeProgress,
-          EpisdoeDuration: data?.ActiveEpisdoeDuration,
-          EpisdoePlayable: data?.ActiveEpisdoePlayable,
-        },
-      },
-    };
-    dispatch(AnimeWatched(AnimeData));
-  };
+
 
 /**
  * Asynchronous action to clear error state.

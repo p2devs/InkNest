@@ -10,7 +10,6 @@ import analytics from '@react-native-firebase/analytics';
 const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
   let Tag = View;
   const [showItem, setShowItem] = useState(true);
-  const isAnime = useSelector(state => state?.data?.Anime);
   if (!showItem) return null;
   return (
     <View
@@ -29,35 +28,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
           flexWrap: 'wrap',
         }}
         onPress={async () => {
-          if (isAnime) {
-            crashlytics().log('User click on the Anime.');
-
-            const navigationTarget = search
-              ? NAVIGATION.animeDetails
-              : NAVIGATION.animeVideo;
-
-            await crashlytics().setAttributes({
-              link: item?.link?.toString(),
-              title: item?.title?.toString(),
-              imageUrl: item?.imageUrl?.toString(),
-              navigationPage: navigationTarget?.toString(),
-            });
-
-            await analytics().logEvent('open_anime', {
-              link: item.link?.toString(),
-              title: item.title?.toString(),
-              imageUrl: item.imageUrl?.toString(),
-            });
-
-            navigate(navigationTarget, {
-              link: item.link,
-              title: item.title,
-              imageUrl: item.imageUrl,
-            });
-
-            return;
-          }
-
+        
           crashlytics().log('User click on the Comic.');
 
           await crashlytics().setAttributes({
@@ -76,12 +47,6 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
           });
           navigate(NAVIGATION.comicDetails, { ...item });
 
-          // navigate(NAVIGATION.comicDetails, {
-          //   link: item.link,
-          //   home: !Showhistory,
-          //   search: Showhistory,
-          //   PageUrl: item.link,
-          // });
         }}>
         <Image
           source={{ uri: item.imageUrl }}

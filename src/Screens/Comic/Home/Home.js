@@ -34,7 +34,7 @@ export function Home({navigation}) {
   const error = useSelector(state => state.data.error);
   const baseUrl = useSelector(state => state.data.baseUrl);
   const flatListRef = useRef(null);
-  const IsAnime = useSelector(state => state.data.Anime);
+  // const IsAnime = useSelector(state => state.data.Anime);
   const [comicsData, setComicsData] = useState([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -184,9 +184,7 @@ export function Home({navigation}) {
                       if (page === 1) return;
                       loadComics({next: false});
                     }}
-                    disabled={[0, 1].includes(
-                      IsAnime ? AnimatedData.page : page,
-                    )}
+                    disabled={[0, 1].includes(page)}
                   />
                   <Text
                     onPress={() => {

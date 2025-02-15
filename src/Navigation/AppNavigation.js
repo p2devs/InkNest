@@ -4,10 +4,7 @@ import {NAVIGATION} from '../Constants';
 import {AboutUs, Search} from '../Screens';
 import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
-import AnimeVideo from '../Screens/Anime/Video';
-import {Details} from '../Screens/Anime';
-import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';
-import {ViewAll} from '../Screens/Anime/Home/ViewAll';
+import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';;
 import { MangaBook, MangaDetails, MangaHome, MangaSearch, MangaViewAll } from '../InkNest-Externals/Screens/Manga';
 
 const Stack = createNativeStackNavigator();
@@ -33,11 +30,8 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.comicBook} component={ComicBook} />
       <Stack.Screen name={NAVIGATION.aboutUs} component={AboutUs} />
       <Stack.Screen name={NAVIGATION.update} component={UpdateScreen} />
-      <Stack.Screen name={NAVIGATION.animeVideo} component={AnimeVideo} />
-      <Stack.Screen name={NAVIGATION.animeDetails} component={Details} />
       <Stack.Screen name={NAVIGATION.mangaDetails} component={MangaDetails} />
       <Stack.Screen name={NAVIGATION.mangaBook} component={MangaBook} />
-      <Stack.Screen name={NAVIGATION.ViewAll} component={ViewAll} />
       <Stack.Screen name={NAVIGATION.homeManga} component={MangaHome} />
       <Stack.Screen name={NAVIGATION.mangaViewAll} component={MangaViewAll} />
       <Stack.Screen name={NAVIGATION.mangaSearch} component={MangaSearch} />

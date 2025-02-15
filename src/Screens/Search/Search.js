@@ -18,7 +18,7 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import crashlytics from '@react-native-firebase/crashlytics';
+// import crashlytics from '@react-native-firebase/crashlytics';
 
 import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -26,15 +26,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
-import Card from '../Comic/Components/Card';
+// import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
+// import Card from '../Comic/Components/Card';
 import {searchComic} from '../../Redux/Actions/GlobalActions';
-import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+// import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
 
 export function Search({navigation}) {
   const dispatch = useDispatch();
   const loading = useSelector(state => state.data.loading);
-  const IsAnime = useSelector(state => state.data.Anime);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState([]);
@@ -44,21 +43,6 @@ export function Search({navigation}) {
   const fetchData = async () => {
     if (loading) return;
     if (!searchTerm.trim()) return;
-    if (IsAnime) {
-      console.log('searching by anime');
-
-      await analytics().logEvent('search_anime', {
-        search: searchTerm?.trim()?.toString(),
-      });
-      let data = await SearchAnime(searchTerm, dispatch);
-      if (data.length == 0) {
-        setSearchData([]);
-        Alert.alert('No results found');
-        return;
-      }
-      setSearchData(data);
-      return;
-    }
 
     await analytics().logEvent('search_comic', {
       search: searchTerm?.trim()?.toString(),
@@ -237,7 +221,7 @@ export function Search({navigation}) {
           <View
             style={{
               flexDirection: 'row',
-              left: IsAnime ? 0 : widthPercentageToDP('6%'),
+              left: widthPercentageToDP('6%'),
             }}>
             <Text
               style={{
@@ -269,11 +253,7 @@ export function Search({navigation}) {
             }}>
             <TextInput
               style={styles.input}
-              placeholder={
-                IsAnime
-                  ? 'Send us what you want to see...'
-                  : 'Find a comic and share its link!'
-              }
+              placeholder={'Find a comic and share its link!'}
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
@@ -293,7 +273,7 @@ export function Search({navigation}) {
             </TouchableOpacity>
           </View>
         </View>
-        {!IsAnime ? (
+        {
           <FlatList
             scrollsToTop
             ref={flatlistRef}
@@ -342,54 +322,7 @@ export function Search({navigation}) {
               <View style={{marginVertical: heightPercentageToDP('6%')}} />
             }
           />
-        ) : (
-          <FlatList
-            ref={flatlistRef}
-            showsVerticalScrollIndicator={false}
-            style={{
-              flex: 1,
-              backgroundColor: '#14142a',
-            }}
-            data={searchData}
-            keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <MaterialCommunityIcons
-                  name="search-web"
-                  size={heightPercentageToDP('10%')}
-                  color="gold"
-                  style={{marginRight: 10}}
-                />
-                <Text
-                  style={[
-                    styles.title,
-                    {fontSize: heightPercentageToDP('2%')},
-                  ]}>
-                  Search for your favorite anime
-                </Text>
-              </View>
-            }
-            renderItem={({item, index}) => {
-              return (
-                <HomeRenderItem
-                  item={item}
-                  index={index}
-                  key={index}
-                  search={true}
-                />
-              );
-            }}
-            contentContainerStyle={{alignItems: 'center'}}
-            ListFooterComponent={
-              <View style={{marginVertical: heightPercentageToDP('6%')}} />
-            }
-          />
-        )}
+        }
         <Modal
           transparent
           animationType="slide"

@@ -7,52 +7,25 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import {List} from 'react-native-paper';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import Header from '../../Components/UIComp/Header';
 import {NAVIGATION} from '../../Constants';
 import {navigate} from '../../Navigation/NavigationService';
 import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
-import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
 
 export function Sources({navigation}) {
-  const dispatch = useDispatch();
-  const [SwitchServer, setSwitchServer] = useState(null);
-  const baseUrl = useSelector(state => state.data.baseUrl);
-  const Anime = useSelector(state => state.data.Anime);
-  const SwitchAnimeToggle = () => {
-    dispatch(SwtichToAnime(!Anime));
-    if (Anime) {
-      crashlytics().log('Switched to Comic Mode');
-      dispatch(SwtichBaseUrl('readcomicsonline'));
-    }
-    if (!Anime) {
-      crashlytics().log('Switched to Anime Mode');
-      dispatch(SwtichBaseUrl('s3taku'));
-    }
-
-    navigation.reset({
-      index: 0,
-      routes: [{name: NAVIGATION.home}],
-    });
-
-    showRewardedAd();
-  };
+  
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Header
@@ -124,7 +97,7 @@ export function Sources({navigation}) {
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={SwitchAnimeToggle}
+        onPress={() => Linking.openURL('https://www.p2devs.engineer/')}
         style={{
           backgroundColor: '#FFF',
           marginHorizontal: widthPercentageToDP('2%'),
@@ -138,7 +111,7 @@ export function Sources({navigation}) {
         }}>
         <View style={{flexDirection: 'row'}}>
           <Entypo
-            name={!Anime ? 'tv' : 'open-book'}
+            name={'tv'}
             size={heightPercentageToDP('2.5%')}
             color="#000"
             style={{marginRight: 10}}
@@ -149,7 +122,7 @@ export function Sources({navigation}) {
               fontWeight: 'bold',
               color: '#000',
             }}>
-            {!Anime ? 'Watch Anime' : 'Read Comics'}
+            {'Watch Anime'}
           </Text>
         </View>
         <Feather

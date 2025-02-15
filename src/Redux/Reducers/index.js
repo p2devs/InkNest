@@ -8,9 +8,6 @@ const initialState = {
   Search: [],
   downTime: false,
   baseUrl: 'azcomic',
-  Anime: false,
-  AnimeWatched: {},
-  AnimeBookMarks: {},
   DownloadComic: {},
 };
 
@@ -30,9 +27,6 @@ const initialState = {
  * @property {Array} Search - Search history
  * @property {boolean} downTime - Server downtime indicator
  * @property {string} baseUrl - Base URL for API calls
- * @property {boolean} Anime - Anime mode toggle
- * @property {Object} AnimeWatched - Watched anime tracking
- * @property {Object} AnimeBookMarks - Anime bookmarks storage
  *
  * @property {Object} reducers - An object containing the reducer functions.
  * @property {function} reducers.fetchDataStart - Initiates data fetching by setting loading to true and clearing errors.
@@ -67,17 +61,6 @@ const initialState = {
  * @property {function} reducers.SwtichBaseUrl - Switches the base URL used in the application.
  *   @param {Object} state - The current state.
  *   @param {string} action.payload - The new base URL.
- * @property {function} reducers.SwtichToAnime - Toggles the Anime flag in the state.
- *   @param {Object} state - The current state.
- * @property {function} reducers.AnimeWatched - Updates the list of watched anime.
- *   @param {Object} state - The current state.
- *   @param {Object} action.payload - The anime watched information.
- * @property {function} reducers.AddAnimeBookMark - Adds an anime to the bookmarks.
- *   @param {Object} state - The current state.
- *   @param {Object} action.payload - The anime bookmark information.
- * @property {function} reducers.RemoveAnimeBookMark - Removes an anime from the bookmarks.
- *   @param {Object} state - The current state.
- *   @param {Object} action.payload - The anime bookmark information to remove.
  */
 
 const Reducers = createSlice({
@@ -167,23 +150,8 @@ const Reducers = createSlice({
         : null;
       state.downTime = action.payload;
     },
-    SwtichBaseUrl: (state, action) => {
-      state.baseUrl = action.payload;
-      state.downTime = false;
-    },
-    SwtichToAnime: state => {
-      state.Anime = !state.Anime;
-      state.downTime = false;
-    },
-    AnimeWatched: (state, action) => {
-      state.AnimeWatched[action?.payload?.AnimeName] = action?.payload;
-    },
-    AddAnimeBookMark: (state, action) => {
-      state.AnimeBookMarks[action?.payload?.url] = action?.payload;
-    },
-    RemoveAnimeBookMark: (state, action) => {
-      delete state.AnimeBookMarks[action?.payload?.url];
-    },
+   
+   
   },
 });
 
@@ -198,11 +166,6 @@ export const {
   updateData,
   UpdateSearch,
   DownTime,
-  SwtichBaseUrl,
-  SwtichToAnime,
-  AnimeWatched,
-  AddAnimeBookMark,
-  RemoveAnimeBookMark,
   DownloadComicBook,
   DeleteDownloadedComicBook,
 } = Reducers.actions;
