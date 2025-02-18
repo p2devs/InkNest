@@ -24,10 +24,12 @@ import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import {serverFuncsList} from '../../../Utils/serverFuncsList';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
+  const selectComicServer = useSelector(state => state.data.serverInUse);
   const [loading, setLoading] = useState(false);
   const History = useSelector(state => state.data.history);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
@@ -81,7 +83,7 @@ export function Home({navigation}) {
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(setComicsData, setLoading);
+        getComicsHome(selectComicServer, setComicsData, setLoading);
       }
     }
   }, [forIosValue, forIosLoading]);
@@ -89,15 +91,17 @@ export function Home({navigation}) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <TouchableOpacity
-          style={styles.rectangle}
-          onPress={() => {
-            crashlytics().log('Home Search button clicked');
-            navigation.navigate(NAVIGATION.search);
-          }}>
-          <AntDesign name="search1" size={20} color="#fff" />
-          <Text style={styles.searchPeopleBy}>Search here</Text>
-        </TouchableOpacity>
+        {serverFuncsList[selectComicServer]?.hasOwnProperty('searchComic') ? (
+          <TouchableOpacity
+            style={styles.rectangle}
+            onPress={() => {
+              crashlytics().log('Home Search button clicked');
+              navigation.navigate(NAVIGATION.search);
+            }}>
+            <AntDesign name="search1" size={20} color="#fff" />
+            <Text style={styles.searchPeopleBy}>Search here</Text>
+          </TouchableOpacity>
+        ) : null}
         {!Object.values(History).length ? null : (
           <View style={styles.gameDetailsParent}>
             <View

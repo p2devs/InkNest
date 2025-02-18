@@ -19,6 +19,8 @@ import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
  * @returns {JSX.Element} The root component of the application.
  */
 const App = () => {
+  console.log(CONFIGCAT_SDK_KEY_PROD);
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <ConfigCatProvider

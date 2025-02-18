@@ -1,3 +1,5 @@
+import {ComicHostName} from '../../../Utils/APIs';
+
 export const HomePageCardClasses = {
   azcomic: {
     'popular-comics': {
@@ -25,7 +27,37 @@ export const HomePageCardClasses = {
       dateClass: '.egb-episode', // Assumes the 'Latest Episode' label can be used for date
     },
   },
-  readcomicsonline: {
+  RcoRu: {
+    'hot-comic-updates': {
+      cardClass: '.schedule-avatar',
+      cardTitleClass: '.schedule-name a',
+      cardLinkClass: 'a',
+      imageClass: '.schedule-avatar img',
+      genresClass: null,
+      statusClass: null,
+      dateClass: null,
+    },
+    'latest-release': {
+      cardClass: '.col-sm-6',
+      cardTitleClass: '.media-body h5.media-heading a.chart-title',
+      cardLinkClass: '.media-body h5.media-heading a.chart-title',
+      imageClass: '.media-left a img',
+      genresClass: null,
+      statusClass: null,
+      dateClass: '.media-body small',
+      lastPageClass: '.pagenavi span.page-numbers.dots',
+    },
+    'most-viewed': {
+      cardClass: 'li.list-group-item',
+      cardTitleClass: '.media-body h5.media-heading a.chart-title',
+      cardLinkClass: '.media-body h5.media-heading a.chart-title',
+      imageClass: '.media-left a img',
+      genresClass: null,
+      statusClass: null,
+      dateClass: null,
+    },
+  },
+  RcoCom: {
     'hot-comic-updates': {
       cardClass: '.schedule-avatar',
       cardTitleClass: '.schedule-name a',

@@ -7,7 +7,7 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 'azcomic',
+  serverInUse: 'RcoRu',
   DownloadComic: {},
 };
 
@@ -150,8 +150,9 @@ const Reducers = createSlice({
         : null;
       state.downTime = action.payload;
     },
-   
-   
+    updateServerInUse: (state, action) => {
+      state.serverInUse = action.payload;
+    },
   },
 });
 
@@ -168,5 +169,6 @@ export const {
   DownTime,
   DownloadComicBook,
   DeleteDownloadedComicBook,
+  updateServerInUse,
 } = Reducers.actions;
 export default Reducers.reducer;

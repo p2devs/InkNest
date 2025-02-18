@@ -2,13 +2,15 @@ import APICaller from '../../../Redux/Controller/Interceptor';
 import cheerio from 'cheerio';
 import {ComicHostName} from '../../../Utils/APIs';
 import {HomePageCardClasses} from './constance';
+import {serverFuncsList} from '../../../Utils/serverFuncsList';
 
-export const getComics = async (hostName, page, type = null) => {
+export const getComics = async (
+  hostName,
+  page,
+  type = null,
+  hostKey = 'RcoRu',
+) => {
   try {
-    const hostKey = Object.keys(ComicHostName).find(
-      key => ComicHostName[key] === hostName,
-    );
-
     // Construct the URL and parameters based on the host, type, and page
     const params = page === 1 || page == null ? '' : `${type}?page=${page}`;
     const requestUrl = `${hostName}${params}`;
@@ -20,7 +22,7 @@ export const getComics = async (hostName, page, type = null) => {
     let comicsData = [];
     let lastPage = null;
     const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
-
+    
     if (tagConfig) {
       $(tagConfig.cardClass).each((index, element) => {
         const title =
@@ -93,41 +95,49 @@ export const getComics = async (hostName, page, type = null) => {
   }
 };
 
-export const getComicsHome = async (setComics, setLoading) => {
+export const getComicsHome = async (
+  selectComicServer,
+  setComics,
+  setLoading,
+) => {
+  const DataFetchFromServer = serverFuncsList[selectComicServer];
+  console.log(DataFetchFromServer.hostUrl);
+
   setLoading(true);
   try {
-    const [hot_comic_updates, latest_release, most_viewed] = await Promise.all([
-      getComics(ComicHostName.readcomicsonline, 1, 'hot-comic-updates'),
-      getComics(ComicHostName.readcomicsonline, 1, 'latest-release'),
-      getComics(ComicHostName.readcomicsonline, 1, 'most-viewed'),
-    ]);
+    const [Fist, Second, Third] = await Promise.all(
+      DataFetchFromServer.HomePageCalls.map(type =>
+        getComics(DataFetchFromServer.hostUrl, 1, type, selectComicServer),
+      ),
+    );
 
+    console.log(Fist, Second, Third);
     const ComicHomeList = {};
 
-    if (hot_comic_updates) {
+    if (Fist) {
       ComicHomeList['hot-comic-updates'] = {
         title: 'Hot Comic',
-        data: hot_comic_updates?.comicsData,
-        hostName: ComicHostName.readcomicsonline,
-        lastPage: hot_comic_updates?.lastPage,
+        data: Fist?.comicsData,
+        hostName: ComicHostName.RcoRu,
+        lastPage: Fist?.lastPage,
       };
     }
 
-    if (latest_release) {
+    if (Second) {
       ComicHomeList['latest-release'] = {
         title: 'Latest Release',
-        data: latest_release?.comicsData,
-        hostName: ComicHostName.readcomicsonline,
-        lastPage: latest_release?.lastPage,
+        data: Second?.comicsData,
+        hostName: ComicHostName.RcoRu,
+        lastPage: Second?.lastPage,
       };
     }
 
-    if (most_viewed) {
+    if (Third) {
       ComicHomeList['most-viewed'] = {
         title: 'Most Viewed',
-        data: most_viewed?.comicsData,
-        hostName: ComicHostName.readcomicsonline,
-        lastPage: most_viewed?.lastPage,
+        data: Third?.comicsData,
+        hostName: ComicHostName.RcoRu,
+        lastPage: Third?.lastPage,
       };
     }
 

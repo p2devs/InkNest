@@ -18,14 +18,23 @@ import analytics from '@react-native-firebase/analytics';
 
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Header from '../../Components/UIComp/Header';
 import {NAVIGATION} from '../../Constants';
-import {navigate} from '../../Navigation/NavigationService';
+import {navigate, replace} from '../../Navigation/NavigationService';
 import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
+import {ComicHostName} from '../../Utils/APIs';
+import {List} from 'react-native-paper';
+import {useDispatch, useSelector} from 'react-redux';
+import {updateServerInUse} from '../../Redux/Reducers';
 
 export function Sources({navigation}) {
-  
+  const dispatch = useDispatch();
+  const selectComicServer = useSelector(state => state.data.serverInUse);
+
+  const SourcesCategory = {Comics: ComicHostName};
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Header
@@ -144,6 +153,61 @@ export function Sources({navigation}) {
         }}>
         More sources will be added later, please be patient
       </Text>
+
+      <List.Section style={{backgroundColor: '#14142A'}}>
+        {[Object.keys(SourcesCategory)].map((item, index) => {
+          return (
+            <List.Accordion
+              title={item || 'No Title'}
+              key={index}
+              backgroundColor="#14142A"
+              style={{backgroundColor: '#14142A'}}
+              titleStyle={{color: '#00D9FF'}}
+              left={props => (
+                <List.Icon {...props} icon="folder" color="#00D9FF" />
+              )}>
+              {Object.keys(SourcesCategory[item]).map((server, _index) => {
+                return (
+                  <List.Item
+                    key={_index}
+                    title={server || 'No Title'}
+                    onPress={() => {
+                      dispatch(updateServerInUse(server));
+                      navigation.reset({
+                        index: 0,
+                        routes: [{name: NAVIGATION.home}],
+                      });
+                    }}
+                    left={props => (
+                      <TouchableOpacity
+                        onPress={() =>
+                          deleteComic(
+                            item?.link,
+                            comic?.link,
+                            comic?.folderPath,
+                            comic?.title,
+                          )
+                        }>
+                        <MaterialCommunityIcons
+                          name="server"
+                          size={24}
+                          color={
+                            selectComicServer == server ? '#00D9FF' : '#FFF'
+                          }
+                        />
+                      </TouchableOpacity>
+                    )}
+                    titleStyle={{
+                      color: selectComicServer == server ? '#00D9FF' : '#FFF',
+                    }}
+                    style={{paddingHorizontal: widthPercentageToDP('5%')}}
+                  />
+                );
+              })}
+            </List.Accordion>
+          );
+        })}
+      </List.Section>
     </SafeAreaView>
   );
 }

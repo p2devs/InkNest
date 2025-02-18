@@ -18,7 +18,6 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-// import crashlytics from '@react-native-firebase/crashlytics';
 
 import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -26,14 +25,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-// import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
-// import Card from '../Comic/Components/Card';
-import {searchComic} from '../../Redux/Actions/GlobalActions';
-// import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+import { serverFuncsList } from '../../Utils/serverFuncsList';
 
 export function Search({navigation}) {
   const dispatch = useDispatch();
   const loading = useSelector(state => state.data.loading);
+  const selectComicServer = useSelector(state => state.data.serverInUse);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState([]);
@@ -48,13 +45,15 @@ export function Search({navigation}) {
       search: searchTerm?.trim()?.toString(),
     });
 
-    // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
     let link = searchTerm.trim();
     if (
       !link.startsWith('https://readcomicsonline.ru/comic/') ||
       !link.includes('comic/')
     ) {
-      const result = await dispatch(searchComic(link));
+
+      const result = await dispatch(
+        serverFuncsList[selectComicServer].searchComic(link),
+      );
       if (result?.suggestions) {
         if (result?.suggestions.length == 0) {
           Alert.alert('No results found');

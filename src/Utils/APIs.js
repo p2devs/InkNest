@@ -1,5 +1,6 @@
 export const ComicHostName = {
-  readcomicsonline: 'https://readcomicsonline.ru/',
+  RcoRu: 'https://readcomicsonline.ru/',
+  RcoCom: 'https://readcomicsonline.ru/',
 };
 export const AnimeHostName = {
   gogoanimes: 'https://ww12.gogoanimes.fi/',
