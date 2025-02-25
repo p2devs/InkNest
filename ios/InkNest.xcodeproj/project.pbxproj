@@ -12,7 +12,6 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		920A60A92D21910100A4C0D0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 920A60A82D21910100A4C0D0 /* GoogleService-Info.plist */; };
 		92E4EB942CE1BF0D00FD7A5D /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92E4EB822CE1BF0D00FD7A5D /* EvilIcons.ttf */; };
 		92E4EB952CE1BF0D00FD7A5D /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92E4EB8B2CE1BF0D00FD7A5D /* Fontisto.ttf */; };
 		92E4EB962CE1BF0D00FD7A5D /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92E4EB832CE1BF0D00FD7A5D /* Feather.ttf */; };
@@ -35,6 +34,7 @@
 		9FB1D507735E51058C9F735C /* Pods_InkNest_InkNestTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45DAF352187DB8E04AFD6D5E /* Pods_InkNest_InkNestTests.framework */; };
 		B68F17F3FDCA791B856C024B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		EC7D154758068FFF2FC62110 /* Pods_InkNest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E54147630CAA84D150335C52 /* Pods_InkNest.framework */; };
+		F92274C62D6D9A67002E4E11 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F92274C52D6D9A67002E4E11 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +64,6 @@
 		5B7EB9410499542E8C5724F5 /* Pods-InkNest-InkNestTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InkNest-InkNestTests.debug.xcconfig"; path = "Target Support Files/Pods-InkNest-InkNestTests/Pods-InkNest-InkNestTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = InkNest/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-InkNest-InkNestTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InkNest-InkNestTests.release.xcconfig"; path = "Target Support Files/Pods-InkNest-InkNestTests/Pods-InkNest-InkNestTests.release.xcconfig"; sourceTree = "<group>"; };
-		920A60A82D21910100A4C0D0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		92454CD92CE1B9A1001DB565 /* InkNest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = InkNest.entitlements; path = InkNest/InkNest.entitlements; sourceTree = "<group>"; };
 		92E4EB802CE1BF0D00FD7A5D /* AntDesign.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AntDesign.ttf; sourceTree = "<group>"; };
 		92E4EB812CE1BF0D00FD7A5D /* Entypo.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Entypo.ttf; sourceTree = "<group>"; };
@@ -87,6 +86,7 @@
 		92E4EB922CE1BF0D00FD7A5D /* Zocial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Zocial.ttf; sourceTree = "<group>"; };
 		E54147630CAA84D150335C52 /* Pods_InkNest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InkNest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F92274C52D6D9A67002E4E11 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,7 +129,7 @@
 		13B07FAE1A68108700A75B9A /* InkNest */ = {
 			isa = PBXGroup;
 			children = (
-				920A60A82D21910100A4C0D0 /* GoogleService-Info.plist */,
+				F92274C52D6D9A67002E4E11 /* GoogleService-Info.plist */,
 				92E4EB932CE1BF0D00FD7A5D /* Fonts */,
 				92454CD92CE1B9A1001DB565 /* InkNest.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -336,7 +336,7 @@
 				92E4EBA22CE1BF0D00FD7A5D /* FontAwesome5_Regular.ttf in Resources */,
 				92E4EBA32CE1BF0D00FD7A5D /* FontAwesome6_Solid.ttf in Resources */,
 				92E4EBA42CE1BF0D00FD7A5D /* FontAwesome6_Regular.ttf in Resources */,
-				920A60A92D21910100A4C0D0 /* GoogleService-Info.plist in Resources */,
+				F92274C62D6D9A67002E4E11 /* GoogleService-Info.plist in Resources */,
 				92E4EBA52CE1BF0D00FD7A5D /* FontAwesome6_Brands.ttf in Resources */,
 				92E4EBA62CE1BF0D00FD7A5D /* Foundation.ttf in Resources */,
 				B68F17F3FDCA791B856C024B /* PrivacyInfo.xcprivacy in Resources */,
@@ -740,10 +740,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -823,10 +820,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
