@@ -156,7 +156,11 @@ export function Sources({navigation}) {
               color: '#000',
             }}>
             Browser
-            <Text style={{fontSize: heightPercentageToDP('1.3%'),color:"purple"}}> (Beta)</Text>
+            <Text
+              style={{fontSize: heightPercentageToDP('1.3%'), color: 'purple'}}>
+              {' '}
+              (Beta)
+            </Text>
           </Text>
         </View>
         <Feather
@@ -213,7 +217,7 @@ export function Sources({navigation}) {
           marginVertical: heightPercentageToDP('1%'),
           textAlign: 'center',
         }}>
-        More sources will be added later, please be patient
+        More Sources Coming Soon...
       </Text>
     </SafeAreaView>
   );
