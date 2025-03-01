@@ -13,7 +13,7 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import {List} from 'react-native-paper';
+import {Chip, List} from 'react-native-paper';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
@@ -113,6 +113,50 @@ export function Sources({navigation}) {
               color: '#000',
             }}>
             Manga reader
+          </Text>
+        </View>
+        <Feather
+          name="arrow-up-right"
+          size={heightPercentageToDP('2.5%')}
+          color="#000"
+          style={{marginRight: 10}}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          analytics().logEvent('open_browser', {
+            item: 'Open_Browser',
+          });
+          showRewardedAd();
+          navigate(NAVIGATION.WebSourcesList);
+        }}
+        style={{
+          backgroundColor: '#FFF',
+          marginHorizontal: widthPercentageToDP('2%'),
+          marginVertical: heightPercentageToDP('1%'),
+          paddingHorizontal: 10,
+          borderRadius: 5,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingVertical: heightPercentageToDP('1%'),
+        }}>
+        <View style={{flexDirection: 'row'}}>
+          <AntDesign
+            name="earth"
+            size={heightPercentageToDP('2.5%')}
+            color="#000"
+            style={{marginRight: 10}}
+          />
+          <Text
+            style={{
+              fontSize: heightPercentageToDP('2%'),
+              fontWeight: 'bold',
+              color: '#000',
+            }}>
+            Browser
+            <Text style={{fontSize: heightPercentageToDP('1.3%'),color:"purple"}}> (Beta)</Text>
           </Text>
         </View>
         <Feather
