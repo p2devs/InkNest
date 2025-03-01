@@ -20,7 +20,10 @@ import {
   requestNotifications,
   checkNotifications,
 } from 'react-native-permissions';
-import mobileAds from 'react-native-google-mobile-ads';
+import mobileAds, {
+  AdsConsent,
+  AdsConsentStatus,
+} from 'react-native-google-mobile-ads';
 
 /**
  * RootNavigation component handles the main navigation logic for the application.
@@ -70,19 +73,6 @@ export function RootNavigation() {
     if (enabled) {
       console.log('Authorization status:', authStatus);
     }
-  }
-
-  async function requestAppTrackingPermission() {
-    if (Platform.OS === 'ios') {
-      const result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
-      if (result === RESULTS.DENIED) {
-        // The permission has not been requested, so request it.
-        await request(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
-      }
-    }
-    const adapterStatuses = await mobileAds().initialize();
-
-    console.log('Adapter Statuses ->', adapterStatuses);
   }
 
   /**
@@ -135,10 +125,52 @@ export function RootNavigation() {
     await firebase.perf().setPerformanceCollectionEnabled(true);
   }
 
+  // Request user consent for personalized ads from Google Mobile Ads SDK
+  useEffect(() => {
+    // Request consent information and load/present a consent form if necessary
+    AdsConsent.gatherConsent()
+      .then(() => startGoogleMobileAdsSDK())
+      .catch(error => {
+        console.error('Consent gathering failed:', error);
+        // Still initialize ads even if consent gathering failed
+        startGoogleMobileAdsSDK();
+      });
+  }, []);
+
+  // Start Google Mobile Ads SDK with user consent
+  async function startGoogleMobileAdsSDK() {
+    const consentInfo = await AdsConsent.getConsentInfo();
+    let useNonPersonalizedAds = !consentInfo.canRequestAds;
+
+    // Handle iOS App Tracking Transparency
+    if (Platform.OS === 'ios' && (await AdsConsent.getGdprApplies())) {
+      const status = await AdsConsent.requestTrackingAuthorization();
+      if (status !== AdsConsentStatus.AUTHORIZED) {
+        useNonPersonalizedAds = true; // Use non-personalized if ATT denied
+      }
+    }
+
+    // Initialize ads based on consent status
+    if (useNonPersonalizedAds) {
+      console.log(
+        'Using non-personalized ads due to consent or ATT restrictions',
+      );
+      await mobileAds().initialize();
+      await mobileAds().setRequestConfiguration({
+        tagForChildDirectedTreatment: false,
+        tagForUnderAgeOfConsent: false,
+        maxAdContentRating: 'G',
+        testDeviceIdentifiers: [],
+      });
+    } else {
+      // Initialize with personalized ads
+      await mobileAds().initialize();
+    }
+  }
+
   useEffect(() => {
     allowToReceiveInAppMessages();
     requestUserPermission();
-    requestAppTrackingPermission();
     if (!__DEV__) {
       PerformanceMonitoring();
       toggleCrashlytics();
