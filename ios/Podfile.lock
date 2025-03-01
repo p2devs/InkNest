@@ -3,7 +3,7 @@ PODS:
   - BVLinearGradient (2.8.3):
     - React-Core
   - DoubleConversion (1.1.6)
-  - dr-pogodin-react-native-fs (2.32.0):
+  - dr-pogodin-react-native-fs (2.29.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2487,7 +2487,7 @@ SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
-  dr-pogodin-react-native-fs: 21e75828d5569ccd59eee7120e48c7e5987ad231
+  dr-pogodin-react-native-fs: 9bf9a73d7ab54ae05fbe65c31b567e2f97d60827
   FasterImage: 0543472141d8f64716efdeb3bb886a6fe814f3b9
   FBLazyVector: 7075bb12898bc3998fd60f4b7ca422496cc2cdf7
   Firebase: a64bf6a8546e6eab54f1c715cd6151f39d2329f4
