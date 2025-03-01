@@ -9,6 +9,7 @@ import {Details} from '../Screens/Anime';
 import {ComicBook, ComicDetails, SeeAll} from '../Screens/Comic';
 import {ViewAll} from '../Screens/Anime/Home/ViewAll';
 import { MangaBook, MangaDetails, MangaHome, MangaSearch, MangaViewAll } from '../InkNest-Externals/Screens/Manga';
+import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,7 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.mangaSearch} component={MangaSearch} />
       <Stack.Screen name={NAVIGATION.search} component={Search} />
       <Stack.Screen name={NAVIGATION.seeAll} component={SeeAll} />
+      <Stack.Screen name={NAVIGATION.WebSources} component={WebViewScreen} />
     </Stack.Navigator>
   );
 }

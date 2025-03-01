@@ -14,6 +14,7 @@ import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import DownTime from '../Components/UIComp/DownTime';
 import {useFeatureFlag} from 'configcat-react';
+import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -149,7 +150,7 @@ export function BottomNavigation() {
       {getVersion() !== forIosValue && (
         <BottomTab.Screen
           name={NAVIGATION.sources}
-          component={Sources}
+          component={LinkListScreen}
           options={{
             tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="source" />

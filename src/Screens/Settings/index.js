@@ -181,7 +181,12 @@ export function Settings({navigation}) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={SwitchAnimeToggle}
+          onPress={() => {
+            analytics().logEvent('anime_external', {
+              item: 'Anime external screen',
+            });
+            Linking.openURL('https://p2devs.github.io/DekuFusion-Release/');
+          }}
           style={{
             backgroundColor: '#FFF',
             marginHorizontal: widthPercentageToDP('2%'),
@@ -206,7 +211,7 @@ export function Settings({navigation}) {
                 fontWeight: 'bold',
                 color: '#000',
               }}>
-              {!Anime ? 'Watch Anime' : 'Read Comics'}
+              Watch Anime
             </Text>
           </View>
           <Feather
@@ -401,49 +406,6 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or anime, InkNest has s
                 color: '#000',
               }}>
               Share App
-            </Text>
-          </View>
-          <Feather
-            name="arrow-up-right"
-            size={hp('2.5%')}
-            color="#000"
-            style={{marginRight: 10}}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            analytics().logEvent('open_manga', {
-              item: 'Open_Manga',
-            });
-            showRewardedAd();
-            navigate(NAVIGATION.homeManga);
-          }}
-          style={{
-            backgroundColor: '#FFF',
-            marginHorizontal: widthPercentageToDP('2%'),
-            marginVertical: hp('1%'),
-            paddingHorizontal: 10,
-            borderRadius: 5,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingVertical: hp('1%'),
-          }}>
-          <View style={{flexDirection: 'row'}}>
-            <Entypo
-              name="open-book"
-              size={hp('2.5%')}
-              color="#000"
-              style={{marginRight: 10}}
-            />
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#000',
-              }}>
-              Manga reader
             </Text>
           </View>
           <Feather
