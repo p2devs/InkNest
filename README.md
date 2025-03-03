@@ -25,21 +25,60 @@
   InkNest is a free mobile app offering a vast collection of comics and anime across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
 </p>
 
-### 🌟 Star this repository to support the developer and encourage further development of the application
+> **🌟 Star this repository to support the developer and encourage further development of the application**
 
-> **Warning**
+> **⚠️ Warning**
 > Please do not attempt to upload InkNest or any of its forks to the Play Store, App Store, or any other stores on the internet. Doing so may infringe their terms and conditions, potentially resulting in legal action or immediate takedown of the app.
+
+## 📑 Table of Contents
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Required Files](#required-files)
+  - [Setup Instructions](#steps)
+- [Running the App](#running-the-app)
+  - [Android](#running-on-android)
+  - [iOS](#running-on-ios)
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer)
+- [Contact](#contact)
+- [Download](#download)
+- [License](#license)
+- [InkNest Sources](#inknest-sources)
+- [Acknowledgements](#acknowledgements)
 
 ## Features
 
-- **CBZ and CBR Reader**: Added support for reading CBZ and CBR comic files.
-- **Comic Read History**: Track your watched anime episodes effortlessly.
-- **Bookmark in Anime & Comic**: Bookmark your favorite anime shows for quick access.
-- **Vast Comic & Anime Library**: Access a wide range of comic books across various genres including superheroes, sci-fi, fantasy.
+- **Comic & Manga Read History**: Track your reading history for easy access to previously read comics.
+- **Bookmark Comic & Manga**: Bookmark your favorite comics & manga for quick access.
+- **Vast Comic & Manga Library**: Access a wide range of comic & manga books across various genres including superheroes, sci-fi, fantasy.
 - **User-Friendly Interface**: Intuitive and easy-to-use navigation ensures a seamless reading experience.
 - **Releases updates**: Stay up-to-date with new releases.
-- **Search and Discover**: Easily find comics & anime with search functionality and explore curated collections.
+- **Search and Discover**: Easily find comics & manga with search functionality and explore curated collections.
 - **Push Notifications**: We have implemented push notifications to inform users about new releases, updates.
+- **Offline Reading**: Download comics & manga for offline reading.
+- **Multi-Platform Support**: Available on both Android and iOS devices.
+- **Open Source**: InkNest is open source, allowing users to contribute and improve the app.
+- **Community Support**: Join our community on Discord for real-time support and discussion.
+
+## Screenshots
+<!-- Add some screenshots here to visually showcase your application -->
+<p align="center">
+  <!-- Example: -->
+  <img src="./.github/readme-images/screenshot.png" width="200" />
+  <!-- <img src="./.github/readme-images/screenshot2.png" width="200" /> -->
+  <!-- <img src="./.github/readme-images/screenshot3.png" width="200" /> -->
+</p>
+
+## Tech Stack
+- [React Native](https://reactnative.dev/) - Cross-platform mobile framework
+- [Redux](https://redux.js.org/) - State management
+- [Firebase](https://firebase.google.com/) - Backend services
+- [Docusaurus](https://docusaurus.io/) - Documentation
 
 ## Installation
 
@@ -80,7 +119,9 @@ Before running the project, make sure to add the following files:
    yarn start
    ```
 
-## Running on Android
+## Running the App
+
+### Running on Android
 
 1. Start the Android emulator or connect an Android device.
 2. Run the following command:
@@ -89,7 +130,7 @@ Before running the project, make sure to add the following files:
    yarn android
    ```
 
-## Running on iOS
+### Running on iOS
 
 1. Install CocoaPods dependencies:
 
@@ -128,6 +169,23 @@ The documentation is managed using Docusaurus. To view the documentation locally
    yarn start
    ```
 
+## Project Structure
+```
+InkNest/
+├── android/                # Android-specific code
+├── ios/                    # iOS-specific code
+├── src/                    # Source code
+│   ├── Components/         # Reusable UI components
+│   ├── Constants/          # App constants and configurations
+│   ├── Navigation/         # Navigation setup
+│   ├── Redux/              # State management
+│   ├── Screens/            # App screens
+│   └── Utils/              # Utility functions
+├── docs/                   # Documentation using Docusaurus
+├── __tests__/              # Tests
+└── ...                     # Configuration files
+```
+
 ## Contributing
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
@@ -145,7 +203,7 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 
 For any inquiries, feel free to reach out through one of the following channels:
 
-- **Email**: [inknest@2hub.live](mailto:inknest@2hub.live)
+- **Email**: [inknest@p2devs.engineer](mailto:inknest@p2devs.engineer)
 - **Discord**: Join our community on [Discord](https://discord.gg/WYwJefvWNT) for real-time support and discussion.
 - **GitHub Discussions**: Visit our [GitHub Discussions board](https://github.com/p2devs/InkNest/discussions) to engage with our community, ask questions, and find answers to common issues.
 
@@ -163,10 +221,12 @@ This project is licensed under the GNU General Public License. See the [LICENSE]
 
 InkNest uses the following sources to provide you with the best experience:
 
-- [readallcomics](https://readallcomics.com/)
-- [azcomix](https://azcomix.me/)
-- [gogoanimes](https://ww12.gogoanimes.fi/)
-- [s3taku](https://s3taku.com/)
+- [readcomiconline](https://readcomiconline.li/)
+- [GlobalComix](https://globalcomix.com/browse/en/comics)
+- [Bato](https://bato.to/)
+- [MangaDex](https://mangadex.org/)
+- [ColaManga](https://www.colamanga.com)
+- [WebToon](https://webtoons.com)
 
 ## Acknowledgements
 
