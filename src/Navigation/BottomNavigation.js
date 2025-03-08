@@ -84,7 +84,6 @@ export function BottomNavigation() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="Home"
       screenOptions={{
         tabBarBackground: () => (
           <View
@@ -107,6 +106,26 @@ export function BottomNavigation() {
         shadow: true,
         floating: true,
       }}>
+      {getVersion() !== forIosValue && (
+        <BottomTab.Screen
+          name={NAVIGATION.sources}
+          component={LinkListScreen}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon focused={focused} tintColor={color} name="source" />
+            ),
+            tabBarBadge: 1,
+            tabBarBadgeStyle: {
+              maxWidth: 10,
+              maxHeight: 10,
+              fontSize: 5,
+              lineHeight: 9,
+              alignSelf: undefined,
+         }
+          }}
+        />
+      )}
+
       <BottomTab.Screen
         name={NAVIGATION.home}
         component={downTime ? DownTime : animeActive ? AnimeHome : Home}
@@ -142,18 +161,6 @@ export function BottomNavigation() {
                 tintColor={color}
                 name="download-for-offline"
               />
-            ),
-          }}
-        />
-      )}
-
-      {getVersion() !== forIosValue && (
-        <BottomTab.Screen
-          name={NAVIGATION.sources}
-          component={LinkListScreen}
-          options={{
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon focused={focused} tintColor={color} name="source" />
             ),
           }}
         />
