@@ -22,7 +22,7 @@
 </div>
 
 <p align="left">
-  InkNest is a free mobile app offering a vast collection of comics and anime across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
+  InkNest is a free mobile app offering a vast collection of comics and manga across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
 </p>
 
 > **🌟 Star this repository to support the developer and encourage further development of the application**
@@ -192,9 +192,9 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 
 ## DISCLAIMER
 
-- InkNest only scrapes links from various websites, making it easier for users to find anime and comics.
-- Neither InkNest nor its developers/staff host any of the content found within the app. All images and anime/comic information in the app are sourced from various public APIs.
-- Additionally, all anime/comic links in InkNest are obtained from various third-party anime hosting websites.
+- InkNest only scrapes links from various websites, making it easier for users to find manga and comics.
+- Neither InkNest nor its developers/staff host any of the content found within the app. All images and manga/comic information in the app are sourced from various public APIs.
+- Additionally, all manga/comic links in InkNest are obtained from various third-party manga hosting websites.
 - InkNest and its owners aren't liable for any misuse of the content found inside or outside the app and cannot be held accountable for the distribution of any content found within the app.
 - By using InkNest, you agree that the developers are not responsible for any content found in the app; this content may or may not come from legitimate sources.
 - If internet infringement issues arise, please contact the source website. The developer does not assume any legal responsibility.
@@ -203,7 +203,7 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 
 For any inquiries, feel free to reach out through one of the following channels:
 
-- **Email**: [inknest@p2devs.engineer](mailto:inknest@p2devs.engineer)
+- **Email**: [inknest@mail.p2devs.engineer](mailto:inknest@mail.p2devs.engineer)
 - **Discord**: Join our community on [Discord](https://discord.gg/WYwJefvWNT) for real-time support and discussion.
 - **GitHub Discussions**: Visit our [GitHub Discussions board](https://github.com/p2devs/InkNest/discussions) to engage with our community, ask questions, and find answers to common issues.
 
