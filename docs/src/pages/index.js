@@ -74,7 +74,7 @@ function HomepageHeader() {
         <h2 className={styles.subtitle}>{siteConfig.tagline}</h2>
         <p className={styles.description}>
           InkNest is a free mobile app offering a vast collection of comics and
-          anime across genres like superheroes, sci-fi, fantasy, and manga.
+          manga across genres like superheroes, sci-fi, fantasy, and manga.
           Enjoy a seamless experience with user-friendly navigation and
           customizable settings. Stay updated with the latest releases and
           classics. With InkNest, your favorite stories and characters are
@@ -238,16 +238,16 @@ function HomepageHeader() {
           <ul>
             <li>
               InkNest only scrapes links from various websites, making it easier
-              for users to find anime and comics.
+              for users to find manga and comics.
             </li>
             <li>
               Neither InkNest nor its developers/staff host any of the content
-              found within the app. All images and anime/comic information in
+              found within the app. All images and manga/comic information in
               the app are sourced from various public APIs.
             </li>
             <li>
-              Additionally, all anime/comic links in InkNest are obtained from
-              various third-party anime hosting websites.
+              Additionally, all manga/comic links in InkNest are obtained from
+              various third-party manga hosting websites.
             </li>
             <li>
               InkNest and its owners aren't liable for any misuse of the content
@@ -275,8 +275,8 @@ function HomepageHeader() {
           <ul>
             <li>
               Email:{' '}
-              <a href="mailto:inknest@p2devs.engineer">
-                inknest@p2devs.engineer
+              <a href="mailto:inknest@mail.p2devs.engineer">
+                inknest@mail.p2devs.engineer
               </a>
             </li>
             <li>

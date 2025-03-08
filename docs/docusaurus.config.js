@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'InkNest',
   tagline:
-    'Explore comics & anime for free with InkNest: your ultimate mobile companion',
+    'Explore comics & manga for free with InkNest: your ultimate mobile companion',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -80,6 +80,11 @@ const config = {
           //   label: 'Tutorial',
           // },
           {
+            label: 'FAQ',
+            to: '/faq',
+            position: 'left',
+          },
+          {
             href: 'https://github.com/p2devs/InkNest/releases',
             label: 'Release Notes',
             position: 'right',
@@ -93,47 +98,47 @@ const config = {
       },
       footer: {
         style: 'dark',
-        // links: [
-        //   {
-        //     title: 'Docs',
-        //     items: [
-        //       {
-        //         label: 'Tutorial',
-        //         to: '/docs/intro',
-        //       },
-        //     ],
-        //   },
-        //   {
-        //     title: 'Community',
-        //     items: [
-        //       {
-        //         label: 'Stack Overflow',
-        //         href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-        //       },
-        //       {
-        //         label: 'Discord',
-        //         href: 'https://discordapp.com/invite/docusaurus',
-        //       },
-        //       {
-        //         label: 'Twitter',
-        //         href: 'https://twitter.com/docusaurus',
-        //       },
-        //     ],
-        //   },
-        //   {
-        //     title: 'More',
-        //     items: [
-        //       {
-        //         label: 'Blog',
-        //         to: '/blog',
-        //       },
-        //       {
-        //         label: 'GitHub',
-        //         href: 'https://github.com/p2devs/InkNest',
-        //       },
-        //     ],
-        //   },
-        // ],
+        links: [
+          // {
+          //   title: 'Docs',
+          //   items: [
+          //     {
+          //       label: 'Tutorial',
+          //       to: '/docs/intro',
+          //     },
+          //   ],
+          // },
+          {
+            title: 'Community',
+            items: [
+              // {
+              //   label: 'Stack Overflow',
+              //   href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              // },
+              {
+                label: 'Discord',
+                href: 'https://discord.com/invite/WYwJefvWNT',
+              },
+              {
+                label: 'Github Discussions',
+                href: 'https://github.com/p2devs/InkNest/discussions',
+              },
+            ],
+          },
+          {
+            title: 'More',
+            items: [
+              {
+                label: 'FAQ',
+                to: '/faq',
+              },
+              {
+                label: 'GitHub',
+                href: 'https://github.com/p2devs/InkNest',
+              },
+            ],
+          },
+        ],
         copyright: `Copyright © ${new Date().getFullYear()} P2 Devs.`,
       },
       prism: {
