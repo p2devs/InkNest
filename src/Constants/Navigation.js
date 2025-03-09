@@ -22,4 +22,5 @@ export const NAVIGATION = {
   sources: 'Web Sources',
   WebSources: 'WebSources',
   WebSourcesList: 'WebSourcesList',
+  WebSearch: 'WebSearch',
 };
