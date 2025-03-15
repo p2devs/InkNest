@@ -293,6 +293,31 @@ export function Search({navigation}) {
             </TouchableOpacity>
           </View>
         </View>
+
+        <View style={{paddingHorizontal: 12}}>
+          <Text
+            style={{
+              fontSize: heightPercentageToDP('2%'),
+              fontWeight: 'bold',
+              color: '#FFF',
+              textAlign: 'center',
+              marginVertical: heightPercentageToDP('2%'),
+              textDecorationLine: 'underline',
+              textDecorationColor: '#FFF',
+              textDecorationStyle: 'solid',
+              textDecorationThickness: 2,
+              textDecorationSkip: 'none',
+            }}
+            onPress={() => {
+              crashlytics().log('Advanced Search button clicked');
+              analytics().logEvent('advanced_search', {
+                click: 'Advanced Search',
+              });
+              navigation.navigate(NAVIGATION.WebSearch);
+            }}>
+            Advanced Search
+          </Text>
+        </View>
         {!IsAnime ? (
           <FlatList
             scrollsToTop
