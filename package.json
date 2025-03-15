@@ -12,7 +12,7 @@
     "pod": "npx pod-install",
     "ios-16": "react-native run-ios --simulator='iPhone 16'",
     "clean": "watchman watch-del-all",
-    "build:release": "cd android && ./gradlew assembleRelease && cd .."
+    "build:release": "./script/gradle.sh && cd android && ./gradlew assembleRelease && cd .. && git checkout android/gradle.properties"
   },
   "dependencies": {
     "@candlefinance/faster-image": "^1.7.2",
