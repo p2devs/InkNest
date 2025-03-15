@@ -1,8 +1,8 @@
-import React, {useEffect, useLayoutEffect, useRef} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
-import {Platform, StatusBar} from 'react-native';
+import {Platform, StatusBar, AppState} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {ClearError} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
@@ -52,8 +52,20 @@ import mobileAds, {
  */
 export function RootNavigation() {
   const dispatch = useDispatch();
-
   const routeNameRef = useRef();
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  // Add this useEffect to track app state
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      setAppState(nextAppState);
+      crashlytics().setAttribute('app_state', nextAppState);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   // Request user permission for notifications on Android and iOS devices
   async function requestUserPermission() {
@@ -203,6 +215,10 @@ export function RootNavigation() {
           console.log('Screen Name: ', currentRouteName);
         }
         routeNameRef.current = currentRouteName;
+
+        // Add more context to crashes
+        crashlytics().setAttribute('current_screen', currentRouteName);
+        crashlytics().setAttribute('app_state', JSON.stringify(appState));
       }}>
       <AppNavigation />
     </NavigationContainer>

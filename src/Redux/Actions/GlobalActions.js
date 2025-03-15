@@ -15,6 +15,7 @@ import {
 import {Alert} from 'react-native';
 import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 /**
  * Action creator for handling watched data.
@@ -194,6 +195,8 @@ export const fetchComicDetails =
       dispatch(WatchedData(watchedData));
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
+      crashlytics().recordError(error);
+      console.log('Error details:', error);
       console.error(
         'Error fetching comic details:',
         error.response?.status || error,
@@ -266,6 +269,8 @@ export const fetchComicBook =
       dispatch(fetchDataSuccess({url: comicBook, data}));
       if (isDownloadComic) return {url: comicBook, data};
     } catch (error) {
+      crashlytics().recordError(error);
+      console.log('Error details:', error);
       dispatch(fetchDataFailure(error.message));
       checkDownTime(error);
     }
@@ -446,6 +451,8 @@ export const getAdvancedSearchFilters = () => async dispatch => {
       types: typesOptions,
     };
   } catch (error) {
+    crashlytics().recordError(error);
+    console.log('Error details:', error);
     console.error('Error fetching advanced search filters:', error);
     dispatch(checkDownTime(error));
     dispatch(fetchDataFailure(error.message));
@@ -473,6 +480,8 @@ export const searchComic = (queryValue) => async dispatch => {
     dispatch(checkDownTime());
     return response?.data;
   } catch (error) {
+    crashlytics().recordError(error);
+    console.log('Error details:', error);
     console.error('Error fetching search results:', error);
     dispatch(fetchDataFailure(error.message));
     dispatch(checkDownTime(error));
