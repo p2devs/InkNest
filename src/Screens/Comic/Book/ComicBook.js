@@ -6,6 +6,8 @@ import {
   StatusBar,
   TouchableWithoutFeedback,
   Dimensions,
+  ScrollView,
+  Text,
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -23,6 +25,7 @@ import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
 import Gallery from '../../../Components/Gallery/src/index';
+import VerticalGallery from '../../../Components/VerticalGallery';
 import {updateData} from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
@@ -45,6 +48,8 @@ export function ComicBook({navigation, route}) {
     'Default',
   );
   const [images, setImages] = useState([]);
+  // Add scrollMode state - 'horizontal' is the default as the app currently uses
+  const [scrollMode, setScrollMode] = useState('horizontal');
 
   const {width} = Dimensions.get('window');
   const numColumns = 3;
@@ -269,28 +274,54 @@ export function ComicBook({navigation, route}) {
               }}
             />
           ) : DownloadedBook?.downloadedImagesPath || ComicBook?.images ? (
-            <Gallery
-              key="galleryView"
-              data={
-                isDownloadComic
-                  ? DownloadedBook?.downloadedImagesPath
-                  : ComicBook?.images
-              }
-              onIndexChange={newIndex => {
-                if (!isDownloadComic) {
-                  dispatch(
-                    updateData({
-                      url: comicBookLink,
-                      data: {lastReadPage: newIndex},
-                      imageLength: ComicBook?.images?.length,
-                      ComicDetailslink: ComicBook?.ComicDetailslink,
-                    }),
-                  );
+            scrollMode === 'horizontal' ? (
+              <Gallery
+                key="galleryView"
+                data={
+                  isDownloadComic
+                    ? DownloadedBook?.downloadedImagesPath
+                    : ComicBook?.images
                 }
-                setPageIndex(newIndex);
-              }}
-              initialIndex={PageIndex}
-            />
+                onIndexChange={newIndex => {
+                  if (!isDownloadComic) {
+                    dispatch(
+                      updateData({
+                        url: comicBookLink,
+                        data: {lastReadPage: newIndex},
+                        imageLength: ComicBook?.images?.length,
+                        ComicDetailslink: ComicBook?.ComicDetailslink,
+                      }),
+                    );
+                  }
+                  setPageIndex(newIndex);
+                }}
+                initialIndex={PageIndex}
+              />
+            ) : (
+              <VerticalGallery
+                key="verticalGalleryView"
+                data={
+                  isDownloadComic
+                    ? DownloadedBook?.downloadedImagesPath
+                    : ComicBook?.images
+                }
+                onPageChange={newIndex => {
+                  if (!isDownloadComic) {
+                    dispatch(
+                      updateData({
+                        url: comicBookLink,
+                        data: {lastReadPage: newIndex},
+                        imageLength: ComicBook?.images?.length,
+                        ComicDetailslink: ComicBook?.ComicDetailslink,
+                      }),
+                    );
+                  }
+                  setPageIndex(newIndex);
+                }}
+                initialIndex={PageIndex}
+                onSingleTap={toggleControls}
+              />
+            )
           ) : null}
 
           {/* Conditionally render the header/footer only if showControls is true */}
@@ -317,6 +348,8 @@ export function ComicBook({navigation, route}) {
               ViewAll={ViewAll}
               navigation={navigation}
               showButton={isDownloadComic ? false : true}
+              scrollMode={scrollMode}
+              setScrollMode={setScrollMode}
             />
           </Animated.View>
         </View>

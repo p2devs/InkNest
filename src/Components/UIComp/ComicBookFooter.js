@@ -1,8 +1,8 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, Image} from 'react-native';
-
 import {useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
 
 const ComicBookFooter = ({
@@ -11,6 +11,8 @@ const ComicBookFooter = ({
   ViewAll,
   navigation,
   showButton,
+  scrollMode,
+  setScrollMode,
 }) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const index = ComicBook?.volumes?.findIndex(item => {
@@ -54,78 +56,39 @@ const ComicBookFooter = ({
           Grid
         </Text>
       </TouchableOpacity>
+
+      {/* Scroll Mode Toggle Button */}
+      {!ViewAll && (
+        <TouchableOpacity
+          onPress={() => {
+            setScrollMode(scrollMode === 'horizontal' ? 'vertical' : 'horizontal');
+          }}
+          style={{
+            alignItems: 'center',
+          }}>
+          <MaterialIcons
+            name={scrollMode === 'horizontal' ? 'swap-vert' : 'swap-horiz'}
+            size={24}
+            color="#fff"
+          />
+          <Text
+            style={{
+              fontSize: 12,
+              color: '#fff',
+              opacity: 0.5,
+            }}>
+            {scrollMode === 'horizontal' ? 'Vertical' : 'Horizontal'}
+          </Text>
+        </TouchableOpacity>
+      )}
+
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           gap: 10,
         }}>
-        {/* {index !== ComicBook?.volumes?.length - 1 ? (
-          showButton ? (
-            <TouchableOpacity
-              onPress={() => {
-                if (index < ComicBook?.volumes.length - 1) {
-                  navigation.replace(NAVIGATION.comicBook, {
-                    comicBookLink: ComicBook?.volumes[index + 1].link,
-                  });
-                }
-              }}
-              style={{
-                alignItems: 'center',
-              }}>
-              <Ionicons
-                name="arrow-back"
-                size={24}
-                color="#fff"
-                style={{marginRight: 10, opacity: 0.9}}
-              />
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: '#fff',
-                  opacity: 0.5,
-                }}>
-                Back Vol
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View />
-          )
-        ) : null}
-        {ComicBook?.volumes?.length == 1 ? (
-          <View />
-        ) : showButton ? (
-          <TouchableOpacity
-            onPress={() => {
-              console.log(index, ComicBook?.volumes.length - 1, 'index');
-              if (index < ComicBook?.volumes.length - 1 || index > 0) {
-                navigation.replace(NAVIGATION.comicBook, {
-                  comicBookLink: ComicBook?.volumes[index - 1]?.link,
-                });
-              }
-            }}
-            style={{
-              alignItems: 'center',
-            }}
-            disabled={index == 0}>
-            <Ionicons
-              name="arrow-forward"
-              size={24}
-              color="#fff"
-              style={{marginRight: 10, opacity: 0.9}}
-            />
-            <Text
-              style={{
-                fontSize: 12,
-                color: '#fff',
-                opacity: 0.5,
-              }}>
-              Next Vol
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <View />
-        )} */}
+        {/* Previous volume controls commented out */}
       </View>
     </View>
   );
