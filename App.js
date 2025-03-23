@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {persistor, store} from './src/Redux/Store';
@@ -10,7 +10,9 @@ import {PaperProvider} from 'react-native-paper';
 import ForceUpdate from './src/Components/ForceUpdate';
 import {ConfigCatProvider} from 'configcat-react';
 import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
-import { BannerProvider } from './src/Components/UIComp/AnimeAdBanner/BannerContext';
+import {BannerProvider} from './src/Components/UIComp/AnimeAdBanner/BannerContext';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 
 /**
  * The main App component that sets up the root of the application.
@@ -21,6 +23,31 @@ import { BannerProvider } from './src/Components/UIComp/AnimeAdBanner/BannerCont
  * @returns {JSX.Element} The root component of the application.
  */
 const App = () => {
+  useEffect(() => {
+    if (!__DEV__) {
+      // Initialize Firebase Crashlytics
+      crashlytics().log('App mounted.');
+
+      // Enable analytics collection
+      analytics().setAnalyticsCollectionEnabled(true);
+
+      // Catch JS errors and report to Crashlytics
+      const errorHandler = (error, isFatal) => {
+        if (isFatal) {
+          crashlytics().recordError(error);
+        }
+        return false;
+      };
+
+      // Set error handlers
+      ErrorUtils.setGlobalHandler(errorHandler);
+
+      return () => {
+        // Clean up if needed
+      };
+    }
+  }, []);
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <ConfigCatProvider
