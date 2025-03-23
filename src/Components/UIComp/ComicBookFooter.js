@@ -4,6 +4,8 @@ import {useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
+import crashlytics from '@react-native-firebase/crashlytics';
+import analytics from '@react-native-firebase/analytics';
 
 const ComicBookFooter = ({
   comicBookLink,
@@ -61,7 +63,16 @@ const ComicBookFooter = ({
       {!ViewAll && (
         <TouchableOpacity
           onPress={() => {
-            setScrollMode(scrollMode === 'horizontal' ? 'vertical' : 'horizontal');
+            analytics().logEvent('comicbook_scroll_mode', {
+              scrollMode:
+                scrollMode === 'horizontal' ? 'vertical' : 'horizontal',
+            });
+            crashlytics().log('ComicBook Scroll Mode Changed');
+            crashlytics().setAttribute('scroll_mode', scrollMode);
+            crashlytics().setUserId(comicBookLink);
+            setScrollMode(
+              scrollMode === 'horizontal' ? 'vertical' : 'horizontal',
+            );
           }}
           style={{
             alignItems: 'center',
