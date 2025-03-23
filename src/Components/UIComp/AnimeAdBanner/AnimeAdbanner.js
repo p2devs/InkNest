@@ -1,6 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, Linking} from 'react-native';
-import {Banner} from 'react-native-paper';
+import {View, Text, StyleSheet, Linking, TouchableOpacity} from 'react-native';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 
@@ -18,38 +17,49 @@ const AnimeAdbanner = () => {
   };
 
   return (
-    <Banner
-      visible={bannerStates.animeBanner}
-      actions={[
-        {
-          label: 'Stream Now',
-          onPress: handleStreamNow,
-        },
-      ]}
-      icon={({size}) => (
+    <TouchableOpacity
+      onPress={() => {
+        crashlytics().log('Anime Banner clicked');
+        analytics().logEvent('anime_banner_clicked');
+        handleStreamNow();
+      }}
+      style={{
+        backgroundColor: '#1F1F1F',
+        paddingHorizontal: 20,
+        display: bannerStates.animeBanner ? 'flex' : 'none',
+        paddingVertical: 10,
+        marginVertical: 10,
+      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
         <Image
           source={{
             uri: 'https://github.com/p2devs/Anizuno/blob/main/.github/readme-images/icon.png?raw=true',
           }}
           style={{
-            width: size,
-            height: size,
+            width: 20,
+            height: 20,
           }}
         />
-      )}>
-      <View style={styles.container}>
         <Text style={styles.text}>
           ✨ Watch Anime Anytime, Anywhere with Anizuno! ✨
         </Text>
-        <Text style={styles.text}>
-          🚀 Our brand-new app is now live! Dive into a world of your favorite
-          anime series and
-        </Text>
-        <Text style={styles.text}>
-          movies with Anizuno– your ultimate streaming destination.
-        </Text>
       </View>
-    </Banner>
+      <Text
+        style={{
+          fontSize: 12,
+          color: '#FFFFFF',
+          textDecorationLine: 'underline',
+          marginLeft: 10,
+          textAlign: 'right',
+        }}>
+        Stream Now
+      </Text>
+    </TouchableOpacity>
   );
 };
 
@@ -58,9 +68,9 @@ export default AnimeAdbanner;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
-    gap: 2,
   },
   text: {
     fontSize: 12,
+    color: '#FFFFFF',
   },
 });

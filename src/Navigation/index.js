@@ -154,11 +154,12 @@ export function RootNavigation() {
     const consentInfo = await AdsConsent.getConsentInfo();
     let useNonPersonalizedAds = !consentInfo.canRequestAds;
 
-    // Handle iOS App Tracking Transparency
-    if (Platform.OS === 'ios' && (await AdsConsent.getGdprApplies())) {
-      const status = await AdsConsent.requestTrackingAuthorization();
-      if (status !== AdsConsentStatus.AUTHORIZED) {
-        useNonPersonalizedAds = true; // Use non-personalized if ATT denied
+    // If ATT is denied, use non-personalized ads
+    const gdprApplies = await AdsConsent.getGdprApplies();
+    if (gdprApplies) {
+      const status = await AdsConsent.getStatus();
+      if (status === AdsConsentStatus.UNKNOWN) {
+        useNonPersonalizedAds = true; // Use non-personalized if consent is unknown
       }
     }
 

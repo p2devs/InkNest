@@ -1,32 +1,47 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, {createContext, useState, useContext, useEffect} from 'react';
+import {useFeatureFlag} from 'configcat-react';
+import {getVersion} from 'react-native-device-info';
 
 // Create the context
 const BannerContext = createContext();
 
 // Provider component
-export const BannerProvider = ({ children }) => {
+export const BannerProvider = ({children}) => {
   const [bannerStates, setBannerStates] = useState({
-    animeBanner: true
+    animeBanner: true,
   });
+  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+
+  useEffect(() => {
+    if (forIosValue !== getVersion()) {
+      setBannerStates(prevState => ({
+        ...prevState,
+        animeBanner: true,
+      }));
+    } else {
+      setBannerStates(prevState => ({
+        ...prevState,
+        animeBanner: false,
+      }));
+    }
+  }, [forIosValue]);
 
   // Function to update banner visibility
   const updateBannerVisibility = (bannerKey, isVisible) => {
     setBannerStates(prevState => ({
       ...prevState,
-      [bannerKey]: isVisible
+      [bannerKey]: isVisible,
     }));
   };
 
   // Context value
   const value = {
     bannerStates,
-    updateBannerVisibility
+    updateBannerVisibility,
   };
 
   return (
-    <BannerContext.Provider value={value}>
-      {children}
-    </BannerContext.Provider>
+    <BannerContext.Provider value={value}>{children}</BannerContext.Provider>
   );
 };
 
