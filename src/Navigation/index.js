@@ -157,6 +157,9 @@ export function RootNavigation() {
     // If ATT is denied, use non-personalized ads
     const gdprApplies = await AdsConsent.getGdprApplies();
     if (gdprApplies) {
+      if (Platform.OS === 'ios') {
+        await AdsConsent.requestTrackingAuthorization();
+      }
       const status = await AdsConsent.getStatus();
       if (status === AdsConsentStatus.UNKNOWN) {
         useNonPersonalizedAds = true; // Use non-personalized if consent is unknown
