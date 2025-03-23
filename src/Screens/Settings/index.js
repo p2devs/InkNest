@@ -185,7 +185,7 @@ export function Settings({navigation}) {
             analytics().logEvent('anime_external', {
               item: 'Anime external screen',
             });
-            Linking.openURL('https://p2devs.github.io/DekuFusion-Release/');
+            Linking.openURL('https://p2devs.github.io/Anizuno/');
           }}
           style={{
             backgroundColor: '#FFF',

@@ -1,3 +1,4 @@
+import React from 'react';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {persistor, store} from './src/Redux/Store';
@@ -9,6 +10,7 @@ import {PaperProvider} from 'react-native-paper';
 import ForceUpdate from './src/Components/ForceUpdate';
 import {ConfigCatProvider} from 'configcat-react';
 import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
+import { BannerProvider } from './src/Components/UIComp/AnimeAdBanner/BannerContext';
 
 /**
  * The main App component that sets up the root of the application.
@@ -26,9 +28,11 @@ const App = () => {
         <Provider store={store}>
           <PersistGate loading={<Loading />} persistor={persistor}>
             <PaperProvider>
-              <RootNavigation />
-              <Toast />
-              <ForceUpdate />
+              <BannerProvider>
+                <RootNavigation />
+                <Toast />
+                <ForceUpdate />
+              </BannerProvider>
             </PaperProvider>
           </PersistGate>
         </Provider>
