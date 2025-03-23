@@ -6,10 +6,7 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   I18nManager,
-  // Image,
-  SafeAreaView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -31,17 +28,16 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import { useVector } from 'react-native-redash';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {useVector} from 'react-native-redash';
 import {
   clamp,
   withDecaySpring,
   withRubberBandClamp,
   resizeImage,
 } from './utils';
-import { FasterImageView as Image } from '@candlefinance/faster-image';
+import {FasterImageView as Image} from '@candlefinance/faster-image';
 import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
-import { BannerAdSize } from 'react-native-google-mobile-ads';
+import {BannerAdSize} from 'react-native-google-mobile-ads';
 
 const rtl = I18nManager.isRTL;
 
@@ -76,12 +72,12 @@ const defaultRenderImage = ({
   item,
   setImageDimensions,
 }: RenderItemInfo<any>) => {
-  if (item.type == "ad") return <AdBanner size={BannerAdSize.FULL_BANNER} />;
+  if (item.type == 'ad') return <AdBanner size={BannerAdSize.FULL_BANNER} />;
   return (
     <Image
       onSuccess={e => {
-        const { height: h, width: w } = e.nativeEvent;
-        setImageDimensions({ height: h, width: w });
+        const {height: h, width: w} = e.nativeEvent;
+        setImageDimensions({height: h, width: w});
       }}
       source={{
         activityColor: 'rgba(25, 255, 25)',
@@ -94,7 +90,7 @@ const defaultRenderImage = ({
         allowHardware: true,
         headers: {
           Referer: item,
-        }
+        },
       }}
       style={StyleSheet.absoluteFillObject}
     />
@@ -139,7 +135,7 @@ type Props<T> = EventsCallbacks & {
   disableSwipeUp?: boolean;
   loop: boolean;
   onScaleChange?: (scale: number) => void;
-  onScaleChangeRange?: { start: number; end: number };
+  onScaleChangeRange?: {start: number; end: number};
 
   setRef: (index: number, value: ItemRef) => void;
 };
@@ -152,7 +148,7 @@ const springConfig = {
   restSpeedThreshold: 4,
 };
 
-type ItemRef = { reset: (animated: boolean) => void };
+type ItemRef = {reset: (animated: boolean) => void};
 
 const ResizableImage = React.memo(
   <T extends any>({
@@ -336,7 +332,7 @@ const ResizableImage = React.memo(
           currentScale: scale.value,
         };
       },
-      ({ i, translateX: tx, currentScale }) => {
+      ({i, translateX: tx, currentScale}) => {
         const translateIndex = tx / -(width + emptySpaceWidth);
         if (loop) {
           let diff = Math.abs((translateIndex % 1) - 0.5);
@@ -381,8 +377,8 @@ const ResizableImage = React.memo(
               (isNextForLast ? getPosition(length) : 0) +
               (isPrevForFirst ? getPosition(length) : 0),
           },
-          { translateY: offset.y.value + translation.y.value },
-          { scale: scale.value },
+          {translateY: offset.y.value + translation.y.value},
+          {scale: scale.value},
         ],
       };
     });
@@ -394,7 +390,7 @@ const ResizableImage = React.memo(
       originalLayout.x.value = w;
       originalLayout.y.value = h;
 
-      const imgLayout = resizeImage({ width: w, height: h }, { width, height });
+      const imgLayout = resizeImage({width: w, height: h}, {width, height});
       layout.x.value = imgLayout.width;
       layout.y.value = imgLayout.height;
     };
@@ -420,7 +416,7 @@ const ResizableImage = React.memo(
 
     const pinchGesture = Gesture.Pinch()
       .enabled(pinchEnabled)
-      .onStart(({ focalX, focalY }) => {
+      .onStart(({focalX, focalY}) => {
         'worklet';
         if (!isActive.value) return;
         if (onScaleStart) {
@@ -431,12 +427,12 @@ const ResizableImage = React.memo(
 
         scaleOffset.value = scale.value;
 
-        setAdjustedFocal({ focalX, focalY });
+        setAdjustedFocal({focalX, focalY});
 
         origin.x.value = adjustedFocal.x.value;
         origin.y.value = adjustedFocal.y.value;
       })
-      .onUpdate(({ scale: s, focalX, focalY, numberOfPointers }) => {
+      .onUpdate(({scale: s, focalX, focalY, numberOfPointers}) => {
         'worklet';
         if (!isActive.value) return;
         if (numberOfPointers !== 2) return;
@@ -450,7 +446,7 @@ const ResizableImage = React.memo(
 
         scale.value = nextScale;
 
-        setAdjustedFocal({ focalX, focalY });
+        setAdjustedFocal({focalX, focalY});
 
         translation.x.value =
           adjustedFocal.x.value +
@@ -476,13 +472,13 @@ const ResizableImage = React.memo(
           const nextTransX =
             scale.value > maxScale
               ? adjustedFocal.x.value +
-              ((-1 * maxScale) / scaleOffset.value) * origin.x.value
+                ((-1 * maxScale) / scaleOffset.value) * origin.x.value
               : translation.x.value;
 
           const nextTransY =
             scale.value > maxScale
               ? adjustedFocal.y.value +
-              ((-1 * maxScale) / scaleOffset.value) * origin.y.value
+                ((-1 * maxScale) / scaleOffset.value) * origin.y.value
               : translation.y.value;
 
           const diffX = nextTransX + offset.x.value - (newWidth - width) / 2;
@@ -564,7 +560,7 @@ const ResizableImage = React.memo(
           cancelAnimation(offset.y);
         }
       })
-      .onStart(({ velocityY, velocityX }) => {
+      .onStart(({velocityY, velocityX}) => {
         'worklet';
         if (!isActive.value) return;
 
@@ -576,7 +572,7 @@ const ResizableImage = React.memo(
         isVertical.value = Math.abs(velocityY) > Math.abs(velocityX);
         initialTranslateX.value = translateX.value;
       })
-      .onUpdate(({ translationX, translationY, velocityY }) => {
+      .onUpdate(({translationX, translationY, velocityY}) => {
         'worklet';
         if (!isActive.value) return;
         if (disableVerticalSwipe && scale.value === 1 && isVertical.value)
@@ -663,7 +659,7 @@ const ResizableImage = React.memo(
             : Math.abs(destY) > 220;
         }
       })
-      .onEnd(({ velocityX, velocityY }) => {
+      .onEnd(({velocityX, velocityY}) => {
         'worklet';
         if (!isActive.value) return;
 
@@ -799,7 +795,7 @@ const ResizableImage = React.memo(
       .enabled(doubleTapEnabled)
       .numberOfTaps(2)
       .maxDelay(doubleTapInterval)
-      .onEnd(({ x, y, numberOfPointers }) => {
+      .onEnd(({x, y, numberOfPointers}) => {
         'worklet';
         if (!isActive.value) return;
         if (numberOfPointers !== 1) return;
@@ -817,19 +813,19 @@ const ResizableImage = React.memo(
         if (scale.value === 1) {
           scale.value = withTiming(doubleTapScale);
 
-          setAdjustedFocal({ focalX: x, focalY: y });
+          setAdjustedFocal({focalX: x, focalY: y});
 
           offset.x.value = withTiming(
             clampX(
               adjustedFocal.x.value +
-              -1 * doubleTapScale * adjustedFocal.x.value,
+                -1 * doubleTapScale * adjustedFocal.x.value,
               doubleTapScale,
             ),
           );
           offset.y.value = withTiming(
             clampY(
               adjustedFocal.y.value +
-              -1 * doubleTapScale * adjustedFocal.y.value,
+                -1 * doubleTapScale * adjustedFocal.y.value,
               doubleTapScale,
             ),
           );
@@ -861,8 +857,8 @@ const ResizableImage = React.memo(
           ),
           Gesture.Exclusive(doubleTapGesture, tapGesture),
         )}>
-        <View style={{ width, height }}>
-          <Animated.View style={[{ width, height }, animatedStyle]}>
+        <View style={{width, height}}>
+          <Animated.View style={[{width, height}, animatedStyle]}>
             {renderItem(itemProps)}
           </Animated.View>
         </View>
@@ -892,7 +888,7 @@ type GalleryProps<T> = EventsCallbacks & {
   doubleTapInterval?: number;
   maxScale?: number;
   style?: ViewStyle;
-  containerDimensions?: { width: number; height: number };
+  containerDimensions?: {width: number; height: number};
   pinchEnabled?: boolean;
   doubleTapEnabled?: boolean;
   disableTransitionOnScaledImage?: boolean;
@@ -901,7 +897,7 @@ type GalleryProps<T> = EventsCallbacks & {
   disableSwipeUp?: boolean;
   loop?: boolean;
   onScaleChange?: (scale: number) => void;
-  onScaleChangeRange?: { start: number; end: number };
+  onScaleChangeRange?: {start: number; end: number};
 };
 
 const GalleryComponent = <T extends any>(
@@ -951,7 +947,7 @@ const GalleryComponent = <T extends any>(
   const currentIndex = useSharedValue(initialIndex);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: rtl ? -translateX.value : translateX.value }],
+    transform: [{translateX: rtl ? -translateX.value : translateX.value}],
   }));
 
   const changeIndex = useCallback(
@@ -1021,15 +1017,15 @@ const GalleryComponent = <T extends any>(
               key={
                 keyExtractor
                   ? keyExtractor(item, i)
-                  : item.id || item.key || item._id || i
+                  : item.id || item.key || item._id || `gallery-item-${i}`
               }
               style={[
                 dimensions,
-                isFirst ? {} : { marginLeft: emptySpaceWidth },
+                isFirst ? {} : {marginLeft: emptySpaceWidth},
                 index === i ? styles.activeItem : styles.inactiveItem,
               ]}>
               {hidden ? null : (
-                <View>
+                <View key={`gallery-image-container-${i}`} collapsable={false}>
                   {/* @ts-ignore */}
                   <ResizableImage
                     {...{
@@ -1070,14 +1066,14 @@ const GalleryComponent = <T extends any>(
 };
 
 const Gallery = React.forwardRef(GalleryComponent) as <T extends any>(
-  p: GalleryProps<T> & { ref?: GalleryReactRef },
+  p: GalleryProps<T> & {ref?: GalleryReactRef},
 ) => React.ReactElement;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  rowContainer: { flex: 1, flexDirection: 'row' },
-  activeItem: { zIndex: 1 },
-  inactiveItem: { zIndex: 0 },
+  container: {flex: 1},
+  rowContainer: {flex: 1, flexDirection: 'row'},
+  activeItem: {zIndex: 1},
+  inactiveItem: {zIndex: 0},
 });
 
 export default Gallery;

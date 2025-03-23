@@ -42,8 +42,13 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
   const hideControlsTimeout = useRef(null);
 
   useEffect(() => {
-    if (!isOpen) setPageIndex(0);
-    if (isOpen?.index) setPageIndex(isOpen?.index + 1);
+    if (isOpen === null) {
+      // Reset state when popup is closed
+      setPageIndex(0);
+    }
+    if (isOpen?.index !== undefined) {
+      setPageIndex(isOpen.index);
+    }
   }, [isOpen]);
 
   // Function to hide controls with animation
@@ -64,6 +69,11 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
 
   // Toggle controls
   const toggleControls = useCallback(() => {
+    if (hideControlsTimeout.current) {
+      clearTimeout(hideControlsTimeout.current);
+      hideControlsTimeout.current = null;
+    }
+
     setShowControls(prev => !prev);
 
     if (!showControls) {
@@ -80,7 +90,12 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
     }
 
     // Clear timeout when the component unmounts or showControls state changes
-    return () => clearTimeout(hideControlsTimeout.current);
+    return () => {
+      if (hideControlsTimeout.current) {
+        clearTimeout(hideControlsTimeout.current);
+        hideControlsTimeout.current = null;
+      }
+    };
   }, [showControls, hideControls, showControlsAnimation]);
 
   // Animated styles for header and footer
@@ -97,6 +112,10 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
       transform: [{translateY: footerTranslateY.value}],
     };
   });
+
+  if (isOpen === null) {
+    return null;
+  }
 
   return (
     <Modal
@@ -165,15 +184,18 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
           </Animated.View>
 
           {/* Gallery */}
-          <Gallery
-            data={images.map(item => item.image)}
-            onIndexChange={newIndex => {
-              setPageIndex(newIndex);
-            }}
-            pinchEnabled
-            initialIndex={isOpen?.index}
-            ref={GalleryRef}
-          />
+          <View style={{flex: 1}} collapsable={false}>
+            <Gallery
+              key={`gallery-popup-${isOpen?.index ?? 0}`}
+              data={images.map(item => item.image)}
+              onIndexChange={newIndex => {
+                setPageIndex(newIndex);
+              }}
+              pinchEnabled
+              initialIndex={isOpen?.index ?? 0}
+              ref={GalleryRef}
+            />
+          </View>
 
           {/* Footer */}
           <Animated.View
@@ -213,7 +235,10 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
                   value={jumpToPage}
                   ref={InputRef}
                   onChangeText={text => {
-                    if (text === '') return;
+                    if (text === '') {
+                      setJumpToPage('');
+                      return;
+                    }
                     // Validate the input for page number
                     if (text.match(/[^0-9]/g)) {
                       setJumpToPage(text.replace(/[^0-9]/g, ''));
@@ -223,7 +248,7 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
                     if (isNaN(index) || index < 0 || index >= images.length) {
                       return Alert.alert('Invalid page number');
                     }
-                    setJumpToPage(index);
+                    setJumpToPage(text);
                   }}
                 />
                 <Text
@@ -239,7 +264,8 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
                   disabled={jumpToPage === ''}
                   onPress={() => {
                     if (jumpToPage === '') return;
-                    GalleryRef.current?.setIndex(jumpToPage);
+                    const pageNum = parseInt(jumpToPage) - 1;
+                    GalleryRef.current?.setIndex(pageNum);
                     InputRef.current?.clear();
                     InputRef.current?.blur();
                     setJumpToPage('');

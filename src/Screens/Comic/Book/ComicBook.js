@@ -253,6 +253,7 @@ export function ComicBook({navigation, route}) {
         <View style={{flex: 1}}>
           {ViewAll ? (
             <FlatList
+              key="gridView"
               data={
                 isDownloadComic
                   ? DownloadedBook?.downloadedImagesPath
@@ -269,6 +270,7 @@ export function ComicBook({navigation, route}) {
             />
           ) : DownloadedBook?.downloadedImagesPath || ComicBook?.images ? (
             <Gallery
+              key="galleryView"
               data={
                 isDownloadComic
                   ? DownloadedBook?.downloadedImagesPath
