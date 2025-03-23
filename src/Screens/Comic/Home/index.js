@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -18,18 +19,20 @@ import {getVersion} from 'react-native-device-info';
 import {useFeatureFlag} from 'configcat-react';
 
 import {NAVIGATION} from '../../../Constants';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
+import {clearHistory} from '../../../Redux/Reducers';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
   const History = useSelector(state => state.data.history);
+  const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
@@ -117,6 +120,33 @@ export function Home({navigation}) {
                 }}>
                 Continue Reading
               </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert(
+                    'Clear History',
+                    'Are you sure you want to clear your reading history?',
+                    [
+                      {
+                        text: 'Cancel',
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Clear',
+                        onPress: () => dispatch(clearHistory()),
+                      },
+                    ],
+                    {cancelable: false},
+                  );
+                }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: '#2767f2',
+                    textAlign: 'right',
+                  }}>
+                  Clear
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <FlatList

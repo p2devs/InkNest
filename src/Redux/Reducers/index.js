@@ -158,7 +158,10 @@ const Reducers = createSlice({
     clearData: state => {
       state.loading = false;
       state.error = null;
-      dataByUrl = {};
+      state.dataByUrl = {};
+    },
+    clearHistory: state => {
+      state.history = {};
     },
     DownTime: (state, action) => {
       state.loading = false;
@@ -205,5 +208,6 @@ export const {
   RemoveAnimeBookMark,
   DownloadComicBook,
   DeleteDownloadedComicBook,
+  clearHistory,
 } = Reducers.actions;
 export default Reducers.reducer;
