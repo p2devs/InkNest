@@ -11,6 +11,7 @@ import {
   useWindowDimensions,
   View,
   ViewStyle,
+  InteractionManager,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -41,8 +42,8 @@ import {BannerAdSize} from 'react-native-google-mobile-ads';
 
 const rtl = I18nManager.isRTL;
 
-const DOUBLE_TAP_SCALE = 3;
-const MAX_SCALE = 6;
+const DOUBLE_TAP_SCALE = 2.5; // Reduced from 3
+const MAX_SCALE = 4; // Reduced from 6
 const SPACE_BETWEEN_IMAGES = 40;
 
 type Dimensions = {
@@ -88,6 +89,11 @@ const defaultRenderImage = ({
         url: item,
         progressiveLoadingEnabled: true,
         allowHardware: true,
+        // Add downsampling to reduce memory usage
+        downsampling: {
+          width: 1500, // Reasonable limit for comic images
+          height: 1800,
+        },
         headers: {
           Referer: item,
         },
@@ -247,6 +253,15 @@ const ResizableImage = React.memo(
       offset.y.value = animated ? withTiming(0) : 0;
       translation.x.value = animated ? withTiming(0) : 0;
       translation.y.value = animated ? withTiming(0) : 0;
+      
+      // Request garbage collection when scaling back to normal size
+      if (scale.value > 1.5) {
+        runOnJS(InteractionManager.runAfterInteractions)(() => {
+          setTimeout(() => {
+            global.gc && global.gc();
+          }, 1000);
+        });
+      }
     };
 
     const getEdgeX = () => {
@@ -260,28 +275,6 @@ const ResizableImage = React.memo(
       }
 
       return [-point, point];
-    };
-
-    const clampY = (value: number, newScale: number) => {
-      'worklet';
-      const newHeight = newScale * layout.y.value;
-      const point = (newHeight - height) / 2;
-
-      if (newHeight < height) {
-        return 0;
-      }
-      return clamp(value, -point, point);
-    };
-
-    const clampX = (value: number, newScale: number) => {
-      'worklet';
-      const newWidth = newScale * layout.x.value;
-      const point = (newWidth - width) / 2;
-
-      if (newWidth < width) {
-        return 0;
-      }
-      return clamp(value, -point, point);
     };
 
     const getEdgeY = () => {
@@ -575,10 +568,10 @@ const ResizableImage = React.memo(
       .onUpdate(({translationX, translationY, velocityY}) => {
         'worklet';
         if (!isActive.value) return;
+        const x = getEdgeX();
+
         if (disableVerticalSwipe && scale.value === 1 && isVertical.value)
           return;
-
-        const x = getEdgeX();
 
         if (!isVertical.value || scale.value > 1) {
           const clampedX = clamp(
@@ -674,7 +667,6 @@ const ResizableImage = React.memo(
           let snapPoints = [index - 1, index, index + 1]
             .filter((_, y) => {
               if (loop) return true;
-
               if (y === 0) {
                 return !isFirst;
               }
@@ -848,6 +840,42 @@ const ResizableImage = React.memo(
         }
       });
 
+    // Cleanup on unmount to prevent memory leaks
+    useEffect(() => {
+      return () => {
+        InteractionManager.runAfterInteractions(() => {
+          offset.x.value = 0;
+          offset.y.value = 0;
+          scale.value = 1;
+          translation.x.value = 0;
+          translation.y.value = 0;
+        });
+      };
+    }, []);
+
+    // Clamp functions
+    const clampY = (value: number, newScale: number) => {
+      'worklet';
+      const newHeight = newScale * layout.y.value;
+      const point = (newHeight - height) / 2;
+
+      if (newHeight < height) {
+        return 0;
+      }
+      return clamp(value, -point, point);
+    };
+
+    const clampX = (value: number, newScale: number) => {
+      'worklet';
+      const newWidth = newScale * layout.x.value;
+      const point = (newWidth - width) / 2;
+
+      if (newWidth < width) {
+        return 0;
+      }
+      return clamp(value, -point, point);
+    };
+
     return (
       <GestureDetector
         gesture={Gesture.Race(
@@ -929,7 +957,6 @@ const GalleryComponent = <T extends any>(
 ) => {
   const windowDimensions = useWindowDimensions();
   const dimensions = containerDimensions || windowDimensions;
-
   const isLoop = loop && data?.length > 1;
 
   const [index, setIndex] = useState(initialIndex);
@@ -997,6 +1024,16 @@ const GalleryComponent = <T extends any>(
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.length, dimensions.width]);
+
+  // Release resources when Gallery is unmounted
+  useEffect(() => {
+    return () => {
+      InteractionManager.runAfterInteractions(() => {
+        refs.current = [];
+        global.gc && global.gc();
+      });
+    };
+  }, []);
 
   return (
     <GestureHandlerRootView style={[styles.container, style]}>

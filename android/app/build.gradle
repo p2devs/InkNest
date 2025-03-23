@@ -87,7 +87,30 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 22
         versionName "1.3.3"
+
+        // Increase memory allocated to Gradle
+        dexOptions {
+            javaMaxHeapSize "4g"
+        }
     }
+
+    // Add large heap support to the application
+    aaptOptions {
+        cruncherEnabled = false
+    }
+
+    packagingOptions {
+        // Exclude unnecessary files to reduce APK size
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

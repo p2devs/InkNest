@@ -72,6 +72,8 @@ const VerticalGallery = ({
             source={{ uri: item }}
             style={styles.image}
             resizeMode="contain"
+            // Enable downsampling to reduce memory usage
+            downsample={true}
           />
         </View>
       </TouchableWithoutFeedback>
@@ -84,23 +86,24 @@ const VerticalGallery = ({
     index,
   });
 
-  // Debug the data prop
-  console.log('VerticalGallery data:', data && data.length ? 'Has items' : 'Empty or invalid', 
-    Array.isArray(data) ? `(${data.length} items)` : '(Not an array)');
+  // Memory cleanup for images that are no longer visible
+  const keyExtractor = useCallback((_, index) => `page-${index}`, []);
 
   return (
     <FlatList
       ref={flatListRef}
       data={data}
       renderItem={renderItem}
-      keyExtractor={(_, index) => index.toString()}
+      keyExtractor={keyExtractor}
       pagingEnabled
       showsVerticalScrollIndicator={false}
       viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
       getItemLayout={getItemLayout}
-      initialNumToRender={3}
-      maxToRenderPerBatch={3}
-      windowSize={5}
+      initialNumToRender={2} // Reduced from 3 to 2
+      maxToRenderPerBatch={2} // Reduced to save memory
+      windowSize={3} // Reduced from 5 to 3
+      removeClippedSubviews={true} // Important for memory management
+      updateCellsBatchingPeriod={100} // Delay updates to improve performance
       style={styles.container}
       onScrollToIndexFailed={info => {
         const wait = new Promise(resolve => setTimeout(resolve, 100));

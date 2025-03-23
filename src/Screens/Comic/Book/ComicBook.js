@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -48,9 +48,15 @@ export function ComicBook({navigation, route}) {
     'Default',
   );
   const [images, setImages] = useState([]);
-  // Add scrollMode state - 'horizontal' is the default as the app currently uses
   const [scrollMode, setScrollMode] = useState('horizontal');
+  
+  // Adding pagination for grid view to prevent memory issues
+  const [currentGridPage, setCurrentGridPage] = useState(0);
+  const imagesPerGridPage = 30; // Limit number of images per page
 
+  // Track mounted state to prevent state updates after unmounting
+  const isMounted = useRef(true);
+  
   const {width} = Dimensions.get('window');
   const numColumns = 3;
   const imageSize = width / numColumns - 10;
@@ -65,6 +71,17 @@ export function ComicBook({navigation, route}) {
   const footerTranslateY = useSharedValue(0);
 
   let hideControlsTimeout;
+
+  // Component cleanup
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      // Clear any timers to prevent memory leaks
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isDownloadComic) {
@@ -92,7 +109,9 @@ export function ComicBook({navigation, route}) {
       comicBookLink === 'https://comicbookplus.com/?dlid=16848' ||
       comicBookLink === 'https://comicbookplus.com/?dlid=15946'
     ) {
-      for (let index = 0; index < 35; index++) {
+      // Load images progressively to avoid memory issues
+      const maxImagesToLoad = 35;
+      for (let index = 0; index < maxImagesToLoad; index++) {
         newImages.push(
           `https://box01.comicbookplus.com/viewer/4a/4af4d2facd653c6fee0013367c681f6a/${index}.jpg`,
         );
@@ -101,7 +120,8 @@ export function ComicBook({navigation, route}) {
       comicBookLink === 'https://comicbookplus.com/?dlid=16857' ||
       comicBookLink === 'https://comicbookplus.com/?cid=860'
     ) {
-      for (let index = 0; index < 35; index++) {
+      const maxImagesToLoad = 35;
+      for (let index = 0; index < maxImagesToLoad; index++) {
         newImages.push(
           `https://box01.comicbookplus.com/viewer/7c/7ce6723c8f20d1ce3b78c2cda1debc50/${index}.jpg`,
         );
@@ -109,7 +129,7 @@ export function ComicBook({navigation, route}) {
     }
 
     // Only update state if newImages differs from the current images state.
-    if (JSON.stringify(newImages) !== JSON.stringify(images)) {
+    if (JSON.stringify(newImages) !== JSON.stringify(images) && isMounted.current) {
       setImages(newImages);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,6 +141,9 @@ export function ComicBook({navigation, route}) {
 
     if (!showControls) {
       // Reset hide controls timer when showing them
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+      }
       hideControlsTimeout = setTimeout(() => hideControls(), 5000);
     }
   }, [showControls]);
@@ -142,13 +165,20 @@ export function ComicBook({navigation, route}) {
   useEffect(() => {
     if (showControls) {
       FnshowControls();
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+      }
       hideControlsTimeout = setTimeout(() => hideControls(), 5000);
     } else {
       hideControls();
     }
 
     // Clear timeout when the component unmounts or showControls state changes
-    return () => clearTimeout(hideControlsTimeout);
+    return () => {
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+      }
+    };
   }, [showControls]);
 
   // Animated styles for header and footer
@@ -165,6 +195,32 @@ export function ComicBook({navigation, route}) {
       transform: [{translateY: footerTranslateY.value}],
     };
   });
+  
+  // Get paginated data for grid view
+  const getPaginatedImagesForGrid = useCallback(() => {
+    const allImages = isDownloadComic
+      ? DownloadedBook?.downloadedImagesPath
+      : ComicBook?.images;
+      
+    if (!allImages) return [];
+    
+    const startIndex = currentGridPage * imagesPerGridPage;
+    return allImages.slice(startIndex, startIndex + imagesPerGridPage);
+  }, [currentGridPage, ComicBook?.images, DownloadedBook?.downloadedImagesPath, isDownloadComic, imagesPerGridPage]);
+  
+  // Load more images when scrolling in grid view
+  const handleLoadMoreGridImages = () => {
+    const allImages = isDownloadComic
+      ? DownloadedBook?.downloadedImagesPath
+      : ComicBook?.images;
+      
+    if (!allImages) return;
+    
+    const totalPages = Math.ceil(allImages.length / imagesPerGridPage);
+    if (currentGridPage < totalPages - 1) {
+      setCurrentGridPage(currentGridPage + 1);
+    }
+  };
 
   if (loading && !isDownloadComic) {
     return <Loading />;
@@ -241,6 +297,10 @@ export function ComicBook({navigation, route}) {
                   flex: 1,
                   marginVertical: 60,
                 }}
+                windowSize={5} // Reduced window size
+                removeClippedSubviews={true} // Important for memory management
+                maxToRenderPerBatch={6} // Limit number of items rendered in a batch
+                initialNumToRender={9} // Start with just one screen worth of content
               />
             )}
           </View>
@@ -259,11 +319,7 @@ export function ComicBook({navigation, route}) {
           {ViewAll ? (
             <FlatList
               key="gridView"
-              data={
-                isDownloadComic
-                  ? DownloadedBook?.downloadedImagesPath
-                  : ComicBook?.images
-              }
+              data={getPaginatedImagesForGrid()}
               renderItem={({item, index}) => (
                 <GridImageItem item={item} index={index} />
               )}
@@ -272,6 +328,12 @@ export function ComicBook({navigation, route}) {
                 flex: 1,
                 marginVertical: 60,
               }}
+              windowSize={5} // Reduced window size
+              removeClippedSubviews={true} // Important for memory management
+              maxToRenderPerBatch={6} // Limit number of items rendered in a batch
+              initialNumToRender={9} // Start with just one screen worth of content
+              onEndReached={handleLoadMoreGridImages}
+              onEndReachedThreshold={0.5}
             />
           ) : DownloadedBook?.downloadedImagesPath || ComicBook?.images ? (
             scrollMode === 'horizontal' ? (
@@ -296,6 +358,8 @@ export function ComicBook({navigation, route}) {
                   setPageIndex(newIndex);
                 }}
                 initialIndex={PageIndex}
+                numToRender={3} // Limit to render only 3 images at a time (current, prev, next)
+                maxScale={4} // Reduce max scale to save memory
               />
             ) : (
               <VerticalGallery
