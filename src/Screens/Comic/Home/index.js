@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Text,
-  Image,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
@@ -24,6 +23,7 @@ import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
 import Card from '../Components/Card';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
@@ -89,6 +89,7 @@ export function Home({navigation}) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <AnimeAdbanner />
         <TouchableOpacity
           style={styles.rectangle}
           onPress={() => {
