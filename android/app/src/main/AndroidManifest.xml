@@ -11,7 +11,8 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true"
-      android:gwpAsanMode="always">
+      android:gwpAsanMode="always"
+      android:largeHeap="true">
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
