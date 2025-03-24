@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, Image} from 'react-native';
+import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import {useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -42,6 +42,9 @@ const ComicBookFooter = ({
       }}>
       <TouchableOpacity
         onPress={() => {
+          alert(
+            'This feature may cause the app to crash. Please use with caution.',
+          );
           setViewAll(!ViewAll);
         }}>
         <Ionicons
