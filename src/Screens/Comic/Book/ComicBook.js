@@ -254,7 +254,6 @@ export function ComicBook({navigation, route}) {
       style={{flex: 1, backgroundColor: '#14142a'}}
       edges={['top', 'bottom']}>
       <TouchableWithoutFeedback onPress={toggleControls}>
-        {/* Wrap the entire view with TouchableWithoutFeedback to detect taps */}
         <View style={{flex: 1}}>
           {ViewAll ? (
             <FlatList
@@ -274,54 +273,30 @@ export function ComicBook({navigation, route}) {
               }}
             />
           ) : DownloadedBook?.downloadedImagesPath || ComicBook?.images ? (
-            scrollMode === 'horizontal' ? (
-              <Gallery
-                key="galleryView"
-                data={
-                  isDownloadComic
-                    ? DownloadedBook?.downloadedImagesPath
-                    : ComicBook?.images
+            <Gallery
+              key="galleryView"
+              data={
+                isDownloadComic
+                  ? DownloadedBook?.downloadedImagesPath
+                  : ComicBook?.images
+              }
+              onIndexChange={newIndex => {
+                if (!isDownloadComic) {
+                  dispatch(
+                    updateData({
+                      url: comicBookLink,
+                      data: {lastReadPage: newIndex},
+                      imageLength: ComicBook?.images?.length,
+                      ComicDetailslink: ComicBook?.ComicDetailslink,
+                    }),
+                  );
                 }
-                onIndexChange={newIndex => {
-                  if (!isDownloadComic) {
-                    dispatch(
-                      updateData({
-                        url: comicBookLink,
-                        data: {lastReadPage: newIndex},
-                        imageLength: ComicBook?.images?.length,
-                        ComicDetailslink: ComicBook?.ComicDetailslink,
-                      }),
-                    );
-                  }
-                  setPageIndex(newIndex);
-                }}
-                initialIndex={PageIndex}
-              />
-            ) : (
-              <VerticalGallery
-                key="verticalGalleryView"
-                data={
-                  isDownloadComic
-                    ? DownloadedBook?.downloadedImagesPath
-                    : ComicBook?.images
-                }
-                onPageChange={newIndex => {
-                  if (!isDownloadComic) {
-                    dispatch(
-                      updateData({
-                        url: comicBookLink,
-                        data: {lastReadPage: newIndex},
-                        imageLength: ComicBook?.images?.length,
-                        ComicDetailslink: ComicBook?.ComicDetailslink,
-                      }),
-                    );
-                  }
-                  setPageIndex(newIndex);
-                }}
-                initialIndex={PageIndex}
-                onSingleTap={toggleControls}
-              />
-            )
+                setPageIndex(newIndex);
+              }}
+              initialIndex={PageIndex}
+              isVartical={Boolean(scrollMode === 'vertical')}
+              onImagePress={toggleControls}
+            />
           ) : null}
 
           {/* Conditionally render the header/footer only if showControls is true */}
