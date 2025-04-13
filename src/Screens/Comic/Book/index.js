@@ -45,6 +45,10 @@ export function ComicBook({navigation, route}) {
 
   useEffect(() => {
     if (comicBookLink) {
+      analytics().logEvent('fetch_comic_book', {
+        screen: 'ComicBook',
+        comicBookLink: comicBookLink?.toString(),
+      });
       dispatch(fetchComicBook(comicBookLink));
     }
   }, [comicBookLink, dispatch]);
