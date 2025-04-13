@@ -4026,7 +4026,7 @@ __metadata:
     "@reduxjs/toolkit": ^2.3.0
     "@types/react": ^18.2.6
     "@types/react-test-renderer": ^18.0.0
-    axios: 1.7.2
+    axios: 1.8.4
     babel-jest: ^29.6.3
     cheerio: 1.0.0-rc.12
     configcat-react: ^4.8.1
@@ -4055,6 +4055,7 @@ __metadata:
     react-native-vector-icons: ^10.2.0
     react-native-video: ^6.7.0
     react-native-webview: ^13.12.3
+    react-native-zoom-toolkit: ^4.0.2
     react-redux: ^9.1.2
     react-test-renderer: 18.3.1
     redux: ^5.0.1
@@ -4397,14 +4398,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.7.2":
-  version: 1.7.2
-  resolution: "axios@npm:1.7.2"
+"axios@npm:1.8.4":
+  version: 1.8.4
+  resolution: "axios@npm:1.8.4"
   dependencies:
     follow-redirects: ^1.15.6
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: e457e2b0ab748504621f6fa6609074ac08c824bf0881592209dfa15098ece7e88495300e02cd22ba50b3468fd712fe687e629dcb03d6a3f6a51989727405aedf
+  checksum: e901dc1730bdcd769839b3d93ae6d6457a53d79b19a0eb623ebfea333441259ab51e63ca118baa47a5156567401466ac739f31087b4ee5e6770ab2e227484538
   languageName: node
   linkType: hard
 
@@ -9990,6 +9991,18 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 7f3bce1b37d6be9b2f07f0f7481181d5344f9e58022645b0d20dc58cd66056bb6efecacb231963959db6283cc66d977593db62a403c7c151f83568f83041c2eb
+  languageName: node
+  linkType: hard
+
+"react-native-zoom-toolkit@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "react-native-zoom-toolkit@npm:4.0.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: ">= 2.19.0"
+    react-native-reanimated: ">= 2.x.x"
+  checksum: 32681f647852bde4ded38604fc020ce4dc36fe622043cd98d682c31a3899b67123a5120aa26a2908f61a0b42d587ca8de6f0f2b9ebabf6b77cdc402094969b9d
   languageName: node
   linkType: hard
 
