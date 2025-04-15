@@ -22,12 +22,14 @@ export default function VerticalView({
   loading,
   setImageLinkIndex,
   activeIndex,
+  resolutions,
 }) {
   const {width, height} = useWindowDimensions();
   const [imageResolutionLoading, setImageResolutionLoading] = useState(true);
   const [imagesLinks, setImagesLinks] = useState('');
   const ref = useRef(null);
   const [zoomMode, setZoomMode] = useState(false);
+  const [imageSizeAcuired, setImageSizeAcquired] = useState(false);
 
   // Update imagesLinks when comicBook changes
   useEffect(() => {
@@ -59,6 +61,13 @@ export default function VerticalView({
       })
     : null;
 
+  // Set imageSizeAcuired when size is first calculated
+  useEffect(() => {
+    if (size && !imageSizeAcuired) {
+      setImageSizeAcquired(true);
+    }
+  }, [size, imageSizeAcuired]);
+
   useEffect(() => {
     // Only update loading state when resolution is available
     if (resolution && imagesLinks) {
@@ -70,10 +79,33 @@ export default function VerticalView({
   }, [resolution, isFetching, imagesLinks, imageSource]);
 
   useEffect(() => {
-    if (activeIndex > 0 && data?.length > 0 && size?.width && size?.height) {
-      ref?.current?.scrollToIndex({index: activeIndex, animated: true});
+    if (activeIndex > 0 && data?.length > 0) {
+      // Ensure size is acquired before attempting to scroll
+      if (imageSizeAcuired && ref.current) {
+        ref.current.scrollToIndex({index: activeIndex, animated: true});
+      }
     }
-  }, [activeIndex, data, ref, size]);
+    // Depend on imageSizeAcuired to ensure scroll happens after layout is known
+  }, [activeIndex, data, imageSizeAcuired]);
+
+  // getItemLayout is used to optimize the FlatList performance
+  const getItemLayout = (data, index) => {
+    // Use calculated size if available
+    if (size?.height) {
+      return {
+        length: size.height,
+        offset: size.height * index,
+        index,
+      };
+    }
+    // Fallback if size is not yet calculated: use resolutions prop or screen height
+    const estimatedHeight = resolutions?.height || height;
+    return {
+      length: estimatedHeight,
+      offset: estimatedHeight * index,
+      index,
+    };
+  };
 
   if (loading || !imagesLinks) {
     return (
@@ -99,17 +131,20 @@ export default function VerticalView({
         maxToRenderPerBatch={5}
         windowSize={5}
         data={data}
+        getItemLayout={getItemLayout}
         keyExtractor={(item, index) => `${item}-${index}`}
         renderItem={({item, index}) => (
           <TouchableOpacity
             style={{
-              marginBottom: 5,
+              marginBottom: 20,
             }}
+            activeOpacity={0.8}
             onPress={() => {
               setImageLinkIndex(index);
               setImagesLinks(item);
               setZoomMode(true);
             }}>
+            {/* Render placeholder or image based on size availability */}
             {size?.width && size?.height ? (
               <Image
                 source={{uri: item}}
@@ -117,11 +152,22 @@ export default function VerticalView({
                 resizeMethod={'scale'}
               />
             ) : (
-              <ActivityIndicator size={'large'} color="#fff" />
+              // Optional: Render a placeholder with estimated height
+              <View
+                style={{
+                  height: resolutions?.height || height,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size={'large'} color="#fff" />
+              </View>
             )}
           </TouchableOpacity>
         )}
         onScroll={event => {
+          // Calculate the index based on the scroll position
+          // and the height of the image (only if size is known)
+          if (!size?.height) return;
           const index = Math.floor(
             event.nativeEvent.contentOffset.y / size.height,
           );
@@ -135,17 +181,19 @@ export default function VerticalView({
         animationType="fade"
         onRequestClose={() => setZoomMode(false)}>
         <SafeAreaView style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)'}}>
-          <ResumableZoom
-            ref={ref}
-            extendGestures={true}
-            maxScale={resolution}
-            pinchCenteringMode={'sync'}>
-            <Image
-              source={{uri: imagesLinks}}
-              style={{...size}}
-              resizeMethod="scale"
-            />
-          </ResumableZoom>
+          {/* Ensure size exists before rendering ResumableZoom content */}
+          {size && (
+            <ResumableZoom
+              extendGestures={true}
+              maxScale={resolution}
+              pinchCenteringMode={'sync'}>
+              <Image
+                source={{uri: imagesLinks}}
+                style={{...size}}
+                resizeMethod="scale"
+              />
+            </ResumableZoom>
+          )}
           <TouchableOpacity
             style={{
               backgroundColor: '#FF6347',
@@ -168,6 +216,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142A',
+    justifyContent: 'center', // Center loading indicators
+    alignItems: 'center', // Center loading indicators
   },
   text: {
     color: '#fff',

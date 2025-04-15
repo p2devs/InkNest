@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 
 import {useDispatch, useSelector} from 'react-redux';
 import {useFeatureFlag} from 'configcat-react';
-import {Gallery} from 'react-native-zoom-toolkit';
+import {Gallery, useImageResolution} from 'react-native-zoom-toolkit';
 import {useSharedValue} from 'react-native-reanimated';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -75,6 +75,19 @@ export function ComicBook({navigation, route}) {
 
   const activeIndex = useSharedValue(0);
 
+  const imageSource = useMemo(() => {
+    if (comicBook?.images?.length > 0) {
+      return {
+        uri: comicBook?.images[0],
+      };
+    }
+    return {
+      uri: '',
+    };
+  }, [comicBook?.images]);
+
+  const {isFetching, resolution} = useImageResolution(imageSource);
+
   const renderItem = useCallback(
     (item, index) => {
       let assets = {uri: item};
@@ -136,15 +149,16 @@ export function ComicBook({navigation, route}) {
 
   useEffect(() => {
     if (pageJump && pageJump > 0) {
+      setImageLinkIndex(pageJump - 1);
       ref?.current?.setIndex(pageJump - 1);
     }
   }, [pageJump, ref]);
 
   useEffect(() => {
-    if (!isVerticalScroll) {
+    if (!isVerticalScroll && imageLinkIndex > 0) {
       ref?.current?.setIndex(imageLinkIndex);
     }
-  }, [isVerticalScroll, imageLinkIndex]);
+  }, [isVerticalScroll, imageLinkIndex, ref]);
 
   if (loading) {
     return (
@@ -230,6 +244,7 @@ export function ComicBook({navigation, route}) {
             loading={loading}
             setImageLinkIndex={setImageLinkIndex}
             activeIndex={activeIndex?.value}
+            resolutions={resolution}
           />
         ) : (
           <Gallery
