@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
-import {useFeatureFlag} from 'configcat-react';
 import {Gallery, useImageResolution} from 'react-native-zoom-toolkit';
 import {useSharedValue} from 'react-native-reanimated';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
@@ -30,10 +29,6 @@ import {updateData} from '../../../Redux/Reducers';
 export function ComicBook({navigation, route}) {
   const dispatch = useDispatch();
   const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
-  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
-    'forIos',
-    'Default',
-  );
 
   const ref = useRef(null);
 

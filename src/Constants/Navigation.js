@@ -4,6 +4,7 @@ export const NAVIGATION = {
   homeManga: 'Home Manga',
   comicDetails: 'ComicDetails',
   comicBook: 'ComicBook',
+  mockBooks: 'MockBooks',
   search: 'Search',
   bookmarks: 'Bookmarks',
   settings: 'Settings',

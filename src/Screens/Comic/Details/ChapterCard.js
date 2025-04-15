@@ -1,6 +1,8 @@
 import React, {memo, useState} from 'react';
 import {TouchableOpacity, Text, View, ActivityIndicator} from 'react-native';
 
+import {useFeatureFlag} from 'configcat-react';
+import {getVersion} from 'react-native-device-info';
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
@@ -30,6 +32,11 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
     ),
   );
 
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    'Default',
+  );
+
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [LoadingStatus, setLoadStatus] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
@@ -41,6 +48,14 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
+
+    if (getVersion() === forIosValue && forIosLoading === false) {
+      navigate(NAVIGATION.mockBooks, {
+        comicBookLink: item?.link,
+        pageJump: 0,
+      });
+      return;
+    }
 
     navigate(NAVIGATION.comicBook, {
       comicBookLink: item?.link,
