@@ -41,9 +41,11 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
+
     navigate(NAVIGATION.comicBook, {
       comicBookLink: item?.link,
-      pageJump: item?.lastReadPage,
+      pageJump:
+        ComicBook?.lastReadPage + 1 > 1 ? ComicBook?.lastReadPage + 1 : 0,
       isDownloadComic: isComicDownload,
       DetailsPage: {
         link: detailPageLink,
@@ -120,15 +122,15 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             maxWidth:
               LoadingStatus && progress
                 ? widthPercentageToDP('30%')
-                : widthPercentageToDP('50%'),
+                : widthPercentageToDP('40%'),
           }}>
           {item?.title}
         </Text>
         {item?.date ? (
           <Text
             style={{
-              fontSize: 14,
-              color: '#4b4b5f',
+              fontSize: 12,
+              color: 'rgba(255, 255, 255, 0.5)',
             }}>
             {` · `}
             {item?.date}

@@ -42,8 +42,6 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
       })
     : null;
 
-  console.log('GalleryImage', asset.uri, size);
-
   const [downScale, setDownScale] = useState<boolean>(true);
 
   const wrapper = (active: number) => {

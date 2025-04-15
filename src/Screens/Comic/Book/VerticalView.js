@@ -17,7 +17,12 @@ import {
   useImageResolution,
 } from 'react-native-zoom-toolkit';
 
-export default function VerticalView({data, loading, setImageLinkIndex}) {
+export default function VerticalView({
+  data,
+  loading,
+  setImageLinkIndex,
+  activeIndex,
+}) {
   const {width, height} = useWindowDimensions();
   const [imageResolutionLoading, setImageResolutionLoading] = useState(true);
   const [imagesLinks, setImagesLinks] = useState('');
@@ -64,6 +69,12 @@ export default function VerticalView({data, loading, setImageLinkIndex}) {
     }
   }, [resolution, isFetching, imagesLinks, imageSource]);
 
+  useEffect(() => {
+    if (activeIndex > 0 && data?.length > 0 && size?.width && size?.height) {
+      ref?.current?.scrollToIndex({index: activeIndex, animated: true});
+    }
+  }, [activeIndex, data, ref, size]);
+
   if (loading || !imagesLinks) {
     return (
       <View style={styles.container}>
@@ -83,6 +94,7 @@ export default function VerticalView({data, loading, setImageLinkIndex}) {
   return (
     <>
       <FlatList
+        ref={ref}
         initialNumToRender={2}
         maxToRenderPerBatch={5}
         windowSize={5}

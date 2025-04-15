@@ -58,8 +58,6 @@ export function ComicBook({navigation, route}) {
   const [isModelVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
-  const [isNextChapter, setIsNextChapter] = useState(false);
-  const [isPreviousChapter, setIsPreviousChapter] = useState(false);
 
   useEffect(() => {
     if (comicBookLink) {
@@ -68,14 +66,10 @@ export function ComicBook({navigation, route}) {
         comicBookLink: comicBookLink?.toString(),
         DetailsPageLink: DetailsPage?.link?.toString(),
         pageJump: pageJump,
-        isDownloadComic: isDownloadComic,
         isVerticalScroll: isVerticalScroll,
+        timestamp: new Date().toISOString(),
       });
       dispatch(fetchComicBook(comicBookLink));
-      setIsPreviousChapter(getChapterIndex() === 0);
-      setIsNextChapter(
-        getChapterIndex() === ComicDetails?.chapters?.length - 1,
-      );
     }
   }, [comicBookLink, dispatch]);
 
@@ -140,6 +134,18 @@ export function ComicBook({navigation, route}) {
     translateY.value = ty;
   };
 
+  useEffect(() => {
+    if (pageJump && pageJump > 0) {
+      ref?.current?.setIndex(pageJump - 1);
+    }
+  }, [pageJump, ref]);
+
+  useEffect(() => {
+    if (!isVerticalScroll) {
+      ref?.current?.setIndex(imageLinkIndex);
+    }
+  }, [isVerticalScroll, imageLinkIndex]);
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -182,9 +188,9 @@ export function ComicBook({navigation, route}) {
                 screen: 'ComicBook',
                 comicBookLink: comicBookLink?.toString(),
                 DetailsPageLink: DetailsPage?.link?.toString(),
-                pageJump: pageJump,
-                isDownloadComic: isDownloadComic,
-                isVerticalScroll: isVerticalScroll,
+                pageJump: pageJump?.toString(),
+                isDownloadComic: isDownloadComic?.toString(),
+                isVerticalScroll: isVerticalScroll?.toString(),
               });
               dispatch(
                 updateData({
@@ -223,6 +229,7 @@ export function ComicBook({navigation, route}) {
             data={comicBook?.images}
             loading={loading}
             setImageLinkIndex={setImageLinkIndex}
+            activeIndex={activeIndex?.value}
           />
         ) : (
           <Gallery
@@ -239,40 +246,6 @@ export function ComicBook({navigation, route}) {
             onVerticalPull={onVerticalPulling}
           />
         )}
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            paddingHorizontal: 12,
-          }}>
-          <TouchableOpacity
-            disabled={isPreviousChapter}
-            onPress={() => {
-              navigateToChapter('previous');
-            }}
-            style={{
-              backgroundColor: '#FF6347',
-              padding: 10,
-              borderRadius: 5,
-              alignItems: 'center',
-            }}>
-            <Text style={styles.text}>Previous</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            disabled={isNextChapter}
-            onPress={() => {
-              navigateToChapter('next');
-            }}
-            style={{
-              backgroundColor: '#FF6347',
-              padding: 10,
-              borderRadius: 5,
-              alignItems: 'center',
-            }}>
-            <Text style={styles.text}>Next</Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
       {isModelVisible && (
         <Modal
@@ -311,7 +284,6 @@ export function ComicBook({navigation, route}) {
                 onPress={() => {
                   setIsVerticalScroll(!isVerticalScroll);
                   setIsModalVisible(false);
-                  setImageLinkIndex(0);
                   analytics().logEvent('toggle_vertical_scroll', {
                     screen: 'ComicBook',
                     isVerticalScroll: !isVerticalScroll,
@@ -320,6 +292,34 @@ export function ComicBook({navigation, route}) {
                 <Text style={styles.text}>
                   {!isVerticalScroll ? 'Vertical Scroll' : 'Horizontal Scroll'}
                 </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  navigateToChapter('previous');
+                  setIsModalVisible(false);
+                  setImageLinkIndex(0);
+                  analytics().logEvent('navigate_previous_chapter', {
+                    screen: 'ComicBook',
+                    currentChapterLink: comicBookLink?.toString(),
+                  });
+                }}>
+                <Text style={styles.text}>Previous Chapter</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  navigateToChapter('next');
+                  setIsModalVisible(false);
+                  setImageLinkIndex(0);
+                  analytics().logEvent('navigate_next_chapter', {
+                    screen: 'ComicBook',
+                    currentChapterLink: comicBookLink?.toString(),
+                  });
+                }}>
+                <Text style={styles.text}>Next Chapter</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -344,9 +344,6 @@ export function ComicBook({navigation, route}) {
                       setLoadStatus: setDownloadLoading,
                       onProgress: (downloaded, total) => {
                         setProgress({downloaded, total});
-                        if (downloaded === total) {
-                          setIsDownloaded(true);
-                        }
                       },
                     }),
                   );
