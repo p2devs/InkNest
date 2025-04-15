@@ -53,6 +53,8 @@ export function ComicBook({navigation, route}) {
   const [isModelVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
+  const [isNextChapter, setIsNextChapter] = useState(false);
+  const [isPreviousChapter, setIsPreviousChapter] = useState(false);
 
   useEffect(() => {
     if (comicBookLink) {
@@ -65,6 +67,10 @@ export function ComicBook({navigation, route}) {
         timestamp: new Date().toISOString(),
       });
       dispatch(fetchComicBook(comicBookLink));
+      setIsPreviousChapter(getChapterIndex() === 0);
+      setIsNextChapter(
+        getChapterIndex() === ComicDetails?.chapters?.length - 1,
+      );
     }
   }, [comicBookLink, dispatch]);
 
@@ -157,31 +163,31 @@ export function ComicBook({navigation, route}) {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Loading comic data...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Error: {error}</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (!comicBook) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.text}>No data available</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}}>
         <Header
           style={{
             width: '100%',
@@ -305,7 +311,8 @@ export function ComicBook({navigation, route}) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.button}
+                style={[styles.button, { backgroundColor: isPreviousChapter ? '#555' : '#FF6347' }]}
+                disabled={isPreviousChapter}
                 onPress={() => {
                   navigateToChapter('previous');
                   setIsModalVisible(false);
@@ -319,7 +326,8 @@ export function ComicBook({navigation, route}) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.button}
+                style={[styles.button, { backgroundColor: isNextChapter ? '#555' : '#FF6347' }]}
+                disabled={isNextChapter}
                 onPress={() => {
                   navigateToChapter('next');
                   setIsModalVisible(false);
@@ -370,6 +378,7 @@ export function ComicBook({navigation, route}) {
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
+                  setIsModalVisible(false);
                   await analytics().logEvent('share_comic', {
                     screen: 'ComicBook',
                     comicBookLink: comicBookLink?.toString(),
@@ -382,7 +391,6 @@ export function ComicBook({navigation, route}) {
       🚀 Download now and start exploring: https://p2devs.github.io/InkNest/
       `,
                   });
-                  setIsModalVisible(false);
                 }}>
                 <Text style={styles.text}>Share</Text>
               </TouchableOpacity>
@@ -423,6 +431,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142A',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     fontSize: 20,
