@@ -24,10 +24,12 @@ import Header from '../../../Components/UIComp/Header';
 import {goBack} from '../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
+import {downloadComicBook} from '../../../InkNest-Externals/Redux/Actions/Download';
+import {updateData} from '../../../Redux/Reducers';
 
 export function ComicBook({navigation, route}) {
   const dispatch = useDispatch();
-  const {comicBookLink, pageJump, isDownloadComic, chapterlink} = route?.params;
+  const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
@@ -36,20 +38,44 @@ export function ComicBook({navigation, route}) {
   const ref = useRef(null);
 
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
+  const ComicDetails = useSelector(
+    state => state?.data?.dataByUrl[DetailsPage?.link],
+  );
+  const isComicDownload = Boolean(
+    useSelector(
+      state =>
+        state?.data?.DownloadComic?.[DetailsPage?.link]?.comicBooks?.[
+          comicBookLink
+        ],
+    ),
+  );
+
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
   const [isVerticalScroll, setIsVerticalScroll] = useState(false);
   const [isModelVisible, setIsModalVisible] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [progress, setProgress] = useState({downloaded: 0, total: 0});
+  const [isNextChapter, setIsNextChapter] = useState(false);
+  const [isPreviousChapter, setIsPreviousChapter] = useState(false);
 
   useEffect(() => {
     if (comicBookLink) {
       analytics().logEvent('fetch_comic_book', {
         screen: 'ComicBook',
         comicBookLink: comicBookLink?.toString(),
+        DetailsPageLink: DetailsPage?.link?.toString(),
+        pageJump: pageJump,
+        isDownloadComic: isDownloadComic,
+        isVerticalScroll: isVerticalScroll,
       });
       dispatch(fetchComicBook(comicBookLink));
+      setIsPreviousChapter(getChapterIndex() === 0);
+      setIsNextChapter(
+        getChapterIndex() === ComicDetails?.chapters?.length - 1,
+      );
     }
   }, [comicBookLink, dispatch]);
 
@@ -64,6 +90,46 @@ export function ComicBook({navigation, route}) {
     },
     [activeIndex],
   );
+
+  function getChapterIndex() {
+    if (!ComicDetails?.chapters || ComicDetails.chapters.length === 0)
+      return -1;
+    return ComicDetails.chapters.findIndex(
+      chapter => chapter.link === comicBookLink,
+    );
+  }
+
+  function navigateToChapter(direction) {
+    const currentIndex = getChapterIndex();
+    if (currentIndex === -1) return;
+
+    let targetIndex;
+    if (
+      direction === 'next' &&
+      currentIndex < ComicDetails.chapters.length - 1
+    ) {
+      targetIndex = currentIndex + 1;
+    } else if (direction === 'previous' && currentIndex > 0) {
+      targetIndex = currentIndex - 1;
+    } else {
+      return; // No valid navigation
+    }
+
+    const targetChapter = ComicDetails.chapters[targetIndex];
+    analytics().logEvent('chapter_navigation', {
+      screen: 'ComicBook',
+      direction: direction,
+      fromChapter: comicBookLink,
+      toChapter: targetChapter.link,
+    });
+
+    navigation.replace('ComicBook', {
+      comicBookLink: targetChapter.link,
+      pageJump: 0,
+      isDownloadComic: isComicDownload,
+      DetailsPage: DetailsPage,
+    });
+  }
 
   const keyExtractor = useCallback((item, index) => `${item.uri}-${index}`, []);
 
@@ -112,6 +178,23 @@ export function ComicBook({navigation, route}) {
           }}>
           <TouchableOpacity
             onPress={() => {
+              analytics().logEvent('go_back', {
+                screen: 'ComicBook',
+                comicBookLink: comicBookLink?.toString(),
+                DetailsPageLink: DetailsPage?.link?.toString(),
+                pageJump: pageJump,
+                isDownloadComic: isDownloadComic,
+                isVerticalScroll: isVerticalScroll,
+              });
+              dispatch(
+                updateData({
+                  url: comicBookLink,
+                  data: {lastReadPage: imageLinkIndex},
+                  imageLength: comicBookLink?.images?.length,
+                  ComicDetailslink: ComicDetails?.link,
+                }),
+              );
+
               goBack();
             }}>
             <Ionicons
@@ -156,6 +239,40 @@ export function ComicBook({navigation, route}) {
             onVerticalPull={onVerticalPulling}
           />
         )}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 12,
+          }}>
+          <TouchableOpacity
+            disabled={isPreviousChapter}
+            onPress={() => {
+              navigateToChapter('previous');
+            }}
+            style={{
+              backgroundColor: '#FF6347',
+              padding: 10,
+              borderRadius: 5,
+              alignItems: 'center',
+            }}>
+            <Text style={styles.text}>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={isNextChapter}
+            onPress={() => {
+              navigateToChapter('next');
+            }}
+            style={{
+              backgroundColor: '#FF6347',
+              padding: 10,
+              borderRadius: 5,
+              alignItems: 'center',
+            }}>
+            <Text style={styles.text}>Next</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
       {isModelVisible && (
         <Modal
@@ -204,6 +321,45 @@ export function ComicBook({navigation, route}) {
                   {!isVerticalScroll ? 'Vertical Scroll' : 'Horizontal Scroll'}
                 </Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                disabled={downloadLoading || isComicDownload}
+                onPress={() => {
+                  if (isComicDownload) return;
+                  if (downloadLoading) return;
+
+                  analytics().logEvent('download_comic', {
+                    screen: 'ComicBook',
+                    comicBookLink: comicBookLink?.toString(),
+                    DetailsPageLink: DetailsPage?.link?.toString(),
+                    pageJump: pageJump,
+                    isDownloadComic: isDownloadComic,
+                    isVerticalScroll: isVerticalScroll,
+                  });
+                  dispatch(
+                    downloadComicBook({
+                      comicDetails: DetailsPage,
+                      comicBook: {...comicBook, link: comicBookLink},
+                      setLoadStatus: setDownloadLoading,
+                      onProgress: (downloaded, total) => {
+                        setProgress({downloaded, total});
+                        if (downloaded === total) {
+                          setIsDownloaded(true);
+                        }
+                      },
+                    }),
+                  );
+                }}>
+                <Text style={styles.text}>
+                  {isComicDownload
+                    ? 'Downloaded'
+                    : downloadLoading
+                    ? `Downloading ${progress.downloaded}/${progress.total}`
+                    : 'Download Comic'}
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {

@@ -43,6 +43,13 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
     });
     navigate(NAVIGATION.comicBook, {
       comicBookLink: item?.link,
+      pageJump: item?.lastReadPage,
+      isDownloadComic: isComicDownload,
+      DetailsPage: {
+        link: detailPageLink,
+        title: ComicDetail?.title,
+        imgSrc: ComicDetail?.imgSrc,
+      },
     });
   };
 
