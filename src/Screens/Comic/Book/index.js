@@ -23,7 +23,7 @@ import Header from '../../../Components/UIComp/Header';
 import {goBack} from '../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
-import {downloadComicBook} from '../../../InkNest-Externals/Redux/Actions/Download';
+import {downloadComicBook, showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
 import {updateData} from '../../../Redux/Reducers';
 
 export function ComicBook({navigation, route}) {
@@ -368,6 +368,7 @@ export function ComicBook({navigation, route}) {
                       isDownloadComic: isDownloadComic,
                       isVerticalScroll: isVerticalScroll,
                     });
+                    showRewardedAd();
                     dispatch(
                       downloadComicBook({
                         comicDetails: DetailsPage,

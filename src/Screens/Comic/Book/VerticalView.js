@@ -175,17 +175,22 @@ export default function VerticalView({
         }}
         showsVerticalScrollIndicator={false}
       />
-      <Modal
-        visible={zoomMode}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setZoomMode(false)}>
-        <SafeAreaView style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)'}}>
-          {/* Ensure size exists before rendering ResumableZoom content */}
+      {zoomMode && (
+        <View
+          style={{
+            flex: 1,
+            position: 'absolute',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1,
+          }}>
           {size && (
             <ResumableZoom
               extendGestures={true}
-              maxScale={resolution}
+              maxScale={6}
               pinchCenteringMode={'sync'}>
               <Image
                 source={{uri: imagesLinks}}
@@ -201,13 +206,15 @@ export default function VerticalView({
               borderRadius: 5,
               alignItems: 'center',
               marginHorizontal: 20,
-              marginVertical: 10,
+              bottom: 30,
             }}
-            onPress={() => setZoomMode(false)}>
+            onPress={() => {
+              setZoomMode(false);
+            }}>
             <Text style={styles.text}>Tap to close</Text>
           </TouchableOpacity>
-        </SafeAreaView>
-      </Modal>
+        </View>
+      )}
     </>
   );
 }
