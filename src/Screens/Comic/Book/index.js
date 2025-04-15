@@ -264,164 +264,178 @@ export function ComicBook({navigation, route}) {
         )}
       </SafeAreaView>
       {isModelVisible && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isModelVisible}
-          onRequestClose={() => {
-            setIsModalVisible(!isModelVisible);
-          }}>
-          <SafeAreaView
-            style={{
-              flex: 1,
-              padding: 20,
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        <SafeAreaView>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isModelVisible}
+            onRequestClose={() => {
+              setIsModalVisible(!isModelVisible);
             }}>
-            <View
+            <SafeAreaView
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flex: 1,
+                padding: 20,
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
               }}>
-              {/* Add your modal content here */}
-              <Text style={styles.text}>Comic Book Options</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsModalVisible(false);
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                 }}>
-                <Ionicons name="close" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
+                {/* Add your modal content here */}
+                <Text style={styles.text}>Comic Book Options</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsModalVisible(false);
+                  }}>
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
 
-            <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  setIsVerticalScroll(!isVerticalScroll);
-                  setIsModalVisible(false);
-                  analytics().logEvent('toggle_vertical_scroll', {
-                    screen: 'ComicBook',
-                    isVerticalScroll: !isVerticalScroll,
-                  });
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
-                <Text style={styles.text}>
-                  {!isVerticalScroll ? 'Vertical Scroll' : 'Horizontal Scroll'}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => {
+                    setIsVerticalScroll(!isVerticalScroll);
+                    setIsModalVisible(false);
+                    analytics().logEvent('toggle_vertical_scroll', {
+                      screen: 'ComicBook',
+                      isVerticalScroll: !isVerticalScroll,
+                    });
+                  }}>
+                  <Text style={styles.text}>
+                    {!isVerticalScroll
+                      ? 'Vertical Scroll'
+                      : 'Horizontal Scroll'}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: isPreviousChapter ? '#555' : '#FF6347' }]}
-                disabled={isPreviousChapter}
-                onPress={() => {
-                  navigateToChapter('previous');
-                  setIsModalVisible(false);
-                  setImageLinkIndex(0);
-                  analytics().logEvent('navigate_previous_chapter', {
-                    screen: 'ComicBook',
-                    currentChapterLink: comicBookLink?.toString(),
-                  });
-                }}>
-                <Text style={styles.text}>Previous Chapter</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    {backgroundColor: isPreviousChapter ? '#555' : '#FF6347'},
+                  ]}
+                  disabled={isPreviousChapter}
+                  onPress={() => {
+                    navigateToChapter('previous');
+                    setIsModalVisible(false);
+                    setImageLinkIndex(0);
+                    analytics().logEvent('navigate_previous_chapter', {
+                      screen: 'ComicBook',
+                      currentChapterLink: comicBookLink?.toString(),
+                    });
+                  }}>
+                  <Text style={styles.text}>Previous Chapter</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: isNextChapter ? '#555' : '#FF6347' }]}
-                disabled={isNextChapter}
-                onPress={() => {
-                  navigateToChapter('next');
-                  setIsModalVisible(false);
-                  setImageLinkIndex(0);
-                  analytics().logEvent('navigate_next_chapter', {
-                    screen: 'ComicBook',
-                    currentChapterLink: comicBookLink?.toString(),
-                  });
-                }}>
-                <Text style={styles.text}>Next Chapter</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    {backgroundColor: isNextChapter ? '#555' : '#FF6347'},
+                  ]}
+                  disabled={isNextChapter}
+                  onPress={() => {
+                    navigateToChapter('next');
+                    setIsModalVisible(false);
+                    setImageLinkIndex(0);
+                    analytics().logEvent('navigate_next_chapter', {
+                      screen: 'ComicBook',
+                      currentChapterLink: comicBookLink?.toString(),
+                    });
+                  }}>
+                  <Text style={styles.text}>Next Chapter</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.button}
-                disabled={downloadLoading || isComicDownload}
-                onPress={() => {
-                  if (isComicDownload) return;
-                  if (downloadLoading) return;
+                <TouchableOpacity
+                  style={styles.button}
+                  disabled={downloadLoading || isComicDownload}
+                  onPress={() => {
+                    if (isComicDownload) return;
+                    if (downloadLoading) return;
 
-                  analytics().logEvent('download_comic', {
-                    screen: 'ComicBook',
-                    comicBookLink: comicBookLink?.toString(),
-                    DetailsPageLink: DetailsPage?.link?.toString(),
-                    pageJump: pageJump,
-                    isDownloadComic: isDownloadComic,
-                    isVerticalScroll: isVerticalScroll,
-                  });
-                  dispatch(
-                    downloadComicBook({
-                      comicDetails: DetailsPage,
-                      comicBook: {...comicBook, link: comicBookLink},
-                      setLoadStatus: setDownloadLoading,
-                      onProgress: (downloaded, total) => {
-                        setProgress({downloaded, total});
-                      },
-                    }),
-                  );
-                }}>
-                <Text style={styles.text}>
-                  {isComicDownload
-                    ? 'Downloaded'
-                    : downloadLoading
-                    ? `Downloading ${progress.downloaded}/${progress.total}`
-                    : 'Download Comic'}
-                </Text>
-              </TouchableOpacity>
+                    analytics().logEvent('download_comic', {
+                      screen: 'ComicBook',
+                      comicBookLink: comicBookLink?.toString(),
+                      DetailsPageLink: DetailsPage?.link?.toString(),
+                      pageJump: pageJump,
+                      isDownloadComic: isDownloadComic,
+                      isVerticalScroll: isVerticalScroll,
+                    });
+                    dispatch(
+                      downloadComicBook({
+                        comicDetails: DetailsPage,
+                        comicBook: {...comicBook, link: comicBookLink},
+                        setLoadStatus: setDownloadLoading,
+                        onProgress: (downloaded, total) => {
+                          setProgress({downloaded, total});
+                        },
+                      }),
+                    );
+                  }}>
+                  <Text style={styles.text}>
+                    {isComicDownload
+                      ? 'Downloaded'
+                      : downloadLoading
+                      ? `Downloading ${progress.downloaded}/${progress.total}`
+                      : 'Download Comic'}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={async () => {
-                  setIsModalVisible(false);
-                  await analytics().logEvent('share_comic', {
-                    screen: 'ComicBook',
-                    comicBookLink: comicBookLink?.toString(),
-                  });
-                  Share.share({
-                    message: `📖✨ Explore comics & manga for free with InkNest: your ultimate mobile companion
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={async () => {
+                    setIsModalVisible(false);
+                    await analytics().logEvent('share_comic', {
+                      screen: 'ComicBook',
+                      comicBookLink: comicBookLink?.toString(),
+                    });
+                    Share.share({
+                      message: `📖✨ Explore comics & manga for free with InkNest: your ultimate mobile companion
       
       InkNest is a free mobile app offering a vast collection of comics and manga across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
       
       🚀 Download now and start exploring: https://p2devs.github.io/InkNest/
       `,
-                  });
-                }}>
-                <Text style={styles.text}>Share</Text>
-              </TouchableOpacity>
+                    });
+                  }}>
+                  <Text style={styles.text}>Share</Text>
+                </TouchableOpacity>
 
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={async () => {
+                    await analytics().logEvent('report_comic', {
+                      screen: 'ComicBook',
+                      comicBookLink: comicBookLink?.toString(),
+                    });
+                    Linking.openURL('https://discord.gg/WYwJefvWNT');
+                    setIsModalVisible(false);
+                  }}>
+                  <Text style={styles.text}>Report</Text>
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
-                style={styles.button}
-                onPress={async () => {
-                  await analytics().logEvent('report_comic', {
-                    screen: 'ComicBook',
-                    comicBookLink: comicBookLink?.toString(),
-                  });
-                  Linking.openURL('https://discord.gg/WYwJefvWNT');
+                onPress={() => {
                   setIsModalVisible(false);
+                }}
+                style={{
+                  backgroundColor: '#FF6347',
+                  padding: 10,
+                  borderRadius: 5,
+                  alignItems: 'center',
                 }}>
-                <Text style={styles.text}>Report</Text>
+                <Text style={styles.text}>Close</Text>
               </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                setIsModalVisible(false);
-              }}
-              style={{
-                backgroundColor: '#FF6347',
-                padding: 10,
-                borderRadius: 5,
-                alignItems: 'center',
-              }}>
-              <Text style={styles.text}>Close</Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-        </Modal>
+            </SafeAreaView>
+          </Modal>
+        </SafeAreaView>
       )}
     </>
   );
