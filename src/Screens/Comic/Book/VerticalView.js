@@ -175,42 +175,39 @@ export default function VerticalView({
         }}
         showsVerticalScrollIndicator={false}
       />
-      <SafeAreaView>
-        <Modal
-          visible={zoomMode}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setZoomMode(false)}>
-          <SafeAreaView
-            style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)'}}>
-            {/* Ensure size exists before rendering ResumableZoom content */}
-            {size && (
-              <ResumableZoom
-                extendGestures={true}
-                maxScale={resolution}
-                pinchCenteringMode={'sync'}>
-                <Image
-                  source={{uri: imagesLinks}}
-                  style={{...size}}
-                  resizeMethod="scale"
-                />
-              </ResumableZoom>
-            )}
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#FF6347',
-                paddingVertical: 10,
-                borderRadius: 5,
-                alignItems: 'center',
-                marginHorizontal: 20,
-                marginVertical: 10,
-              }}
-              onPress={() => setZoomMode(false)}>
-              <Text style={styles.text}>Tap to close</Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-        </Modal>
-      </SafeAreaView>
+      <Modal
+        visible={zoomMode}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setZoomMode(false)}>
+        <SafeAreaView style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)'}}>
+          {/* Ensure size exists before rendering ResumableZoom content */}
+          {size && (
+            <ResumableZoom
+              extendGestures={true}
+              maxScale={resolution}
+              pinchCenteringMode={'sync'}>
+              <Image
+                source={{uri: imagesLinks}}
+                style={{...size}}
+                resizeMethod="scale"
+              />
+            </ResumableZoom>
+          )}
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#FF6347',
+              paddingVertical: 10,
+              borderRadius: 5,
+              alignItems: 'center',
+              marginHorizontal: 20,
+              marginVertical: 10,
+            }}
+            onPress={() => setZoomMode(false)}>
+            <Text style={styles.text}>Tap to close</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </Modal>
     </>
   );
 }
