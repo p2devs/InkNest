@@ -4,7 +4,13 @@ import {NAVIGATION} from '../Constants';
 import {AboutUs, Search} from '../Screens';
 import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
-import {ComicBook, ComicDetails, MockBooks, SeeAll} from '../Screens/Comic';
+import {
+  ComicBook,
+  ComicDetails,
+  DownloadComicBook,
+  MockBooks,
+  SeeAll,
+} from '../Screens/Comic';
 import {
   MangaBook,
   MangaDetails,
@@ -48,6 +54,10 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.WebSources} component={WebViewScreen} />
       <Stack.Screen name={NAVIGATION.WebSearch} component={WebSearchScreen} />
       <Stack.Screen name={NAVIGATION.mockBooks} component={MockBooks} />
+      <Stack.Screen
+        name={NAVIGATION.downloadComicBook}
+        component={DownloadComicBook}
+      />
     </Stack.Navigator>
   );
 }
