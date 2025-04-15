@@ -38,7 +38,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   );
 
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
-  const [LoadingStatus, setLoadStatus] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const dispatch = useDispatch();
 
@@ -71,8 +71,8 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   };
 
   const LoadingComic = async () => {
-    if (LoadingStatus) return;
-    setLoadStatus(true);
+    if (loadingStatus) return;
+    setLoadingStatus(true);
     setProgress({downloaded: 0, total: 0});
     crashlytics().log('ChapterCard download clicked');
     await analytics().logEvent('newUI_download_comic', {
@@ -101,7 +101,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           imgSrc: ComicDetail?.imgSrc,
         },
         comicBook: {...data, link: item.link},
-        setLoadStatus,
+        setLoadingStatus,
         onProgress: (downloaded, total) => setProgress({downloaded, total}),
       }),
     );
@@ -135,7 +135,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             color: '#eaebea',
             fontSize: 14,
             maxWidth:
-              LoadingStatus && progress
+              loadingStatus && progress
                 ? widthPercentageToDP('30%')
                 : widthPercentageToDP('40%'),
           }}>
@@ -169,7 +169,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           </>
         ) : null}
       </View>
-      {LoadingStatus ? (
+      {loadingStatus ? (
         <View style={{alignItems: 'center'}}>
           <ActivityIndicator size="small" color="skyblue" />
           <Text style={{fontSize: 12, color: '#fff', marginTop: 4}}>

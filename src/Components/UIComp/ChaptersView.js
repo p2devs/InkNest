@@ -35,7 +35,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const Bookmarks = ComicBook?.BookmarkPages;
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
   const [OpenModal, setOpenModal] = useState(null);
-  const [LoadingStatus, setLoadStatus] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(false);
 
   const RemoveBookMark = (link, removeItem) => {
     //find the item and remove from book mark Bookmarks is a list of numbers
@@ -52,8 +52,8 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   };
 
   const LoadingComic = async () => {
-    if (LoadingStatus) return;
-    setLoadStatus(true);
+    if (loadingStatus) return;
+    setLoadingStatus(true);
     await analytics().logEvent('download_comic', {
       link: chapter?.link?.toString(),
       title: chapter?.title?.toString(),
@@ -70,7 +70,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
       downloadComicBook({
         comicDetails: ComicDetail,
         comicBook: { ...data, link: chapter.link },
-        setLoadStatus,
+        setLoadingStatus,
       }),
     );
   };
@@ -191,10 +191,10 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
             : ''}
         </Text>
       </Text>
-      {LoadingStatus ? (
+      {loadingStatus ? (
         <ActivityIndicator size="small" color="skyblue" />
       ) : null}
-      {LoadingStatus ? null : !isComicDownload ? (
+      {loadingStatus ? null : !isComicDownload ? (
         <Entypo
           name="download"
           size={24}

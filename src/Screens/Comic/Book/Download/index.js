@@ -35,7 +35,7 @@ export function DownloadComicBook({route}) {
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
   const [isVerticalScroll, setIsVerticalScroll] = useState(false);
-  const [isModelVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [extractDownloaded, setExtractDownloaded] = useState(null);
 
   useEffect(() => {
@@ -178,14 +178,14 @@ export function DownloadComicBook({route}) {
           />
         )}
       </SafeAreaView>
-      {isModelVisible && (
+      {isModalVisible && (
         <SafeAreaView>
           <Modal
             animationType="slide"
             transparent={true}
-            visible={isModelVisible}
+            visible={isModalVisible}
             onRequestClose={() => {
-              setIsModalVisible(!isModelVisible);
+              setIsModalVisible(!isModalVisible);
             }}>
             <SafeAreaView
               style={{

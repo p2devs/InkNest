@@ -12,7 +12,7 @@ import {useFeatureFlag} from 'configcat-react';
 
 export function MockBooks({route}) {
   const {comicBookLink} = route?.params;
-  const [ViewAll, setViewAll] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
   const [PageIndex, setPageIndex] = useState(0);
   const [images, setImages] = useState([]);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
@@ -59,7 +59,7 @@ export function MockBooks({route}) {
         key={index}
         onPress={() => {
           setPageIndex(index);
-          setViewAll(!ViewAll);
+          setViewAll(!viewAll);
         }}
         style={{
           margin: 5,
@@ -83,7 +83,7 @@ export function MockBooks({route}) {
       style={{flex: 1, backgroundColor: '#14142a'}}
       edges={['top', 'bottom']}>
       <View style={{flex: 1}}>
-        {ViewAll ? (
+        {viewAll ? (
           <TouchableOpacity style={{flex: 1}} onPress={() => setViewAll(false)}>
             <Image
               source={{uri: images[PageIndex]}}

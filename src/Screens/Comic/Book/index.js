@@ -50,7 +50,7 @@ export function ComicBook({navigation, route}) {
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
   const [isVerticalScroll, setIsVerticalScroll] = useState(false);
-  const [isModelVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const [isNextChapter, setIsNextChapter] = useState(false);
@@ -263,14 +263,14 @@ export function ComicBook({navigation, route}) {
           />
         )}
       </SafeAreaView>
-      {isModelVisible && (
+      {isModalVisible && (
         <SafeAreaView>
           <Modal
             animationType="slide"
             transparent={true}
-            visible={isModelVisible}
+            visible={isModalVisible}
             onRequestClose={() => {
-              setIsModalVisible(!isModelVisible);
+              setIsModalVisible(!isModalVisible);
             }}>
             <SafeAreaView
               style={{
@@ -373,7 +373,7 @@ export function ComicBook({navigation, route}) {
                       downloadComicBook({
                         comicDetails: DetailsPage,
                         comicBook: {...comicBook, link: comicBookLink},
-                        setLoadStatus: setDownloadLoading,
+                        setLoadingStatus: setDownloadLoading,
                         onProgress: (downloaded, total) => {
                           setProgress({downloaded, total});
                         },
