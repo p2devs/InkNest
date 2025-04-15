@@ -44,6 +44,10 @@
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array/>
 	<key>NSPrivacyTracking</key>
-	<false/>
+	<true/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array>
+		<string>app-analytics-services-att.com</string>
+	</array>
 </dict>
 </plist>

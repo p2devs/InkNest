@@ -1,6 +1,8 @@
 import React, {memo, useState} from 'react';
 import {TouchableOpacity, Text, View, ActivityIndicator} from 'react-native';
 
+import {useFeatureFlag} from 'configcat-react';
+import {getVersion} from 'react-native-device-info';
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
@@ -30,8 +32,13 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
     ),
   );
 
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    'Default',
+  );
+
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;
-  const [LoadingStatus, setLoadStatus] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const dispatch = useDispatch();
 
@@ -41,14 +48,31 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
+
+    if (getVersion() === forIosValue && forIosLoading === false) {
+      navigate(NAVIGATION.mockBooks, {
+        comicBookLink: item?.link,
+        pageJump: 0,
+      });
+      return;
+    }
+
     navigate(NAVIGATION.comicBook, {
       comicBookLink: item?.link,
+      pageJump:
+        ComicBook?.lastReadPage + 1 > 1 ? ComicBook?.lastReadPage + 1 : 0,
+      isDownloadComic: isComicDownload,
+      DetailsPage: {
+        link: detailPageLink,
+        title: ComicDetail?.title,
+        imgSrc: ComicDetail?.imgSrc,
+      },
     });
   };
 
   const LoadingComic = async () => {
-    if (LoadingStatus) return;
-    setLoadStatus(true);
+    if (loadingStatus) return;
+    setLoadingStatus(true);
     setProgress({downloaded: 0, total: 0});
     crashlytics().log('ChapterCard download clicked');
     await analytics().logEvent('newUI_download_comic', {
@@ -77,7 +101,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           imgSrc: ComicDetail?.imgSrc,
         },
         comicBook: {...data, link: item.link},
-        setLoadStatus,
+        setLoadingStatus,
         onProgress: (downloaded, total) => setProgress({downloaded, total}),
       }),
     );
@@ -111,17 +135,17 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
             color: '#eaebea',
             fontSize: 14,
             maxWidth:
-              LoadingStatus && progress
+              loadingStatus && progress
                 ? widthPercentageToDP('30%')
-                : widthPercentageToDP('50%'),
+                : widthPercentageToDP('40%'),
           }}>
           {item?.title}
         </Text>
         {item?.date ? (
           <Text
             style={{
-              fontSize: 14,
-              color: '#4b4b5f',
+              fontSize: 12,
+              color: 'rgba(255, 255, 255, 0.5)',
             }}>
             {` · `}
             {item?.date}
@@ -145,7 +169,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           </>
         ) : null}
       </View>
-      {LoadingStatus ? (
+      {loadingStatus ? (
         <View style={{alignItems: 'center'}}>
           <ActivityIndicator size="small" color="skyblue" />
           <Text style={{fontSize: 12, color: '#fff', marginTop: 4}}>
