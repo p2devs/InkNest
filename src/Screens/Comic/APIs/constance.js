@@ -66,4 +66,36 @@ export const HomePageCardClasses = {
       lastPageClass: '.pagenavi span.page-numbers.dots',
     },
   },
+  comichubfree: {
+    'latest-release': {
+      cardClass: '.episode-details.box-content',
+      cardTitleClass: '.box-info h3.series-title',
+      cardLinkClass: '.box-info h3.series-title a',
+      imageClass: '.box-image a img',
+      genresClass: '.box-info a.genre',
+      chapterInfo: '.box-info a.chapter-title',
+    },
+    'hot-comic': {
+      cardClass: '.cartoon-box',
+      cardTitleClass: '.mb-right h3 a',
+      cardLinkClass: '.mb-right h3 a',
+      imageClass: '.lazyload',
+      chapterInfo: '.mb-right .detail a',
+      statusClass: '.mb-right .detail',
+    },
+    'new-comic': {
+      cardClass: '.cartoon-box',
+      cardTitleClass: '.mb-right h3 a',
+      cardLinkClass: '.mb-right h3 a',
+      imageClass: '.lazyload',
+      statusClass: '.mb-right .detail',
+    },
+    'popular-comic': {
+      cardClass: '.cartoon-box',
+      cardTitleClass: '.mb-right h3 a',
+      cardLinkClass: '.mb-right h3 a',
+      imageClass: '.lazyload',
+      statusClass: '.mb-right .detail',
+    }
+  },
 };
