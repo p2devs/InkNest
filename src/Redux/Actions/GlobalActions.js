@@ -16,6 +16,8 @@ import {Alert} from 'react-native';
 import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
 import crashlytics from '@react-native-firebase/crashlytics';
+import {ComicHostName} from '../../Utils/APIs';
+import {ComicDetailPageClasses} from '../../Screens/Comic/APIs/constance';
 
 /**
  * Action creator for handling watched data.
@@ -112,21 +114,29 @@ export const fetchComicDetails =
       const html = response.data;
       const $ = cheerio.load(html);
 
-      // Details Section
-      const detailsContainer = $('.list-container');
-      const title = $('img.img-responsive').attr('alt')?.trim();
+      // find the host name from the link
+      const hostkey = Object.keys(ComicHostName).find(key =>
+        link.includes(key),
+      );
+
+      const config = ComicDetailPageClasses[hostkey];
+      if (!config) throw new Error(`No config found for source: ${hostkey}`);
+
+      const detailsContainer = $(config.detailsContainer);
+      const title = $(config.title).attr('alt')?.trim();
+
       let imgSrc = detailsContainer
-        .find('.boxed img.img-responsive')
-        .attr('src');
+        .find(config.imgSrc)
+        .attr(config.getImageAttr);
       if (imgSrc && imgSrc.startsWith('//')) {
         imgSrc = 'https:' + imgSrc;
       }
 
-      // Build a details map from the <dl class="dl-horizontal">
       const details = {};
-      detailsContainer.find('dl.dl-horizontal dt').each((i, el) => {
+      detailsContainer.find(config.detailsDL).each((i, el) => {
         const key = $(el).text().trim().replace(':', '');
         const dd = $(el).next('dd');
+
         if (key === 'Tags') {
           const tags = [];
           dd.find('a').each((j, a) => {
@@ -135,33 +145,15 @@ export const fetchComicDetails =
           details[key] = tags;
         } else if (key === 'Categories') {
           details[key] = dd.find('a').first().text().trim();
-        } else if (key === 'Rating') {
-          details[key] = dd.text().trim();
         } else {
           details[key] = dd.text().trim();
         }
       });
 
-      // Summary Section
-      const summary = $('div.manga.well p').text().trim();
+      const summary = $(config.summary).text().trim();
 
-      // Chapters Section
-      const chapters = [];
-      $('ul.chapters li').each((i, el) => {
-        const chapterTitle = $(el).find('h5.chapter-title-rtl a').text().trim();
-        const chapterLink = $(el).find('h5.chapter-title-rtl a').attr('href');
-        const chapterDate = $(el)
-          .find('div.date-chapter-title-rtl')
-          .text()
-          .trim();
-        chapters.push({
-          title: chapterTitle,
-          link: chapterLink,
-          date: chapterDate,
-        });
-      });
+      const chapters = await fetchChaptersWithPagination($, config, link);
 
-      // Create comic details object using the new API structure
       const comicDetails = {
         title,
         imgSrc,
@@ -209,6 +201,36 @@ export const fetchComicDetails =
       Alert.alert('Error', 'Comic not found');
     }
   };
+
+const fetchChaptersWithPagination = async ($, config, link) => {
+  const chapters = [];
+
+  while (true) {
+    $(config.chaptersList).each((i, el) => {
+      const chapterTitle = $(el).find(config.chapterTitle).text().trim();
+      const chapterLink = $(el).find(config.chapterLink).attr('href');
+      const chapterDate = $(el).find(config.chapterDate).text().trim();
+
+      chapters.push({
+        title: chapterTitle,
+        link: chapterLink,
+        date: chapterDate,
+      });
+    });
+
+    // Find "Next" button or pagination link
+    const nextPageLink = $('ul.pagination li a')
+      .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
+      .attr('href');
+
+    if (!nextPageLink) break;
+
+    const response = await APICaller.get(nextPageLink);
+    $ = cheerio.load(response.data); // Load next page
+  }
+
+  return chapters;
+};
 
 /**
  * Fetches comic book data from a given URL and dispatches appropriate actions based on the result.
@@ -467,7 +489,7 @@ export const getAdvancedSearchFilters = () => async dispatch => {
  * @param {string} queryValue - The value to be appended to the search URL.
  * @returns {Function} A thunk function that performs the async operation and returns the result.
  */
-export const searchComic = (queryValue) => async dispatch => {
+export const searchComic = queryValue => async dispatch => {
   dispatch(fetchDataStart());
   const url = `https://readcomicsonline.ru/search?query=${encodeURIComponent(
     queryValue,

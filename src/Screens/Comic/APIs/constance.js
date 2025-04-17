@@ -74,6 +74,7 @@ export const HomePageCardClasses = {
       imageClass: '.box-image a img',
       genresClass: '.box-info a.genre',
       chapterInfo: '.box-info a.chapter-title',
+      imageAttr: 'data-src',
     },
     'hot-comic': {
       cardClass: '.cartoon-box',
@@ -82,6 +83,7 @@ export const HomePageCardClasses = {
       imageClass: '.lazyload',
       chapterInfo: '.mb-right .detail a',
       statusClass: '.mb-right .detail',
+      imageAttr: 'data-src',
     },
     'new-comic': {
       cardClass: '.cartoon-box',
@@ -89,6 +91,7 @@ export const HomePageCardClasses = {
       cardLinkClass: '.mb-right h3 a',
       imageClass: '.lazyload',
       statusClass: '.mb-right .detail',
+      imageAttr: 'data-src',
     },
     'popular-comic': {
       cardClass: '.cartoon-box',
@@ -96,6 +99,35 @@ export const HomePageCardClasses = {
       cardLinkClass: '.mb-right h3 a',
       imageClass: '.lazyload',
       statusClass: '.mb-right .detail',
-    }
+      imageAttr: 'data-src',
+    },
   },
+};
+
+export const ComicDetailPageClasses = {
+  readcomicsonline: {
+    detailsContainer: '.list-container',
+    title: 'img.img-responsive',
+    imgSrc: '.boxed img.img-responsive',
+    getImageAttr: 'src',
+    summary: 'div.manga.well p',
+    chaptersList: 'ul.chapters li',
+    chapterTitle: 'h5.chapter-title-rtl a',
+    chapterLink: 'h5.chapter-title-rtl a',
+    chapterDate: 'div.date-chapter-title-rtl',
+    detailsDL: 'dl.dl-horizontal dt',
+  },
+  comichubfree: {
+    detailsContainer: '.movie-info',
+    title: '.movie-title span.title-1',
+    imgSrc: '.movie-image img',
+    getImageAttr: 'data-src', // important change
+    summary: '#film-content',
+    chaptersList: '#list tr',
+    chapterTitle: 'td:first-child a',
+    chapterLink: 'td:first-child a',
+    chapterDate: 'td:last-child',
+    detailsDL: 'dl.movie-dl dt',
+  },
+  
 };
