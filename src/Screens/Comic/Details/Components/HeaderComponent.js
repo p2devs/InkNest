@@ -159,17 +159,24 @@ const HeaderComponent = memo(
                   color: '#fff',
                   opacity: 0.8,
                 }}>{`${
-                ComicDetail?.genres
+                  ComicDetail?.releaseDate
+                    ? ComicDetail?.releaseDate +
+                      (ComicDetail?.status ? ' · ' : '')
+                    : ''
+                }${
+                ComicDetail?.genres && ComicDetail?.genres?.length > 0
                   ? ComicDetail?.genres?.toString() + ' · '
-                  : ComicDetail?.tags
+                  : ComicDetail?.tags && ComicDetail?.tags?.length > 0
                   ? ComicDetail?.tags?.toString() + ' · '
                   : ''
               }${
-                ComicDetail?.yearOfRelease
-                  ? ComicDetail?.yearOfRelease + ' · '
+                ComicDetail?.status
+                  ? ComicDetail?.status + (ComicDetail?.author || ComicDetail?.categories ? ' · ' : '')
                   : ''
-              }${ComicDetail?.status ? ComicDetail?.status + ' · ' : ''}${
-                ComicDetail?.publisher ? 'By - ' + ComicDetail?.publisher : ''
+              }${
+                ComicDetail?.author || ComicDetail?.categories
+                  ? 'By - ' + (ComicDetail?.author || ComicDetail?.categories)
+                  : ''
               }`}</Text>
             }
             {ComicDetail?.summary ? (

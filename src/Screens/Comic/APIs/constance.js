@@ -103,7 +103,6 @@ export const HomePageCardClasses = {
     },
   },
 };
-
 export const ComicDetailPageClasses = {
   readcomicsonline: {
     detailsContainer: '.list-container',
@@ -116,18 +115,19 @@ export const ComicDetailPageClasses = {
     chapterLink: 'h5.chapter-title-rtl a',
     chapterDate: 'div.date-chapter-title-rtl',
     detailsDL: 'dl.dl-horizontal dt',
+    pagination: 'ul.pagination li a',
   },
   comichubfree: {
     detailsContainer: '.movie-info',
     title: '.movie-title span.title-1',
     imgSrc: '.movie-image img',
-    getImageAttr: 'data-src', // important change
+    getImageAttr: 'data-src',
     summary: '#film-content',
     chaptersList: '#list tr',
     chapterTitle: 'td:first-child a',
     chapterLink: 'td:first-child a',
     chapterDate: 'td:last-child',
-    detailsDL: 'dl.movie-dl dt',
+    detailsDL: '.movie-dl dt',
+    pagination: '.pagination li a',
   },
-  
 };

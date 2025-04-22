@@ -112,18 +112,16 @@ export const fetchComicDetails =
 
       const response = await APICaller.get(link);
       const html = response.data;
-      const $ = cheerio.load(html);
+      let $ = cheerio.load(html);
 
-      // find the host name from the link
       const hostkey = Object.keys(ComicHostName).find(key =>
-        link.includes(key),
+        link.includes(key)
       );
-
       const config = ComicDetailPageClasses[hostkey];
       if (!config) throw new Error(`No config found for source: ${hostkey}`);
 
       const detailsContainer = $(config.detailsContainer);
-      const title = $(config.title).attr('alt')?.trim();
+      const title = $(config.title).text().trim();
 
       let imgSrc = detailsContainer
         .find(config.imgSrc)
@@ -137,35 +135,42 @@ export const fetchComicDetails =
         const key = $(el).text().trim().replace(':', '');
         const dd = $(el).next('dd');
 
-        if (key === 'Tags') {
-          const tags = [];
+        if (key.toLowerCase() === 'tags' || key.toLowerCase() === 'genres') {
+          const list = [];
           dd.find('a').each((j, a) => {
-            tags.push($(a).text().trim());
+            list.push($(a).text().trim());
           });
-          details[key] = tags;
-        } else if (key === 'Categories') {
-          details[key] = dd.find('a').first().text().trim();
+          details[key] = list;
         } else {
           details[key] = dd.text().trim();
         }
       });
 
       const summary = $(config.summary).text().trim();
-
       const chapters = await fetchChaptersWithPagination($, config, link);
+      const pagination = getChapterPagination($, config);
 
       const comicDetails = {
         title,
         imgSrc,
         type: details['Type'] || null,
         status: details['Status'] || null,
-        releaseDate: details['Date of release'] || null,
-        categories: details['Categories'] || null,
+        releaseDate:
+          details['Release'] ||
+          details['Released'] ||
+          details['Date of release'] ||
+          null,
+        categories: details['Category'] || details['Categories'] || null,
         tags: details['Tags'] || [],
+        genres: details['Genres'] || [],
+        author: details['Author'] || null,
+        alternativeName:
+          details['Alternative'] || details['Alternative name'] || null,
         views: details['Views'] || null,
         rating: details['Rating'] || null,
         summary,
         chapters,
+        pagination,
         link,
       };
 
@@ -179,19 +184,19 @@ export const fetchComicDetails =
       };
 
       if (refresh) {
-        dispatch(updateData({url: link, data: comicDetails}));
+        dispatch(updateData({ url: link, data: comicDetails }));
         dispatch(StopLoading());
         return;
       }
 
       dispatch(WatchedData(watchedData));
-      dispatch(fetchDataSuccess({url: link, data: comicDetails}));
+      dispatch(fetchDataSuccess({ url: link, data: comicDetails }));
     } catch (error) {
       crashlytics().recordError(error);
       console.log('Error details:', error);
       console.error(
         'Error fetching comic details:',
-        error.response?.status || error,
+        error.response?.status || error
       );
       checkDownTime(error);
       dispatch(StopLoading());
@@ -202,35 +207,55 @@ export const fetchComicDetails =
     }
   };
 
-const fetchChaptersWithPagination = async ($, config, link) => {
-  const chapters = [];
 
-  while (true) {
-    $(config.chaptersList).each((i, el) => {
-      const chapterTitle = $(el).find(config.chapterTitle).text().trim();
-      const chapterLink = $(el).find(config.chapterLink).attr('href');
-      const chapterDate = $(el).find(config.chapterDate).text().trim();
-
-      chapters.push({
-        title: chapterTitle,
-        link: chapterLink,
-        date: chapterDate,
+  const fetchChaptersWithPagination = async ($, config, link) => {
+    const chapters = [];
+    const visitedPages = new Set();
+    let currentLink = link;
+  
+    while (!visitedPages.has(currentLink)) {
+      visitedPages.add(currentLink);
+  
+      $(config.chaptersList).each((i, el) => {
+        const chapterTitle = $(el).find(config.chapterTitle).text().trim();
+        const chapterLink = $(el).find(config.chapterLink).attr('href');
+        const chapterDate = $(el).find(config.chapterDate).text().trim();
+  
+        if (chapterTitle && chapterLink) {
+          chapters.push({
+            title: chapterTitle,
+            link: chapterLink,
+            date: chapterDate,
+          });
+        }
       });
+  
+      const nextPageLink = $(config.pagination)
+        .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
+        .attr('href');
+  
+      if (!nextPageLink) break;
+  
+      const response = await APICaller.get(nextPageLink);
+      currentLink = nextPageLink;
+      $ = cheerio.load(response.data);
+    }
+  
+    return chapters;
+  };
+
+  const getChapterPagination = ($, config) => {
+    const pages = [];
+    $(config.pagination).each((i, el) => {
+      const text = $(el).text().trim();
+      const href = $(el).attr('href');
+      if (text && href) {
+        pages.push({ text, link: href });
+      }
     });
-
-    // Find "Next" button or pagination link
-    const nextPageLink = $('ul.pagination li a')
-      .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
-      .attr('href');
-
-    if (!nextPageLink) break;
-
-    const response = await APICaller.get(nextPageLink);
-    $ = cheerio.load(response.data); // Load next page
-  }
-
-  return chapters;
-};
+    return pages;
+  };
+  
 
 /**
  * Fetches comic book data from a given URL and dispatches appropriate actions based on the result.
