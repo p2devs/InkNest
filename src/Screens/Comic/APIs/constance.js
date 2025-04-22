@@ -133,7 +133,7 @@ export const ComicDetailPageClasses = {
 };
 
 export const ComicBookPageClasses = {
-  readallcomics: {
+  readcomicsonline: {
     imageContainer: '.imagecnt',
     imageSelector: 'img.img-responsive[data-src]',
     imageAttr: 'data-src',

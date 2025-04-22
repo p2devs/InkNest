@@ -142,7 +142,10 @@ const Reducers = createSlice({
     },
     pushHistory: (state, action) => {
       // state.history.push(action.payload);
-      state.history[action.payload.link] = action.payload;
+      //trim the query from the url
+      const link = action.payload.link.split('?')[0];
+
+      state.history[link] = action.payload;
     },
     UpdateSearch: (state, action) => {
       //push data to search array on top
