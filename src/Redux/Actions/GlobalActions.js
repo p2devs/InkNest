@@ -534,24 +534,58 @@ export const getAdvancedSearchFilters = () => async dispatch => {
  * @param {string} queryValue - The value to be appended to the search URL.
  * @returns {Function} A thunk function that performs the async operation and returns the result.
  */
-export const searchComic = queryValue => async dispatch => {
-  dispatch(fetchDataStart());
-  const url = `https://readcomicsonline.ru/search?query=${encodeURIComponent(
-    queryValue,
-  )}`;
-  try {
-    const response = await APICaller.get(url);
-    dispatch(fetchDataSuccess({url, data: response?.data}));
-    dispatch(StopLoading());
-    dispatch(ClearError());
-    dispatch(checkDownTime());
-    return response?.data;
-  } catch (error) {
-    crashlytics().recordError(error);
-    console.log('Error details:', error);
-    console.error('Error fetching search results:', error);
-    dispatch(fetchDataFailure(error.message));
-    dispatch(checkDownTime(error));
-    return null;
-  }
-};
+export const searchComic =
+  (queryValue, source = 'readcomicsonline') =>
+  async dispatch => {
+    dispatch(fetchDataStart());
+
+    let url;
+    const host =
+      source === 'readcomicsonline'
+        ? 'https://readcomicsonline.ru'
+        : 'https://comichubfree.com';
+
+    try {
+      if (source === 'readcomicsonline') {
+        url = `${host}/search?query=${encodeURIComponent(queryValue)}`;
+        const response = await APICaller.get(url);
+        const suggestions = response?.data?.suggestions || [];
+
+        const formatted = suggestions.map(item => ({
+          title: item.value,
+          data: item.data,
+          link: `${host}/comic/${item.data}`,
+        }));
+
+        dispatch(fetchDataSuccess({url, data: formatted}));
+        dispatch(StopLoading());
+        dispatch(ClearError());
+        dispatch(checkDownTime());
+        return formatted;
+      } else if (source === 'comichubfree') {
+        url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
+        const response = await APICaller.get(url);
+        const json = response?.data || [];
+
+        const formatted = json.map(item => ({
+          title: item.title,
+          data: item.slug,
+          link: `${host}/comic/${item.slug}`,
+        }));
+
+        dispatch(fetchDataSuccess({url, data: formatted}));
+        dispatch(StopLoading());
+        dispatch(ClearError());
+        dispatch(checkDownTime());
+        return formatted;
+      }
+
+      throw new Error(`Unsupported source: ${source}`);
+    } catch (error) {
+      crashlytics().recordError(error);
+      console.log('Error details:', error);
+      dispatch(fetchDataFailure(error.message));
+      dispatch(checkDownTime(error));
+      return null;
+    }
+  };
