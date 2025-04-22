@@ -32,7 +32,7 @@ export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState('readcomicsonline');
+  const [type, setType] = useState('comichubfree');
   const [changeType, setChangeType] = useState(false);
   const History = useSelector(state => state.data.history);
   const dispatch = useDispatch();

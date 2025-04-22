@@ -118,7 +118,7 @@ const HomeType = {
 };
 
 export const getComicsHome = async (
-  type = 'readcomicsonline',
+  type = 'comichubfree',
   setComics,
   setLoading,
 ) => {
