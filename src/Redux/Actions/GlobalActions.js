@@ -17,7 +17,10 @@ import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {ComicHostName} from '../../Utils/APIs';
-import {ComicDetailPageClasses} from '../../Screens/Comic/APIs/constance';
+import {
+  ComicBookPageClasses,
+  ComicDetailPageClasses,
+} from '../../Screens/Comic/APIs/constance';
 
 /**
  * Action creator for handling watched data.
@@ -115,7 +118,7 @@ export const fetchComicDetails =
       let $ = cheerio.load(html);
 
       const hostkey = Object.keys(ComicHostName).find(key =>
-        link.includes(key)
+        link.includes(key),
       );
       const config = ComicDetailPageClasses[hostkey];
       if (!config) throw new Error(`No config found for source: ${hostkey}`);
@@ -184,19 +187,19 @@ export const fetchComicDetails =
       };
 
       if (refresh) {
-        dispatch(updateData({ url: link, data: comicDetails }));
+        dispatch(updateData({url: link, data: comicDetails}));
         dispatch(StopLoading());
         return;
       }
 
       dispatch(WatchedData(watchedData));
-      dispatch(fetchDataSuccess({ url: link, data: comicDetails }));
+      dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
       crashlytics().recordError(error);
       console.log('Error details:', error);
       console.error(
         'Error fetching comic details:',
-        error.response?.status || error
+        error.response?.status || error,
       );
       checkDownTime(error);
       dispatch(StopLoading());
@@ -207,55 +210,53 @@ export const fetchComicDetails =
     }
   };
 
+const fetchChaptersWithPagination = async ($, config, link) => {
+  const chapters = [];
+  const visitedPages = new Set();
+  let currentLink = link;
 
-  const fetchChaptersWithPagination = async ($, config, link) => {
-    const chapters = [];
-    const visitedPages = new Set();
-    let currentLink = link;
-  
-    while (!visitedPages.has(currentLink)) {
-      visitedPages.add(currentLink);
-  
-      $(config.chaptersList).each((i, el) => {
-        const chapterTitle = $(el).find(config.chapterTitle).text().trim();
-        const chapterLink = $(el).find(config.chapterLink).attr('href');
-        const chapterDate = $(el).find(config.chapterDate).text().trim();
-  
-        if (chapterTitle && chapterLink) {
-          chapters.push({
-            title: chapterTitle,
-            link: chapterLink,
-            date: chapterDate,
-          });
-        }
-      });
-  
-      const nextPageLink = $(config.pagination)
-        .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
-        .attr('href');
-  
-      if (!nextPageLink) break;
-  
-      const response = await APICaller.get(nextPageLink);
-      currentLink = nextPageLink;
-      $ = cheerio.load(response.data);
-    }
-  
-    return chapters;
-  };
+  while (!visitedPages.has(currentLink)) {
+    visitedPages.add(currentLink);
 
-  const getChapterPagination = ($, config) => {
-    const pages = [];
-    $(config.pagination).each((i, el) => {
-      const text = $(el).text().trim();
-      const href = $(el).attr('href');
-      if (text && href) {
-        pages.push({ text, link: href });
+    $(config.chaptersList).each((i, el) => {
+      const chapterTitle = $(el).find(config.chapterTitle).text().trim();
+      const chapterLink = $(el).find(config.chapterLink).attr('href');
+      const chapterDate = $(el).find(config.chapterDate).text().trim();
+
+      if (chapterTitle && chapterLink) {
+        chapters.push({
+          title: chapterTitle,
+          link: chapterLink,
+          date: chapterDate,
+        });
       }
     });
-    return pages;
-  };
-  
+
+    const nextPageLink = $(config.pagination)
+      .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
+      .attr('href');
+
+    if (!nextPageLink) break;
+
+    const response = await APICaller.get(nextPageLink);
+    currentLink = nextPageLink;
+    $ = cheerio.load(response.data);
+  }
+
+  return chapters;
+};
+
+const getChapterPagination = ($, config) => {
+  const pages = [];
+  $(config.pagination).each((i, el) => {
+    const text = $(el).text().trim();
+    const href = $(el).attr('href');
+    if (text && href) {
+      pages.push({text, link: href});
+    }
+  });
+  return pages;
+};
 
 /**
  * Fetches comic book data from a given URL and dispatches appropriate actions based on the result.
@@ -267,7 +268,18 @@ export const fetchComicDetails =
 export const fetchComicBook =
   (comicBook, setPageLink = null, isDownloadComic) =>
   async (dispatch, getState) => {
+    let newcomicBook = comicBook;
+    // Dynamically get host config
+    const hostkey = Object.keys(ComicHostName).find(key =>
+      comicBook.includes(key),
+    );
+
+    if (hostkey == 'comichubfree') {
+      newcomicBook = `${comicBook}/all`;
+    }
+
     if (!isDownloadComic) dispatch(fetchDataStart());
+
     try {
       const Data = getState().data.dataByUrl[comicBook];
       if (Data) {
@@ -279,40 +291,48 @@ export const fetchComicBook =
         dispatch(checkDownTime());
         return;
       }
-      const response = await APICaller.get(comicBook);
+
+      const response = await APICaller.get(newcomicBook);
       const html = response.data;
       const $ = cheerio.load(html);
 
-      // New API: Extract chapter images using data-src attribute
-      const imageContainer = $('.imagecnt');
+      const config = ComicBookPageClasses[hostkey];
+      if (!config) {
+        throw new Error(`No chapter page config found for source: ${hostkey}`);
+      }
+
+      const {
+        imageContainer,
+        imageSelector,
+        imageAttr,
+        titleSelector,
+        titleAttr,
+      } = config;
+
+      const container = $(imageContainer);
       const imgSources = [];
-      imageContainer
-        .find('img.img-responsive[data-src]')
-        .each((index, element) => {
-          const src = $(element).attr('data-src')?.trim();
-          if (src) {
-            imgSources.push(src);
-          }
-        });
+
+      container.find(imageSelector).each((i, el) => {
+        const src = $(el).attr(imageAttr)?.trim();
+        if (src) imgSources.push(src);
+      });
+
+      const title =
+        container.find(titleSelector).first().attr(titleAttr)?.trim() || '';
 
       const data = {
         images: imgSources,
-        // It is assumed the chapter title is embedded in the alt text of the first image.
-        // Adjust the extraction as needed.
-        title:
-          imageContainer
-            .find('img.img-responsive')
-            .first()
-            .attr('alt')
-            ?.trim() || '',
+        title,
         lastReadPage: 0,
         BookmarkPages: [],
-        ComicDetailslink: '',
+        ComicDetailslink: '', // set externally if needed
       };
+      console.log('imgSources', data);
 
       if (setPageLink) {
         setPageLink(data.ComicDetailslink);
       }
+
       dispatch(fetchDataSuccess({url: comicBook, data}));
       if (isDownloadComic) return {url: comicBook, data};
     } catch (error) {

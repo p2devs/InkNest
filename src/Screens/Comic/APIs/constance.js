@@ -131,3 +131,20 @@ export const ComicDetailPageClasses = {
     pagination: '.pagination li a',
   },
 };
+
+export const ComicBookPageClasses = {
+  readallcomics: {
+    imageContainer: '.imagecnt',
+    imageSelector: 'img.img-responsive[data-src]',
+    imageAttr: 'data-src',
+    titleSelector: 'img.img-responsive',
+    titleAttr: 'alt',
+  },
+  comichubfree: {
+    imageContainer: '.chapter-container.chapter-all',
+    imageSelector: 'img.chapter_img[data-src]',
+    imageAttr: 'data-src',
+    titleSelector: 'img.chapter_img',
+    titleAttr: 'alt',
+  },
+};
