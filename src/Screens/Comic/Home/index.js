@@ -28,7 +28,7 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
-import { widthPercentageToDP } from 'react-native-responsive-screen';
+import {widthPercentageToDP} from 'react-native-responsive-screen';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
@@ -97,41 +97,50 @@ export function Home({navigation}) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Temp UI Start for Switch Server */}
-        <View style={{flex: 1, flexDirection: 'row', gap: 15}}>
-          <TouchableOpacity
-            onPress={() => {
-              setChangeType(!changeType);
-              crashlytics().log('Comic Host Name Clicked');
-            }}
-            style={styles.rectangle}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '700',
-                color: '#fff',
-                textAlign: 'left',
-              }}>
-              {type}
-            </Text>
-            <AntDesign name="down" size={20} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              borderRadius: 100,
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              width: 40,
-              height: 40,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onPress={() => {
-              crashlytics().log('Home Search button clicked');
-              navigation.navigate(NAVIGATION.search);
-            }}>
-            <AntDesign name="search1" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        {getVersion() === forIosValue &&
+        forIosLoading === false ? null : forIosLoading === false ? (
+          <>
+            <View style={{flex: 1, flexDirection: 'row', gap: 15}}>
+              <TouchableOpacity
+                onPress={() => {
+                  setChangeType(!changeType);
+                  crashlytics().log('Comic Host Name Clicked');
+                  analytics().logEvent('comic_host_name_clicked', {
+                    hostName: type.toString(),
+                  });
+                }}
+                style={styles.rectangle}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: '#fff',
+                    textAlign: 'left',
+                  }}>
+                  {type}
+                </Text>
+                <AntDesign name="down" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  borderRadius: 100,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  width: 40,
+                  height: 40,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => {
+                  crashlytics().log('Home Search button clicked');
+                  navigation.navigate(NAVIGATION.search);
+                }}>
+                <AntDesign name="search1" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <AnimeAdbanner />
+          </>
+        ) : null}
         {changeType ? (
           <View
             style={{
@@ -216,10 +225,6 @@ export function Home({navigation}) {
             ))}
           </View>
         ) : null}
-
-        {/* Temp UI End for Switch Server */}
-
-        <AnimeAdbanner />
 
         {!Object.values(History).length ? null : (
           <View style={styles.gameDetailsParent}>
