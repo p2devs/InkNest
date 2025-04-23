@@ -327,7 +327,6 @@ export const fetchComicBook =
         BookmarkPages: [],
         ComicDetailslink: '', // set externally if needed
       };
-      console.log('imgSources', data);
 
       if (setPageLink) {
         setPageLink(data.ComicDetailslink);
