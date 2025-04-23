@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -36,30 +36,15 @@ export function Search({navigation}) {
   const loading = useSelector(state => state.data.loading);
   const IsAnime = useSelector(state => state.data.Anime);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('ComicOnline');
+  const [activeTab, setActiveTab] = useState('ComicHub');
   const [viewAll, setViewAll] = useState(null);
-  const [searchData, setSearchData] = useState({ComicOnline: [], ComicHub: []});
-  const flatlistRef = React.useRef();
+  const [searchData, setSearchData] = useState({ComicHub: [], ComicOnline: []});
+  const flatlistRef = useRef();
   let Tag = View;
 
   const fetchData = async () => {
     if (loading) return;
     if (!searchTerm.trim()) return;
-    if (IsAnime) {
-      console.log('searching by anime');
-
-      await analytics().logEvent('search_anime', {
-        search: searchTerm?.trim()?.toString(),
-      });
-      let data = await SearchAnime(searchTerm, dispatch);
-      if (data.length == 0) {
-        setSearchData([]);
-        Alert.alert('No results found');
-        return;
-      }
-      setSearchData(data);
-      return;
-    }
 
     await analytics().logEvent('search_comic', {
       search: searchTerm?.trim()?.toString(),
@@ -68,17 +53,19 @@ export function Search({navigation}) {
     // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
     let link = searchTerm.trim();
     if (
-      !link.startsWith('https://readcomicsonline.ru/comic/') ||
+      (!link.startsWith('https://readcomicsonline.ru/comic/') &&
+        !link.startsWith('https://comichubfree.com/comic/')) ||
       !link.includes('comic/')
     ) {
-      const [readcomicsonlineResult, comichubfreeResult] = await Promise.all([
-        dispatch(searchComic(link, 'readcomicsonline')),
+      if (link.startsWith('http://') || link.startsWith('https://')) {
+        Alert.alert('Invalid link', 'Please enter a valid comic link');
+        return;
+      }
+
+      const [comichubfreeResult, readcomicsonlineResult] = await Promise.all([
         dispatch(searchComic(link, 'comichubfree')),
+        dispatch(searchComic(link, 'readcomicsonline')),
       ]);
-      console.log('readcomicsonlineResult', {
-        readcomicsonlineResult,
-        comichubfreeResult,
-      });
 
       if (readcomicsonlineResult || comichubfreeResult) {
         if (
@@ -88,8 +75,8 @@ export function Search({navigation}) {
           Alert.alert('No results found');
         }
         setSearchData({
-          ComicOnline: readcomicsonlineResult,
           ComicHub: comichubfreeResult,
+          ComicOnline: readcomicsonlineResult,
         });
       }
       return;
@@ -196,8 +183,8 @@ export function Search({navigation}) {
                     alignItems: 'center',
                     gap: 12,
                   }}>
-                  <Text style={{fontSize: 5, color: 'white', marginLeft: 12}}>
-                    {'\u2B24'}
+                  <Text style={{fontSize: 14, color: 'white', marginLeft: 12}}>
+                    {index + 1}.
                   </Text>
                   <Text style={styles.link}>{item?.title}</Text>
                 </TouchableOpacity>
@@ -248,7 +235,7 @@ export function Search({navigation}) {
           <View
             style={{
               flexDirection: 'row',
-              left: IsAnime ? 0 : widthPercentageToDP('6%'),
+              left: widthPercentageToDP('7%'),
             }}>
             <Text
               style={{
@@ -335,8 +322,11 @@ export function Search({navigation}) {
               <View
                 style={{
                   flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
+                  marginTop: 24,
+                  paddingHorizontal: 16,
+                  borderBottomColor: 'rgba(255,255,255,0.1)',
+                  borderBottomWidth: 1,
+                  justifyContent: 'space-between',
                 }}>
                 {Object.keys(searchData).map((key, idx) => {
                   return (
@@ -346,27 +336,40 @@ export function Search({navigation}) {
                         setActiveTab(key);
                       }}
                       style={{
-                        paddingVertical: 5,
-                        paddingHorizontal: 10,
-                        borderRadius: 12,
-                        backgroundColor:
-                          activeTab !== key ? '#14142a' : 'steelblue',
+                        marginRight: 28,
+                        borderBottomColor:
+                          activeTab === key ? '#3268de' : 'transparent',
+                        borderBottomWidth: 2,
+                        paddingBottom: 4,
+                        flexDirection: 'row',
+                        gap: 6,
                       }}>
                       <Text
-                        style={[
-                          activeTab !== key
-                            ? styles.SwitchUnselectedText
-                            : styles.SwitchSelectedText,
-                        ]}>
+                        style={{
+                          fontSize: 14,
+                          fontWeight: '700',
+                          color:
+                            activeTab === key
+                              ? 'rgba(255,255,255,1)'
+                              : 'rgba(255,255,255,0.6)',
+                        }}>
                         {key}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: '700',
+                          color:
+                            activeTab === key
+                              ? 'rgba(255, 6, 6, 1)'
+                              : 'rgba(255, 6, 6, 0.6)',
+                        }}>
+                        ({searchData[key]?.length})
                       </Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
-              <Text style={styles.title}>
-                Total results: {searchData?.[activeTab]?.length}
-              </Text>
             </View>
           }
           ListEmptyComponent={
@@ -403,6 +406,8 @@ export function Search({navigation}) {
           ListFooterComponent={
             <View style={{marginVertical: heightPercentageToDP('6%')}} />
           }
+          maxToRenderPerBatch={15}
+          initialNumToRender={10}
         />
         <Modal
           transparent

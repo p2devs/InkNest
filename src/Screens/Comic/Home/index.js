@@ -13,6 +13,7 @@ import {
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {getVersion} from 'react-native-device-info';
@@ -27,6 +28,7 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
+import { widthPercentageToDP } from 'react-native-responsive-screen';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
@@ -96,34 +98,40 @@ export function Home({navigation}) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Temp UI Start for Switch Server */}
-        <TouchableOpacity
-          onPress={() => {
-            setChangeType(!changeType);
-            crashlytics().log('Comic Host Name Clicked');
-          }}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 100,
-            width: '100%',
-            height: 40,
-            paddingHorizontal: 20,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 6,
-            marginBottom: 24,
-          }}>
-          <Text
+        <View style={{flex: 1, flexDirection: 'row', gap: 15}}>
+          <TouchableOpacity
+            onPress={() => {
+              setChangeType(!changeType);
+              crashlytics().log('Comic Host Name Clicked');
+            }}
+            style={styles.rectangle}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '700',
+                color: '#fff',
+                textAlign: 'left',
+              }}>
+              {type}
+            </Text>
+            <AntDesign name="down" size={20} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{
-              fontSize: 16,
-              fontWeight: '700',
-              color: '#fff',
-              textAlign: 'left',
-              opacity: 0.9,
+              borderRadius: 100,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              width: 40,
+              height: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onPress={() => {
+              crashlytics().log('Home Search button clicked');
+              navigation.navigate(NAVIGATION.search);
             }}>
-            {type}
-          </Text>
-          <AntDesign name="down" size={20} color="#fff" />
-        </TouchableOpacity>
+            <AntDesign name="search1" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
         {changeType ? (
           <View
             style={{
@@ -134,7 +142,7 @@ export function Home({navigation}) {
               gap: 6,
               paddingHorizontal: 20,
               marginBottom: 24,
-              backgroundColor: 'rgba(0, 255, 255, 0.7)',
+              backgroundColor: '#14142A',
               borderRadius: 10,
               paddingVertical: 10,
               paddingLeft: 10,
@@ -156,15 +164,15 @@ export function Home({navigation}) {
               <TouchableOpacity
                 key={index}
                 style={{
-                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
                   borderRadius: 100,
                   width: '100%',
                   height: 40,
                   paddingHorizontal: 20,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 6,
-                  marginBottom: 24,
+                  gap: 10,
+                  marginVertical: 6,
                 }}
                 onPress={() => {
                   crashlytics().log('Comic Host Name Clicked');
@@ -173,26 +181,37 @@ export function Home({navigation}) {
                   });
                   setType(key);
                   getComicsHome(key, setComicsData, setLoading);
+                  setChangeType(false);
                 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '700',
-                    color: '#fff',
-                    textAlign: 'left',
-                    opacity: 0.9,
-                  }}>
-                  {key}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: '#fff',
-                    textAlign: 'left',
-                    opacity: 0.3,
-                  }}>
-                  {ComicHostName[key]}
-                </Text>
+                {type == key ? (
+                  <AntDesign name="checkcircle" size={20} color="#fff" />
+                ) : (
+                  <MaterialIcons
+                    name="radio-button-unchecked"
+                    size={20}
+                    color="#fff"
+                  />
+                )}
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '700',
+                      color: 'rgba(255, 255, 255, 1)',
+                      textAlign: 'left',
+                      opacity: 0.9,
+                    }}>
+                    {key}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textAlign: 'left',
+                    }}>
+                    {ComicHostName[key]}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -201,15 +220,7 @@ export function Home({navigation}) {
         {/* Temp UI End for Switch Server */}
 
         <AnimeAdbanner />
-        <TouchableOpacity
-          style={styles.rectangle}
-          onPress={() => {
-            crashlytics().log('Home Search button clicked');
-            navigation.navigate(NAVIGATION.search);
-          }}>
-          <AntDesign name="search1" size={20} color="#fff" />
-          <Text style={styles.searchPeopleBy}>Search here</Text>
-        </TouchableOpacity>
+
         {!Object.values(History).length ? null : (
           <View style={styles.gameDetailsParent}>
             <View
@@ -333,13 +344,14 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 20 : 0,
   },
   rectangle: {
+    flex: 1,
     borderRadius: 100,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    width: '100%',
     height: 40,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 6,
     marginBottom: 24,
   },
