@@ -67,7 +67,7 @@ export const HomePageCardClasses = {
     },
   },
   comichubfree: {
-    'latest-release': {
+    'all-comic': {
       cardClass: '.episode-details.box-content',
       cardTitleClass: '.box-info h3.series-title',
       cardLinkClass: '.box-info h3.series-title a',

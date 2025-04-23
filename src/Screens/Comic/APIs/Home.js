@@ -10,7 +10,7 @@ export const getComics = async (hostName, page, type = null) => {
     );
 
     // Construct the URL and parameters based on the host, type, and page
-    let params = `${type}?page=${page}`;
+    let params = `${type ?? ''}?page=${page}`;
     if (
       (page === 1 || page == null) &&
       hostName === ComicHostName.readcomicsonline
@@ -114,6 +114,7 @@ const HomeType = {
     getComics(ComicHostName.comichubfree, 1, 'hot-comic'),
     getComics(ComicHostName.comichubfree, 1, 'new-comic'),
     getComics(ComicHostName.comichubfree, 1, 'popular-comic'),
+    getComics(ComicHostName.comichubfree, 1),
   ],
 };
 
@@ -124,11 +125,28 @@ export const getComicsHome = async (
 ) => {
   setLoading(true);
   try {
-    const [hot_comic_updates, latest_release, most_viewed] = await Promise.all(
-      HomeType[type],
-    );
+    const [hot_comic_updates, latest_release, most_viewed, all_comic] =
+      await Promise.all(HomeType[type]);
 
     const ComicHomeList = {};
+
+    if (all_comic) {
+      ComicHomeList['all-comic'] = {
+        title: 'Latest Comic',
+        data: all_comic?.comicsData,
+        hostName: ComicHostName.comichubfree,
+        lastPage: all_comic?.lastPage,
+      };
+    }
+
+    if (latest_release) {
+      ComicHomeList['latest-release'] = {
+        title: type === 'comichubfree' ? 'New Comic' : 'Latest Release',
+        data: latest_release?.comicsData,
+        hostName: ComicHostName.readcomicsonline,
+        lastPage: latest_release?.lastPage,
+      };
+    }
 
     if (hot_comic_updates) {
       ComicHomeList['hot-comic-updates'] = {
@@ -136,15 +154,6 @@ export const getComicsHome = async (
         data: hot_comic_updates?.comicsData,
         hostName: ComicHostName.readcomicsonline,
         lastPage: hot_comic_updates?.lastPage,
-      };
-    }
-
-    if (latest_release) {
-      ComicHomeList['latest-release'] = {
-        title: 'Latest Release',
-        data: latest_release?.comicsData,
-        hostName: ComicHostName.readcomicsonline,
-        lastPage: latest_release?.lastPage,
       };
     }
 
