@@ -1,27 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
-
-import {
-  heightPercentageToDP,
-  widthPercentageToDP,
-} from 'react-native-responsive-screen';
+import {FlatList, StyleSheet} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {getVersion} from 'react-native-device-info';
 import {useFeatureFlag} from 'configcat-react';
 
-import {
-  fetchComicBook,
-  fetchComicDetails,
-} from '../../../Redux/Actions/GlobalActions';
+import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import PaginationFooter from './Components/FooterPagination';
 
-export function ComicDetails({route}) {
+export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
     {name: 'Chapters', active: true},
@@ -119,7 +112,12 @@ export function ComicDetails({route}) {
         )}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
-          <View style={{height: heightPercentageToDP('5%')}} />
+          <PaginationFooter
+            pagination={ComicDetail?.pagination}
+            pageLink={PageLink}
+            route={route}
+            navigation={navigation}
+          />
         }
       />
     </>

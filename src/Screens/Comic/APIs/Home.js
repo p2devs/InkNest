@@ -10,7 +10,13 @@ export const getComics = async (hostName, page, type = null) => {
     );
 
     // Construct the URL and parameters based on the host, type, and page
-    const params = page === 1 || page == null ? '' : `${type}?page=${page}`;
+    let params = `${type}?page=${page}`;
+    if (
+      (page === 1 || page == null) &&
+      hostName === ComicHostName.readcomicsonline
+    )
+      params = '';
+
     const requestUrl = `${hostName}${params}`;
 
     const response = await APICaller.get(requestUrl);
@@ -19,6 +25,7 @@ export const getComics = async (hostName, page, type = null) => {
 
     let comicsData = [];
     let lastPage = null;
+
     const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
 
     if (tagConfig) {
@@ -31,7 +38,9 @@ export const getComics = async (hostName, page, type = null) => {
         if (link) {
           link = link.replace(/\/\d+$/, '');
         }
-        let image = $(element).find(tagConfig.imageClass).attr('src');
+        let image = $(element)
+          .find(tagConfig.imageClass)
+          .attr(tagConfig.imageAttr ?? 'src');
 
         // For latest-release or most-viewed type, ensure the image URL has https: prefix.
         if (
@@ -89,18 +98,35 @@ export const getComics = async (hostName, page, type = null) => {
     return {comicsData, lastPage};
   } catch (error) {
     console.error('Error fetching comics data:', error);
+    console.log('Request URL:', hostName, page, type);
+
     return null;
   }
 };
 
-export const getComicsHome = async (setComics, setLoading) => {
+const HomeType = {
+  readcomicsonline: [
+    getComics(ComicHostName.readcomicsonline, 1, 'hot-comic-updates'),
+    getComics(ComicHostName.readcomicsonline, 1, 'latest-release'),
+    getComics(ComicHostName.readcomicsonline, 1, 'most-viewed'),
+  ],
+  comichubfree: [
+    getComics(ComicHostName.comichubfree, 1, 'hot-comic'),
+    getComics(ComicHostName.comichubfree, 1, 'new-comic'),
+    getComics(ComicHostName.comichubfree, 1, 'popular-comic'),
+  ],
+};
+
+export const getComicsHome = async (
+  type = 'comichubfree',
+  setComics,
+  setLoading,
+) => {
   setLoading(true);
   try {
-    const [hot_comic_updates, latest_release, most_viewed] = await Promise.all([
-      getComics(ComicHostName.readcomicsonline, 1, 'hot-comic-updates'),
-      getComics(ComicHostName.readcomicsonline, 1, 'latest-release'),
-      getComics(ComicHostName.readcomicsonline, 1, 'most-viewed'),
-    ]);
+    const [hot_comic_updates, latest_release, most_viewed] = await Promise.all(
+      HomeType[type],
+    );
 
     const ComicHomeList = {};
 

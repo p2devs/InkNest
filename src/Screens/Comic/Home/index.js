@@ -26,11 +26,14 @@ import Card from '../Components/Card';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
+import {ComicHostName} from '../../../Utils/APIs';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [type, setType] = useState('comichubfree');
+  const [changeType, setChangeType] = useState(false);
   const History = useSelector(state => state.data.history);
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
@@ -84,7 +87,7 @@ export function Home({navigation}) {
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(setComicsData, setLoading);
+        getComicsHome(type, setComicsData, setLoading);
       }
     }
   }, [forIosValue, forIosLoading]);
@@ -92,6 +95,111 @@ export function Home({navigation}) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Temp UI Start for Switch Server */}
+        <TouchableOpacity
+          onPress={() => {
+            setChangeType(!changeType);
+            crashlytics().log('Comic Host Name Clicked');
+          }}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: 100,
+            width: '100%',
+            height: 40,
+            paddingHorizontal: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            marginBottom: 24,
+          }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: '700',
+              color: '#fff',
+              textAlign: 'left',
+              opacity: 0.9,
+            }}>
+            {type}
+          </Text>
+          <AntDesign name="down" size={20} color="#fff" />
+        </TouchableOpacity>
+        {changeType ? (
+          <View
+            style={{
+              flexGrow: 1,
+              position: 'absolute',
+              width: '100%',
+              flexDirection: 'column',
+              gap: 6,
+              paddingHorizontal: 20,
+              marginBottom: 24,
+              backgroundColor: 'rgba(0, 255, 255, 0.7)',
+              borderRadius: 10,
+              paddingVertical: 10,
+              paddingLeft: 10,
+              paddingRight: 10,
+              zIndex: 1,
+              top: 50,
+              left: 0,
+              right: 0,
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.2,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}>
+            {Object.keys(ComicHostName).map((key, index) => (
+              <TouchableOpacity
+                key={index}
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  borderRadius: 100,
+                  width: '100%',
+                  height: 40,
+                  paddingHorizontal: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  marginBottom: 24,
+                }}
+                onPress={() => {
+                  crashlytics().log('Comic Host Name Clicked');
+                  analytics().logEvent('comic_host_name_clicked', {
+                    hostName: key,
+                  });
+                  setType(key);
+                  getComicsHome(key, setComicsData, setLoading);
+                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: '#fff',
+                    textAlign: 'left',
+                    opacity: 0.9,
+                  }}>
+                  {key}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: '#fff',
+                    textAlign: 'left',
+                    opacity: 0.3,
+                  }}>
+                  {ComicHostName[key]}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
+
+        {/* Temp UI End for Switch Server */}
+
         <AnimeAdbanner />
         <TouchableOpacity
           style={styles.rectangle}

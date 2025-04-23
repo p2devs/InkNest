@@ -16,6 +16,11 @@ import {Alert} from 'react-native';
 import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
 import crashlytics from '@react-native-firebase/crashlytics';
+import {ComicHostName} from '../../Utils/APIs';
+import {
+  ComicBookPageClasses,
+  ComicDetailPageClasses,
+} from '../../Screens/Comic/APIs/constance';
 
 /**
  * Action creator for handling watched data.
@@ -110,70 +115,65 @@ export const fetchComicDetails =
 
       const response = await APICaller.get(link);
       const html = response.data;
-      const $ = cheerio.load(html);
+      let $ = cheerio.load(html);
 
-      // Details Section
-      const detailsContainer = $('.list-container');
-      const title = $('img.img-responsive').attr('alt')?.trim();
+      const hostkey = Object.keys(ComicHostName).find(key =>
+        link.includes(key),
+      );
+      const config = ComicDetailPageClasses[hostkey];
+      if (!config) throw new Error(`No config found for source: ${hostkey}`);
+
+      const detailsContainer = $(config.detailsContainer);
+      const title = $(config.title).text().trim();
+
       let imgSrc = detailsContainer
-        .find('.boxed img.img-responsive')
-        .attr('src');
+        .find(config.imgSrc)
+        .attr(config.getImageAttr);
       if (imgSrc && imgSrc.startsWith('//')) {
         imgSrc = 'https:' + imgSrc;
       }
 
-      // Build a details map from the <dl class="dl-horizontal">
       const details = {};
-      detailsContainer.find('dl.dl-horizontal dt').each((i, el) => {
+      detailsContainer.find(config.detailsDL).each((i, el) => {
         const key = $(el).text().trim().replace(':', '');
         const dd = $(el).next('dd');
-        if (key === 'Tags') {
-          const tags = [];
+
+        if (key.toLowerCase() === 'tags' || key.toLowerCase() === 'genres') {
+          const list = [];
           dd.find('a').each((j, a) => {
-            tags.push($(a).text().trim());
+            list.push($(a).text().trim());
           });
-          details[key] = tags;
-        } else if (key === 'Categories') {
-          details[key] = dd.find('a').first().text().trim();
-        } else if (key === 'Rating') {
-          details[key] = dd.text().trim();
+          details[key] = list;
         } else {
           details[key] = dd.text().trim();
         }
       });
 
-      // Summary Section
-      const summary = $('div.manga.well p').text().trim();
+      const summary = $(config.summary).text().trim();
+      const chapters = await fetchChaptersWithPagination($, config, link);
+      const pagination = getChapterPagination($, config);
 
-      // Chapters Section
-      const chapters = [];
-      $('ul.chapters li').each((i, el) => {
-        const chapterTitle = $(el).find('h5.chapter-title-rtl a').text().trim();
-        const chapterLink = $(el).find('h5.chapter-title-rtl a').attr('href');
-        const chapterDate = $(el)
-          .find('div.date-chapter-title-rtl')
-          .text()
-          .trim();
-        chapters.push({
-          title: chapterTitle,
-          link: chapterLink,
-          date: chapterDate,
-        });
-      });
-
-      // Create comic details object using the new API structure
       const comicDetails = {
         title,
         imgSrc,
         type: details['Type'] || null,
         status: details['Status'] || null,
-        releaseDate: details['Date of release'] || null,
-        categories: details['Categories'] || null,
+        releaseDate:
+          details['Release'] ||
+          details['Released'] ||
+          details['Date of release'] ||
+          null,
+        categories: details['Category'] || details['Categories'] || null,
         tags: details['Tags'] || [],
+        genres: details['Genres'] || [],
+        author: details['Author'] || null,
+        alternativeName:
+          details['Alternative'] || details['Alternative name'] || null,
         views: details['Views'] || null,
         rating: details['Rating'] || null,
         summary,
         chapters,
+        pagination,
         link,
       };
 
@@ -210,6 +210,54 @@ export const fetchComicDetails =
     }
   };
 
+const fetchChaptersWithPagination = async ($, config, link) => {
+  const chapters = [];
+  const visitedPages = new Set();
+  let currentLink = link;
+
+  while (!visitedPages.has(currentLink)) {
+    visitedPages.add(currentLink);
+
+    $(config.chaptersList).each((i, el) => {
+      const chapterTitle = $(el).find(config.chapterTitle).text().trim();
+      const chapterLink = $(el).find(config.chapterLink).attr('href');
+      const chapterDate = $(el).find(config.chapterDate).text().trim();
+
+      if (chapterTitle && chapterLink) {
+        chapters.push({
+          title: chapterTitle,
+          link: chapterLink,
+          date: chapterDate,
+        });
+      }
+    });
+
+    const nextPageLink = $(config.pagination)
+      .filter((i, el) => $(el).text().trim().toLowerCase() === 'next')
+      .attr('href');
+
+    if (!nextPageLink) break;
+
+    const response = await APICaller.get(nextPageLink);
+    currentLink = nextPageLink;
+    $ = cheerio.load(response.data);
+  }
+
+  return chapters;
+};
+
+const getChapterPagination = ($, config) => {
+  const pages = [];
+  $(config.pagination).each((i, el) => {
+    const text = $(el).text().trim();
+    const href = $(el).attr('href');
+    if (text && href) {
+      pages.push({text, link: href});
+    }
+  });
+  return pages;
+};
+
 /**
  * Fetches comic book data from a given URL and dispatches appropriate actions based on the result.
  *
@@ -220,7 +268,18 @@ export const fetchComicDetails =
 export const fetchComicBook =
   (comicBook, setPageLink = null, isDownloadComic) =>
   async (dispatch, getState) => {
+    let newcomicBook = comicBook;
+    // Dynamically get host config
+    const hostkey = Object.keys(ComicHostName).find(key =>
+      comicBook.includes(key),
+    );
+
+    if (hostkey == 'comichubfree') {
+      newcomicBook = `${comicBook}/all`;
+    }
+
     if (!isDownloadComic) dispatch(fetchDataStart());
+
     try {
       const Data = getState().data.dataByUrl[comicBook];
       if (Data) {
@@ -232,40 +291,48 @@ export const fetchComicBook =
         dispatch(checkDownTime());
         return;
       }
-      const response = await APICaller.get(comicBook);
+
+      const response = await APICaller.get(newcomicBook);
       const html = response.data;
       const $ = cheerio.load(html);
 
-      // New API: Extract chapter images using data-src attribute
-      const imageContainer = $('.imagecnt');
+      const config = ComicBookPageClasses[hostkey];
+      if (!config) {
+        throw new Error(`No chapter page config found for source: ${hostkey}`);
+      }
+
+      const {
+        imageContainer,
+        imageSelector,
+        imageAttr,
+        titleSelector,
+        titleAttr,
+      } = config;
+
+      const container = $(imageContainer);
       const imgSources = [];
-      imageContainer
-        .find('img.img-responsive[data-src]')
-        .each((index, element) => {
-          const src = $(element).attr('data-src')?.trim();
-          if (src) {
-            imgSources.push(src);
-          }
-        });
+
+      container.find(imageSelector).each((i, el) => {
+        const src = $(el).attr(imageAttr)?.trim();
+        if (src) imgSources.push(src);
+      });
+
+      const title =
+        container.find(titleSelector).first().attr(titleAttr)?.trim() || '';
 
       const data = {
         images: imgSources,
-        // It is assumed the chapter title is embedded in the alt text of the first image.
-        // Adjust the extraction as needed.
-        title:
-          imageContainer
-            .find('img.img-responsive')
-            .first()
-            .attr('alt')
-            ?.trim() || '',
+        title,
         lastReadPage: 0,
         BookmarkPages: [],
-        ComicDetailslink: '',
+        ComicDetailslink: '', // set externally if needed
       };
+      console.log('imgSources', data);
 
       if (setPageLink) {
         setPageLink(data.ComicDetailslink);
       }
+
       dispatch(fetchDataSuccess({url: comicBook, data}));
       if (isDownloadComic) return {url: comicBook, data};
     } catch (error) {
@@ -467,24 +534,58 @@ export const getAdvancedSearchFilters = () => async dispatch => {
  * @param {string} queryValue - The value to be appended to the search URL.
  * @returns {Function} A thunk function that performs the async operation and returns the result.
  */
-export const searchComic = (queryValue) => async dispatch => {
-  dispatch(fetchDataStart());
-  const url = `https://readcomicsonline.ru/search?query=${encodeURIComponent(
-    queryValue,
-  )}`;
-  try {
-    const response = await APICaller.get(url);
-    dispatch(fetchDataSuccess({url, data: response?.data}));
-    dispatch(StopLoading());
-    dispatch(ClearError());
-    dispatch(checkDownTime());
-    return response?.data;
-  } catch (error) {
-    crashlytics().recordError(error);
-    console.log('Error details:', error);
-    console.error('Error fetching search results:', error);
-    dispatch(fetchDataFailure(error.message));
-    dispatch(checkDownTime(error));
-    return null;
-  }
-};
+export const searchComic =
+  (queryValue, source = 'readcomicsonline') =>
+  async dispatch => {
+    dispatch(fetchDataStart());
+
+    let url;
+    const host =
+      source === 'readcomicsonline'
+        ? 'https://readcomicsonline.ru'
+        : 'https://comichubfree.com';
+
+    try {
+      if (source === 'readcomicsonline') {
+        url = `${host}/search?query=${encodeURIComponent(queryValue)}`;
+        const response = await APICaller.get(url);
+        const suggestions = response?.data?.suggestions || [];
+
+        const formatted = suggestions.map(item => ({
+          title: item.value,
+          data: item.data,
+          link: `${host}/comic/${item.data}`,
+        }));
+
+        dispatch(fetchDataSuccess({url, data: formatted}));
+        dispatch(StopLoading());
+        dispatch(ClearError());
+        dispatch(checkDownTime());
+        return formatted;
+      } else if (source === 'comichubfree') {
+        url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
+        const response = await APICaller.get(url);
+        const json = response?.data || [];
+
+        const formatted = json.map(item => ({
+          title: item.title,
+          data: item.slug,
+          link: `${host}/comic/${item.slug}`,
+        }));
+
+        dispatch(fetchDataSuccess({url, data: formatted}));
+        dispatch(StopLoading());
+        dispatch(ClearError());
+        dispatch(checkDownTime());
+        return formatted;
+      }
+
+      throw new Error(`Unsupported source: ${source}`);
+    } catch (error) {
+      crashlytics().recordError(error);
+      console.log('Error details:', error);
+      dispatch(fetchDataFailure(error.message));
+      dispatch(checkDownTime(error));
+      return null;
+    }
+  };
