@@ -18,7 +18,7 @@ export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
     {name: 'Chapters', active: true},
-    {name: 'Bookmarks', active: false},
+    // {name: 'Bookmarks', active: false},
   ]);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
