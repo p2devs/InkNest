@@ -164,4 +164,12 @@ export const ComicBookPageClasses = {
     titleSelector: 'img.chapter_img',
     titleAttr: 'alt',
   },
+  readallcomics: {
+    imageContainer: 'div[style*="margin:0px auto"]',
+    imageSelector: 'img',
+    imageAttr: 'src',
+    titleSelector: 'h3[style*="color: #0363df"]',
+    titleAttr: 'alt',
+    detailsLinkSelector: 'a[rel="category tag"]',
+  },
 };

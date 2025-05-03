@@ -198,7 +198,7 @@ export const fetchComicDetails =
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
       crashlytics().recordError(error);
-      console.log('Error details:', error);
+      console.log('Error comic details:', error);
       checkDownTime(error);
       dispatch(StopLoading());
       dispatch(ClearError());
@@ -264,40 +264,44 @@ const getChapterPagination = ($, config) => {
  * @returns {function} A thunk function that performs the async fetch operation.
  */
 export const fetchComicBook =
-  (comicBook, setPageLink = null, isDownloadComic) =>
+  (comicBook, isfetchComicDetails = false, isDownloadComic = false) =>
   async (dispatch, getState) => {
-    let newcomicBook = comicBook;
-    // Dynamically get host config
-    const hostkey = Object.keys(ComicHostName).find(key =>
+    const originalComicBook = comicBook;
+    let modifiedComicBook = comicBook;
+
+    const hostkey = Object.keys(ComicBookPageClasses).find(key =>
       comicBook.includes(key),
     );
 
-    if (hostkey == 'comichubfree') {
-      newcomicBook = `${comicBook}/all`;
+    if (!hostkey) {
+      console.warn('Unknown comic host:', comicBook);
+      return;
+    }
+
+    // Apply host-specific transformations
+    if (hostkey === 'comichubfree') {
+      modifiedComicBook = `${comicBook}/all`;
     }
 
     if (!isDownloadComic) dispatch(fetchDataStart());
 
     try {
-      const Data = getState().data.dataByUrl[comicBook];
-      if (Data) {
-        if (setPageLink) {
-          setPageLink(Data.ComicDetailslink);
+      const existingData = getState().data.dataByUrl[originalComicBook];
+
+      if (existingData) {
+        if (isfetchComicDetails && existingData.detailsLink) {
+          dispatch(fetchComicDetails(existingData?.detailsLink));
         }
+
         dispatch(StopLoading());
         dispatch(ClearError());
         dispatch(checkDownTime());
         return;
       }
 
-      const response = await APICaller.get(newcomicBook);
+      const response = await APICaller.get(modifiedComicBook);
       const html = response.data;
       const $ = cheerio.load(html);
-
-      const config = ComicBookPageClasses[hostkey];
-      if (!config) {
-        throw new Error(`No chapter page config found for source: ${hostkey}`);
-      }
 
       const {
         imageContainer,
@@ -305,12 +309,14 @@ export const fetchComicBook =
         imageAttr,
         titleSelector,
         titleAttr,
-      } = config;
+        detailsLinkSelector,
+        detailsLinkAttr = 'href',
+      } = ComicBookPageClasses[hostkey];
 
       const container = $(imageContainer);
       const imgSources = [];
 
-      container.find(imageSelector).each((i, el) => {
+      container.find(imageSelector).each((_, el) => {
         const src = $(el).attr(imageAttr)?.trim();
         if (src) imgSources.push(src);
       });
@@ -318,61 +324,38 @@ export const fetchComicBook =
       const title =
         container.find(titleSelector).first().attr(titleAttr)?.trim() || '';
 
+      // Get details page link if available
+      let detailsLink = '';
+      let detailPageTitle = '';
+      if (detailsLinkSelector) {
+        const detailAnchor = $(detailsLinkSelector).first();
+        detailsLink = detailAnchor.attr(detailsLinkAttr)?.trim() || '';
+        detailPageTitle = detailAnchor.text().trim() || '';
+      }
+
       const data = {
         images: imgSources,
         title,
         lastReadPage: 0,
         BookmarkPages: [],
-        ComicDetailslink: '', // set externally if needed
+        detailsLink,
+        detailPageTitle,
       };
+      console.log('Fetched data:', data);
 
-      if (setPageLink) {
-        setPageLink(data.ComicDetailslink);
+      if (isfetchComicDetails && detailsLink) {
+        dispatch(fetchComicDetails(detailsLink));
       }
 
-      dispatch(fetchDataSuccess({url: comicBook, data}));
-      if (isDownloadComic) return {url: comicBook, data};
+      dispatch(fetchDataSuccess({url: originalComicBook, data}));
+
+      if (isDownloadComic) return {url: originalComicBook, data};
     } catch (error) {
       crashlytics().recordError(error);
-      console.log('Error details:', error);
+      console.log('Error comic book:', error);
       dispatch(fetchDataFailure(error.message));
       checkDownTime(error);
     }
-  };
-
-/**
- * Redux action to update the anime history in the state.
- *
- * @param {Object} params - The parameters object.
- * @param {Object} params.data - The data object containing anime information.
- * @param {string} params.data.AnimeName - The name of the anime.
- * @param {string} params.data.ActiveEpisdeLink - The link to the active episode.
- * @param {number} params.data.ActiveEpisdoe - The active episode number.
- * @param {number} params.data.ActiveEpisdoeProgress - The progress of the active episode.
- * @param {number} params.data.ActiveEpisdoeDuration - The duration of the active episode.
- * @param {boolean} params.data.ActiveEpisdoePlayable - Whether the active episode is playable.
- * @returns {Function} A thunk function that dispatches the AnimeWatched action.
- */
-export const AnimeHistroy =
-  ({data}) =>
-  async (dispatch, getState) => {
-    //get data from state
-    let History = getState().data.AnimeWatched;
-    let WatchedEpisodes = History[data.AnimeName]?.Episodes;
-    let AnimeData = {
-      ...data,
-      Episodes: {
-        ...WatchedEpisodes,
-        [data.ActiveEpisdeLink]: {
-          Link: data.ActiveEpisdeLink,
-          Episode: data?.ActiveEpisdoe,
-          EpisdoeProgress: data?.ActiveEpisdoeProgress,
-          EpisdoeDuration: data?.ActiveEpisdoeDuration,
-          EpisdoePlayable: data?.ActiveEpisdoePlayable,
-        },
-      },
-    };
-    dispatch(AnimeWatched(AnimeData));
   };
 
 /**
