@@ -12,6 +12,7 @@ const initialState = {
   AnimeWatched: {},
   AnimeBookMarks: {},
   DownloadComic: {},
+  rewardShown: {}, // Track comics that have shown rewards during this session
 };
 
 /**
@@ -190,6 +191,14 @@ const Reducers = createSlice({
     RemoveAnimeBookMark: (state, action) => {
       delete state.AnimeBookMarks[action?.payload?.url];
     },
+    markRewardShown: (state, action) => {
+      // Mark specific comic as having shown a reward
+      state.rewardShown[action.payload] = true;
+    },
+    resetRewards: (state) => {
+      // Reset all reward tracking (e.g., on app restart)
+      state.rewardShown = {};
+    },
   },
 });
 
@@ -212,5 +221,7 @@ export const {
   DownloadComicBook,
   DeleteDownloadedComicBook,
   clearHistory,
+  markRewardShown,
+  resetRewards,
 } = Reducers.actions;
 export default Reducers.reducer;
