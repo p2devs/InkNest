@@ -533,53 +533,120 @@ export const getAdvancedSearchFilters = () => async dispatch => {
  * @param {string} queryValue - The value to be appended to the search URL.
  * @returns {Function} A thunk function that performs the async operation and returns the result.
  */
+// export const searchComic =
+//   (queryValue, source = 'readcomicsonline') =>
+//   async dispatch => {
+//     dispatch(fetchDataStart());
+
+//     let url;
+//     const host =
+//       source === 'readcomicsonline'
+//         ? 'https://readcomicsonline.ru'
+//         : 'https://comichubfree.com';
+
+//     try {
+//       if (source === 'readcomicsonline') {
+//         url = `${host}/search?query=${encodeURIComponent(queryValue)}`;
+//         const response = await APICaller.get(url);
+//         const suggestions = response?.data?.suggestions || [];
+
+//         const formatted = suggestions.map(item => ({
+//           title: item.value,
+//           data: item.data,
+//           link: `${host}/comic/${item.data}`,
+//         }));
+
+//         dispatch(fetchDataSuccess({url, data: formatted}));
+//         dispatch(StopLoading());
+//         dispatch(ClearError());
+//         dispatch(checkDownTime());
+//         return formatted;
+//       } else if (source === 'comichubfree') {
+//         url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
+//         const response = await APICaller.get(url);
+//         const json = response?.data || [];
+
+//         const formatted = json.map(item => ({
+//           title: item.title,
+//           data: item.slug,
+//           link: `${host}/comic/${item.slug}`,
+//         }));
+
+//         dispatch(fetchDataSuccess({url, data: formatted}));
+//         dispatch(StopLoading());
+//         dispatch(ClearError());
+//         dispatch(checkDownTime());
+//         return formatted;
+//       }
+
+//       throw new Error(`Unsupported source: ${source}`);
+//     } catch (error) {
+//       crashlytics().recordError(error);
+//       console.log('Error details:', error);
+//       dispatch(fetchDataFailure(error.message));
+//       dispatch(checkDownTime(error));
+//       return null;
+//     }
+//   };
+
 export const searchComic =
   (queryValue, source = 'readcomicsonline') =>
   async dispatch => {
     dispatch(fetchDataStart());
 
-    let url;
-    const host =
-      source === 'readcomicsonline'
-        ? 'https://readcomicsonline.ru'
-        : 'https://comichubfree.com';
-
     try {
+      let url, formatted;
+
       if (source === 'readcomicsonline') {
+        const host = 'https://readcomicsonline.ru';
         url = `${host}/search?query=${encodeURIComponent(queryValue)}`;
         const response = await APICaller.get(url);
         const suggestions = response?.data?.suggestions || [];
 
-        const formatted = suggestions.map(item => ({
+        formatted = suggestions.map(item => ({
           title: item.value,
           data: item.data,
           link: `${host}/comic/${item.data}`,
         }));
 
-        dispatch(fetchDataSuccess({url, data: formatted}));
-        dispatch(StopLoading());
-        dispatch(ClearError());
-        dispatch(checkDownTime());
-        return formatted;
       } else if (source === 'comichubfree') {
+        const host = 'https://comichubfree.com';
         url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
         const response = await APICaller.get(url);
         const json = response?.data || [];
 
-        const formatted = json.map(item => ({
+        formatted = json.map(item => ({
           title: item.title,
           data: item.slug,
           link: `${host}/comic/${item.slug}`,
         }));
 
-        dispatch(fetchDataSuccess({url, data: formatted}));
-        dispatch(StopLoading());
-        dispatch(ClearError());
-        dispatch(checkDownTime());
-        return formatted;
+      } else if (source === 'readallcomics') {
+        const host = 'https://readallcomics.com';
+        url = `${host}/?story=${queryValue.replace(/ /g, '+')}&s=&type=comic`;
+        const response = await APICaller.get(url);
+        const html = response.data;
+        const $ = cheerio.load(html);
+
+        formatted = [];
+        $('ul.list-story.categories li a').each((_, element) => {
+          const title = $(element).text().trim();
+          const href = $(element).attr('href');
+          formatted.push({
+            title,
+            data: href.split('/').filter(Boolean).pop(), // get last part of URL
+            link: href.startsWith('http') ? href : `${host}${href}`,
+          });
+        });
+      } else {
+        throw new Error(`Unsupported source: ${source}`);
       }
 
-      throw new Error(`Unsupported source: ${source}`);
+      dispatch(fetchDataSuccess({ url, data: formatted }));
+      dispatch(StopLoading());
+      dispatch(ClearError());
+      dispatch(checkDownTime());
+      return formatted;
     } catch (error) {
       crashlytics().recordError(error);
       console.log('Error details:', error);

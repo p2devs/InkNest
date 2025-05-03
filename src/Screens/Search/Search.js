@@ -36,9 +36,13 @@ export function Search({navigation}) {
   const loading = useSelector(state => state.data.loading);
   const IsAnime = useSelector(state => state.data.Anime);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('ComicHub');
+  const [activeTab, setActiveTab] = useState('ReadAllComic');
   const [viewAll, setViewAll] = useState(null);
-  const [searchData, setSearchData] = useState({ComicHub: [], ComicOnline: []});
+  const [searchData, setSearchData] = useState({
+    ReadAllComic: [],
+    ComicHub: [],
+    ComicOnline: [],
+  });
   const flatlistRef = useRef();
   let Tag = View;
 
@@ -54,27 +58,38 @@ export function Search({navigation}) {
     let link = searchTerm.trim();
     if (
       (!link.startsWith('https://readcomicsonline.ru/comic/') &&
-        !link.startsWith('https://comichubfree.com/comic/')) ||
-      !link.includes('comic/')
+        !link.startsWith('https://comichubfree.com/comic/') &&
+        !link.startsWith('https://readallcomics.com/category/')) ||
+      (!link.includes('comic/') && !link.includes('category/'))
     ) {
       if (link.startsWith('http://') || link.startsWith('https://')) {
         Alert.alert('Invalid link', 'Please enter a valid comic link');
         return;
       }
 
-      const [comichubfreeResult, readcomicsonlineResult] = await Promise.all([
-        dispatch(searchComic(link, 'comichubfree')),
-        dispatch(searchComic(link, 'readcomicsonline')),
-      ]);
+      const [readcomicsonlineResult, comichubfreeResult, readallcomicsResult] =
+        await Promise.all([
+          dispatch(searchComic(link, 'readcomicsonline')),
+          dispatch(searchComic(link, 'comichubfree')),
+          dispatch(searchComic(link, 'readallcomics')),
+        ]);
+
+      console.log('readcomicsonlineResult', {
+        readcomicsonlineResult,
+        comichubfreeResult,
+        readallcomicsResult,
+      });
 
       if (readcomicsonlineResult || comichubfreeResult) {
         if (
           comichubfreeResult.length == 0 &&
-          readcomicsonlineResult.length == 0
+          readcomicsonlineResult.length == 0 &&
+          readallcomicsResult.length == 0
         ) {
           Alert.alert('No results found');
         }
         setSearchData({
+          ReadAllComic: readallcomicsResult,
           ComicHub: comichubfreeResult,
           ComicOnline: readcomicsonlineResult,
         });
@@ -328,47 +343,53 @@ export function Search({navigation}) {
                   borderBottomWidth: 1,
                   justifyContent: 'space-between',
                 }}>
-                {Object.keys(searchData).map((key, idx) => {
-                  return (
-                    <TouchableOpacity
-                      key={idx}
-                      onPress={() => {
-                        setActiveTab(key);
-                      }}
-                      style={{
-                        marginRight: 28,
-                        borderBottomColor:
-                          activeTab === key ? '#3268de' : 'transparent',
-                        borderBottomWidth: 2,
-                        paddingBottom: 4,
-                        flexDirection: 'row',
-                        gap: 6,
-                      }}>
-                      <Text
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={Object.keys(searchData)}
+                  renderItem={({item, idx}) => {
+                    return (
+                      <TouchableOpacity
+                        key={idx}
+                        onPress={() => {
+                          setActiveTab(item);
+                        }}
                         style={{
-                          fontSize: 14,
-                          fontWeight: '700',
-                          color:
-                            activeTab === key
-                              ? 'rgba(255,255,255,1)'
-                              : 'rgba(255,255,255,0.6)',
+                          marginRight: 28,
+                          borderBottomColor:
+                            activeTab === item ? '#3268de' : 'transparent',
+                          borderBottomWidth: 2,
+                          paddingBottom: 4,
+                          flexDirection: 'row',
+                          gap: 6,
                         }}>
-                        {key}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          fontWeight: '700',
-                          color:
-                            activeTab === key
-                              ? 'rgba(255, 6, 6, 1)'
-                              : 'rgba(255, 6, 6, 0.6)',
-                        }}>
-                        ({searchData[key]?.length})
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: '700',
+                            color:
+                              activeTab === item
+                                ? 'rgba(255,255,255,1)'
+                                : 'rgba(255,255,255,0.6)',
+                          }}>
+                          {item}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: '700',
+                            color:
+                              activeTab === item
+                                ? 'rgba(255, 6, 6, 1)'
+                                : 'rgba(255, 6, 6, 0.6)',
+                          }}>
+                          ({searchData[item]?.length})
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  }}
+                  keyExtractor={(item, index) => index.toString()}
+                />
               </View>
             </View>
           }
