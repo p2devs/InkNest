@@ -26,7 +26,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {SearchAnime} from '../../Components/Func/AnimeVideoFunc';
+import {SearchAnime} from '../../Components/Func/parseFunc';
 import Card from '../Comic/Components/Card';
 import {searchComic} from '../../Redux/Actions/GlobalActions';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
@@ -327,72 +327,70 @@ export function Search({navigation}) {
             </TouchableOpacity>
           </View>
         </View>
+        <View style={{paddingHorizontal: 12, gap: 15, marginBottom: 10}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 24,
+              paddingHorizontal: 16,
+              borderBottomColor: 'rgba(255,255,255,0.1)',
+              borderBottomWidth: 1,
+              justifyContent: 'space-between',
+            }}>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={Object.keys(searchData)}
+              renderItem={({item, idx}) => {
+                return (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => {
+                      setActiveTab(item);
+                    }}
+                    style={{
+                      marginRight: 28,
+                      borderBottomColor:
+                        activeTab === item ? '#3268de' : 'transparent',
+                      borderBottomWidth: 2,
+                      paddingBottom: 4,
+                      flexDirection: 'row',
+                      gap: 6,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '700',
+                        color:
+                          activeTab === item
+                            ? 'rgba(255,255,255,1)'
+                            : 'rgba(255,255,255,0.6)',
+                      }}>
+                      {item}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '700',
+                        color:
+                          activeTab === item
+                            ? 'rgba(255, 6, 6, 1)'
+                            : 'rgba(255, 6, 6, 0.6)',
+                      }}>
+                      ({searchData[item]?.length})
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          </View>
+        </View>
 
         <FlatList
           scrollsToTop
           ref={flatlistRef}
           style={{flex: 1, backgroundColor: '#14142a'}}
-          ListHeaderComponent={
-            <View style={{paddingHorizontal: 12, gap: 15, marginBottom: 10}}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginTop: 24,
-                  paddingHorizontal: 16,
-                  borderBottomColor: 'rgba(255,255,255,0.1)',
-                  borderBottomWidth: 1,
-                  justifyContent: 'space-between',
-                }}>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={Object.keys(searchData)}
-                  renderItem={({item, idx}) => {
-                    return (
-                      <TouchableOpacity
-                        key={idx}
-                        onPress={() => {
-                          setActiveTab(item);
-                        }}
-                        style={{
-                          marginRight: 28,
-                          borderBottomColor:
-                            activeTab === item ? '#3268de' : 'transparent',
-                          borderBottomWidth: 2,
-                          paddingBottom: 4,
-                          flexDirection: 'row',
-                          gap: 6,
-                        }}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '700',
-                            color:
-                              activeTab === item
-                                ? 'rgba(255,255,255,1)'
-                                : 'rgba(255,255,255,0.6)',
-                          }}>
-                          {item}
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '700',
-                            color:
-                              activeTab === item
-                                ? 'rgba(255, 6, 6, 1)'
-                                : 'rgba(255, 6, 6, 0.6)',
-                          }}>
-                          ({searchData[item]?.length})
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                  keyExtractor={(item, index) => index.toString()}
-                />
-              </View>
-            </View>
-          }
           ListEmptyComponent={
             <View
               style={{

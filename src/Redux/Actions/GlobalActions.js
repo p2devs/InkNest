@@ -117,67 +117,69 @@ export const fetchComicDetails =
       const html = response.data;
       let $ = cheerio.load(html);
 
-      const hostkey = Object.keys(ComicHostName).find(key =>
+      const hostkey = Object.keys(ComicDetailPageClasses).find(key =>
         link.includes(key),
       );
       const config = ComicDetailPageClasses[hostkey];
       if (!config) throw new Error(`No config found for source: ${hostkey}`);
 
-      const detailsContainer = $(config.detailsContainer);
-      const title = $(config.title).text().trim();
+      let comicDetails;
+      if (config.customParser) {
+        comicDetails = config.customParser($, config, link);
+      } else {
+        const detailsContainer = $(config.detailsContainer);
+        const title = $(config.title).text().trim();
+        let imgSrc = detailsContainer
+          .find(config.imgSrc)
+          .attr(config.getImageAttr);
+        if (imgSrc && imgSrc.startsWith('//')) imgSrc = 'https:' + imgSrc;
 
-      let imgSrc = detailsContainer
-        .find(config.imgSrc)
-        .attr(config.getImageAttr);
-      if (imgSrc && imgSrc.startsWith('//')) {
-        imgSrc = 'https:' + imgSrc;
-      }
-
-      const details = {};
-      detailsContainer.find(config.detailsDL).each((i, el) => {
-        const key = $(el).text().trim().replace(':', '');
-        const dd = $(el).next('dd');
-
-        if (key.toLowerCase() === 'tags' || key.toLowerCase() === 'genres') {
-          const list = [];
-          dd.find('a').each((j, a) => {
-            list.push($(a).text().trim());
+        const details = {};
+        if (config.detailsDL) {
+          detailsContainer.find(config.detailsDL).each((i, el) => {
+            const key = $(el).text().trim().replace(':', '');
+            const dd = $(el).next('dd');
+            if (
+              key.toLowerCase() === 'tags' ||
+              key.toLowerCase() === 'genres'
+            ) {
+              const list = [];
+              dd.find('a').each((_, a) => list.push($(a).text().trim()));
+              details[key] = list;
+            } else {
+              details[key] = dd.text().trim();
+            }
           });
-          details[key] = list;
-        } else {
-          details[key] = dd.text().trim();
         }
-      });
 
-      const summary = $(config.summary).text().trim();
-      const chapters = await fetchChaptersWithPagination($, config, link);
-      const pagination = getChapterPagination($, config);
+        const summary = $(config.summary).text().trim();
+        const chapters = await fetchChaptersWithPagination($, config, link);
+        const pagination = getChapterPagination($, config);
 
-      const comicDetails = {
-        title,
-        imgSrc,
-        type: details['Type'] || null,
-        status: details['Status'] || null,
-        releaseDate:
-          details['Release'] ||
-          details['Released'] ||
-          details['Date of release'] ||
-          null,
-        categories: details['Category'] || details['Categories'] || null,
-        tags: details['Tags'] || [],
-        genres: details['Genres'] || [],
-        author: details['Author'] || null,
-        alternativeName:
-          details['Alternative'] || details['Alternative name'] || null,
-        views: details['Views'] || null,
-        rating: details['Rating'] || null,
-        summary,
-        chapters,
-        pagination,
-        link,
-      };
-
-      console.log('comicDetails', comicDetails);
+        comicDetails = {
+          title,
+          imgSrc,
+          type: details['Type'] || null,
+          status: details['Status'] || null,
+          releaseDate:
+            details['Release'] ||
+            details['Released'] ||
+            details['Date of release'] ||
+            null,
+          categories: details['Category'] || details['Categories'] || null,
+          tags: details['Tags'] || [],
+          genres: details['Genres'] || [],
+          author: details['Author'] || null,
+          alternativeName:
+            details['Alternative'] || details['Alternative name'] || null,
+          views: details['Views'] || null,
+          rating: details['Rating'] || null,
+          summary,
+          chapters,
+          pagination,
+          link,
+        };
+      }
 
       watchedData = {
         title: comicDetails.title,
@@ -197,10 +199,6 @@ export const fetchComicDetails =
     } catch (error) {
       crashlytics().recordError(error);
       console.log('Error details:', error);
-      console.error(
-        'Error fetching comic details:',
-        error.response?.status || error,
-      );
       checkDownTime(error);
       dispatch(StopLoading());
       dispatch(ClearError());
@@ -526,69 +524,6 @@ export const getAdvancedSearchFilters = () => async dispatch => {
   }
 };
 
-/**
- * Fetches search results for a given query by appending the query value to the search API URL.
- * Returns the parsed result back to the caller.
- *
- * @param {string} queryValue - The value to be appended to the search URL.
- * @returns {Function} A thunk function that performs the async operation and returns the result.
- */
-// export const searchComic =
-//   (queryValue, source = 'readcomicsonline') =>
-//   async dispatch => {
-//     dispatch(fetchDataStart());
-
-//     let url;
-//     const host =
-//       source === 'readcomicsonline'
-//         ? 'https://readcomicsonline.ru'
-//         : 'https://comichubfree.com';
-
-//     try {
-//       if (source === 'readcomicsonline') {
-//         url = `${host}/search?query=${encodeURIComponent(queryValue)}`;
-//         const response = await APICaller.get(url);
-//         const suggestions = response?.data?.suggestions || [];
-
-//         const formatted = suggestions.map(item => ({
-//           title: item.value,
-//           data: item.data,
-//           link: `${host}/comic/${item.data}`,
-//         }));
-
-//         dispatch(fetchDataSuccess({url, data: formatted}));
-//         dispatch(StopLoading());
-//         dispatch(ClearError());
-//         dispatch(checkDownTime());
-//         return formatted;
-//       } else if (source === 'comichubfree') {
-//         url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
-//         const response = await APICaller.get(url);
-//         const json = response?.data || [];
-
-//         const formatted = json.map(item => ({
-//           title: item.title,
-//           data: item.slug,
-//           link: `${host}/comic/${item.slug}`,
-//         }));
-
-//         dispatch(fetchDataSuccess({url, data: formatted}));
-//         dispatch(StopLoading());
-//         dispatch(ClearError());
-//         dispatch(checkDownTime());
-//         return formatted;
-//       }
-
-//       throw new Error(`Unsupported source: ${source}`);
-//     } catch (error) {
-//       crashlytics().recordError(error);
-//       console.log('Error details:', error);
-//       dispatch(fetchDataFailure(error.message));
-//       dispatch(checkDownTime(error));
-//       return null;
-//     }
-//   };
-
 export const searchComic =
   (queryValue, source = 'readcomicsonline') =>
   async dispatch => {
@@ -608,7 +543,6 @@ export const searchComic =
           data: item.data,
           link: `${host}/comic/${item.data}`,
         }));
-
       } else if (source === 'comichubfree') {
         const host = 'https://comichubfree.com';
         url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
@@ -620,7 +554,6 @@ export const searchComic =
           data: item.slug,
           link: `${host}/comic/${item.slug}`,
         }));
-
       } else if (source === 'readallcomics') {
         const host = 'https://readallcomics.com';
         url = `${host}/?story=${queryValue.replace(/ /g, '+')}&s=&type=comic`;
@@ -642,7 +575,7 @@ export const searchComic =
         throw new Error(`Unsupported source: ${source}`);
       }
 
-      dispatch(fetchDataSuccess({ url, data: formatted }));
+      dispatch(fetchDataSuccess({url, data: formatted}));
       dispatch(StopLoading());
       dispatch(ClearError());
       dispatch(checkDownTime());
