@@ -137,8 +137,9 @@ export default function VerticalView({
           <TouchableOpacity
             style={{
               marginBottom: 20,
+              alignItems: 'center',
             }}
-            activeOpacity={0.8}
+            activeOpacity={0.9}
             onPress={() => {
               setImageLinkIndex(index);
               setImagesLinks(item);
