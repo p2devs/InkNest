@@ -77,12 +77,12 @@ export function ComicDetails({route, navigation}) {
       if (PageLink && !rewardShown[PageLink]) {
         crashlytics().log('Comic Details First Visit Reward Shown');
         analytics().logEvent('comic_details_first_visit_reward', {
-          pageLink: PageLink
+          pageLink: PageLink,
         });
-        
+
         // Show the reward
         await showRewardedAd();
-        
+
         // Mark this comic as having shown a reward
         dispatch(markRewardShown(PageLink));
       }
@@ -92,7 +92,12 @@ export function ComicDetails({route, navigation}) {
   }, [PageLink, rewardShown]);
 
   useEffect(() => {
-    dispatch(fetchComicDetails(PageLink));
+    if (getVersion() === forIosValue && forIosLoading === false) {
+    } else {
+      if (forIosLoading === false) {
+        dispatch(fetchComicDetails(PageLink));
+      }
+    }
   }, [PageLink]);
 
   if (error) return <Error error={error} />;

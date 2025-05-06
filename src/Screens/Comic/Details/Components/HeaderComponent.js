@@ -6,6 +6,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 
 import {
@@ -35,10 +36,10 @@ const HeaderComponent = memo(
         <View style={styles.headerContainer}>
           <Image
             style={{
-              top: -heightPercentageToDP('30%'),
+              top: -widthPercentageToDP('60%'),
               borderRadius: heightPercentageToDP('50%'),
               width: widthPercentageToDP('100%'),
-              height: heightPercentageToDP('52%'),
+              height: widthPercentageToDP('100%'),
               position: 'absolute',
             }}
             resizeMode="cover"
@@ -112,6 +113,7 @@ const HeaderComponent = memo(
           <View
             style={{
               alignItems: 'center',
+              marginTop: Platform.isPad ? widthPercentageToDP('20%') : 0,
             }}>
             <View
               style={{
@@ -159,11 +161,11 @@ const HeaderComponent = memo(
                   color: '#fff',
                   opacity: 0.8,
                 }}>{`${
-                  ComicDetail?.releaseDate
-                    ? ComicDetail?.releaseDate +
-                      (ComicDetail?.status ? ' · ' : '')
-                    : ''
-                }${
+                ComicDetail?.releaseDate
+                  ? ComicDetail?.releaseDate +
+                    (ComicDetail?.status ? ' · ' : '')
+                  : ''
+              }${
                 ComicDetail?.genres && ComicDetail?.genres?.length > 0
                   ? ComicDetail?.genres?.toString() + ' · '
                   : ComicDetail?.tags && ComicDetail?.tags?.length > 0
@@ -171,7 +173,10 @@ const HeaderComponent = memo(
                   : ''
               }${
                 ComicDetail?.status
-                  ? ComicDetail?.status + (ComicDetail?.author || ComicDetail?.categories ? ' · ' : '')
+                  ? ComicDetail?.status +
+                    (ComicDetail?.author || ComicDetail?.categories
+                      ? ' · '
+                      : '')
                   : ''
               }${
                 ComicDetail?.author || ComicDetail?.categories
