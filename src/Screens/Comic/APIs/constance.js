@@ -66,6 +66,7 @@ export const HomePageCardClasses = {
       statusClass: null, // Not applicable for readallcomics
       dateClass: '.pinbin-copy span', // Date is inside this span tag
       lastPageClass: '.pagenavi span.page-numbers.dots',
+      cardLinkClass: '.front-link',
     },
   },
   comichubfree: {

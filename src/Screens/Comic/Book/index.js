@@ -23,7 +23,10 @@ import Header from '../../../Components/UIComp/Header';
 import {goBack} from '../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
-import {downloadComicBook, showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
+import {
+  downloadComicBook,
+  showRewardedAd,
+} from '../../../InkNest-Externals/Redux/Actions/Download';
 import {updateData, setScrollPreference} from '../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
 import {NAVIGATION} from '../../../Constants';
@@ -51,10 +54,14 @@ export function ComicBook({navigation, route}) {
 
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
-  const userScrollPreference = useSelector(state => state?.data?.scrollPreference);
+  const userScrollPreference = useSelector(
+    state => state?.data?.scrollPreference,
+  );
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
-  const [isVerticalScroll, setIsVerticalScroll] = useState(userScrollPreference === 'vertical');
+  const [isVerticalScroll, setIsVerticalScroll] = useState(
+    userScrollPreference === 'vertical',
+  );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
@@ -174,7 +181,11 @@ export function ComicBook({navigation, route}) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
         <Text style={styles.text}>Loading comic data...</Text>
       </SafeAreaView>
     );
@@ -183,22 +194,98 @@ export function ComicBook({navigation, route}) {
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>Error: {error}</Text>
+        <Header
+          style={{
+            width: '100%',
+            height: heightPercentageToDP('4%'),
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              analytics().logEvent('go_back_error', {
+                screen: 'ComicBook',
+                comicBookLink: comicBookLink?.toString(),
+                DetailsPageLink: detailsPageLink?.toString(),
+              });
+              goBack();
+            }}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color="#fff"
+              style={{marginRight: 10, opacity: 0.9}}
+            />
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: '700',
+              color: '#fff',
+              opacity: 0.9,
+            }}>
+            Comic Book
+          </Text>
+          <View style={{flex: 0.1}} />
+        </Header>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={styles.text}>Error: {error}</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
-  if (!comicBook) {
+  if (!comicBook?.images?.length > 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>No data available</Text>
+        <Header
+          style={{
+            width: '100%',
+            height: heightPercentageToDP('4%'),
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              analytics().logEvent('go_back_nodata', {
+                screen: 'ComicBook',
+                comicBookLink: comicBookLink?.toString(),
+                DetailsPageLink: detailsPageLink?.toString(),
+              });
+              goBack();
+            }}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color="#fff"
+              style={{marginRight: 10, opacity: 0.9}}
+            />
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: '700',
+              color: '#fff',
+              opacity: 0.9,
+            }}>
+            Comic Book
+          </Text>
+          <View style={{flex: 0.1}} />
+        </Header>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={styles.text}>No data available</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <>
-      <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}}>
+      <SafeAreaView style={styles.container}>
         <Header
           style={{
             width: '100%',
@@ -243,7 +330,7 @@ export function ComicBook({navigation, route}) {
               color: '#fff',
               opacity: 0.9,
             }}>
-            Page: {imageLinkIndex + 1} / {comicBook?.images.length}
+            Page: {imageLinkIndex + 1} / {comicBook?.images?.length}
           </Text>
 
           <TouchableOpacity onPress={() => setIsModalVisible(true)}>
@@ -321,7 +408,7 @@ export function ComicBook({navigation, route}) {
                       setScrollPreference,
                       () => setIsModalVisible(false),
                       'ComicBook',
-                      comicBookLink
+                      comicBookLink,
                     );
                   }}>
                   <Text style={styles.text}>
@@ -494,8 +581,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142A',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   text: {
     fontSize: 20,

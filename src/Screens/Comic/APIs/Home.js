@@ -116,6 +116,7 @@ const HomeType = {
     getComics(ComicHostName.comichubfree, 1, 'popular-comic'),
     getComics(ComicHostName.comichubfree, 1),
   ],
+  readallcomics: [getComics(ComicHostName.readallcomics, 1)],
 };
 
 export const getComicsHome = async (

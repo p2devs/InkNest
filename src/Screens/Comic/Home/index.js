@@ -28,13 +28,12 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
-import {widthPercentageToDP} from 'react-native-responsive-screen';
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState('comichubfree');
+  const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
   const History = useSelector(state => state.data.history);
   const dispatch = useDispatch();
@@ -323,10 +322,14 @@ export function Home({navigation}) {
                         link: item?.link?.toString(),
                         title: item?.title?.toString(),
                       });
-                      navigation.navigate(NAVIGATION.comicDetails, {
-                        ...item,
-                        isComicBookLink: key === 'readallcomics',
-                      });
+                      type === 'readallcomics'
+                        ? navigation.navigate(NAVIGATION.comicBook, {
+                            comicBookLink: item?.link,
+                          })
+                        : navigation.navigate(NAVIGATION.comicDetails, {
+                            ...item,
+                            isComicBookLink: key === 'readallcomics',
+                          });
                     }}
                   />
                 )}
