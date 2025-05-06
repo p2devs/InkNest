@@ -23,11 +23,9 @@ import Header from '../../../Components/UIComp/Header';
 import {goBack} from '../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
-import {
-  downloadComicBook,
-  showRewardedAd,
-} from '../../../InkNest-Externals/Redux/Actions/Download';
-import {updateData} from '../../../Redux/Reducers';
+import {downloadComicBook, showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
+import {updateData, setScrollPreference} from '../../../Redux/Reducers';
+import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
 import {NAVIGATION} from '../../../Constants';
 
 export function ComicBook({navigation, route}) {
@@ -53,9 +51,10 @@ export function ComicBook({navigation, route}) {
 
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
+  const userScrollPreference = useSelector(state => state?.data?.scrollPreference);
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
-  const [isVerticalScroll, setIsVerticalScroll] = useState(false);
+  const [isVerticalScroll, setIsVerticalScroll] = useState(userScrollPreference === 'vertical');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
@@ -315,12 +314,15 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => {
-                    setIsVerticalScroll(!isVerticalScroll);
-                    setIsModalVisible(false);
-                    analytics().logEvent('toggle_vertical_scroll', {
-                      screen: 'ComicBook',
-                      isVerticalScroll: !isVerticalScroll,
-                    });
+                    handleScrollModeChange(
+                      isVerticalScroll,
+                      setIsVerticalScroll,
+                      dispatch,
+                      setScrollPreference,
+                      () => setIsModalVisible(false),
+                      'ComicBook',
+                      comicBookLink
+                    );
                   }}>
                   <Text style={styles.text}>
                     {!isVerticalScroll

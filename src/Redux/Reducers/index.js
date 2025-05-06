@@ -12,6 +12,8 @@ const initialState = {
   AnimeWatched: {},
   AnimeBookMarks: {},
   DownloadComic: {},
+  rewardShown: {}, // Track comics that have shown rewards during this session
+  scrollPreference: 'horizontal', // Default scroll mode is horizontal
 };
 
 /**
@@ -33,6 +35,7 @@ const initialState = {
  * @property {boolean} Anime - Anime mode toggle
  * @property {Object} AnimeWatched - Watched anime tracking
  * @property {Object} AnimeBookMarks - Anime bookmarks storage
+ * @property {string} scrollPreference - User's preferred comic reading scroll mode
  *
  * @property {Object} reducers - An object containing the reducer functions.
  * @property {function} reducers.fetchDataStart - Initiates data fetching by setting loading to true and clearing errors.
@@ -77,7 +80,6 @@ const initialState = {
  *   @param {Object} action.payload - The anime bookmark information.
  * @property {function} reducers.RemoveAnimeBookMark - Removes an anime from the bookmarks.
  *   @param {Object} state - The current state.
- *   @param {Object} action.payload - The anime bookmark information to remove.
  */
 
 const Reducers = createSlice({
@@ -190,6 +192,18 @@ const Reducers = createSlice({
     RemoveAnimeBookMark: (state, action) => {
       delete state.AnimeBookMarks[action?.payload?.url];
     },
+    markRewardShown: (state, action) => {
+      // Mark specific comic as having shown a reward
+      state.rewardShown[action.payload] = true;
+    },
+    resetRewards: (state) => {
+      // Reset all reward tracking (e.g., on app restart)
+      state.rewardShown = {};
+    },
+    setScrollPreference: (state, action) => {
+      // Update user's preferred comic reading scroll mode
+      state.scrollPreference = action.payload;
+    },
   },
 });
 
@@ -212,5 +226,8 @@ export const {
   DownloadComicBook,
   DeleteDownloadedComicBook,
   clearHistory,
+  markRewardShown,
+  resetRewards,
+  setScrollPreference,
 } = Reducers.actions;
 export default Reducers.reducer;

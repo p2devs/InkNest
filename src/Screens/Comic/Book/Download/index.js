@@ -9,7 +9,7 @@ import {
   Share,
 } from 'react-native';
 
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import {Gallery, useImageResolution} from 'react-native-zoom-toolkit';
 import {useSharedValue} from 'react-native-reanimated';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
@@ -22,19 +22,23 @@ import Header from '../../../../Components/UIComp/Header';
 import {goBack} from '../../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
+import {setScrollPreference} from '../../../../Redux/Reducers';
+import {handleScrollModeChange} from '../../../../Utils/ScrollModeUtils';
 
 export function DownloadComicBook({route}) {
+  const dispatch = useDispatch();
   const {isDownloadComic, chapterlink} = route?.params;
 
   const ref = useRef(null);
 
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
+  const userScrollPreference = useSelector(state => state?.data?.scrollPreference);
 
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
-  const [isVerticalScroll, setIsVerticalScroll] = useState(false);
+  const [isVerticalScroll, setIsVerticalScroll] = useState(userScrollPreference === 'vertical');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [extractDownloaded, setExtractDownloaded] = useState(null);
 
@@ -218,12 +222,15 @@ export function DownloadComicBook({route}) {
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => {
-                    setIsVerticalScroll(!isVerticalScroll);
-                    setIsModalVisible(false);
-                    analytics().logEvent('toggle_vertical_scroll', {
-                      screen: 'DownloadComicBook',
-                      isVerticalScroll: !isVerticalScroll,
-                    });
+                    handleScrollModeChange(
+                      isVerticalScroll,
+                      setIsVerticalScroll,
+                      dispatch,
+                      setScrollPreference,
+                      () => setIsModalVisible(false),
+                      'DownloadComicBook',
+                      isDownloadComic
+                    );
                   }}>
                   <Text style={styles.text}>
                     {!isVerticalScroll

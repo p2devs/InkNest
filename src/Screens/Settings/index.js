@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   Linking,
   Platform,
-  Switch,
   Modal,
   FlatList,
   StyleSheet,
   Share,
+  Alert,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {
@@ -30,10 +30,9 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
 import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
-import {AnimeHostName, ComicHostName} from '../../Utils/APIs';
-import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
+import {AnimeHostName} from '../../Utils/APIs';
+import {SwtichBaseUrl, SwtichToAnime, setScrollPreference} from '../../Redux/Reducers';
 import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
-import {navigate} from '../../Navigation/NavigationService';
 
 export function Settings({navigation}) {
   let Tag = View;
@@ -41,6 +40,8 @@ export function Settings({navigation}) {
   const [SwitchServer, setSwitchServer] = useState(null);
   const baseUrl = useSelector(state => state.data.baseUrl);
   const Anime = useSelector(state => state.data.Anime);
+  const scrollPreference = useSelector(state => state.data.scrollPreference);
+  
   const SwitchAnimeToggle = () => {
     dispatch(SwtichToAnime(!Anime));
     if (Anime) {
@@ -282,6 +283,58 @@ export function Settings({navigation}) {
             </View>
           </TouchableOpacity>
         ) : null}
+
+        <TouchableOpacity
+          style={{
+            paddingVertical: hp('1%'),
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+          onPress={() => {
+            analytics().logEvent('toggle_scroll_preference', {
+              item: 'Comic Reading Mode',
+              currentPreference: scrollPreference,
+            });
+            
+            const newPreference = scrollPreference === 'horizontal' ? 'vertical' : 'horizontal';
+            dispatch(setScrollPreference(newPreference));
+            
+            Alert.alert(
+              'Reading Preference Changed',
+              `Your comic reading mode is now set to ${newPreference} scrolling.`,
+              [{ text: 'OK' }]
+            );
+          }}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <MaterialIcons
+              name={scrollPreference === 'horizontal' ? 'swap-horiz' : 'swap-vert'}
+              size={hp('2.5%')}
+              color="#000"
+              style={{marginRight: 10}}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Comic Reading Mode
+            </Text>
+          </View>
+          <Text
+            style={{
+              fontSize: hp('1.8%'),
+              color: '#007AFF',
+            }}>
+            {scrollPreference === 'horizontal' ? 'Horizontal' : 'Vertical'}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={async () => {

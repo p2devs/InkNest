@@ -1,21 +1,20 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {NAVIGATION} from '../../Constants';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+
+import {setScrollPreference} from '../../Redux/Reducers';
+import {handleScrollModeChange} from '../../Utils/ScrollModeUtils';
 
 const ComicBookFooter = ({
   comicBookLink,
   setViewAll,
   ViewAll,
-  navigation,
-  showButton,
   scrollMode,
   setScrollMode,
 }) => {
+  const dispatch = useDispatch();
   const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
   const index = ComicBook?.volumes?.findIndex(item => {
     const checklinkBaseUrl = item?.link.includes('readallcomics.com')
@@ -66,15 +65,19 @@ const ComicBookFooter = ({
       {!ViewAll && (
         <TouchableOpacity
           onPress={() => {
-            analytics().logEvent('comicbook_scroll_mode', {
-              scrollMode:
-                scrollMode === 'horizontal' ? 'vertical' : 'horizontal',
-            });
-            crashlytics().log('ComicBook Scroll Mode Changed');
-            crashlytics().setAttribute('scroll_mode', scrollMode);
-            crashlytics().setUserId(comicBookLink);
-            setScrollMode(
-              scrollMode === 'horizontal' ? 'vertical' : 'horizontal',
+            // Convert string scroll mode to boolean isVertical for consistency
+            const isVerticalScroll = scrollMode === 'vertical';
+            handleScrollModeChange(
+              isVerticalScroll,
+              (newValue) => {
+                // Convert back to string format that this component uses
+                setScrollMode(newValue ? 'vertical' : 'horizontal');
+              },
+              dispatch,
+              setScrollPreference,
+              null,
+              'ComicBookFooter',
+              comicBookLink
             );
           }}
           style={{
