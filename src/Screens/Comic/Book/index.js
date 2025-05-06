@@ -26,21 +26,24 @@ import VerticalView from './VerticalView';
 import {downloadComicBook, showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
 import {updateData, setScrollPreference} from '../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
+import {NAVIGATION} from '../../../Constants';
 
 export function ComicBook({navigation, route}) {
+  const ref = useRef(null);
   const dispatch = useDispatch();
   const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
-
-  const ref = useRef(null);
-
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
+
+  const [detailsPageLink, setDetailsPageLink] = useState(
+    DetailsPage?.link ?? comicBook?.detailsLink ?? '',
+  );
   const ComicDetails = useSelector(
-    state => state?.data?.dataByUrl[DetailsPage?.link],
+    state => state?.data?.dataByUrl[detailsPageLink],
   );
   const isComicDownload = Boolean(
     useSelector(
       state =>
-        state?.data?.DownloadComic?.[DetailsPage?.link]?.comicBooks?.[
+        state?.data?.DownloadComic?.[detailsPageLink]?.comicBooks?.[
           comicBookLink
         ],
     ),
@@ -63,18 +66,24 @@ export function ComicBook({navigation, route}) {
       analytics().logEvent('fetch_comic_book', {
         screen: 'ComicBook',
         comicBookLink: comicBookLink?.toString(),
-        DetailsPageLink: DetailsPage?.link?.toString(),
+        DetailsPageLink: detailsPageLink?.toString(),
         pageJump: pageJump,
         isVerticalScroll: isVerticalScroll,
         timestamp: new Date().toISOString(),
       });
-      dispatch(fetchComicBook(comicBookLink));
+      dispatch(fetchComicBook(comicBookLink, !detailsPageLink));
       setIsPreviousChapter(getChapterIndex() === 0);
       setIsNextChapter(
         getChapterIndex() === ComicDetails?.chapters?.length - 1,
       );
     }
   }, [comicBookLink, dispatch]);
+
+  useEffect(() => {
+    if (comicBook?.detailsLink) {
+      setDetailsPageLink(comicBook?.detailsLink);
+    }
+  }, [comicBook?.detailsLink]);
 
   const activeIndex = useSharedValue(0);
 
@@ -204,7 +213,7 @@ export function ComicBook({navigation, route}) {
               analytics().logEvent('go_back', {
                 screen: 'ComicBook',
                 comicBookLink: comicBookLink?.toString(),
-                DetailsPageLink: DetailsPage?.link?.toString(),
+                DetailsPageLink: detailsPageLink?.toString(),
                 pageJump: pageJump?.toString(),
                 isDownloadComic: isDownloadComic?.toString(),
                 isVerticalScroll: isVerticalScroll?.toString(),
@@ -325,6 +334,40 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   style={[
                     styles.button,
+                    {backgroundColor: !detailsPageLink ? '#555' : '#FF6347'},
+                  ]}
+                  disabled={!detailsPageLink}
+                  onPress={() => {
+                    analytics().logEvent('navigate_Comic_details_page', {
+                      screen: 'ComicBook',
+                      currentChapterLink: comicBookLink?.toString(),
+                      detailsPageLink: detailsPageLink?.toString(),
+                      isDownloadComic: isDownloadComic?.toString(),
+                      pageJump: pageJump?.toString(),
+                      isVerticalScroll: isVerticalScroll?.toString(),
+                    });
+
+                    setIsModalVisible(false);
+                    setImageLinkIndex(0);
+                    navigation.navigate(NAVIGATION.comicDetails, {
+                      link: detailsPageLink,
+                    });
+
+                    dispatch(
+                      updateData({
+                        url: comicBookLink,
+                        data: {lastReadPage: imageLinkIndex},
+                        imageLength: comicBookLink?.images?.length,
+                        ComicDetailslink: ComicDetails?.link,
+                      }),
+                    );
+                  }}>
+                  <Text style={styles.text}>Open Details Page</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.button,
                     {backgroundColor: isPreviousChapter ? '#555' : '#FF6347'},
                   ]}
                   disabled={isPreviousChapter}
@@ -368,7 +411,7 @@ export function ComicBook({navigation, route}) {
                     analytics().logEvent('download_comic', {
                       screen: 'ComicBook',
                       comicBookLink: comicBookLink?.toString(),
-                      DetailsPageLink: DetailsPage?.link?.toString(),
+                      DetailsPageLink: detailsPageLink?.toString(),
                       pageJump: pageJump,
                       isDownloadComic: isDownloadComic,
                       isVerticalScroll: isVerticalScroll,

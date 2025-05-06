@@ -1,3 +1,5 @@
+import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
+
 export const HomePageCardClasses = {
   azcomic: {
     'popular-comics': {
@@ -103,6 +105,7 @@ export const HomePageCardClasses = {
     },
   },
 };
+
 export const ComicDetailPageClasses = {
   readcomicsonline: {
     detailsContainer: '.list-container',
@@ -130,6 +133,20 @@ export const ComicDetailPageClasses = {
     detailsDL: '.movie-dl dt',
     pagination: '.pagination li a',
   },
+  readallcomics: {
+    container: '.description-archive',
+    title: 'h1',
+    image: 'img',
+    imageAttr: 'src',
+    genre: 'p strong:nth-of-type(1)',
+    author: 'p strong:nth-of-type(2)',
+    volumeDescription: 'hr.style-six',
+    summarySelector: 'strong',
+    chapters: '.list-story li a',
+    chapterTitleAttr: 'title',
+    chapterLinkAttr: 'href',
+    customParser: parseReadAllComicsDetails,
+  },
 };
 
 export const ComicBookPageClasses = {
@@ -146,5 +163,13 @@ export const ComicBookPageClasses = {
     imageAttr: 'data-src',
     titleSelector: 'img.chapter_img',
     titleAttr: 'alt',
+  },
+  readallcomics: {
+    imageContainer: 'div[style*="margin:0px auto"]',
+    imageSelector: 'img',
+    imageAttr: 'src',
+    titleSelector: 'h3[style*="color: #0363df"]',
+    titleAttr: 'alt',
+    detailsLinkSelector: 'a[rel="category tag"]',
   },
 };
