@@ -98,7 +98,7 @@ export function ComicDetails({route, navigation}) {
         dispatch(fetchComicDetails(PageLink));
       }
     }
-  }, [PageLink]);
+  }, [PageLink, forIosLoading]);
 
   if (error) return <Error error={error} />;
 
