@@ -13,8 +13,8 @@ import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
+import {rewardAdsShown} from '../../../Redux/Reducers';
 import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
-import {markRewardShown} from '../../../Redux/Reducers';
 
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
@@ -34,7 +34,7 @@ export function ComicDetails({route, navigation}) {
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
-  const rewardShown = useSelector(state => state.data.rewardShown);
+  const hasRewardAdsShown = useSelector(state => state.data.hasRewardAdsShown);
 
   const reverseChapterList = () => {
     if (getVersion() === forIosValue && forIosLoading === false) {
@@ -70,27 +70,18 @@ export function ComicDetails({route, navigation}) {
     }
   };
 
-  // Check and show reward for first visit
   useEffect(() => {
-    const showRewardForFirstVisit = async () => {
-      // Only show reward if it hasn't been shown for this comic yet
-      if (PageLink && !rewardShown[PageLink]) {
-        crashlytics().log('Comic Details First Visit Reward Shown');
-        analytics().logEvent('comic_details_first_visit_reward', {
-          pageLink: PageLink,
-        });
-
-        // Show the reward
+    (async () => {
+      if (!hasRewardAdsShown) {
+        crashlytics().log('Reward Ads Shown');
+        analytics().logEvent('Reward_Ads_Shown');
         await showRewardedAd();
-
-        // Mark this comic as having shown a reward
-        dispatch(markRewardShown(PageLink));
+        dispatch(rewardAdsShown(!hasRewardAdsShown));
       }
-    };
-
-    showRewardForFirstVisit();
-  }, [PageLink, rewardShown]);
-
+    })();
+  }, [hasRewardAdsShown]);
+  
+  
   useEffect(() => {
     if (getVersion() === forIosValue && forIosLoading === false) {
     } else {
