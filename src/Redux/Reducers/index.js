@@ -13,6 +13,7 @@ const initialState = {
   AnimeBookMarks: {},
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
+  hasRewardAdsShown: false,
 };
 
 /**
@@ -195,6 +196,10 @@ const Reducers = createSlice({
       // Update user's preferred comic reading scroll mode
       state.scrollPreference = action.payload;
     },
+    rewardAdsShown: (state, action) => {
+      // Update the flag indicating whether reward ads have been shown
+      state.hasRewardAdsShown = action.payload;
+    },
   },
 });
 
@@ -218,5 +223,6 @@ export const {
   DeleteDownloadedComicBook,
   clearHistory,
   setScrollPreference,
+  rewardAdsShown,
 } = Reducers.actions;
 export default Reducers.reducer;

@@ -6,7 +6,7 @@ import Reducers from '../Reducers';
 const persistConfig = {
   key: 'root',
   storage: storage,
-  blacklist: ['error', 'status', 'loading', 'downTime'],
+  blacklist: ['error', 'status', 'loading', 'downTime', 'hasRewardAdsShown'],
 };
 
 const persistedReducer = persistReducer(persistConfig, Reducers);

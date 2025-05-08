@@ -13,6 +13,8 @@ import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
+import {rewardAdsShown} from '../../../Redux/Reducers';
+import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
 
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
@@ -32,6 +34,7 @@ export function ComicDetails({route, navigation}) {
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
+  const hasRewardAdsShown = useSelector(state => state.data.hasRewardAdsShown);
 
   const reverseChapterList = () => {
     if (getVersion() === forIosValue && forIosLoading === false) {
@@ -67,8 +70,18 @@ export function ComicDetails({route, navigation}) {
     }
   };
 
-
-
+  useEffect(() => {
+    (async () => {
+      if (!hasRewardAdsShown) {
+        crashlytics().log('Reward Ads Shown');
+        analytics().logEvent('Reward_Ads_Shown');
+        await showRewardedAd();
+        dispatch(rewardAdsShown(!hasRewardAdsShown));
+      }
+    })();
+  }, [hasRewardAdsShown]);
+  
+  
   useEffect(() => {
     if (getVersion() === forIosValue && forIosLoading === false) {
     } else {
