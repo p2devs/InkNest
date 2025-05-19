@@ -33,6 +33,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {AnimeHostName} from '../../Utils/APIs';
 import {SwtichBaseUrl, SwtichToAnime, setScrollPreference} from '../../Redux/Reducers';
 import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
+import DonationBanner from '../../InkNest-Externals/Donation/DonationBanner';
 
 export function Settings({navigation}) {
   let Tag = View;
@@ -79,6 +80,7 @@ export function Settings({navigation}) {
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}} edges={['top']}>
       <Header title="Settings" />
+      <DonationBanner />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity
