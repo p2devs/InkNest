@@ -1,19 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {getVersion, getBuildNumber} from 'react-native-device-info';
+import {getVersion} from 'react-native-device-info';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {Settings, Sources} from '../Screens';
+import {Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
 import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
-import DownTime from '../Components/UIComp/DownTime';
 import {useFeatureFlag} from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
+import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -81,6 +81,7 @@ export function BottomNavigation() {
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
 
   return (
+    <>
     <BottomTab.Navigator
       screenOptions={{
         tabBarBackground: () => (
@@ -174,5 +175,7 @@ export function BottomNavigation() {
         />
       )}
     </BottomTab.Navigator>
+    <FloatingDonationButton />
+    </>
   );
 }
