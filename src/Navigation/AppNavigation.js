@@ -1,4 +1,4 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createStackNavigator} from '@react-navigation/stack';
 
 import {NAVIGATION} from '../Constants';
 import {AboutUs, Search} from '../Screens';
@@ -21,7 +21,7 @@ import {
 import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 import WebSearchScreen from '../InkNest-Externals/Screens/Webview/WebSearchScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 /**
  * AppNavigation component sets up the navigation stack for the application.
@@ -34,7 +34,6 @@ export function AppNavigation() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
       }}>
       <Stack.Screen
         name={NAVIGATION.bottomNavigation}

@@ -14,7 +14,6 @@ import {Gallery, useImageResolution} from 'react-native-zoom-toolkit';
 import {useSharedValue} from 'react-native-reanimated';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import analytics from '@react-native-firebase/analytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -29,7 +28,27 @@ import {
 } from '../../../InkNest-Externals/Redux/Actions/Download';
 import {updateData, setScrollPreference} from '../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
+import { isMacOS } from '../../../Utils/PlatformUtils';
 import {NAVIGATION} from '../../../Constants';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 export function ComicBook({navigation, route}) {
   const ref = useRef(null);
@@ -70,7 +89,7 @@ export function ComicBook({navigation, route}) {
 
   useEffect(() => {
     if (comicBookLink) {
-      analytics().logEvent('fetch_comic_book', {
+      analytics.logEvent('fetch_comic_book', {
         screen: 'ComicBook',
         comicBookLink: comicBookLink?.toString(),
         DetailsPageLink: detailsPageLink?.toString(),
@@ -142,7 +161,7 @@ export function ComicBook({navigation, route}) {
     }
 
     const targetChapter = ComicDetails.chapters[targetIndex];
-    analytics().logEvent('chapter_navigation', {
+    analytics.logEvent('chapter_navigation', {
       screen: 'ComicBook',
       direction: direction,
       fromChapter: comicBookLink,
@@ -205,7 +224,7 @@ export function ComicBook({navigation, route}) {
           }}>
           <TouchableOpacity
             onPress={() => {
-              analytics().logEvent('go_back_error', {
+              analytics.logEvent('go_back_error', {
                 screen: 'ComicBook',
                 comicBookLink: comicBookLink?.toString(),
                 DetailsPageLink: detailsPageLink?.toString(),
@@ -251,7 +270,7 @@ export function ComicBook({navigation, route}) {
           }}>
           <TouchableOpacity
             onPress={() => {
-              analytics().logEvent('go_back_nodata', {
+              analytics.logEvent('go_back_nodata', {
                 screen: 'ComicBook',
                 comicBookLink: comicBookLink?.toString(),
                 DetailsPageLink: detailsPageLink?.toString(),
@@ -297,7 +316,7 @@ export function ComicBook({navigation, route}) {
           }}>
           <TouchableOpacity
             onPress={() => {
-              analytics().logEvent('go_back', {
+              analytics.logEvent('go_back', {
                 screen: 'ComicBook',
                 comicBookLink: comicBookLink?.toString(),
                 DetailsPageLink: detailsPageLink?.toString(),
@@ -363,13 +382,32 @@ export function ComicBook({navigation, route}) {
       </SafeAreaView>
       {isModalVisible && (
         <SafeAreaView>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => {
-              setIsModalVisible(!isModalVisible);
-            }}>
+          {(() => {
+            // On macOS, render as a regular View instead of Modal to avoid RCTModalHostView error
+            const ContentWrapper = isMacOS ? View : Modal;
+            const contentProps = isMacOS 
+              ? {
+                  style: {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1000,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                  }
+                }
+              : {
+                  animationType: "slide",
+                  transparent: true,
+                  visible: isModalVisible,
+                  onRequestClose: () => {
+                    setIsModalVisible(!isModalVisible);
+                  }
+                };
+
+            return (
+              <ContentWrapper {...contentProps}>
             <SafeAreaView
               style={{
                 flex: 1,
@@ -425,7 +463,7 @@ export function ComicBook({navigation, route}) {
                   ]}
                   disabled={!detailsPageLink}
                   onPress={() => {
-                    analytics().logEvent('navigate_Comic_details_page', {
+                    analytics.logEvent('navigate_Comic_details_page', {
                       screen: 'ComicBook',
                       currentChapterLink: comicBookLink?.toString(),
                       detailsPageLink: detailsPageLink?.toString(),
@@ -462,7 +500,7 @@ export function ComicBook({navigation, route}) {
                     navigateToChapter('previous');
                     setIsModalVisible(false);
                     setImageLinkIndex(0);
-                    analytics().logEvent('navigate_previous_chapter', {
+                    analytics.logEvent('navigate_previous_chapter', {
                       screen: 'ComicBook',
                       currentChapterLink: comicBookLink?.toString(),
                     });
@@ -480,7 +518,7 @@ export function ComicBook({navigation, route}) {
                     navigateToChapter('next');
                     setIsModalVisible(false);
                     setImageLinkIndex(0);
-                    analytics().logEvent('navigate_next_chapter', {
+                    analytics.logEvent('navigate_next_chapter', {
                       screen: 'ComicBook',
                       currentChapterLink: comicBookLink?.toString(),
                     });
@@ -495,7 +533,7 @@ export function ComicBook({navigation, route}) {
                     if (isComicDownload) return;
                     if (downloadLoading) return;
 
-                    analytics().logEvent('download_comic', {
+                    analytics.logEvent('download_comic', {
                       screen: 'ComicBook',
                       comicBookLink: comicBookLink?.toString(),
                       DetailsPageLink: detailsPageLink?.toString(),
@@ -528,7 +566,7 @@ export function ComicBook({navigation, route}) {
                   style={styles.button}
                   onPress={async () => {
                     setIsModalVisible(false);
-                    await analytics().logEvent('share_comic', {
+                    await analytics.logEvent('share_comic', {
                       screen: 'ComicBook',
                       comicBookLink: comicBookLink?.toString(),
                     });
@@ -547,7 +585,7 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   style={styles.button}
                   onPress={async () => {
-                    await analytics().logEvent('report_comic', {
+                    await analytics.logEvent('report_comic', {
                       screen: 'ComicBook',
                       comicBookLink: comicBookLink?.toString(),
                     });
@@ -570,7 +608,9 @@ export function ComicBook({navigation, route}) {
                 <Text style={styles.text}>Close</Text>
               </TouchableOpacity>
             </SafeAreaView>
-          </Modal>
+              </ContentWrapper>
+            );
+          })()}
         </SafeAreaView>
       )}
     </>

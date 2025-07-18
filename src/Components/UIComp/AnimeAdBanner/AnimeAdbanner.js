@@ -1,7 +1,16 @@
 import React from 'react';
 import {View, Text, StyleSheet, Linking, TouchableOpacity} from 'react-native';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+import {isMacOS} from '../../../Utils/PlatformUtils';
+
+let crashlytics, analytics;
+try {
+  if (!isMacOS) {
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+  }
+} catch (error) {
+  console.log('Firebase modules not available on this platform');
+}
 
 import {useBannerContext} from './BannerContext';
 import Image from '../Image';
@@ -10,8 +19,12 @@ const AnimeAdbanner = () => {
   const {bannerStates, updateBannerVisibility} = useBannerContext();
 
   const handleStreamNow = () => {
-    crashlytics().log('Anime Banner Open button clicked');
-    analytics().logEvent('anime_banner_open');
+    if (!isMacOS && crashlytics) {
+      crashlytics().log('Anime Banner Open button clicked');
+    }
+    if (!isMacOS && analytics) {
+      analytics.logEvent('anime_banner_open');
+    }
     Linking.openURL('https://p2devs.github.io/Anizuno/');
     updateBannerVisibility('animeBanner', false);
   };
@@ -19,8 +32,12 @@ const AnimeAdbanner = () => {
   return (
     <TouchableOpacity
       onPress={() => {
-        crashlytics().log('Anime Banner clicked');
-        analytics().logEvent('anime_banner_clicked');
+        if (!isMacOS && crashlytics) {
+          crashlytics().log('Anime Banner clicked');
+        }
+        if (!isMacOS && analytics) {
+          analytics.logEvent('anime_banner_clicked');
+        }
         handleStreamNow();
       }}
       style={{

@@ -16,9 +16,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import {getVersion, getBuildNumber} from 'react-native-device-info';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+import {isMacOS} from '../../Utils/PlatformUtils';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -28,6 +26,26 @@ import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
+
+// Conditional imports for device info and Firebase
+let getVersion, getBuildNumber, crashlytics, analytics;
+if (!isMacOS) {
+  try {
+    const deviceInfo = require('react-native-device-info');
+    getVersion = deviceInfo.getVersion;
+    getBuildNumber = deviceInfo.getBuildNumber;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+  } catch (error) {
+    console.log('Device info or Firebase modules not available:', error.message);
+    getVersion = () => '1.0.0';
+    getBuildNumber = () => '1';
+  }
+} else {
+  // Fallback functions for macOS
+  getVersion = () => '1.0.0';
+  getBuildNumber = () => '1';
+}
 import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
 import {AnimeHostName} from '../../Utils/APIs';
@@ -95,7 +113,7 @@ export function Settings({navigation}) {
             alignItems: 'center',
           }}
           onPress={async () => {
-            await analytics().logEvent('about_us', {
+            await analytics.logEvent('about_us', {
               item: 'About us screen',
             });
             navigation.navigate(NAVIGATION.aboutUs);
@@ -118,7 +136,7 @@ export function Settings({navigation}) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('update_screen', {
+            await analytics.logEvent('update_screen', {
               item: 'Update screen',
             });
             navigation.navigate(NAVIGATION.update);
@@ -151,7 +169,7 @@ export function Settings({navigation}) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('storage_usage', {
+            await analytics.logEvent('storage_usage', {
               item: 'Storage usage screen',
             });
             Linking.openSettings();
@@ -185,7 +203,7 @@ export function Settings({navigation}) {
 
         <TouchableOpacity
           onPress={() => {
-            analytics().logEvent('anime_external', {
+            analytics.logEvent('anime_external', {
               item: 'Anime external screen',
             });
             Linking.openURL('https://p2devs.github.io/Anizuno/');
@@ -228,7 +246,7 @@ export function Settings({navigation}) {
         {Anime ? (
           <TouchableOpacity
             onPress={async () => {
-              await analytics().logEvent('server_switch', {
+              await analytics.logEvent('server_switch', {
                 item: 'Switch Server screen',
               });
               setSwitchServer(baseUrl);
@@ -299,7 +317,7 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
           }}
           onPress={() => {
-            analytics().logEvent('toggle_scroll_preference', {
+            analytics.logEvent('toggle_scroll_preference', {
               item: 'Comic Reading Mode',
               currentPreference: scrollPreference,
             });
@@ -340,7 +358,7 @@ export function Settings({navigation}) {
 
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('discord_open', {
+            await analytics.logEvent('discord_open', {
               item: 'Discord Invite screen',
             });
             Linking.openURL('https://discord.gg/WYwJefvWNT');
@@ -381,7 +399,7 @@ export function Settings({navigation}) {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('privacy_policy_open', {
+            await analytics.logEvent('privacy_policy_open', {
               item: 'Privacy Policy screen',
             });
             Linking.openURL('https://2hub.live/InkNest/Privacy-Policy');
@@ -422,7 +440,7 @@ export function Settings({navigation}) {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
-            await analytics().logEvent('share_app', {
+            await analytics.logEvent('share_app', {
               item: 'Share App screen',
             });
             Share.share({

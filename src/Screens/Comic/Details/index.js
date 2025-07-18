@@ -1,10 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, StyleSheet} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
-import {getVersion} from 'react-native-device-info';
 import {useFeatureFlag} from 'configcat-react';
+import {isMacOS} from '../../../Utils/PlatformUtils';
 
 import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
@@ -15,6 +13,18 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
 import {rewardAdsShown} from '../../../Redux/Reducers';
 import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
+
+// Conditional imports for Firebase
+let crashlytics, analytics, getVersion;
+if (!isMacOS) {
+  try {
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+    getVersion = require('react-native-device-info').getVersion;
+  } catch (error) {
+    console.log('Firebase/device-info modules not available:', error.message);
+  }
+}
 
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
@@ -37,7 +47,7 @@ export function ComicDetails({route, navigation}) {
   const hasRewardAdsShown = useSelector(state => state.data.hasRewardAdsShown);
 
   const reverseChapterList = () => {
-    if (getVersion() === forIosValue && forIosLoading === false) {
+    if (getVersion && getVersion() === forIosValue && forIosLoading === false) {
       return [
         {
           link: 'https://comicbookplus.com/?dlid=16848',
@@ -72,9 +82,9 @@ export function ComicDetails({route, navigation}) {
 
   useEffect(() => {
     (async () => {
-      if (!hasRewardAdsShown) {
-        crashlytics().log('Reward Ads Shown');
-        analytics().logEvent('Reward_Ads_Shown');
+      if (!hasRewardAdsShown && !isMacOS) {
+        if (crashlytics) crashlytics().log('Reward Ads Shown');
+        if (analytics) analytics.logEvent('Reward_Ads_Shown');
         await showRewardedAd();
         dispatch(rewardAdsShown(!hasRewardAdsShown));
       }
@@ -83,7 +93,7 @@ export function ComicDetails({route, navigation}) {
   
   
   useEffect(() => {
-    if (getVersion() === forIosValue && forIosLoading === false) {
+    if (getVersion && getVersion() === forIosValue && forIosLoading === false) {
     } else {
       if (forIosLoading === false) {
         dispatch(fetchComicDetails(PageLink));
@@ -104,18 +114,22 @@ export function ComicDetails({route, navigation}) {
             title={route?.params?.title}
             tabBar={tabBar}
             onTabBar={index => {
-              crashlytics().log('Comic Details Tab Clicked');
-              analytics().logEvent('Comic_Details_Tab_Clicked', {
-                TabName: tabBar[index].name?.toString(),
-              });
+              if (!isMacOS) {
+                if (crashlytics) crashlytics().log('Comic Details Tab Clicked');
+                if (analytics) analytics.logEvent('Comic_Details_Tab_Clicked', {
+                  TabName: tabBar[index].name?.toString(),
+                });
+              }
               tabBar.map(tab => (tab.active = false));
               tabBar[index].active = true;
               setTabBar([...tabBar]);
             }}
             sort={sort}
             setSORT={() => {
-              crashlytics().log('Comic Details Sort Clicked');
-              analytics().logEvent('Comic_Details_Sort_Clicked');
+              if (!isMacOS) {
+                if (crashlytics) crashlytics().log('Comic Details Sort Clicked');
+                if (analytics) analytics.logEvent('Comic_Details_Sort_Clicked');
+              }
               setSort(!sort);
             }}
           />

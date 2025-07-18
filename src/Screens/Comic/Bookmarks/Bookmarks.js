@@ -10,14 +10,34 @@ import {
 
 import {useDispatch, useSelector} from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 import {updateData} from '../../../Redux/Reducers';
 import Image from '../../../Components/UIComp/Image';
 import {NAVIGATION} from '../../../Constants';
+
+import { isMacOS } from '../../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 export function Bookmarks({navigation}) {
   const dispatch = useDispatch();
@@ -39,7 +59,7 @@ export function Bookmarks({navigation}) {
           <TouchableOpacity
             onPress={async () => {
               crashlytics().log('Comic Bookmark clicked');
-              analytics().logEvent('Comic_Bookmark_clicked', {
+              analytics.logEvent('Comic_Bookmark_clicked', {
                 title: item?.title?.toString(),
                 link: getKey(item.title)?.toString(),
               });
@@ -77,7 +97,7 @@ export function Bookmarks({navigation}) {
             <TouchableOpacity
               onPress={() => {
                 crashlytics().log('Comic Bookmark removed');
-                analytics().logEvent('Comic_Bookmark_removed', {
+                analytics.logEvent('Comic_Bookmark_removed', {
                   url: getKey(item.title)?.toString(),
                 });
                 dispatch(

@@ -1,11 +1,31 @@
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity, Image, View, Text} from 'react-native';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+
 import {useSelector} from 'react-redux';
 
 import {navigate} from '../../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../../Constants';
+
+import { isMacOS } from '../../../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 const HistoryCard = ({item, index}) => {
   const ComicDetail = useSelector(state => state.data.dataByUrl[item.link]);
@@ -42,7 +62,7 @@ const HistoryCard = ({item, index}) => {
       }}
       onPress={() => {
         crashlytics().log('History Card Comic Details button clicked');
-        analytics().logEvent('history_card_comic_details_button', {
+        analytics.logEvent('history_card_comic_details_button', {
           link: item?.link?.toString(),
           title: item?.title?.toString(),
         });

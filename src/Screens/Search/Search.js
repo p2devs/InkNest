@@ -18,9 +18,7 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import crashlytics from '@react-native-firebase/crashlytics';
 
-import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -30,6 +28,27 @@ import {SearchAnime} from '../../Components/Func/parseFunc';
 import Card from '../Comic/Components/Card';
 import {searchComic} from '../../Redux/Actions/GlobalActions';
 import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 export function Search({navigation}) {
   const dispatch = useDispatch();
@@ -50,7 +69,7 @@ export function Search({navigation}) {
     if (loading) return;
     if (!searchTerm.trim()) return;
 
-    await analytics().logEvent('search_comic', {
+    await analytics.logEvent('search_comic', {
       search: searchTerm?.trim()?.toString(),
     });
 
@@ -268,7 +287,7 @@ export function Search({navigation}) {
             }}
             onPress={() => {
               crashlytics().log('Advanced Search button clicked');
-              analytics().logEvent('advanced_search', {
+              analytics.logEvent('advanced_search', {
                 click: 'Advanced Search',
               });
               navigation.navigate(NAVIGATION.WebSearch);

@@ -4,8 +4,27 @@ import { navigate } from '../../Navigation/NavigationService';
 import { NAVIGATION } from '../../Constants';
 import Image from './Image';
 import { useSelector } from 'react-redux';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
   let Tag = View;
@@ -43,7 +62,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
               navigationPage: navigationTarget?.toString(),
             });
 
-            await analytics().logEvent('open_anime', {
+            await analytics.logEvent('open_anime', {
               link: item.link?.toString(),
               title: item.title?.toString(),
               imageUrl: item.imageUrl?.toString(),
@@ -67,7 +86,7 @@ const HomeRenderItem = ({ item, index, Showhistory, search = false }) => {
             navigationPage: NAVIGATION?.comicDetails?.toString(),
           });
 
-          await analytics().logEvent('open_comic', {
+          await analytics.logEvent('open_comic', {
             link: item.link?.toString(),
             home: !Showhistory?.toString(),
             search: Showhistory?.toString(),

@@ -10,8 +10,6 @@ import {
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
 
 import Card from '../Components/Card';
 import {getComics} from '../APIs/Home';
@@ -25,8 +23,36 @@ import Button from '../../../Components/UIComp/Button';
 import Toast from 'react-native-toast-message';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AdBanner from '../../../InkNest-Externals/Ads/BannerAds';
-import {BannerAdSize} from 'react-native-google-mobile-ads';
+
+// Conditional imports for macOS compatibility
+import { isMacOS } from '../../../Utils/PlatformUtils';
+
+// Google Mobile Ads - only import on supported platforms
+let BannerAdSize;
+if (!isMacOS) {
+  BannerAdSize = require('react-native-google-mobile-ads').BannerAdSize;
+}
+
 import {NAVIGATION} from '../../../Constants';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 export function SeeAll({navigation, route}) {
   const {title, data, key, hostName, lastPage} = route.params;
@@ -104,7 +130,7 @@ export function SeeAll({navigation, route}) {
               index={index}
               onPress={() => {
                 crashlytics().log('See All Comics Card clicked');
-                analytics().logEvent('see_all_comics_card_clicked', {
+                analytics.logEvent('see_all_comics_card_clicked', {
                   key: key?.toString(),
                   title: title?.toString(),
                   isComicBookLink: key === 'readallcomics',
@@ -141,7 +167,7 @@ export function SeeAll({navigation, route}) {
                 onPress={() => {
                   if (page > 1) {
                     crashlytics().log('See All Comics Previous Button clicked');
-                    analytics().logEvent(
+                    analytics.logEvent(
                       'see_all_comics_previous_button_clicked',
                       {
                         page: page?.toString(),
@@ -167,7 +193,7 @@ export function SeeAll({navigation, route}) {
                 color={lastPage && page == lastPage ? 'silver' : '#007AFF'}
                 onPress={() => {
                   crashlytics().log('See All Comics Next Button clicked');
-                  analytics().logEvent('see_all_comics_next_button', {
+                  analytics.logEvent('see_all_comics_next_button', {
                     page: page?.toString(),
                     lastPage: lastPage?.toString(),
                   });

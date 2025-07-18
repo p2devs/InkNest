@@ -14,7 +14,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-
 import {
   checkDownTime,
   fetchComicBook,
@@ -25,7 +24,6 @@ import Error from '../../../Components/UIComp/Error';
 import {updateData} from '../../../Redux/Reducers';
 import ChaptersView from '../../../Components/UIComp/ChaptersView';
 import DescriptionView from '../../../Components/UIComp/DescriptionView';
-import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';

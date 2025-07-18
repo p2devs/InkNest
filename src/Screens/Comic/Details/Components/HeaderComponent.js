@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
-
 import {
   heightPercentageToDP,
   widthPercentageToDP,

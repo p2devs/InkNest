@@ -1,6 +1,16 @@
 import React, {createContext, useState, useContext, useEffect} from 'react';
 import {useFeatureFlag} from 'configcat-react';
-import {getVersion} from 'react-native-device-info';
+import {Platform} from 'react-native';
+import {isMacOS} from '../../../Utils/PlatformUtils';
+
+let getVersion;
+try {
+  if (!isMacOS) {
+    getVersion = require('react-native-device-info').getVersion;
+  }
+} catch (error) {
+  console.log('react-native-device-info not available on this platform');
+}
 
 // Create the context
 const BannerContext = createContext();
@@ -13,6 +23,15 @@ export const BannerProvider = ({children}) => {
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
 
   useEffect(() => {
+    if (isMacOS || !getVersion) {
+      // On macOS, just show banner by default
+      setBannerStates(prevState => ({
+        ...prevState,
+        animeBanner: true,
+      }));
+      return;
+    }
+
     if (forIosValue !== getVersion()) {
       setBannerStates(prevState => ({
         ...prevState,

@@ -8,9 +8,24 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import {updateData} from '../../Redux/Reducers';
 import {goBack} from '../../Navigation/NavigationService';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
-import AdBanner from '../../InkNest-Externals/Ads/BannerAds';
-import {BannerAdSize} from 'react-native-google-mobile-ads';
-import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Google Mobile Ads
+let AdBanner = () => null;
+let BannerAdSize = {};
+let showRewardedAd = () => {};
+
+if (!isMacOS) {
+  try {
+    AdBanner = require('../../InkNest-Externals/Ads/BannerAds').default;
+    const {BannerAdSize: BannerAdSizeImport} = require('react-native-google-mobile-ads');
+    BannerAdSize = BannerAdSizeImport;
+    const {showRewardedAd: showRewardedAdImport} = require('../../InkNest-Externals/Redux/Actions/Download');
+    showRewardedAd = showRewardedAdImport;
+  } catch (error) {
+    console.log('Google Mobile Ads not available on this platform');
+  }
+}
 
 const ComicBookHeader = ({comicBookLink, PageIndex, ViewAll, showBookmark}) => {
   const dispatch = useDispatch();

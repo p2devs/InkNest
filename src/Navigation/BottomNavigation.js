@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {getVersion} from 'react-native-device-info';
+import {isMacOS} from '../Utils/PlatformUtils';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -14,6 +14,21 @@ import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
+
+// Conditional import for device info
+let getVersion;
+if (!isMacOS) {
+  try {
+    getVersion = require('react-native-device-info').getVersion;
+  } catch (error) {
+    console.log('react-native-device-info not available on this platform:', error.message);
+    // Fallback function for macOS
+    getVersion = () => '1.0.0';
+  }
+} else {
+  // Fallback function for macOS
+  getVersion = () => '1.0.0';
+}
 
 const BottomTab = createBottomTabNavigator();
 

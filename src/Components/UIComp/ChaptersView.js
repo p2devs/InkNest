@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import analytics from '@react-native-firebase/analytics';
+
 import { navigate } from '../../Navigation/NavigationService';
 import GalleryPopup from './GalleryPopup';
 import { updateData } from '../../Redux/Reducers';
@@ -20,6 +20,27 @@ import { NAVIGATION } from '../../Constants';
 import Image from './Image';
 import { downloadComicBook, showRewardedAd } from '../../InkNest-Externals/Redux/Actions/Download';
 import { fetchComicBook } from '../../Redux/Actions/GlobalActions';
+
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const dispatch = useDispatch();
@@ -54,7 +75,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   const LoadingComic = async () => {
     if (loadingStatus) return;
     setLoadingStatus(true);
-    await analytics().logEvent('download_comic', {
+    await analytics.logEvent('download_comic', {
       link: chapter?.link?.toString(),
       title: chapter?.title?.toString(),
     });
@@ -94,7 +115,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
           }}>
           <Text
             onPress={async () => {
-              await analytics().logEvent('open_bookmark_comic', {
+              await analytics.logEvent('open_bookmark_comic', {
                 link: chapter?.link?.toString(),
                 title: chapter?.title?.toString(),
               });
@@ -173,7 +194,7 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
   return (
     <TouchableOpacity
       onPress={async () => {
-        await analytics().logEvent('open_comic_chapter', {
+        await analytics.logEvent('open_comic_chapter', {
           link: chapter?.link?.toString(),
           title: chapter?.title?.toString(),
         });

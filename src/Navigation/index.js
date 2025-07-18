@@ -5,25 +5,38 @@ import {navigationRef} from './NavigationService';
 import {Platform, StatusBar, AppState} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {ClearError} from '../Redux/Reducers';
-import analytics from '@react-native-firebase/analytics';
-import messaging from '@react-native-firebase/messaging';
-import {firebase} from '@react-native-firebase/perf';
-import crashlytics from '@react-native-firebase/crashlytics';
-import {firebase as fire} from '@react-native-firebase/analytics';
-import inAppMessaging from '@react-native-firebase/in-app-messaging';
+import {isMacOS} from '../Utils/PlatformUtils';
 
-import {
-  check,
-  request,
-  PERMISSIONS,
-  RESULTS,
-  requestNotifications,
-  checkNotifications,
-} from 'react-native-permissions';
-import mobileAds, {
-  AdsConsent,
-  AdsConsentStatus,
-} from 'react-native-google-mobile-ads';
+// Conditional imports for non-macOS platforms
+let analytics, messaging, firebase, crashlytics, fire, inAppMessaging;
+let check, request, PERMISSIONS, RESULTS, requestNotifications, checkNotifications;
+let mobileAds, AdsConsent, AdsConsentStatus;
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    firebase = require('@react-native-firebase/perf').firebase;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    fire = require('@react-native-firebase/analytics').firebase;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+    
+    const permissions = require('react-native-permissions');
+    check = permissions.check;
+    request = permissions.request;
+    PERMISSIONS = permissions.PERMISSIONS;
+    RESULTS = permissions.RESULTS;
+    requestNotifications = permissions.requestNotifications;
+    checkNotifications = permissions.checkNotifications;
+    
+    const mobileAdsPackage = require('react-native-google-mobile-ads');
+    mobileAds = mobileAdsPackage.default;
+    AdsConsent = mobileAdsPackage.AdsConsent;
+    AdsConsentStatus = mobileAdsPackage.AdsConsentStatus;
+  } catch (error) {
+    console.log('Some modules not available on this platform:', error.message);
+  }
+}
 
 /**
  * RootNavigation component handles the main navigation logic for the application.
@@ -32,23 +45,6 @@ import mobileAds, {
  *
  * @function RootNavigation
  * @returns {JSX.Element} The navigation container with the app's navigation structure.
- *
- * @requires useDispatch from 'react-redux'
- * @requires useNetInfo from '@react-native-community/netinfo'
- * @requires useRef from 'react'
- * @requires useEffect from 'react'
- * @requires useLayoutEffect from 'react'
- * @requires crashlytics from '@react-native-firebase/crashlytics'
- * @requires messaging from '@react-native-firebase/messaging'
- * @requires fire from '@react-native-firebase/app'
- * @requires firebase from '@react-native-firebase/app'
- * @requires PermissionsAndroid from 'react-native'
- * @requires Platform from 'react-native'
- * @requires StatusBar from 'react-native'
- * @requires NavigationContainer from '@react-navigation/native'
- * @requires navigationRef from './path/to/navigationRef'
- * @requires AppNavigation from './path/to/AppNavigation'
- * @requires ClearError from './path/to/actions'
  */
 export function RootNavigation() {
   const dispatch = useDispatch();
@@ -59,7 +55,9 @@ export function RootNavigation() {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
       setAppState(nextAppState);
-      crashlytics().setAttribute('app_state', nextAppState);
+      if (!isMacOS && crashlytics) {
+        crashlytics().setAttribute('app_state', nextAppState);
+      }
     });
 
     return () => {
@@ -69,14 +67,18 @@ export function RootNavigation() {
 
   // Request user permission for notifications on Android and iOS devices
   async function requestUserPermission() {
-    crashlytics().log('Requesting the notification permission.');
-    checkNotifications();
-    requestNotifications(['alert', 'sound']);
+    if (isMacOS) return; // Skip on macOS
+    
+    if (crashlytics) crashlytics().log('Requesting the notification permission.');
+    if (checkNotifications) checkNotifications();
+    if (requestNotifications) requestNotifications(['alert', 'sound']);
     FCMPushNotification();
   }
 
   // FCM Push Notification for Android and iOS devices using Firebase Cloud Messaging
   async function FCMPushNotification() {
+    if (isMacOS || !messaging) return; // Skip on macOS
+    
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -89,56 +91,40 @@ export function RootNavigation() {
 
   /**
    * Enables the reception of in-app messages by disabling message display suppression.
-   *
-   * @async
-   * @function allowToReceiveInAppMessages
-   * @returns {Promise<void>} Resolves when in-app messages can be received.
    */
   async function allowToReceiveInAppMessages() {
+    if (isMacOS || !inAppMessaging) return; // Skip on macOS
     await inAppMessaging().setMessagesDisplaySuppressed(false);
   }
 
   /**
    * Enables analytics collection for the application.
-   *
-   * This function asynchronously sets the analytics collection to be enabled
-   * using the Firebase analytics service.
-   *
-   * @returns {Promise<void>} A promise that resolves when the analytics collection is enabled.
    */
   async function AnalyticsEnabled() {
+    if (isMacOS || !fire) return; // Skip on macOS
     await fire.analytics().setAnalyticsCollectionEnabled(true);
   }
 
   /**
    * Enables Crashlytics collection.
-   *
-   * This function asynchronously enables the Crashlytics collection by setting
-   * the Crashlytics collection enabled flag to true.
-   *
-   * @returns {Promise<void>} A promise that resolves when the Crashlytics collection is enabled.
    */
   async function toggleCrashlytics() {
+    if (isMacOS || !crashlytics) return; // Skip on macOS
     await crashlytics().setCrashlyticsCollectionEnabled(true);
   }
 
   /**
    * Enables performance monitoring collection in the Firebase application.
-   *
-   * This function asynchronously enables the collection of performance data
-   * using Firebase Performance Monitoring. It sets the performance collection
-   * to be enabled, allowing the app to gather and report performance metrics.
-   *
-   * @async
-   * @function PerformanceMonitoring
-   * @returns {Promise<void>} A promise that resolves when the performance collection is enabled.
    */
   async function PerformanceMonitoring() {
+    if (isMacOS || !firebase) return; // Skip on macOS
     await firebase.perf().setPerformanceCollectionEnabled(true);
   }
 
   // Request user consent for personalized ads from Google Mobile Ads SDK
   useEffect(() => {
+    if (isMacOS || !AdsConsent) return; // Skip on macOS
+    
     // Request consent information and load/present a consent form if necessary
     AdsConsent.gatherConsent()
       .then(() => startGoogleMobileAdsSDK())
@@ -151,6 +137,8 @@ export function RootNavigation() {
 
   // Start Google Mobile Ads SDK with user consent
   async function startGoogleMobileAdsSDK() {
+    if (isMacOS || !AdsConsent || !mobileAds) return; // Skip on macOS
+    
     const consentInfo = await AdsConsent.getConsentInfo();
     let useNonPersonalizedAds = !consentInfo.canRequestAds;
 
@@ -185,12 +173,14 @@ export function RootNavigation() {
   }
 
   useEffect(() => {
-    allowToReceiveInAppMessages();
-    requestUserPermission();
-    if (!__DEV__) {
-      PerformanceMonitoring();
-      toggleCrashlytics();
-      AnalyticsEnabled();
+    if (!isMacOS) {
+      allowToReceiveInAppMessages();
+      requestUserPermission();
+      if (!__DEV__) {
+        PerformanceMonitoring();
+        toggleCrashlytics();
+        AnalyticsEnabled();
+      }
     }
   }, []);
 
@@ -212,17 +202,21 @@ export function RootNavigation() {
         const currentRouteName = navigationRef.current.getCurrentRoute().name;
 
         if (previousRouteName !== currentRouteName) {
-          await analytics().logScreenView({
-            screen_name: currentRouteName,
-            screen_class: currentRouteName,
-          });
+          if (!isMacOS && analytics) {
+            await analytics.logScreenView({
+              screen_name: currentRouteName,
+              screen_class: currentRouteName,
+            });
+          }
           console.log('Screen Name: ', currentRouteName);
         }
         routeNameRef.current = currentRouteName;
 
         // Add more context to crashes
-        crashlytics().setAttribute('current_screen', currentRouteName);
-        crashlytics().setAttribute('app_state', JSON.stringify(appState));
+        if (!isMacOS && crashlytics) {
+          crashlytics().setAttribute('current_screen', currentRouteName);
+          crashlytics().setAttribute('app_state', JSON.stringify(appState));
+        }
       }}>
       <AppNavigation />
     </NavigationContainer>

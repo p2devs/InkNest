@@ -14,8 +14,6 @@ import {
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import {Chip, List} from 'react-native-paper';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -29,6 +27,27 @@ import {NAVIGATION} from '../../Constants';
 import {navigate} from '../../Navigation/NavigationService';
 import {showRewardedAd} from '../../InkNest-Externals/Redux/Actions/Download';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
+
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = { logEvent: () => Promise.resolve() };
+let crashlytics = { log: () => {}, recordError: () => {}, setAttribute: () => {}, setUserId: () => {} };
+let messaging = { onMessage: () => {}, getToken: () => Promise.resolve('') };
+let perf = { newTrace: () => ({ start: () => {}, stop: () => {} }) };
+let inAppMessaging = { setAutomaticDataCollectionEnabled: () => {} };
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    messaging = require('@react-native-firebase/messaging').default;
+    perf = require('@react-native-firebase/perf').default;
+    inAppMessaging = require('@react-native-firebase/in-app-messaging').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 export function Sources({navigation}) {
   const dispatch = useDispatch();
@@ -82,7 +101,7 @@ export function Sources({navigation}) {
 
       <TouchableOpacity
         onPress={() => {
-          analytics().logEvent('open_manga', {
+          analytics.logEvent('open_manga', {
             item: 'Open_Manga',
           });
           showRewardedAd();
@@ -125,7 +144,7 @@ export function Sources({navigation}) {
 
       <TouchableOpacity
         onPress={() => {
-          analytics().logEvent('open_browser', {
+          analytics.logEvent('open_browser', {
             item: 'Open_Browser',
           });
           showRewardedAd();

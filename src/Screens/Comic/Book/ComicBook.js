@@ -18,7 +18,6 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import {getVersion} from 'react-native-device-info';
 import {useFeatureFlag} from 'configcat-react';
 
 import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
@@ -30,6 +29,18 @@ import {updateData} from '../../../Redux/Reducers';
 import ComicBookHeader from '../../../Components/UIComp/ComicBookHeader';
 import ComicBookFooter from '../../../Components/UIComp/ComicBookFooter';
 import Image from '../../../Components/UIComp/Image';
+import { isMacOS } from '../../../Utils/PlatformUtils';
+
+// Conditional imports for device info
+let getVersion = () => '1.0.0'; // Default fallback
+if (!isMacOS) {
+  try {
+    const deviceInfo = require('react-native-device-info');
+    getVersion = deviceInfo.getVersion;
+  } catch (error) {
+    console.log('Device info not available on this platform');
+  }
+}
 
 export function ComicBook({navigation, route}) {
   const {comicBookLink, pageJump, isDownloadComic, chapterlink} = route?.params;

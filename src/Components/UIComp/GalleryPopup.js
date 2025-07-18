@@ -23,6 +23,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {navigate, replace} from '../../Navigation/NavigationService';
 import {NAVIGATION} from '../../Constants';
+import { isMacOS } from '../../Utils/PlatformUtils';
 
 const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
   const [PageIndex, setPageIndex] = useState(0);
@@ -117,13 +118,30 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
     return null;
   }
 
+  // On macOS, render as a regular View instead of Modal to avoid RCTModalHostView error
+  const ContentWrapper = isMacOS ? View : Modal;
+  const contentProps = isMacOS 
+    ? {
+        style: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1000,
+          backgroundColor: '#222',
+        }
+      }
+    : {
+        animationType: "slide",
+        visible: isOpen !== null,
+        onRequestClose: () => {
+          setClose(null);
+        }
+      };
+
   return (
-    <Modal
-      animationType="slide"
-      visible={isOpen !== null}
-      onRequestClose={() => {
-        setClose(null);
-      }}>
+    <ContentWrapper {...contentProps}>
       <TouchableWithoutFeedback onPress={toggleControls}>
         <SafeAreaView
           style={{
@@ -307,7 +325,7 @@ const GalleryPopup = ({images, setClose, isOpen, link, BookMarkRemove}) => {
           </Animated.View>
         </SafeAreaView>
       </TouchableWithoutFeedback>
-    </Modal>
+    </ContentWrapper>
   );
 };
 

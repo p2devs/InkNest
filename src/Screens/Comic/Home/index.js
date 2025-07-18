@@ -14,10 +14,8 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
-import {getVersion} from 'react-native-device-info';
 import {useFeatureFlag} from 'configcat-react';
+import {isMacOS} from '../../../Utils/PlatformUtils';
 
 import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
@@ -28,6 +26,22 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
+
+// Conditional imports for Firebase and device info
+let crashlytics, analytics, getVersion;
+if (!isMacOS) {
+  try {
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+    getVersion = require('react-native-device-info').getVersion;
+  } catch (error) {
+    console.log('Firebase or device-info modules not available:', error.message);
+    getVersion = () => '1.0.0';
+  }
+} else {
+  // Fallback function for macOS
+  getVersion = () => '1.0.0';
+}
 
 export function Home({navigation}) {
   const flatListRef = useRef(null);
@@ -43,6 +57,14 @@ export function Home({navigation}) {
   );
 
   useEffect(() => {
+    console.log('=== macOS Debug Info ===');
+    console.log('isMacOS:', isMacOS);
+    console.log('getVersion():', getVersion());
+    console.log('forIosValue:', forIosValue);
+    console.log('forIosLoading:', forIosLoading);
+    console.log('Condition result:', getVersion() === forIosValue && forIosLoading === false);
+    console.log('========================');
+    
     if (getVersion() === forIosValue && forIosLoading === false) {
       setComicsData({
         'most-viewed': {
@@ -88,7 +110,14 @@ export function Home({navigation}) {
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(type, setComicsData, setLoading);
+        console.log('Loading comics data for type:', type);
+        getComicsHome(type, (data) => {
+          console.log('=== API Response Debug ===');
+          console.log('Received data:', data);
+          console.log('Data keys:', Object.keys(data || {}));
+          console.log('=========================');
+          setComicsData(data);
+        }, setLoading);
       }
     }
   }, [forIosValue, forIosLoading]);
@@ -103,10 +132,12 @@ export function Home({navigation}) {
               <TouchableOpacity
                 onPress={() => {
                   setChangeType(!changeType);
-                  crashlytics().log('Comic Host Name Clicked');
-                  analytics().logEvent('comic_host_name_clicked', {
-                    hostName: type.toString(),
-                  });
+                  if (!isMacOS) {
+                    if (crashlytics) crashlytics().log('Comic Host Name Clicked');
+                    if (analytics) analytics.logEvent('comic_host_name_clicked', {
+                      hostName: type.toString(),
+                    });
+                  }
                 }}
                 style={styles.rectangle}>
                 <Text
@@ -130,7 +161,9 @@ export function Home({navigation}) {
                   justifyContent: 'center',
                 }}
                 onPress={() => {
-                  crashlytics().log('Home Search button clicked');
+                  if (!isMacOS && crashlytics) {
+                    crashlytics().log('Home Search button clicked');
+                  }
                   navigation.navigate(NAVIGATION.search);
                 }}>
                 <AntDesign name="search1" size={20} color="#fff" />
@@ -139,7 +172,11 @@ export function Home({navigation}) {
 
             <AnimeAdbanner />
           </>
-        ) : null}
+        ) : (
+          <View style={{padding: 20}}>
+            <Text style={{color: 'white', fontSize: 18}}>Loading content...</Text>
+          </View>
+        )}
         {changeType ? (
           <View
             style={{
@@ -184,7 +221,7 @@ export function Home({navigation}) {
                 }}
                 onPress={() => {
                   crashlytics().log('Comic Host Name Clicked');
-                  analytics().logEvent('comic_host_name_clicked', {
+                  analytics.logEvent('comic_host_name_clicked', {
                     hostName: key,
                   });
                   setType(key);
@@ -317,11 +354,15 @@ export function Home({navigation}) {
                     item={item}
                     index={index}
                     onPress={() => {
-                      crashlytics().log('Comic Details button clicked');
-                      analytics().logEvent('comic_details_button_clicked', {
-                        link: item?.link?.toString(),
-                        title: item?.title?.toString(),
-                      });
+                      if (!isMacOS && crashlytics) {
+                        crashlytics().log('Comic Details button clicked');
+                      }
+                      if (!isMacOS && analytics) {
+                        analytics.logEvent('comic_details_button_clicked', {
+                          link: item?.link?.toString(),
+                          title: item?.title?.toString(),
+                        });
+                      }
                       type === 'readallcomics'
                         ? navigation.navigate(NAVIGATION.comicBook, {
                             comicBookLink: item?.link,

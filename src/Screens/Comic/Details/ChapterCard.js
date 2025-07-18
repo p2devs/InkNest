@@ -2,14 +2,11 @@ import React, {memo, useState} from 'react';
 import {TouchableOpacity, Text, View, ActivityIndicator} from 'react-native';
 
 import {useFeatureFlag} from 'configcat-react';
-import {getVersion} from 'react-native-device-info';
 import {useDispatch, useSelector} from 'react-redux';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
-import {BannerAdSize} from 'react-native-google-mobile-ads';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {widthPercentageToDP} from 'react-native-responsive-screen';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {isMacOS} from '../../../Utils/PlatformUtils';
 
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
@@ -19,6 +16,23 @@ import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../InkNest-Externals/Redux/Actions/Download';
+
+// Conditional imports for non-macOS platforms
+let getVersion, crashlytics, analytics, BannerAdSize;
+if (!isMacOS) {
+  try {
+    getVersion = require('react-native-device-info').getVersion;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+    BannerAdSize = require('react-native-google-mobile-ads').BannerAdSize;
+  } catch (error) {
+    console.log('Some modules not available on this platform:', error.message);
+    getVersion = () => '1.0.0';
+  }
+} else {
+  // Fallback functions for macOS
+  getVersion = () => '1.0.0';
+}
 
 const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);
@@ -43,11 +57,15 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   const dispatch = useDispatch();
 
   const handleClick = async () => {
-    crashlytics().log('ChapterCard clicked');
-    await analytics().logEvent('newUI_open_comic_book', {
-      link: item?.link?.toString(),
-      title: item?.title?.toString(),
-    });
+    if (!isMacOS && crashlytics) {
+      crashlytics().log('ChapterCard clicked');
+    }
+    if (!isMacOS && analytics) {
+      await analytics.logEvent('newUI_open_comic_book', {
+        link: item?.link?.toString(),
+        title: item?.title?.toString(),
+      });
+    }
 
     if (getVersion() === forIosValue && forIosLoading === false) {
       navigate(NAVIGATION.mockBooks, {
@@ -74,11 +92,15 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
     if (loadingStatus) return;
     setLoadingStatus(true);
     setProgress({downloaded: 0, total: 0});
-    crashlytics().log('ChapterCard download clicked');
-    await analytics().logEvent('newUI_download_comic', {
-      link: item?.link?.toString(),
-      title: item?.title?.toString(),
-    });
+    if (!isMacOS && crashlytics) {
+      crashlytics().log('ChapterCard download clicked');
+    }
+    if (!isMacOS && analytics) {
+      await analytics.logEvent('newUI_download_comic', {
+        link: item?.link?.toString(),
+        title: item?.title?.toString(),
+      });
+    }
     if (!ComicBook?.images) {
       let data = await dispatch(fetchComicBook(item.link, null, true));
       DownloadedComic(data.data);
@@ -88,11 +110,15 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
   };
 
   const DownloadedComic = async data => {
-    crashlytics().log('ChapterCard download started');
-    await analytics().logEvent('newUI_download_started', {
-      link: detailPageLink?.toString(),
-      title: item?.title?.toString(),
-    });
+    if (!isMacOS && crashlytics) {
+      crashlytics().log('ChapterCard download started');
+    }
+    if (!isMacOS && analytics) {
+      await analytics.logEvent('newUI_download_started', {
+        link: detailPageLink?.toString(),
+        title: item?.title?.toString(),
+      });
+    }
     dispatch(
       downloadComicBook({
         comicDetails: {
@@ -109,7 +135,14 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
 
   if (isBookmark && !numbersBookmarks) return null;
 
-  if (item.type === 'ad') return <AdBanner size={BannerAdSize.BANNER} />;
+  if (item.type === 'ad') {
+    // Only show ads on non-macOS platforms
+    if (!isMacOS && BannerAdSize) {
+      return <AdBanner size={BannerAdSize.BANNER} />;
+    }
+    return null;
+  }
+  
   return (
     <TouchableOpacity
       key={index}
@@ -183,7 +216,9 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           color={'#fff'}
           onPress={() => {
             LoadingComic();
-            showRewardedAd();
+            if (!isMacOS) {
+              showRewardedAd();
+            }
           }}
         />
       ) : (
@@ -192,11 +227,15 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           size={24}
           color="green"
           onPress={() => {
-            crashlytics().log('ChapterCard offline clicked');
-            analytics().logEvent('newUI_open_offline_comic', {
-              link: item?.link?.toString(),
-              title: item?.title?.toString(),
-            });
+            if (!isMacOS && crashlytics) {
+              crashlytics().log('ChapterCard offline clicked');
+            }
+            if (!isMacOS && analytics) {
+              analytics.logEvent('newUI_open_offline_comic', {
+                link: item?.link?.toString(),
+                title: item?.title?.toString(),
+              });
+            }
             navigate(NAVIGATION.offlineComic);
           }}
         />

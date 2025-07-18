@@ -15,12 +15,29 @@ import {
 import {Alert} from 'react-native';
 import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
-import crashlytics from '@react-native-firebase/crashlytics';
 import {ComicHostName} from '../../Utils/APIs';
 import {
   ComicBookPageClasses,
   ComicDetailPageClasses,
 } from '../../Screens/Comic/APIs/constance';
+import { isMacOS } from '../../Utils/PlatformUtils';
+
+// Conditional imports for Firebase Crashlytics
+let crashlytics = {
+  recordError: () => {},
+  log: () => {},
+  setAttribute: () => {},
+  setUserId: () => {},
+  crash: () => {},
+};
+
+if (!isMacOS) {
+  try {
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+  } catch (error) {
+    console.log('Firebase Crashlytics not available on this platform');
+  }
+}
 
 /**
  * Action creator for handling watched data.

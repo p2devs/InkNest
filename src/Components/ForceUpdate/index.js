@@ -7,19 +7,38 @@ import {
   Image,
   Modal,
   Linking,
+  Platform,
 } from 'react-native';
-import {checkUpdate} from '../../InkNest-Externals/ForceUpdate/Func';
+import {isMacOS} from '../../Utils/PlatformUtils';
+
+let checkUpdate;
+try {
+  if (!isMacOS) {
+    checkUpdate = require('../../InkNest-Externals/ForceUpdate/Func').checkUpdate;
+  }
+} catch (error) {
+  console.log('checkUpdate not available on this platform');
+}
 
 const ForceUpdate = () => {
   const [isForceUpdate, setIsForceUpdate] = useState(false);
+  
   useEffect(() => {
-    checkUpdate(setIsForceUpdate, handleUpdate);
+    if (checkUpdate && !isMacOS) {
+      checkUpdate(setIsForceUpdate, handleUpdate);
+    }
   }, []);
 
   const handleUpdate = () => {
     Linking.openURL('https://p2devs.github.io/InkNest/');
   };
 
+  // On macOS, don't show the modal since it causes native component issues
+  if (isMacOS || !isForceUpdate) {
+    return null;
+  }
+
+  // For iOS/Android, use Modal
   return (
     <Modal
       style={{

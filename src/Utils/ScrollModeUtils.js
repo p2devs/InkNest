@@ -1,6 +1,25 @@
 import {Alert} from 'react-native';
-import analytics from '@react-native-firebase/analytics';
-import crashlytics from '@react-native-firebase/crashlytics';
+import { isMacOS } from './PlatformUtils';
+
+// Conditional imports for Firebase
+let analytics = {
+  logEvent: () => {},
+};
+let crashlytics = {
+  log: () => {},
+  setAttribute: () => {},
+  setUserId: () => {},
+  recordError: () => {},
+};
+
+if (!isMacOS) {
+  try {
+    analytics = require('@react-native-firebase/analytics').default;
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform');
+  }
+}
 
 /**
  * Function to handle scroll mode change with options for temporary use or saving as default
@@ -39,7 +58,7 @@ export const handleScrollModeChange = (
           setIsVerticalScroll(newScrollMode);
           if (closeModal) closeModal();
           
-          analytics().logEvent(`toggle_vertical_scroll_temporary`, {
+          analytics.logEvent(`toggle_vertical_scroll_temporary`, {
             screen: screenName,
             isVerticalScroll: newScrollMode,
           });
@@ -58,7 +77,7 @@ export const handleScrollModeChange = (
           dispatch(setScrollPreferenceAction(newScrollMode ? 'vertical' : 'horizontal'));
           if (closeModal) closeModal();
           
-          analytics().logEvent(`toggle_vertical_scroll_default`, {
+          analytics.logEvent(`toggle_vertical_scroll_default`, {
             screen: screenName,
             isVerticalScroll: newScrollMode,
           });

@@ -11,8 +11,18 @@ import ForceUpdate from './src/Components/ForceUpdate';
 import {ConfigCatProvider} from 'configcat-react';
 import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
 import {BannerProvider} from './src/Components/UIComp/AnimeAdBanner/BannerContext';
-import crashlytics from '@react-native-firebase/crashlytics';
-import analytics from '@react-native-firebase/analytics';
+import {isMacOS} from './src/Utils/PlatformUtils';
+
+// Conditional imports for Firebase
+let crashlytics, analytics;
+if (!isMacOS) {
+  try {
+    crashlytics = require('@react-native-firebase/crashlytics').default;
+    analytics = require('@react-native-firebase/analytics').default;
+  } catch (error) {
+    console.log('Firebase modules not available on this platform:', error.message);
+  }
+}
 
 /**
  * The main App component that sets up the root of the application.
@@ -24,23 +34,29 @@ import analytics from '@react-native-firebase/analytics';
  */
 const App = () => {
   useEffect(() => {
-    if (!__DEV__) {
+    if (!__DEV__ && !isMacOS) {
       // Initialize Firebase Crashlytics
-      crashlytics().log('App mounted.');
+      if (crashlytics) {
+        crashlytics().log('App mounted.');
+      }
 
       // Enable analytics collection
-      analytics().setAnalyticsCollectionEnabled(true);
+      if (analytics) {
+        analytics.setAnalyticsCollectionEnabled(true);
+      }
 
       // Catch JS errors and report to Crashlytics
       const errorHandler = (error, isFatal) => {
-        if (isFatal) {
+        if (isFatal && crashlytics) {
           crashlytics().recordError(error);
         }
         return false;
       };
 
       // Set error handlers
-      ErrorUtils.setGlobalHandler(errorHandler);
+      if (typeof ErrorUtils !== 'undefined') {
+        ErrorUtils.setGlobalHandler(errorHandler);
+      }
 
       return () => {
         // Clean up if needed
