@@ -1280,9 +1280,9 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-safe-area-context (5.3.0):
+  - react-native-safe-area-context (5.5.2):
     - React-Core
-  - react-native-webview (13.13.5):
+  - react-native-webview (13.15.0):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.10.14.00)
@@ -1558,11 +1558,11 @@ PODS:
     - React-logger
     - React-perflogger
     - React-utils (= 0.76.9)
-  - RNCAsyncStorage (2.1.2):
+  - RNCAsyncStorage (2.2.0):
     - React-Core
-  - RNCPicker (2.11.0):
+  - RNCPicker (2.11.1):
     - React-Core
-  - RNGestureHandler (2.25.0):
+  - RNGestureHandler (2.27.1):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.10.14.00)
@@ -1670,7 +1670,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.11.2):
+  - RNSVG (15.12.0):
     - React-Core
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
@@ -1935,8 +1935,8 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 607455b5d7e030c901ac293e50912c5dd5cbc691
   React-microtasksnativemodule: 59110e61c9b08105615895182743e750062e29b0
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-safe-area-context: fdb0a66feac038cb6eb1edafcf2ccee2b5cf0284
-  react-native-webview: 6a563ee08df30c5b99c5e1f3a2c014e763df3b4e
+  react-native-safe-area-context: 0f7bf11598f9a61b7ceac8dc3f59ef98697e99e1
+  react-native-webview: b7801c426c5665bbef31d6f4300a11674a6c643f
   React-nativeconfig: 796655f6b8a8600becde16a785c02ac1cfe9071a
   React-NativeModulesApple: 5656d2db1a38c89f2a65d8f6bbdcec4965516aa5
   React-perflogger: d1521a485f24e75808214a62762b22c71f79842f
@@ -1963,11 +1963,11 @@ SPEC CHECKSUMS:
   React-utils: da2df48602f6ce2c9ed839c81dce6e1dad073877
   ReactCodegen: 0ab9109cea54d25f1e8954f277cf42e31707987f
   ReactCommon: f0aa08e091af632946fdd9f2e1ff32f1bc5fc897
-  RNCAsyncStorage: b9f5f78da5d16a853fe3dc22e8268d932fc45a83
-  RNCPicker: 124b4fb5859ba1a3fd53a91e16d1e7a0fc016e59
-  RNGestureHandler: d1b9432bb98d6ab424484d8aee035f11505205a9
+  RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
+  RNCPicker: da0f1c9411208c1ca52bc98383db54a06e0a3862
+  RNGestureHandler: c4ea071bad48ae332dd152f9adda52a83fb1a119
   RNReanimated: ced820e31c75c11dd53450c35eff5050f98d7abc
-  RNSVG: a07e14363aa208062c6483bad24a438d5986d490
+  RNSVG: df335373ea2cb29876864e6a2ea8c86aad305838
   SocketRocket: 03f7111df1a343b162bf5b06ead333be808e1e0a
   Yoga: c47b0304c857eb8aba5e9c55c73bd352a6acd409
 
