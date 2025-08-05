@@ -57,8 +57,8 @@ export function Search({navigation}) {
     // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
     let link = searchTerm.trim();
     if (
+      // !link.startsWith('https://comichubfree.com/comic/') &&
       (!link.startsWith('https://readcomicsonline.ru/comic/') &&
-        !link.startsWith('https://comichubfree.com/comic/') &&
         !link.startsWith('https://readallcomics.com/category/')) ||
       (!link.includes('comic/') && !link.includes('category/'))
     ) {
@@ -67,22 +67,23 @@ export function Search({navigation}) {
         return;
       }
 
-      const [readcomicsonlineResult, comichubfreeResult, readallcomicsResult] =
-        await Promise.all([
-          dispatch(searchComic(link, 'readcomicsonline')),
-          dispatch(searchComic(link, 'comichubfree')),
-          dispatch(searchComic(link, 'readallcomics')),
-        ]);
+      // comichubfreeResult,
+      const [readcomicsonlineResult, readallcomicsResult] = await Promise.all([
+        dispatch(searchComic(link, 'readcomicsonline')),
+        // dispatch(searchComic(link, 'comichubfree')),
+        dispatch(searchComic(link, 'readallcomics')),
+      ]);
 
       console.log('readcomicsonlineResult', {
         readcomicsonlineResult,
-        comichubfreeResult,
+        // comichubfreeResult,
         readallcomicsResult,
       });
 
-      if (readcomicsonlineResult || comichubfreeResult) {
+      // || comichubfreeResult
+      if (readcomicsonlineResult) {
         if (
-          comichubfreeResult.length == 0 &&
+          // comichubfreeResult.length == 0 &&
           readcomicsonlineResult.length == 0 &&
           readallcomicsResult.length == 0
         ) {
@@ -90,7 +91,7 @@ export function Search({navigation}) {
         }
         setSearchData({
           ReadAllComic: readallcomicsResult,
-          ComicHub: comichubfreeResult,
+          // ComicHub: comichubfreeResult,
           ComicOnline: readcomicsonlineResult,
         });
       }
