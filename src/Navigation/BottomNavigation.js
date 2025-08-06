@@ -82,100 +82,104 @@ export function BottomNavigation() {
 
   return (
     <>
-    <BottomTab.Navigator
-      screenOptions={{
-        tabBarBackground: () => (
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: '#110918',
-              },
-            ]}
+      <BottomTab.Navigator
+        screenOptions={{
+          tabBarBackground: () => (
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: '#110918',
+                },
+              ]}
+            />
+          ),
+          headerShown: false,
+          tabBarActiveTintColor: '#D2D2D6',
+          tabBarInactiveTintColor: '#6B666D',
+          tabBarStyle: {
+            paddingVertical: 4,
+          },
+        }}
+        appearance={{
+          shadow: true,
+          floating: true,
+        }}>
+        <BottomTab.Screen
+          name={NAVIGATION.home}
+          component={Home}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon focused={focused} tintColor={color} name="home" />
+            ),
+          }}
+        />
+
+        <BottomTab.Screen
+          name={NAVIGATION.bookmarks}
+          component={ComicBookmarks}
+          options={{
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon
+                focused={focused}
+                tintColor={color}
+                name="book-bookmark"
+              />
+            ),
+          }}
+        />
+
+        {getVersion() !== forIosValue && (
+          <BottomTab.Screen
+            name={NAVIGATION.sources}
+            component={LinkListScreen}
+            options={{
+              tabBarIcon: ({focused, color}) => (
+                <TabBarIcon focused={focused} tintColor={color} name="source" />
+              ),
+              // tabBarBadge: 1,
+              // tabBarBadgeStyle: {
+              //   maxWidth: 10,
+              //   maxHeight: 10,
+              //   fontSize: 5,
+              //   lineHeight: 9,
+              //   alignSelf: undefined,
+              // },
+            }}
           />
-        ),
-        headerShown: false,
-        tabBarActiveTintColor: '#D2D2D6',
-        tabBarInactiveTintColor: '#6B666D',
-        tabBarStyle: {
-          paddingVertical: 4,
-        },
-      }}
-      appearance={{
-        shadow: true,
-        floating: true,
-      }}>
-      <BottomTab.Screen
-        name={NAVIGATION.home}
-        component={Home}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon focused={focused} tintColor={color} name="home" />
-          ),
-        }}
-      />
+        )}
 
-      <BottomTab.Screen
-        name={NAVIGATION.bookmarks}
-        component={ComicBookmarks}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon
-              focused={focused}
-              tintColor={color}
-              name="book-bookmark"
-            />
-          ),
-        }}
-      />
-
-      {getVersion() !== forIosValue && (
         <BottomTab.Screen
-          name={NAVIGATION.sources}
-          component={LinkListScreen}
+          name={NAVIGATION.offlineComic}
+          component={OfflineComic}
           options={{
             tabBarIcon: ({focused, color}) => (
-              <TabBarIcon focused={focused} tintColor={color} name="source" />
-            ),
-            // tabBarBadge: 1,
-            // tabBarBadgeStyle: {
-            //   maxWidth: 10,
-            //   maxHeight: 10,
-            //   fontSize: 5,
-            //   lineHeight: 9,
-            //   alignSelf: undefined,
-            // },
-          }}
-        />
-      )}
-
-      <BottomTab.Screen
-        name={NAVIGATION.offlineComic}
-        component={OfflineComic}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabBarIcon
-              focused={focused}
-              tintColor={color}
-              name="download-for-offline"
-            />
-          ),
-        }}
-      />
-
-      {getVersion() !== forIosValue && (
-        <BottomTab.Screen
-          name={NAVIGATION.settings}
-          component={Settings}
-          options={{
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon focused={focused} tintColor={color} name="settings" />
+              <TabBarIcon
+                focused={focused}
+                tintColor={color}
+                name="download-for-offline"
+              />
             ),
           }}
         />
-      )}
-    </BottomTab.Navigator>
-    <FloatingDonationButton />
+
+        {getVersion() !== forIosValue && (
+          <BottomTab.Screen
+            name={NAVIGATION.settings}
+            component={Settings}
+            options={{
+              tabBarIcon: ({focused, color}) => (
+                <TabBarIcon
+                  focused={focused}
+                  tintColor={color}
+                  name="settings"
+                />
+              ),
+            }}
+          />
+        )}
+      </BottomTab.Navigator>
+      {getVersion() !== forIosValue && <FloatingDonationButton />}
     </>
   );
 }
