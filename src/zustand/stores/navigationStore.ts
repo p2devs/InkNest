@@ -1,0 +1,27 @@
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { CONTENT_TYPES, CONTENT_TYPE_LABELS, type NavigationState, type ContentType } from '../types';
+
+export const useNavigationStore = create<NavigationState>()(
+  immer((set, get) => ({
+    // Default to Comic as specified in requirements
+    selectedContentType: CONTENT_TYPES.COMIC,
+
+    // Action to change content type
+    setContentType: (contentType: ContentType) => {
+      set((state) => {
+        state.selectedContentType = contentType;
+      });
+    },
+
+    // Helper function to get content type label
+    getContentTypeLabel: (contentType?: ContentType) => {
+      const typeToCheck = contentType ?? get().selectedContentType;
+      return CONTENT_TYPE_LABELS[typeToCheck];
+    },
+
+    // Helper functions for easy checking
+    isComicSelected: () => get().selectedContentType === CONTENT_TYPES.COMIC,
+    isMangaSelected: () => get().selectedContentType === CONTENT_TYPES.MANGA,
+  }))
+);
