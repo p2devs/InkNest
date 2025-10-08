@@ -2992,6 +2992,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-documents/picker@npm:^10.1.7":
+  version: 10.1.7
+  resolution: "@react-native-documents/picker@npm:10.1.7"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 27844133276e14f4e9c92c34ee008af8101749233686121001f7b6ccbad76ca0afb33845a328b23011cb36c6e98921aa42c58fcf23d79b3751d62308e4a97ad6
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/analytics@npm:21.7.1":
   version: 21.7.1
   resolution: "@react-native-firebase/analytics@npm:21.7.1"
@@ -4009,6 +4019,7 @@ __metadata:
     "@react-native-community/cli-platform-android": 15.0.1
     "@react-native-community/cli-platform-ios": 15.0.1
     "@react-native-community/netinfo": ^11.4.1
+    "@react-native-documents/picker": ^10.1.7
     "@react-native-firebase/analytics": 21.7.1
     "@react-native-firebase/app": 21.7.1
     "@react-native-firebase/crashlytics": 21.7.1
@@ -4052,6 +4063,7 @@ __metadata:
     react-native-svg: ^15.8.0
     react-native-svg-transformer: ^1.5.0
     react-native-toast-message: ^2.2.1
+    react-native-unarchive: ^1.1.0
     react-native-vector-icons: ^10.2.0
     react-native-video: ^6.7.0
     react-native-webview: ^13.12.3
@@ -9953,6 +9965,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: c6b5d231b3b617b3d3d893023673534fe2cc0c5f32bb5fc4aecfe239e9de2fb9f0e9a4086d776e53daf3bc2376dce16dcec13e1b5cf1554dbf51808695fc2441
+  languageName: node
+  linkType: hard
+
+"react-native-unarchive@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "react-native-unarchive@npm:1.1.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: a701efb2d7ef184242dc09e7cb6157f6039a03e23941d15165675b5837cc25b5b78954fa0936402a72ade02bea3ae079b91dfa03f8af9da30a5086e712f084e3
   languageName: node
   linkType: hard
 

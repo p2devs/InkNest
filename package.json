@@ -12,6 +12,7 @@
     "pod": "npx pod-install",
     "ios-16": "react-native run-ios --simulator='iPhone 16'",
     "clean": "watchman watch-del-all",
+    "clean:cache": "yarn cache clean && rm -rf node_modules && rm -rf ios/Pods && rm -rf ios/Podfile.lock && rm -rf android/.gradle && rm -rf android/app/build && rm -rf android/build && yarn install && cd ios && pod install && cd ..",
     "build:release": "./script/gradle.sh && cd android && ./gradlew assembleRelease && cd .. && git checkout android/gradle.properties"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@dr.pogodin/react-native-fs": "2.29.1",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/netinfo": "^11.4.1",
+    "@react-native-documents/picker": "^10.1.7",
     "@react-native-firebase/analytics": "21.7.1",
     "@react-native-firebase/app": "21.7.1",
     "@react-native-firebase/crashlytics": "21.7.1",
@@ -49,6 +51,7 @@
     "react-native-screens": "3.35.0",
     "react-native-svg": "^15.8.0",
     "react-native-toast-message": "^2.2.1",
+    "react-native-unarchive": "^1.1.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.7.0",
     "react-native-webview": "^13.12.3",
