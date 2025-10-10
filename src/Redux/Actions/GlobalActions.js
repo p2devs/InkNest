@@ -526,17 +526,17 @@ export const searchComic =
           data: item.data,
           link: `${host}/comic/${item.data}`,
         }));
-      // } else if (source === 'comichubfree') {
-        // const host = 'https://comichubfree.com';
-        // url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
-        // const response = await APICaller.get(url);
-        // const json = response?.data || [];
+      } else if (source === 'comichubfree') {
+        const host = 'https://comichubfree.com';
+        url = `${host}/ajax/search?key=${encodeURIComponent(queryValue)}`;
+        const response = await APICaller.get(url);
+        const json = response?.data || [];
 
-        // formatted = json.map(item => ({
-        //   title: item.title,
-        //   data: item.slug,
-        //   link: `${host}/comic/${item.slug}`,
-        // }));
+        formatted = json.map(item => ({
+          title: item.title,
+          data: item.slug,
+          link: `${host}/comic/${item.slug}`,
+        }));
       } else if (source === 'readallcomics') {
         const host = 'https://readallcomics.com';
         url = `${host}/?story=${queryValue.replace(/ /g, '+')}&s=&type=comic`;

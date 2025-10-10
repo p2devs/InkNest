@@ -57,8 +57,8 @@ export function Search({navigation}) {
     // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
     let link = searchTerm.trim();
     if (
-      // !link.startsWith('https://comichubfree.com/comic/') &&
-      (!link.startsWith('https://readcomicsonline.ru/comic/') &&
+      (!link.startsWith('https://comichubfree.com/comic/') &&
+        !link.startsWith('https://readcomicsonline.ru/comic/') &&
         !link.startsWith('https://readallcomics.com/category/')) ||
       (!link.includes('comic/') && !link.includes('category/'))
     ) {
@@ -67,34 +67,18 @@ export function Search({navigation}) {
         return;
       }
 
-      // comichubfreeResult,
-      const [readcomicsonlineResult, readallcomicsResult] = await Promise.all([
-        dispatch(searchComic(link, 'readcomicsonline')),
-        // dispatch(searchComic(link, 'comichubfree')),
-        dispatch(searchComic(link, 'readallcomics')),
-      ]);
+      const [readcomicsonlineResult, comichubfreeResult, readallcomicsResult] =
+        await Promise.all([
+          dispatch(searchComic(link, 'readcomicsonline')),
+          dispatch(searchComic(link, 'comichubfree')),
+          dispatch(searchComic(link, 'readallcomics')),
+        ]);
 
-      console.log('readcomicsonlineResult', {
-        readcomicsonlineResult,
-        // comichubfreeResult,
-        readallcomicsResult,
+      setSearchData({
+        ReadAllComic: readallcomicsResult ?? [],
+        ComicHub: comichubfreeResult ?? [],
+        ComicOnline: readcomicsonlineResult ?? [],
       });
-
-      // || comichubfreeResult
-      if (readcomicsonlineResult) {
-        if (
-          // comichubfreeResult.length == 0 &&
-          readcomicsonlineResult.length == 0 &&
-          readallcomicsResult.length == 0
-        ) {
-          Alert.alert('No results found');
-        }
-        setSearchData({
-          ReadAllComic: readallcomicsResult,
-          // ComicHub: comichubfreeResult,
-          ComicOnline: readcomicsonlineResult,
-        });
-      }
       return;
     }
     // remove the last element if present in the link like 5, 100, etc
