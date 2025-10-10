@@ -1,3 +1,3 @@
 [submodule "src/InkNest-Externals"]
 	path = src/InkNest-Externals
-	url = https://github.com/p2devs/InkNest-Externals.git
+	url = git@github.com:p2devs/InkNest-Externals.git
