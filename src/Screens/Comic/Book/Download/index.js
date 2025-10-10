@@ -61,8 +61,9 @@ export function DownloadComicBook({route}) {
       let localComic = route?.params?.localComic;
       let pages = localComic.map((page, index) => page.uri);
       setExtractDownloaded({downloadedImagesPath: pages});
+      setImageLinkIndex(route?.params?.initialIndex || 0);
     }
-  }, [route?.params?.localComic]);
+  }, [route?.params?.localComic, route?.params?.initialIndex]);
 
   const activeIndex = useSharedValue(0);
 

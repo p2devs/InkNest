@@ -112,6 +112,7 @@ export function Home() {
     return () => {
       subscription.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Function to handle external file opening
@@ -371,10 +372,17 @@ export function Home() {
                 </Text>
               </View>
             }
-            renderItem={({item}) => (
+            renderItem={({item, index}) => (
               <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => {}}
+                onPress={() => {
+                  navigate(NAVIGATION.downloadComicBook, {
+                    isDownloadComic: null,
+                    chapterlink: null,
+                    localComic: pages,
+                    initialIndex: index,
+                  });
+                }}
                 style={styles.gridItem}>
                 <Image source={{uri: item.uri}} style={styles.pageImage} />
                 <View style={styles.pageBadge}>
