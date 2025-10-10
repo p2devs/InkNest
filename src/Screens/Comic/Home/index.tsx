@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   FlatList,
+  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -92,6 +93,113 @@ export function Home() {
   const [unarchiveResult, setUnarchiveResult] =
     useState<UnarchiveResult | null>(null);
 
+  // Handle external file opening (when user taps CBR/CBZ file in Files app)
+  useEffect(() => {
+    // Handle initial URL if app was closed
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        handleExternalFile(url);
+      }
+    });
+
+    // Handle URL when app is already open
+    const subscription = Linking.addEventListener('url', event => {
+      if (event.url) {
+        handleExternalFile(event.url);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Function to handle external file opening
+  const handleExternalFile = async (url: string) => {
+    try {
+      setLoading(true);
+
+      // Convert URL to file path
+      let filePath = uriToPath(url);
+
+      // Check if it's a CBR or CBZ file
+      const fileExtension = filePath.toLowerCase().split('.').pop();
+      if (!['cbr', 'cbz', 'zip', 'rar'].includes(fileExtension || '')) {
+        Alert.alert(
+          'Unsupported File',
+          'Please select a CBR, CBZ, ZIP, or RAR file.',
+        );
+        return;
+      }
+
+      await processArchiveFile(
+        filePath,
+        filePath.split('/').pop() || 'archive',
+      );
+    } catch (error) {
+      console.error('Error handling external file:', error);
+      Alert.alert('Error', 'Failed to open the file. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Shared function to process archive files
+  const processArchiveFile = async (sourceUri: string, fileName: string) => {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const archivePath = `${COMICS_ROOT}/${safeFileName}`;
+
+    try {
+      const rootExists = await exists(COMICS_ROOT);
+      if (rootExists) {
+        await unlink(COMICS_ROOT);
+      }
+      await mkdir(COMICS_ROOT);
+
+      // Copy file to app's document directory
+      await copyFile(sourceUri, archivePath);
+
+      // Verify the copied file
+      const copiedExists = await exists(archivePath);
+      if (!copiedExists) {
+        throw new Error('File copy verification failed');
+      }
+
+      const archiveFilePath =
+        Platform.OS === 'android' ? uriToPath(archivePath) : archivePath;
+
+      // Check if archive file exists
+      const archiveExists = await exists(archiveFilePath);
+
+      if (!archiveExists) {
+        Alert.alert(
+          'Error',
+          'Archive file not found. Please select the file again.',
+        );
+        return;
+      }
+
+      const archiveResult: UnarchiveResult = await unarchive(
+        archiveFilePath,
+        COMICS_ROOT,
+      );
+
+      setUnarchiveResult({
+        files: archiveResult.files.map(file => ({
+          ...file,
+          relativePath: file.path.replace(`${COMICS_ROOT}/`, ''),
+        })),
+        outputPath: COMICS_ROOT,
+      });
+    } catch (error) {
+      console.error('Failed to process archive:', error);
+      Alert.alert(
+        'Error',
+        'Failed to extract the comic file. Please try again.',
+      );
+    }
+  };
+
   const pages = useMemo(() => {
     if (!unarchiveResult?.files) {
       const checkExists = async () => {
@@ -163,59 +271,9 @@ export function Home() {
         let originalUri = selectedFile.uri;
         let originalName: string | null = selectedFile.name;
 
-        const safeFileName = (originalName || 'archive').replace(
-          /[^a-zA-Z0-9.-]/g,
-          '_',
-        );
-        const archivePath = `${COMICS_ROOT}/${safeFileName}`;
+        Platform.OS === 'ios' && (originalUri = uriToPath(originalUri));
 
-        try {
-          const rootExists = await exists(COMICS_ROOT);
-          if (rootExists) {
-            await unlink(COMICS_ROOT);
-          }
-          await mkdir(COMICS_ROOT);
-
-          Platform.OS === 'ios' && (originalUri = uriToPath(originalUri));
-
-          // Copy from content URI to app's document directory
-          await copyFile(originalUri, archivePath);
-
-          // Verify the copied file
-          const copiedExists = await exists(archivePath);
-          if (!copiedExists) {
-            throw new Error('File copy verification failed');
-          }
-
-          const archiveFilePath =
-            Platform.OS === 'android' ? uriToPath(archivePath) : archivePath;
-
-          // Check if archive file exists
-          const archiveExists = await exists(archiveFilePath);
-
-          if (!archiveExists) {
-            Alert.alert(
-              'Error',
-              'Archive file not found. Please select the file again.',
-            );
-            return;
-          }
-
-          const archiveResult: UnarchiveResult = await unarchive(
-            archiveFilePath,
-            COMICS_ROOT,
-          );
-
-          setUnarchiveResult({
-            files: archiveResult.files.map(file => ({
-              ...file,
-              relativePath: file.path.replace(`${COMICS_ROOT}/`, ''),
-            })),
-            outputPath: COMICS_ROOT,
-          });
-        } catch (unarchiveError) {
-          console.error('Failed to unarchive', unarchiveError);
-        }
+        await processArchiveFile(originalUri, originalName || 'archive');
       }
     } catch (error) {
       console.error('Error picking document:', error);

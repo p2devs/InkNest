@@ -2,6 +2,7 @@
 #import <Firebase.h>
 
 #import <React/RCTBundleURLProvider.h>
+#import <React/RCTLinkingManager.h>
 
 @implementation AppDelegate
 
@@ -14,6 +15,19 @@
   self.initialProps = @{};
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+// Handle opening files from external sources (e.g., Files app, other apps)
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  // Handle deep linking if needed
+  if ([RCTLinkingManager application:application openURL:url options:options]) {
+    return YES;
+  }
+  
+  return NO;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
