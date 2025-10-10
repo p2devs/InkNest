@@ -6,3 +6,4 @@ export {DownloadComicBook} from './Book/Download';
 export {ComicBookmarks} from './Bookmarks';
 export {OfflineComic} from '../../InkNest-Externals/Screens/Comic/OfflineComic';
 export {SeeAll} from './SeeAll';
+export {Library} from './Library';

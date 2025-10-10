@@ -82,5 +82,108 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+		<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>CBZ Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>com.rarlab.cbz-archive</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>cbz</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>CBR Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.rarlab.rar-archive</string>
+				<string>com.rarlab.cbr-archive</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>cbr</string>
+				<string>rar</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ZIP Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>zip</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.rarlab.cbz-archive</string>
+			<key>UTTypeDescription</key>
+			<string>CBZ Comic Book Archive</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cbz</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-cbz</string>
+					<string>application/vnd.comicbook+zip</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.rarlab.cbr-archive</string>
+			<key>UTTypeDescription</key>
+			<string>CBR Comic Book Archive</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.rarlab.rar-archive</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cbr</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-cbr</string>
+					<string>application/vnd.comicbook-rar</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

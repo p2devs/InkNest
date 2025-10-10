@@ -32,13 +32,17 @@ export function DownloadComicBook({route}) {
   const ref = useRef(null);
 
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
-  const userScrollPreference = useSelector(state => state?.data?.scrollPreference);
+  const userScrollPreference = useSelector(
+    state => state?.data?.scrollPreference,
+  );
 
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
-  const [isVerticalScroll, setIsVerticalScroll] = useState(userScrollPreference === 'vertical');
+  const [isVerticalScroll, setIsVerticalScroll] = useState(
+    userScrollPreference === 'vertical',
+  );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [extractDownloaded, setExtractDownloaded] = useState(null);
 
@@ -51,6 +55,14 @@ export function DownloadComicBook({route}) {
       }
     }
   }, [isDownloadComic, DownloadComic, chapterlink]);
+
+  useEffect(() => {
+    if (route?.params?.localComic) {
+      let localComic = route?.params?.localComic;
+      let pages = localComic.map((page, index) => page.uri);
+      setExtractDownloaded({downloadedImagesPath: pages});
+    }
+  }, [route?.params?.localComic]);
 
   const activeIndex = useSharedValue(0);
 
@@ -229,7 +241,7 @@ export function DownloadComicBook({route}) {
                       setScrollPreference,
                       () => setIsModalVisible(false),
                       'DownloadComicBook',
-                      isDownloadComic
+                      isDownloadComic,
                     );
                   }}>
                   <Text style={styles.text}>

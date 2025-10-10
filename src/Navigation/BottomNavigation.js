@@ -3,13 +3,13 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {getVersion} from 'react-native-device-info';
 
 import Feather from 'react-native-vector-icons/Feather';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
 import {useSelector} from 'react-redux';
-import {ComicBookmarks, Home, OfflineComic} from '../Screens/Comic';
+import {ComicBookmarks, Home, OfflineComic, Library} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
@@ -35,9 +35,9 @@ const TabBarIcon = props => {
         color={props.tintColor}
       />
     );
-  } else if (props.name === 'book-bookmark') {
+  } else if (props.name === 'library') {
     return (
-      <FontAwesome6
+      <Ionicons
         name={props.name}
         size={props.size ? props.size : 24}
         color={props.tintColor}
@@ -77,7 +77,6 @@ const TabBarIcon = props => {
  * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
  */
 export function BottomNavigation() {
-  const downTime = useSelector(state => state.data.downTime);
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
 
   return (
@@ -116,15 +115,11 @@ export function BottomNavigation() {
         />
 
         <BottomTab.Screen
-          name={NAVIGATION.bookmarks}
-          component={ComicBookmarks}
+          name={NAVIGATION.Library}
+          component={Library}
           options={{
             tabBarIcon: ({focused, color}) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="book-bookmark"
-              />
+              <TabBarIcon focused={focused} tintColor={color} name="library" />
             ),
           }}
         />

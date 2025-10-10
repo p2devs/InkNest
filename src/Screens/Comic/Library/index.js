@@ -14,6 +14,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {getVersion} from 'react-native-device-info';
@@ -29,7 +30,7 @@ import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanne
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
 
-export function Home({navigation}) {
+export function Library({navigation}) {
   const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -91,6 +92,7 @@ export function Home({navigation}) {
         getComicsHome(type, setComicsData, setLoading);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forIosValue, forIosLoading]);
 
   return (
@@ -119,6 +121,21 @@ export function Home({navigation}) {
                   {type}
                 </Text>
                 <AntDesign name="down" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  borderRadius: 100,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  width: 40,
+                  height: 40,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => {
+                  crashlytics().log('Bookmarks button clicked');
+                  navigation.navigate(NAVIGATION.bookmarks);
+                }}>
+                <FontAwesome6 name="book-bookmark" size={20} color="#fff" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={{

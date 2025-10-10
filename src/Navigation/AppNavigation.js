@@ -6,6 +6,7 @@ import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import {
   ComicBook,
+  ComicBookmarks,
   ComicDetails,
   DownloadComicBook,
   MockBooks,
@@ -58,6 +59,7 @@ export function AppNavigation() {
         name={NAVIGATION.downloadComicBook}
         component={DownloadComicBook}
       />
+      <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
     </Stack.Navigator>
   );
 }
