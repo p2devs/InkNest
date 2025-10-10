@@ -19,10 +19,11 @@ export const NAVIGATION = {
   mangaSearch: 'MangaSearch',
   mangaViewAll: 'MangaViewAll',
   ViewAll: 'ViewAll',
-  offlineComic: 'Offline',
+  offlineComic: 'Downloaded',
   seeAll: 'SeeAll',
   sources: 'Web Sources',
   WebSources: 'WebSources',
   WebSourcesList: 'WebSourcesList',
   WebSearch: 'WebSearch',
+  Library: 'Library',
 };
