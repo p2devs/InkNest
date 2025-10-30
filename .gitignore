@@ -33,13 +33,13 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+.kotlin/
 
 # node.js
 #
 node_modules/
 npm-debug.log
 yarn-error.log
-package-lock.json
 
 # fastlane
 #
@@ -78,20 +78,4 @@ package-lock.json
 **/google-services.json
 **/GoogleService-Info.plist
 
-
-#Files to ignore
-**/LocalComic/index.js
-**/Actions/Download.js
-**/OfflineComic/index.js
-**/ForceUpdate/Func.js
-
-#ignore app.json file
-app.json
-
-#ignore .env file
-.env
-
-
-## InkNest Some Files
-**/InkNest-Externals/*
 .qodo
