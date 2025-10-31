@@ -1,4 +1,4 @@
-package com.inknest
+package com.p2devs.inknest
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

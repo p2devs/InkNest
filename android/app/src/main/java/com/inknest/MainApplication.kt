@@ -1,4 +1,4 @@
-package com.inknest
+package com.p2devs.inknest
 
 import android.app.Application
 import com.facebook.react.PackageList
