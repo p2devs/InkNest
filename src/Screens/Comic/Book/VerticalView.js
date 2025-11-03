@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,14 @@ import {
   FlatList,
   useWindowDimensions,
   Image,
-  Modal,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {
   fitContainer,
   ResumableZoom,
   useImageResolution,
 } from 'react-native-zoom-toolkit';
+
+const ITEM_SPACING = 20;
 
 export default function VerticalView({
   data,
@@ -30,12 +30,28 @@ export default function VerticalView({
   const ref = useRef(null);
   const [zoomMode, setZoomMode] = useState(false);
   const [imageSizeAcuired, setImageSizeAcquired] = useState(false);
+  const [initialSyncDone, setInitialSyncDone] = useState(false);
+  const currentIndexRef = useRef(0);
 
-  // Update imagesLinks when comicBook changes
   useEffect(() => {
-    if (data && data?.length > 0) {
-      setImagesLinks(data[0]);
+    if (!data || data.length === 0) {
+      setImagesLinks('');
+      currentIndexRef.current = 0;
+      return;
     }
+
+    const maxIndex = data.length - 1;
+    const safeIndex = Math.min(
+      Math.max(activeIndex ?? 0, 0),
+      maxIndex,
+    );
+
+    setImagesLinks(data[safeIndex]);
+    currentIndexRef.current = safeIndex;
+  }, [activeIndex, data]);
+
+  useEffect(() => {
+    setInitialSyncDone(false);
   }, [data]);
 
   // Properly prepare the image source object with headers
@@ -79,33 +95,76 @@ export default function VerticalView({
   }, [resolution, isFetching, imagesLinks, imageSource]);
 
   useEffect(() => {
-    if (activeIndex > 0 && data?.length > 0) {
-      // Ensure size is acquired before attempting to scroll
-      if (imageSizeAcuired && ref.current) {
-        ref.current.scrollToIndex({index: activeIndex, animated: true});
-      }
+    if (!data || data.length === 0) {
+      return;
     }
-    // Depend on imageSizeAcuired to ensure scroll happens after layout is known
-  }, [activeIndex, data, imageSizeAcuired]);
+
+    if (!imageSizeAcuired || initialSyncDone || !ref.current) {
+      return;
+    }
+
+    const maxIndex = data.length - 1;
+    const safeIndex = Math.min(
+      Math.max(activeIndex ?? 0, 0),
+      maxIndex,
+    );
+
+    if (safeIndex === 0) {
+      currentIndexRef.current = 0;
+      setInitialSyncDone(true);
+      return;
+    }
+
+    try {
+      ref.current.scrollToIndex({index: safeIndex, animated: false});
+      currentIndexRef.current = safeIndex;
+      setInitialSyncDone(true);
+    } catch (error) {
+      // Ignore out of range errors while list recalculates
+    }
+  }, [activeIndex, data, imageSizeAcuired, initialSyncDone]);
 
   // getItemLayout is used to optimize the FlatList performance
-  const getItemLayout = (data, index) => {
-    // Use calculated size if available
-    if (size?.height) {
-      return {
-        length: size.height,
-        offset: size.height * index,
-        index,
-      };
-    }
-    // Fallback if size is not yet calculated: use resolutions prop or screen height
-    const estimatedHeight = resolutions?.height || height;
-    return {
-      length: estimatedHeight,
-      offset: estimatedHeight * index,
+  const itemLength = useMemo(() => {
+    const baseHeight = size?.height || resolutions?.height || height;
+    return baseHeight + ITEM_SPACING;
+  }, [height, resolutions?.height, size?.height]);
+
+  const getItemLayout = useCallback(
+    (_, index) => ({
+      length: itemLength,
+      offset: itemLength * index,
       index,
-    };
-  };
+    }),
+    [itemLength],
+  );
+
+  const updateIndexFromOffset = useCallback(
+    offset => {
+      if (!Number.isFinite(offset) || !itemLength) {
+        return;
+      }
+
+      const rawIndex = Math.round(offset / itemLength);
+      const maxIndex = Math.max(0, (data?.length ?? 1) - 1);
+      const safeIndex = Math.min(Math.max(rawIndex, 0), maxIndex);
+
+      if (safeIndex === currentIndexRef.current) {
+        return;
+      }
+
+      currentIndexRef.current = safeIndex;
+      setImageLinkIndex(safeIndex);
+    },
+    [data?.length, itemLength, setImageLinkIndex],
+  );
+
+  const handleScrollEnd = useCallback(
+    event => {
+      updateIndexFromOffset(event.nativeEvent.contentOffset.y);
+    },
+    [updateIndexFromOffset],
+  );
 
   if (loading || !imagesLinks) {
     return (
@@ -136,7 +195,7 @@ export default function VerticalView({
         renderItem={({item, index}) => (
           <TouchableOpacity
             style={{
-              marginBottom: 20,
+              marginBottom: ITEM_SPACING,
               alignItems: 'center',
             }}
             activeOpacity={0.9}
@@ -165,16 +224,10 @@ export default function VerticalView({
             )}
           </TouchableOpacity>
         )}
-        onScroll={event => {
-          // Calculate the index based on the scroll position
-          // and the height of the image (only if size is known)
-          if (!size?.height) return;
-          const index = Math.floor(
-            event.nativeEvent.contentOffset.y / size.height,
-          );
-          setImageLinkIndex(index);
-        }}
+        onScrollEndDrag={handleScrollEnd}
+        onMomentumScrollEnd={handleScrollEnd}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: ITEM_SPACING}}
       />
       {zoomMode && (
         <View
