@@ -57,8 +57,11 @@ export const lightColors = {
   iconSecondary: '#666666',
 
   // Settings specific
-  settingsItem: '#FFFFFF',
+  settingsItem: '#F5F5F5',
   settingsItemText: '#000000',
+
+  // Link and action colors
+  link: '#007AFF',
 };
 
 export const darkColors = {
@@ -117,4 +120,7 @@ export const darkColors = {
   // Settings specific
   settingsItem: '#FFFFFF',
   settingsItemText: '#000000',
+
+  // Link and action colors
+  link: '#007AFF',
 };

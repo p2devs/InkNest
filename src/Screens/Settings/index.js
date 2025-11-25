@@ -147,7 +147,7 @@ export function Settings({navigation}) {
           <Text
             style={{
               fontSize: hp('1.8%'),
-              color: '#007AFF',
+              color: colors.link,
             }}>
             {getThemeModeLabel(themeMode)}
           </Text>
@@ -344,7 +344,7 @@ export function Settings({navigation}) {
           <Text
             style={{
               fontSize: hp('1.8%'),
-              color: '#007AFF',
+              color: colors.link,
             }}>
             {scrollPreference === 'horizontal' ? 'Horizontal' : 'Vertical'}
           </Text>
