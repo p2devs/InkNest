@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {TouchableOpacity, Image, View, Text} from 'react-native';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
@@ -9,19 +9,19 @@ import {NAVIGATION} from '../../../../Constants';
 
 const HistoryCard = ({item, index}) => {
   const ComicDetail = useSelector(state => state.data.dataByUrl[item.link]);
-  const [progress, setProgress] = useState(0);
-  const calculateProgress = () => {
-    const totalChapters = (ComicDetail?.issues ?? ComicDetail?.chapters)
-      ?.length;
-    const ReadChapter = item?.readComics
-      ? Object?.keys(item?.readComics)?.length
-      : 0;
-    setProgress((ReadChapter / totalChapters) * 100);
-  };
+  const progress = useMemo(() => {
+    const totalChapters =
+      (ComicDetail?.issues ?? ComicDetail?.chapters)?.length ?? 0;
+    if (!totalChapters) {
+      return 0;
+    }
 
-  useEffect(() => {
-    calculateProgress();
-  }, [ComicDetail]);
+    const readChapterCount = item?.readComics
+      ? Object.keys(item.readComics).length
+      : 0;
+
+    return (readChapterCount / totalChapters) * 100;
+  }, [ComicDetail?.issues, ComicDetail?.chapters, item?.readComics]);
 
   if (!item?.title || !item?.link || !ComicDetail) return null;
 

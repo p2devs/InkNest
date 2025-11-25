@@ -309,7 +309,7 @@ export function ComicBook({navigation, route}) {
                 updateData({
                   url: comicBookLink,
                   data: {lastReadPage: imageLinkIndex},
-                  imageLength: comicBookLink?.images?.length,
+                  imageLength: comicBook?.images?.length ?? 0,
                   ComicDetailslink: ComicDetails?.link,
                 }),
               );
@@ -444,7 +444,7 @@ export function ComicBook({navigation, route}) {
                       updateData({
                         url: comicBookLink,
                         data: {lastReadPage: imageLinkIndex},
-                        imageLength: comicBookLink?.images?.length,
+                        imageLength: comicBook?.images?.length ?? 0,
                         ComicDetailslink: ComicDetails?.link,
                       }),
                     );

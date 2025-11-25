@@ -184,7 +184,10 @@ const Reducers = createSlice({
       //trim the query from the url
       const link = action.payload.link.split('?')[0];
 
-      state.history[link] = action.payload;
+      state.history[link] = {
+        ...state.history[link],
+        ...action.payload,
+      };
     },
     UpdateSearch: (state, action) => {
       //push data to search array on top
