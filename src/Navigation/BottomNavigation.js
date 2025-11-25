@@ -14,6 +14,7 @@ import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
+import {useTheme} from '../Theme';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -78,6 +79,7 @@ const TabBarIcon = props => {
  */
 export function BottomNavigation() {
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const {colors} = useTheme();
 
   return (
     <>
@@ -88,14 +90,14 @@ export function BottomNavigation() {
               style={[
                 StyleSheet.absoluteFill,
                 {
-                  backgroundColor: '#110918',
+                  backgroundColor: colors.tabBar,
                 },
               ]}
             />
           ),
           headerShown: false,
-          tabBarActiveTintColor: '#D2D2D6',
-          tabBarInactiveTintColor: '#6B666D',
+          tabBarActiveTintColor: colors.tabBarActive,
+          tabBarInactiveTintColor: colors.tabBarInactive,
           tabBarStyle: {
             paddingVertical: 4,
           },

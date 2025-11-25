@@ -13,6 +13,7 @@ import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
 import {BannerProvider} from './src/Components/UIComp/AnimeAdBanner/BannerContext';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+import {ThemeProvider} from './src/Theme';
 
 /**
  * The main App component that sets up the root of the application.
@@ -54,13 +55,15 @@ const App = () => {
         sdkKey={__DEV__ ? CONFIGCAT_SDK_KEY_TEST : CONFIGCAT_SDK_KEY_PROD}>
         <Provider store={store}>
           <PersistGate loading={<Loading />} persistor={persistor}>
-            <PaperProvider>
-              <BannerProvider>
-                <RootNavigation />
-                <Toast />
-                <ForceUpdate />
-              </BannerProvider>
-            </PaperProvider>
+            <ThemeProvider>
+              <PaperProvider>
+                <BannerProvider>
+                  <RootNavigation />
+                  <Toast />
+                  <ForceUpdate />
+                </BannerProvider>
+              </PaperProvider>
+            </ThemeProvider>
           </PersistGate>
         </Provider>
       </ConfigCatProvider>

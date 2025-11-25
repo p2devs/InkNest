@@ -27,23 +27,136 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {NAVIGATION} from '../../Constants';
 import Header from '../../Components/UIComp/Header';
 import {useDispatch, useSelector} from 'react-redux';
-import {setScrollPreference} from '../../Redux/Reducers';
+import {setScrollPreference, setThemeMode} from '../../Redux/Reducers';
 import DonationBanner from '../../InkNest-Externals/Donation/DonationBanner';
+import {useTheme} from '../../Theme';
+
+/**
+ * Get the display label for the current theme mode
+ * @param {string} mode - The theme mode ('light', 'dark', or 'system')
+ * @returns {string} The display label
+ */
+const getThemeModeLabel = mode => {
+  switch (mode) {
+    case 'light':
+      return 'Light';
+    case 'dark':
+      return 'Dark';
+    case 'system':
+    default:
+      return 'System';
+  }
+};
+
+/**
+ * Get the icon name for the current theme mode
+ * @param {string} mode - The theme mode ('light', 'dark', or 'system')
+ * @returns {string} The icon name
+ */
+const getThemeModeIcon = mode => {
+  switch (mode) {
+    case 'light':
+      return 'white-balance-sunny';
+    case 'dark':
+      return 'moon-waning-crescent';
+    case 'system':
+    default:
+      return 'theme-light-dark';
+  }
+};
 
 export function Settings({navigation}) {
   const dispatch = useDispatch();
   const scrollPreference = useSelector(state => state.data.scrollPreference);
+  const themeMode = useSelector(state => state.data.themeMode) || 'system';
+  const {colors} = useTheme();
+
+  /**
+   * Cycle through theme modes: system -> light -> dark -> system
+   */
+  const handleThemeToggle = () => {
+    analytics().logEvent('toggle_theme_mode', {
+      item: 'Theme Mode',
+      currentMode: themeMode,
+    });
+
+    let newMode;
+    switch (themeMode) {
+      case 'system':
+        newMode = 'light';
+        break;
+      case 'light':
+        newMode = 'dark';
+        break;
+      case 'dark':
+      default:
+        newMode = 'system';
+        break;
+    }
+
+    dispatch(setThemeMode(newMode));
+
+    Alert.alert(
+      'Theme Changed',
+      `App theme is now set to ${getThemeModeLabel(newMode)}.`,
+      [{text: 'OK'}],
+    );
+  };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}} edges={['top']}>
-      <Header title="Settings" />
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: colors.background}}
+      edges={['top']}>
+      <Header
+        title="Settings"
+        style={{backgroundColor: colors.headerBackground}}
+        TitleStyle={{color: colors.text}}
+      />
       <DonationBanner />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={{
             paddingVertical: hp('1%'),
-            backgroundColor: '#FFF',
+            backgroundColor: colors.settingsItem,
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+          onPress={handleThemeToggle}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <MaterialCommunityIcons
+              name={getThemeModeIcon(themeMode)}
+              size={hp('2.5%')}
+              color={colors.settingsItemText}
+              style={{marginRight: 10}}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: colors.settingsItemText,
+              }}>
+              Theme
+            </Text>
+          </View>
+          <Text
+            style={{
+              fontSize: hp('1.8%'),
+              color: '#007AFF',
+            }}>
+            {getThemeModeLabel(themeMode)}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            paddingVertical: hp('1%'),
+            backgroundColor: colors.settingsItem,
             marginHorizontal: widthPercentageToDP('2%'),
             marginVertical: hp('1%'),
             paddingHorizontal: 10,
@@ -60,14 +173,14 @@ export function Settings({navigation}) {
           <Ionicons
             name="information-circle-outline"
             size={hp('2.5%')}
-            color="#000"
+            color={colors.settingsItemText}
             style={{marginRight: 10}}
           />
           <Text
             style={{
               fontSize: hp('2%'),
               fontWeight: 'bold',
-              color: '#000',
+              color: colors.settingsItemText,
             }}>
             About us
           </Text>
