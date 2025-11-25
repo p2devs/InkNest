@@ -110,7 +110,7 @@ export const HomePageCardClasses = {
 export const ComicDetailPageClasses = {
   readcomicsonline: {
     detailsContainer: '.list-container',
-    title: 'img.img-responsive',
+    title: '.listmanga-header',
     imgSrc: '.boxed img.img-responsive',
     getImageAttr: 'src',
     summary: 'div.manga.well p',
