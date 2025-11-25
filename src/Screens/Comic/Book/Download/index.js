@@ -443,7 +443,7 @@ export function DownloadComicBook({route}) {
             data={extractDownloaded?.downloadedImagesPath}
             loading={loading}
             setImageLinkIndex={handleDownloadedPageChange}
-            activeIndex={activeIndex?.value}
+            activeIndex={imageLinkIndex}
             resolutions={resolution}
           />
         ) : (

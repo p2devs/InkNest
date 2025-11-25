@@ -342,7 +342,7 @@ export function ComicBook({navigation, route}) {
             data={comicBook?.images}
             loading={loading}
             setImageLinkIndex={setImageLinkIndex}
-            activeIndex={activeIndex?.value}
+            activeIndex={imageLinkIndex}
             resolutions={resolution}
           />
         ) : (
