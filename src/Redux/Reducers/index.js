@@ -14,6 +14,7 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
+  themeMode: 'system', // Theme mode: 'light', 'dark', or 'system'
 };
 
 /**
@@ -240,6 +241,10 @@ const Reducers = createSlice({
       // Update the flag indicating whether reward ads have been shown
       state.hasRewardAdsShown = action.payload;
     },
+    setThemeMode: (state, action) => {
+      // Update the theme mode: 'light', 'dark', or 'system'
+      state.themeMode = action.payload;
+    },
   },
 });
 
@@ -265,5 +270,6 @@ export const {
   clearHistory,
   setScrollPreference,
   rewardAdsShown,
+  setThemeMode,
 } = Reducers.actions;
 export default Reducers.reducer;
