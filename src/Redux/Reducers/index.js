@@ -125,12 +125,49 @@ const Reducers = createSlice({
         link,
         comicBooks: {
           ...state.DownloadComic[link]?.comicBooks,
-          [data?.link]: data,
+          [data?.link]: {
+            ...state.DownloadComic[link]?.comicBooks?.[data?.link],
+            ...data,
+            comicBook: state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook
+              ? {
+                  ...state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook,
+                  ...data?.comicBook,
+                  ...(data?.lastReadPage !== undefined
+                    ? {lastReadPage: data.lastReadPage}
+                    : {}),
+                }
+              : data?.comicBook,
+          },
         },
       };
-      console.log('action.payload', link, data, title);
+    },
+    updateDownloadedComicBook: (state, action) => {
+      const {comicDetailsLink, chapterLink, data} = action.payload;
 
-      console.log('state.DownloadComic', state.DownloadComic);
+      if (
+        !comicDetailsLink ||
+        !chapterLink ||
+        !state.DownloadComic[comicDetailsLink]?.comicBooks?.[chapterLink]
+      ) {
+        return;
+      }
+
+      const existingEntry =
+        state.DownloadComic[comicDetailsLink].comicBooks[chapterLink];
+
+      state.DownloadComic[comicDetailsLink].comicBooks[chapterLink] = {
+        ...existingEntry,
+        ...data,
+        comicBook: existingEntry?.comicBook
+          ? {
+              ...existingEntry.comicBook,
+              ...(data?.comicBook ?? {}),
+              ...(data?.lastReadPage !== undefined
+                ? {lastReadPage: data.lastReadPage}
+                : {}),
+            }
+          : existingEntry?.comicBook,
+      };
     },
     DeleteDownloadedComicBook: (state, action) => {
       const {comicBooksLink, ChapterLink} = action.payload;
@@ -147,7 +184,10 @@ const Reducers = createSlice({
       //trim the query from the url
       const link = action.payload.link.split('?')[0];
 
-      state.history[link] = action.payload;
+      state.history[link] = {
+        ...state.history[link],
+        ...action.payload,
+      };
     },
     UpdateSearch: (state, action) => {
       //push data to search array on top
@@ -221,6 +261,7 @@ export const {
   RemoveAnimeBookMark,
   DownloadComicBook,
   DeleteDownloadedComicBook,
+  updateDownloadedComicBook,
   clearHistory,
   setScrollPreference,
   rewardAdsShown,

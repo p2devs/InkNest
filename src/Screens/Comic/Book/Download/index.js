@@ -7,6 +7,7 @@ import {
   Modal,
   Linking,
   Share,
+  ActivityIndicator,
 } from 'react-native';
 
 import {useSelector, useDispatch} from 'react-redux';
@@ -15,6 +16,7 @@ import {useSharedValue} from 'react-native-reanimated';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import analytics from '@react-native-firebase/analytics';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -22,8 +24,12 @@ import Header from '../../../../Components/UIComp/Header';
 import {goBack} from '../../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
-import {setScrollPreference} from '../../../../Redux/Reducers';
+import {
+  setScrollPreference,
+  updateDownloadedComicBook,
+} from '../../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../../Utils/ScrollModeUtils';
+import {downloadComicBook} from '../../../../InkNest-Externals/Redux/Actions/Download';
 
 export function DownloadComicBook({route}) {
   const dispatch = useDispatch();
@@ -45,16 +51,117 @@ export function DownloadComicBook({route}) {
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [extractDownloaded, setExtractDownloaded] = useState(null);
+  const [isMissingFiles, setIsMissingFiles] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState({downloaded: 0, total: 0});
+
+  const normalizeLocalPath = useCallback(path => {
+    if (typeof path !== 'string') {
+      return '';
+    }
+
+    if (path.startsWith('file://')) {
+      return path.replace('file://', '');
+    }
+
+    return path;
+  }, []);
+
+  const ensureStoredFiles = useCallback(
+    async data => {
+      if (!data) {
+        return false;
+      }
+
+      const candidatePaths = [];
+
+      if (data.folderPath) {
+        candidatePaths.push(normalizeLocalPath(data.folderPath));
+      }
+
+      if (Array.isArray(data.downloadedImagesPath)) {
+        const firstImagePath = data.downloadedImagesPath[0];
+        if (firstImagePath) {
+          candidatePaths.push(normalizeLocalPath(firstImagePath));
+        }
+      }
+
+      if (candidatePaths.length === 0) {
+        return false;
+      }
+
+      try {
+        const checks = await Promise.all(
+          candidatePaths.map(async path => {
+            if (!path) {
+              return false;
+            }
+            try {
+              return await RNFS.exists(path);
+            } catch (err) {
+              console.log('RNFS exists check failed', err);
+              return false;
+            }
+          }),
+        );
+
+        return checks.every(Boolean);
+      } catch (error) {
+        console.log('ensureStoredFiles error', error);
+        return false;
+      }
+    },
+    [normalizeLocalPath],
+  );
 
   useEffect(() => {
-    if (isDownloadComic) {
-      const extractedData =
-        DownloadComic[isDownloadComic]?.comicBooks[chapterlink];
-      if (extractedData) {
-        setExtractDownloaded(extractedData);
+    let isMounted = true;
+
+    const hydrateDownloadedComic = async () => {
+      if (!isDownloadComic) {
+        if (isMounted) {
+          setExtractDownloaded(null);
+          setIsMissingFiles(false);
+        }
+        return;
       }
-    }
-  }, [isDownloadComic, DownloadComic, chapterlink]);
+
+      const storedEntry =
+        DownloadComic?.[isDownloadComic]?.comicBooks?.[chapterlink];
+
+      if (!storedEntry) {
+        if (isMounted) {
+          setExtractDownloaded(null);
+          setIsMissingFiles(false);
+        }
+        return;
+      }
+
+      const hasFiles = await ensureStoredFiles(storedEntry);
+
+      if (!isMounted) {
+        return;
+      }
+
+      setExtractDownloaded(storedEntry);
+      setIsMissingFiles(!hasFiles);
+      if (hasFiles) {
+        setIsSyncing(false);
+        setSyncProgress({downloaded: 0, total: 0});
+      }
+    };
+
+    hydrateDownloadedComic();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    DownloadComic,
+    chapterlink,
+    ensureStoredFiles,
+    isDownloadComic,
+  ]);
 
   useEffect(() => {
     if (route?.params?.localComic) {
@@ -64,6 +171,32 @@ export function DownloadComicBook({route}) {
       setImageLinkIndex(route?.params?.initialIndex || 0);
     }
   }, [route?.params?.localComic, route?.params?.initialIndex]);
+
+  useEffect(() => {
+    if (
+      extractDownloaded?.lastReadPage !== undefined &&
+      Array.isArray(extractDownloaded?.downloadedImagesPath) &&
+      extractDownloaded.downloadedImagesPath.length > 0
+    ) {
+      const maxIndex = extractDownloaded.downloadedImagesPath.length - 1;
+      const safeIndex = Math.min(
+        Math.max(extractDownloaded.lastReadPage, 0),
+        maxIndex,
+      );
+
+      setImageLinkIndex(safeIndex);
+      activeIndex.value = safeIndex;
+
+      if (!isVerticalScroll && ref?.current && safeIndex >= 0) {
+        ref.current.setIndex(safeIndex);
+      }
+    }
+  }, [
+    activeIndex,
+    extractDownloaded?.downloadedImagesPath,
+    extractDownloaded?.lastReadPage,
+    isVerticalScroll,
+  ]);
 
   const activeIndex = useSharedValue(0);
 
@@ -90,7 +223,87 @@ export function DownloadComicBook({route}) {
     [activeIndex],
   );
 
-  const keyExtractor = useCallback((item, index) => `${item.uri}-${index}`, []);
+  const keyExtractor = useCallback((item, index) => `${item}-${index}`, []);
+
+  const handleDownloadedPageChange = useCallback(
+    newIndex => {
+      if (typeof newIndex !== 'number' || Number.isNaN(newIndex)) {
+        return;
+      }
+
+      const totalPages =
+        extractDownloaded?.downloadedImagesPath?.length ?? 0;
+      const safeIndex =
+        totalPages > 0
+          ? Math.min(Math.max(newIndex, 0), totalPages - 1)
+          : Math.max(newIndex, 0);
+
+      if (safeIndex === imageLinkIndex) {
+        return;
+      }
+
+      setImageLinkIndex(safeIndex);
+      activeIndex.value = safeIndex;
+
+      if (isDownloadComic && chapterlink) {
+        dispatch(
+          updateDownloadedComicBook({
+            comicDetailsLink: isDownloadComic,
+            chapterLink: chapterlink,
+            data: {lastReadPage: safeIndex},
+          }),
+        );
+      }
+    },
+    [
+      activeIndex,
+      chapterlink,
+      dispatch,
+      extractDownloaded?.downloadedImagesPath?.length,
+      imageLinkIndex,
+      isDownloadComic,
+    ],
+  );
+
+  const handleSyncDownloads = useCallback(() => {
+    if (!isDownloadComic || !chapterlink || !extractDownloaded?.comicBook) {
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncProgress({downloaded: 0, total: 0});
+
+    const parentSeries = DownloadComic?.[isDownloadComic];
+
+    dispatch(
+      downloadComicBook({
+        comicDetails: {
+          title: parentSeries?.title ?? extractDownloaded?.comicBook?.title,
+          link: parentSeries?.link ?? isDownloadComic,
+          imgSrc: parentSeries?.imgSrc ?? extractDownloaded?.comicBook?.imgSrc,
+        },
+        comicBook: {
+          ...extractDownloaded.comicBook,
+          link: extractDownloaded?.comicBook?.link ?? chapterlink,
+        },
+        setLoadingStatus: status => {
+          setIsSyncing(Boolean(status));
+          if (!status) {
+            setSyncProgress({downloaded: 0, total: 0});
+          }
+        },
+        onProgress: (downloaded, total) =>
+          setSyncProgress({downloaded, total}),
+        initialLastReadPage: extractDownloaded?.lastReadPage ?? 0,
+      }),
+    );
+  }, [
+    DownloadComic,
+    chapterlink,
+    dispatch,
+    extractDownloaded,
+    isDownloadComic,
+  ]);
 
   // used to derived the color animation when pulling vertically
   const translateY = useSharedValue(0);
@@ -121,6 +334,59 @@ export function DownloadComicBook({route}) {
     );
   }
 
+  if (isMissingFiles) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 18,
+            fontWeight: '600',
+            textAlign: 'center',
+            marginBottom: 20,
+            paddingHorizontal: 24,
+          }}>
+          We could not find the downloaded files for this chapter. Sync to
+          restore them offline.
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {opacity: isSyncing ? 0.7 : 1, width: '80%'},
+          ]}
+          disabled={
+            isSyncing || !extractDownloaded?.comicBook?.images?.length
+          }
+          onPress={handleSyncDownloads}>
+          {isSyncing ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+              }}>
+              <ActivityIndicator color="#fff" />
+              <Text style={styles.text}>
+                {syncProgress.total
+                  ? `Syncing ${syncProgress.downloaded}/${syncProgress.total}`
+                  : 'Syncing downloads...'}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.text}>Sync Downloads</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, {backgroundColor: '#555', width: '80%'}]}
+          onPress={() => {
+            goBack();
+          }}>
+          <Text style={styles.text}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   if (!extractDownloaded) {
     return (
       <SafeAreaView style={styles.container}>
@@ -147,6 +413,7 @@ export function DownloadComicBook({route}) {
                 screen: 'DownloadComicBook',
                 comicBookLink: isDownloadComic?.toString(),
               });
+              handleDownloadedPageChange(imageLinkIndex);
               goBack();
             }}>
             <Ionicons
@@ -175,8 +442,8 @@ export function DownloadComicBook({route}) {
           <VerticalView
             data={extractDownloaded?.downloadedImagesPath}
             loading={loading}
-            setImageLinkIndex={setImageLinkIndex}
-            activeIndex={activeIndex?.value}
+            setImageLinkIndex={handleDownloadedPageChange}
+            activeIndex={imageLinkIndex}
             resolutions={resolution}
           />
         ) : (
@@ -187,8 +454,7 @@ export function DownloadComicBook({route}) {
             renderItem={renderItem}
             gap={24}
             onIndexChange={idx => {
-              activeIndex.value = idx;
-              setImageLinkIndex(idx);
+              handleDownloadedPageChange(idx);
             }}
             pinchCenteringMode={'sync'}
             onVerticalPull={onVerticalPulling}

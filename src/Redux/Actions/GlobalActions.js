@@ -128,7 +128,7 @@ export const fetchComicDetails =
         comicDetails = config.customParser($, config, link);
       } else {
         const detailsContainer = $(config.detailsContainer);
-        const title = $(config.title).text().trim();
+        const title = $(config.title).first().text().trim();
         let imgSrc = detailsContainer
           .find(config.imgSrc)
           .attr(config.getImageAttr);
