@@ -27,8 +27,10 @@ import {
   unlink,
 } from '@dr.pogodin/react-native-fs';
 import {unarchive, UnarchiveResult} from 'react-native-unarchive';
+import {useSelector, useDispatch} from 'react-redux';
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
+import {clearLocalComicProgress} from '../../../Redux/Reducers';
 
 // Utility function to convert file URI to file path
 const uriToPath = (uri: string): string => {
@@ -93,6 +95,11 @@ export function Home() {
   const [unarchiveResult, setUnarchiveResult] =
     useState<UnarchiveResult | null>(null);
 
+  const dispatch = useDispatch();
+  const localComicProgress = useSelector(
+    (state: any) => state?.data?.localComicProgress,
+  );
+
   // Handle external file opening (when user taps CBR/CBZ file in Files app)
   useEffect(() => {
     // Handle initial URL if app was closed
@@ -156,6 +163,9 @@ export function Home() {
         await unlink(COMICS_ROOT);
       }
       await mkdir(COMICS_ROOT);
+
+      // Clear previous reading progress when importing a new comic
+      dispatch(clearLocalComicProgress());
 
       // Copy file to app's document directory
       await copyFile(sourceUri, archivePath);
@@ -286,6 +296,25 @@ export function Home() {
   const hasComic = pages.length > 0;
   const coverUri = pages[0]?.uri;
 
+  // Calculate reading progress
+  const readingProgress = useMemo(() => {
+    if (!localComicProgress || !pages.length) {
+      return null;
+    }
+    const {lastReadPage, totalPages} = localComicProgress;
+    // Ensure the saved progress matches the current comic
+    if (totalPages !== pages.length) {
+      return null;
+    }
+    const percentRead = Math.round(((lastReadPage + 1) / totalPages) * 100);
+    return {
+      lastReadPage,
+      totalPages,
+      percentRead,
+      isComplete: lastReadPage + 1 >= totalPages,
+    };
+  }, [localComicProgress, pages.length]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {hasComic ? (
@@ -357,6 +386,85 @@ export function Home() {
                     </Text>
                   </View>
                 </TouchableOpacity>
+
+                {/* Reading Progress Section */}
+                {readingProgress && (
+                  <View style={styles.progressSection}>
+                    <View style={styles.progressHeader}>
+                      <MaterialCommunityIcons
+                        name={
+                          readingProgress.isComplete
+                            ? 'check-circle'
+                            : 'book-open-page-variant'
+                        }
+                        size={hp('2.2%')}
+                        color={
+                          readingProgress.isComplete ? '#4CAF50' : '#5B67F1'
+                        }
+                      />
+                      <Text style={styles.progressHeaderText}>
+                        {readingProgress.isComplete
+                          ? 'Completed!'
+                          : 'Continue Reading'}
+                      </Text>
+                    </View>
+                    <View style={styles.progressInfo}>
+                      <Text style={styles.progressText}>
+                        {readingProgress.isComplete
+                          ? `You finished all ${readingProgress.totalPages} pages`
+                          : `Page ${readingProgress.lastReadPage + 1} of ${readingProgress.totalPages}`}
+                      </Text>
+                      <Text style={styles.progressPercent}>
+                        {readingProgress.percentRead}%
+                      </Text>
+                    </View>
+                    <View style={styles.progressBarContainer}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          {
+                            width: `${readingProgress.percentRead}%`,
+                            backgroundColor: readingProgress.isComplete
+                              ? '#4CAF50'
+                              : '#5B67F1',
+                          },
+                        ]}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      style={[
+                        styles.continueButton,
+                        readingProgress.isComplete &&
+                          styles.continueButtonComplete,
+                      ]}
+                      onPress={() => {
+                        navigate(NAVIGATION.downloadComicBook, {
+                          isDownloadComic: null,
+                          chapterlink: null,
+                          localComic: pages,
+                          initialIndex: readingProgress.isComplete
+                            ? 0
+                            : readingProgress.lastReadPage,
+                        });
+                      }}>
+                      <MaterialCommunityIcons
+                        name={
+                          readingProgress.isComplete
+                            ? 'restart'
+                            : 'play-circle'
+                        }
+                        size={hp('2.4%')}
+                        color="#FFFFFF"
+                      />
+                      <Text style={styles.continueButtonText}>
+                        {readingProgress.isComplete
+                          ? 'Read Again'
+                          : 'Continue Reading'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
                 <Text style={styles.sectionLabel}>Page Previews</Text>
               </View>
             }
@@ -548,6 +656,68 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     marginBottom: hp('1.8%'),
+  },
+  progressSection: {
+    backgroundColor: 'rgba(91, 103, 241, 0.1)',
+    borderRadius: 16,
+    padding: wp('4%'),
+    marginBottom: hp('2.5%'),
+    borderWidth: 1,
+    borderColor: 'rgba(91, 103, 241, 0.3)',
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: hp('1%'),
+  },
+  progressHeaderText: {
+    fontSize: hp('1.8%'),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: hp('1%'),
+  },
+  progressText: {
+    fontSize: hp('1.6%'),
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  progressPercent: {
+    fontSize: hp('1.6%'),
+    fontWeight: '600',
+    color: '#5B67F1',
+  },
+  progressBarContainer: {
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    marginBottom: hp('1.5%'),
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  continueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#5B67F1',
+    paddingVertical: hp('1.2%'),
+    borderRadius: 10,
+    gap: 8,
+  },
+  continueButtonComplete: {
+    backgroundColor: '#4CAF50',
+  },
+  continueButtonText: {
+    fontSize: hp('1.7%'),
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   gridItem: {
     width: '31.5%',

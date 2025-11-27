@@ -14,6 +14,7 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
+  localComicProgress: null, // Tracks reading progress for imported local comics: { lastReadPage, totalPages, timestamp }
 };
 
 /**
@@ -240,6 +241,19 @@ const Reducers = createSlice({
       // Update the flag indicating whether reward ads have been shown
       state.hasRewardAdsShown = action.payload;
     },
+    updateLocalComicProgress: (state, action) => {
+      // Update reading progress for imported local comics
+      const {lastReadPage, totalPages} = action.payload;
+      state.localComicProgress = {
+        lastReadPage,
+        totalPages,
+        timestamp: Date.now(),
+      };
+    },
+    clearLocalComicProgress: state => {
+      // Clear local comic reading progress (e.g., when importing a new comic)
+      state.localComicProgress = null;
+    },
   },
 });
 
@@ -265,5 +279,7 @@ export const {
   clearHistory,
   setScrollPreference,
   rewardAdsShown,
+  updateLocalComicProgress,
+  clearLocalComicProgress,
 } = Reducers.actions;
 export default Reducers.reducer;

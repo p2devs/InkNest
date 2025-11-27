@@ -7,6 +7,7 @@ import {
   Modal,
   Linking,
   Share,
+  Animated,
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -67,6 +68,64 @@ export function ComicBook({navigation, route}) {
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const [isNextChapter, setIsNextChapter] = useState(false);
   const [isPreviousChapter, setIsPreviousChapter] = useState(false);
+  const headerOpacity = useRef(new Animated.Value(1)).current;
+  const headerTimeoutRef = useRef(null);
+  const isHeaderVisibleRef = useRef(true);
+
+  // Function to hide header with animation (no state update to avoid re-render)
+  const hideHeader = useCallback(() => {
+    if (!isHeaderVisibleRef.current) return;
+    isHeaderVisibleRef.current = false;
+    Animated.timing(headerOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [headerOpacity]);
+
+  // Function to show header with animation (no state update to avoid re-render)
+  const showHeader = useCallback(() => {
+    if (isHeaderVisibleRef.current) return;
+    isHeaderVisibleRef.current = true;
+    Animated.timing(headerOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [headerOpacity]);
+
+  // Start/reset the auto-hide timer
+  const resetHeaderTimer = useCallback(() => {
+    if (headerTimeoutRef.current) {
+      clearTimeout(headerTimeoutRef.current);
+    }
+    showHeader();
+    headerTimeoutRef.current = setTimeout(() => {
+      hideHeader();
+    }, 4000); // Hide after 4 seconds
+  }, [showHeader, hideHeader]);
+
+  // Toggle header visibility on tap (called from Gallery onTap)
+  const handleScreenTap = useCallback(() => {
+    if (isHeaderVisibleRef.current) {
+      hideHeader();
+      if (headerTimeoutRef.current) {
+        clearTimeout(headerTimeoutRef.current);
+      }
+    } else {
+      resetHeaderTimer();
+    }
+  }, [hideHeader, resetHeaderTimer]);
+
+  // Initial auto-hide timer and cleanup
+  useEffect(() => {
+    resetHeaderTimer();
+    return () => {
+      if (headerTimeoutRef.current) {
+        clearTimeout(headerTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (comicBookLink) {
@@ -285,81 +344,95 @@ export function ComicBook({navigation, route}) {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
-        <Header
-          style={{
-            width: '100%',
-            height: heightPercentageToDP('4%'),
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-          }}>
-          <TouchableOpacity
-            onPress={() => {
-              analytics().logEvent('go_back', {
-                screen: 'ComicBook',
-                comicBookLink: comicBookLink?.toString(),
-                DetailsPageLink: detailsPageLink?.toString(),
-                pageJump: pageJump?.toString(),
-                isDownloadComic: isDownloadComic?.toString(),
-                isVerticalScroll: isVerticalScroll?.toString(),
-              });
-              dispatch(
-                updateData({
-                  url: comicBookLink,
-                  data: {lastReadPage: imageLinkIndex},
-                  imageLength: comicBook?.images?.length ?? 0,
-                  ComicDetailslink: ComicDetails?.link,
-                }),
-              );
-
-              goBack();
-            }}>
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color="#fff"
-              style={{marginRight: 10, opacity: 0.9}}
-            />
-          </TouchableOpacity>
-          <Text
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <View style={{flex: 1}}>
+          <Animated.View
             style={{
-              fontSize: 14,
-              fontWeight: '700',
-              color: '#fff',
-              opacity: 0.9,
+              opacity: headerOpacity,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 10,
             }}>
-            Page: {imageLinkIndex + 1} / {comicBook?.images?.length}
-          </Text>
+            <Header
+              style={{
+                width: '100%',
+                height: heightPercentageToDP('4%'),
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 12,
+              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  analytics().logEvent('go_back', {
+                    screen: 'ComicBook',
+                    comicBookLink: comicBookLink?.toString(),
+                    DetailsPageLink: detailsPageLink?.toString(),
+                    pageJump: pageJump?.toString(),
+                    isDownloadComic: isDownloadComic?.toString(),
+                    isVerticalScroll: isVerticalScroll?.toString(),
+                  });
+                  dispatch(
+                    updateData({
+                      url: comicBookLink,
+                      data: {lastReadPage: imageLinkIndex},
+                      imageLength: comicBook?.images?.length ?? 0,
+                      ComicDetailslink: ComicDetails?.link,
+                    }),
+                  );
 
-          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
-        </Header>
-        {isVerticalScroll ? (
-          <VerticalView
-            data={comicBook?.images}
-            loading={loading}
-            setImageLinkIndex={setImageLinkIndex}
-            activeIndex={imageLinkIndex}
-            resolutions={resolution}
-          />
-        ) : (
-          <Gallery
-            ref={ref}
-            data={comicBook?.images}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            gap={24}
-            onIndexChange={idx => {
-              activeIndex.value = idx;
-              setImageLinkIndex(idx);
-            }}
-            pinchCenteringMode={'sync'}
-            onVerticalPull={onVerticalPulling}
-          />
-        )}
+                  goBack();
+                }}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color="#fff"
+                  style={{marginRight: 10, opacity: 0.9}}
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: '#fff',
+                  opacity: 0.9,
+                }}>
+                Page: {imageLinkIndex + 1} / {comicBook?.images?.length}
+              </Text>
+
+              <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                <Ionicons name="menu" size={24} color="#fff" />
+              </TouchableOpacity>
+            </Header>
+          </Animated.View>
+          {isVerticalScroll ? (
+            <VerticalView
+              data={comicBook?.images}
+              loading={loading}
+              setImageLinkIndex={setImageLinkIndex}
+              activeIndex={imageLinkIndex}
+              resolutions={resolution}
+              onTap={handleScreenTap}
+            />
+          ) : (
+            <Gallery
+              ref={ref}
+              data={comicBook?.images}
+              keyExtractor={keyExtractor}
+              renderItem={renderItem}
+              gap={24}
+              onIndexChange={idx => {
+                activeIndex.value = idx;
+                setImageLinkIndex(idx);
+              }}
+              pinchCenteringMode={'sync'}
+              onVerticalPull={onVerticalPulling}
+              onTap={handleScreenTap}
+            />
+          )}
+        </View>
       </SafeAreaView>
       {isModalVisible && (
         <SafeAreaView>

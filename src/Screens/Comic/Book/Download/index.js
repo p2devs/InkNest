@@ -8,6 +8,7 @@ import {
   Linking,
   Share,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 
 import {useSelector, useDispatch} from 'react-redux';
@@ -27,6 +28,7 @@ import VerticalView from './VerticalView';
 import {
   setScrollPreference,
   updateDownloadedComicBook,
+  updateLocalComicProgress,
 } from '../../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../../Utils/ScrollModeUtils';
 import {downloadComicBook} from '../../../../InkNest-Externals/Redux/Actions/Download';
@@ -34,6 +36,7 @@ import {downloadComicBook} from '../../../../InkNest-Externals/Redux/Actions/Dow
 export function DownloadComicBook({route}) {
   const dispatch = useDispatch();
   const {isDownloadComic, chapterlink} = route?.params;
+  const isLocalComic = !isDownloadComic && route?.params?.localComic;
 
   const ref = useRef(null);
 
@@ -54,6 +57,64 @@ export function DownloadComicBook({route}) {
   const [isMissingFiles, setIsMissingFiles] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState({downloaded: 0, total: 0});
+  const headerOpacity = useRef(new Animated.Value(1)).current;
+  const headerTimeoutRef = useRef(null);
+  const isHeaderVisibleRef = useRef(true);
+
+  // Function to hide header with animation (no state update to avoid re-render)
+  const hideHeader = useCallback(() => {
+    if (!isHeaderVisibleRef.current) return;
+    isHeaderVisibleRef.current = false;
+    Animated.timing(headerOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [headerOpacity]);
+
+  // Function to show header with animation (no state update to avoid re-render)
+  const showHeader = useCallback(() => {
+    if (isHeaderVisibleRef.current) return;
+    isHeaderVisibleRef.current = true;
+    Animated.timing(headerOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [headerOpacity]);
+
+  // Start/reset the auto-hide timer
+  const resetHeaderTimer = useCallback(() => {
+    if (headerTimeoutRef.current) {
+      clearTimeout(headerTimeoutRef.current);
+    }
+    showHeader();
+    headerTimeoutRef.current = setTimeout(() => {
+      hideHeader();
+    }, 4000); // Hide after 4 seconds
+  }, [showHeader, hideHeader]);
+
+  // Toggle header visibility on tap (called from Gallery onTap)
+  const handleScreenTap = useCallback(() => {
+    if (isHeaderVisibleRef.current) {
+      hideHeader();
+      if (headerTimeoutRef.current) {
+        clearTimeout(headerTimeoutRef.current);
+      }
+    } else {
+      resetHeaderTimer();
+    }
+  }, [hideHeader, resetHeaderTimer]);
+
+  // Initial auto-hide timer and cleanup
+  useEffect(() => {
+    resetHeaderTimer();
+    return () => {
+      if (headerTimeoutRef.current) {
+        clearTimeout(headerTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const normalizeLocalPath = useCallback(path => {
     if (typeof path !== 'string') {
@@ -156,21 +217,18 @@ export function DownloadComicBook({route}) {
     return () => {
       isMounted = false;
     };
-  }, [
-    DownloadComic,
-    chapterlink,
-    ensureStoredFiles,
-    isDownloadComic,
-  ]);
+  }, [DownloadComic, chapterlink, ensureStoredFiles, isDownloadComic]);
 
   useEffect(() => {
     if (route?.params?.localComic) {
       let localComic = route?.params?.localComic;
       let pages = localComic.map((page, index) => page.uri);
       setExtractDownloaded({downloadedImagesPath: pages});
-      setImageLinkIndex(route?.params?.initialIndex || 0);
+      const initialIdx = route?.params?.initialIndex || 0;
+      setImageLinkIndex(initialIdx);
+      activeIndex.value = initialIdx;
     }
-  }, [route?.params?.localComic, route?.params?.initialIndex]);
+  }, [route?.params?.localComic, route?.params?.initialIndex, activeIndex]);
 
   useEffect(() => {
     if (
@@ -231,8 +289,7 @@ export function DownloadComicBook({route}) {
         return;
       }
 
-      const totalPages =
-        extractDownloaded?.downloadedImagesPath?.length ?? 0;
+      const totalPages = extractDownloaded?.downloadedImagesPath?.length ?? 0;
       const safeIndex =
         totalPages > 0
           ? Math.min(Math.max(newIndex, 0), totalPages - 1)
@@ -253,6 +310,14 @@ export function DownloadComicBook({route}) {
             data: {lastReadPage: safeIndex},
           }),
         );
+      } else if (isLocalComic) {
+        // Save progress for locally imported comics
+        dispatch(
+          updateLocalComicProgress({
+            lastReadPage: safeIndex,
+            totalPages,
+          }),
+        );
       }
     },
     [
@@ -262,6 +327,7 @@ export function DownloadComicBook({route}) {
       extractDownloaded?.downloadedImagesPath?.length,
       imageLinkIndex,
       isDownloadComic,
+      isLocalComic,
     ],
   );
 
@@ -292,8 +358,7 @@ export function DownloadComicBook({route}) {
             setSyncProgress({downloaded: 0, total: 0});
           }
         },
-        onProgress: (downloaded, total) =>
-          setSyncProgress({downloaded, total}),
+        onProgress: (downloaded, total) => setSyncProgress({downloaded, total}),
         initialLastReadPage: extractDownloaded?.lastReadPage ?? 0,
       }),
     );
@@ -350,13 +415,8 @@ export function DownloadComicBook({route}) {
           restore them offline.
         </Text>
         <TouchableOpacity
-          style={[
-            styles.button,
-            {opacity: isSyncing ? 0.7 : 1, width: '80%'},
-          ]}
-          disabled={
-            isSyncing || !extractDownloaded?.comicBook?.images?.length
-          }
+          style={[styles.button, {opacity: isSyncing ? 0.7 : 1, width: '80%'}]}
+          disabled={isSyncing || !extractDownloaded?.comicBook?.images?.length}
           onPress={handleSyncDownloads}>
           {isSyncing ? (
             <View
@@ -397,69 +457,83 @@ export function DownloadComicBook({route}) {
 
   return (
     <>
-      <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}}>
-        <Header
-          style={{
-            width: '100%',
-            height: heightPercentageToDP('4%'),
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-          }}>
-          <TouchableOpacity
-            onPress={() => {
-              analytics().logEvent('go_back', {
-                screen: 'DownloadComicBook',
-                comicBookLink: isDownloadComic?.toString(),
-              });
-              handleDownloadedPageChange(imageLinkIndex);
-              goBack();
-            }}>
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color="#fff"
-              style={{marginRight: 10, opacity: 0.9}}
-            />
-          </TouchableOpacity>
-          <Text
+      <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}} edges={["top"]}>
+        <View style={{flex: 1}}>
+          <Animated.View
             style={{
-              fontSize: 14,
-              fontWeight: '700',
-              color: '#fff',
-              opacity: 0.9,
+              opacity: headerOpacity,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 10,
             }}>
-            Page: {imageLinkIndex + 1} /{' '}
-            {extractDownloaded?.downloadedImagesPath.length}
-          </Text>
+            <Header
+              style={{
+                width: '100%',
+                height: heightPercentageToDP('4%'),
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 12,
+              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  analytics().logEvent('go_back', {
+                    screen: 'DownloadComicBook',
+                    comicBookLink: isDownloadComic?.toString(),
+                  });
+                  handleDownloadedPageChange(imageLinkIndex);
+                  goBack();
+                }}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color="#fff"
+                  style={{marginRight: 10, opacity: 0.9}}
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: '#fff',
+                  opacity: 0.9,
+                }}>
+                Page: {imageLinkIndex + 1} /{' '}
+                {extractDownloaded?.downloadedImagesPath.length}
+              </Text>
 
-          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
-        </Header>
-        {isVerticalScroll ? (
-          <VerticalView
-            data={extractDownloaded?.downloadedImagesPath}
-            loading={loading}
-            setImageLinkIndex={handleDownloadedPageChange}
-            activeIndex={imageLinkIndex}
-            resolutions={resolution}
-          />
-        ) : (
-          <Gallery
-            ref={ref}
-            data={extractDownloaded?.downloadedImagesPath}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            gap={24}
-            onIndexChange={idx => {
-              handleDownloadedPageChange(idx);
-            }}
-            pinchCenteringMode={'sync'}
-            onVerticalPull={onVerticalPulling}
-          />
-        )}
+              <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                <Ionicons name="menu" size={24} color="#fff" />
+              </TouchableOpacity>
+            </Header>
+          </Animated.View>
+          {isVerticalScroll ? (
+            <VerticalView
+              data={extractDownloaded?.downloadedImagesPath}
+              loading={loading}
+              setImageLinkIndex={handleDownloadedPageChange}
+              activeIndex={imageLinkIndex}
+              resolutions={resolution}
+              onTap={handleScreenTap}
+            />
+          ) : (
+            <Gallery
+              ref={ref}
+              data={extractDownloaded?.downloadedImagesPath}
+              keyExtractor={keyExtractor}
+              renderItem={renderItem}
+              gap={24}
+              onIndexChange={idx => {
+                handleDownloadedPageChange(idx);
+              }}
+              pinchCenteringMode={'sync'}
+              onVerticalPull={onVerticalPulling}
+              onTap={handleScreenTap}
+            />
+          )}
+        </View>
       </SafeAreaView>
       {isModalVisible && (
         <SafeAreaView>

@@ -20,10 +20,6 @@ import {
   requestNotifications,
   checkNotifications,
 } from 'react-native-permissions';
-import mobileAds, {
-  AdsConsent,
-  AdsConsentStatus,
-} from 'react-native-google-mobile-ads';
 
 /**
  * RootNavigation component handles the main navigation logic for the application.
@@ -135,53 +131,6 @@ export function RootNavigation() {
    */
   async function PerformanceMonitoring() {
     await firebase.perf().setPerformanceCollectionEnabled(true);
-  }
-
-  // Request user consent for personalized ads from Google Mobile Ads SDK
-  useEffect(() => {
-    // Request consent information and load/present a consent form if necessary
-    AdsConsent.gatherConsent()
-      .then(() => startGoogleMobileAdsSDK())
-      .catch(error => {
-        console.error('Consent gathering failed:', error);
-        // Still initialize ads even if consent gathering failed
-        startGoogleMobileAdsSDK();
-      });
-  }, []);
-
-  // Start Google Mobile Ads SDK with user consent
-  async function startGoogleMobileAdsSDK() {
-    const consentInfo = await AdsConsent.getConsentInfo();
-    let useNonPersonalizedAds = !consentInfo.canRequestAds;
-
-    // If ATT is denied, use non-personalized ads
-    const gdprApplies = await AdsConsent.getGdprApplies();
-    if (gdprApplies) {
-      if (Platform.OS === 'ios') {
-        await AdsConsent.requestTrackingAuthorization();
-      }
-      const status = await AdsConsent.getStatus();
-      if (status === AdsConsentStatus.UNKNOWN) {
-        useNonPersonalizedAds = true; // Use non-personalized if consent is unknown
-      }
-    }
-
-    // Initialize ads based on consent status
-    if (useNonPersonalizedAds) {
-      console.log(
-        'Using non-personalized ads due to consent or ATT restrictions',
-      );
-      await mobileAds().initialize();
-      await mobileAds().setRequestConfiguration({
-        tagForChildDirectedTreatment: false,
-        tagForUnderAgeOfConsent: false,
-        maxAdContentRating: 'G',
-        testDeviceIdentifiers: [],
-      });
-    } else {
-      // Initialize with personalized ads
-      await mobileAds().initialize();
-    }
   }
 
   useEffect(() => {

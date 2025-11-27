@@ -5,6 +5,7 @@ import {
   useAnimatedReaction,
   type SharedValue,
 } from 'react-native-reanimated';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
 
 import {fitContainer, useImageResolution} from 'react-native-zoom-toolkit';
 
@@ -38,7 +39,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
   const size = resolution
     ? fitContainer(resolution.width / resolution.height, {
         width,
-        height,
+        height: height - heightPercentageToDP('4%'),
       })
     : null;
 

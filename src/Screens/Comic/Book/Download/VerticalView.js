@@ -23,6 +23,7 @@ export default function VerticalView({
   setImageLinkIndex,
   activeIndex,
   resolutions,
+  onTap,
 }) {
   const {width, height} = useWindowDimensions();
   const [imageResolutionLoading, setImageResolutionLoading] = useState(true);
@@ -199,10 +200,16 @@ export default function VerticalView({
             }}
             activeOpacity={0.8}
             onPress={() => {
+              // Single tap toggles header
+              onTap?.();
+            }}
+            onLongPress={() => {
+              // Long press opens zoom mode
               setImageLinkIndex(index);
               setImagesLinks(item);
               setZoomMode(true);
-            }}>
+            }}
+            delayLongPress={300}>
             {/* Render placeholder or image based on size availability */}
             {size?.width && size?.height ? (
               <Image
