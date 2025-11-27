@@ -4,30 +4,524 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/* Modern color palette */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #6366f1;
+  --ifm-color-primary-dark: #4f46e5;
+  --ifm-color-primary-darker: #4338ca;
+  --ifm-color-primary-darkest: #3730a3;
+  --ifm-color-primary-light: #818cf8;
+  --ifm-color-primary-lighter: #a5b4fc;
+  --ifm-color-primary-lightest: #c7d2fe;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --ifm-navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ifm-global-radius: 0.75rem;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #818cf8;
+  --ifm-color-primary-dark: #6366f1;
+  --ifm-color-primary-darker: #4f46e5;
+  --ifm-color-primary-darkest: #4338ca;
+  --ifm-color-primary-light: #a5b4fc;
+  --ifm-color-primary-lighter: #c7d2fe;
+  --ifm-color-primary-lightest: #e0e7ff;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-background-color: #0f0f23;
+  --ifm-background-surface-color: #1a1a2e;
+  --ifm-font-color-base: #e2e8f0;
+  --ifm-font-color-secondary: #94a3b8;
+  --ifm-heading-color: #f1f5f9;
+  --ifm-link-color: #818cf8;
 }
 
-/* You can also include any custom CSS here. */
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Global improvements */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Navbar styling */
+.navbar {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme='dark'] .navbar {
+  background: rgba(15, 15, 35, 0.8);
+}
+
+.navbar__title {
+  font-weight: 700;
+}
+
+/* Footer styling */
+.footer {
+  background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
+}
+
+.footer__title {
+  font-weight: 600;
+}
+
+/* Blog styling */
+.blog-post-item {
+  border-radius: var(--ifm-global-radius);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-post-item:hover {
+  transform: translateY(-2px);
+}
+
+/* Blog Page Header */
+.blog-list-page .hero {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 0;
+}
+
+/* Blog Post Cards */
+article.margin-bottom--xl {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] article.margin-bottom--xl {
+  background: #1e1e3f;
+  border-color: #2d2d5a;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+article.margin-bottom--xl:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] article.margin-bottom--xl:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Blog Post Title */
+article.margin-bottom--xl header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+article.margin-bottom--xl header h2 a {
+  color: #1e293b;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+[data-theme='dark'] article.margin-bottom--xl header h2 a {
+  color: #f1f5f9;
+}
+
+article.margin-bottom--xl header h2 a:hover {
+  color: #6366f1;
+}
+
+[data-theme='dark'] article.margin-bottom--xl header h2 a:hover {
+  color: #818cf8;
+}
+
+/* Blog Post Meta */
+.blog-post-item .avatar {
+  margin-bottom: 1rem;
+}
+
+.blog-post-item .avatar__name {
+  font-weight: 600;
+  color: #6366f1;
+}
+
+[data-theme='dark'] .blog-post-item .avatar__name {
+  color: #818cf8;
+}
+
+/* Blog Tags */
+.blog-tags a,
+article .tag {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff !important;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.blog-tags a:hover,
+article .tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  text-decoration: none;
+}
+
+/* Read More Button */
+article.margin-bottom--xl .read-more a,
+article.margin-bottom--xl footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+article.margin-bottom--xl .read-more a:hover,
+article.margin-bottom--xl footer a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  text-decoration: none;
+}
+
+/* Blog Post Page Styling */
+.blog-wrapper article {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .blog-wrapper article {
+  background: #1a1a2e !important;
+  border-color: #2d2d5a;
+}
+
+/* Blog Post Content */
+.blog-wrapper article .markdown {
+  line-height: 1.8;
+}
+
+.blog-wrapper article .markdown p,
+.markdown p {
+  color: #475569;
+}
+
+[data-theme='dark'] .blog-wrapper article .markdown p,
+[data-theme='dark'] .markdown p {
+  color: #e2e8f0 !important;
+}
+
+.blog-wrapper article .markdown h1,
+.blog-wrapper article .markdown h2,
+.blog-wrapper article .markdown h3,
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+[data-theme='dark'] .blog-wrapper article .markdown h1,
+[data-theme='dark'] .blog-wrapper article .markdown h2,
+[data-theme='dark'] .blog-wrapper article .markdown h3,
+[data-theme='dark'] .markdown h1,
+[data-theme='dark'] .markdown h2,
+[data-theme='dark'] .markdown h3 {
+  color: #f1f5f9 !important;
+}
+
+.blog-wrapper article .markdown ul,
+.blog-wrapper article .markdown ol,
+.markdown ul,
+.markdown ol {
+  padding-left: 1.5rem;
+  color: #475569;
+}
+
+[data-theme='dark'] .blog-wrapper article .markdown ul,
+[data-theme='dark'] .blog-wrapper article .markdown ol,
+[data-theme='dark'] .markdown ul,
+[data-theme='dark'] .markdown ol {
+  color: #e2e8f0 !important;
+}
+
+.blog-wrapper article .markdown li,
+.markdown li {
+  margin-bottom: 0.5rem;
+  color: #475569;
+}
+
+[data-theme='dark'] .blog-wrapper article .markdown li,
+[data-theme='dark'] .markdown li {
+  color: #e2e8f0 !important;
+}
+
+.blog-wrapper article .markdown strong,
+.markdown strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .blog-wrapper article .markdown strong,
+[data-theme='dark'] .markdown strong {
+  color: #ffffff !important;
+}
+
+/* Blog post title on detail page */
+[data-theme='dark'] article header h1,
+[data-theme='dark'] article header h2 {
+  color: #f1f5f9 !important;
+}
+
+/* Blog post date and reading time */
+[data-theme='dark'] article .margin-vert--md,
+[data-theme='dark'] article time,
+[data-theme='dark'] .blog-post-date {
+  color: #94a3b8 !important;
+}
+
+/* Blog post author info */
+[data-theme='dark'] .avatar__subtitle,
+[data-theme='dark'] .avatar__intro {
+  color: #94a3b8 !important;
+}
+
+/* Blog TOC on right side */
+[data-theme='dark'] .table-of-contents,
+[data-theme='dark'] .table-of-contents li,
+[data-theme='dark'] .table-of-contents a {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .table-of-contents a:hover,
+[data-theme='dark'] .table-of-contents .table-of-contents__link--active {
+  color: #818cf8 !important;
+}
+
+/* Code blocks in blog */
+[data-theme='dark'] .markdown code {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Horizontal rules */
+[data-theme='dark'] .markdown hr {
+  border-color: #334155;
+}
+
+/* ============================================
+   DARK MODE - Blog Article Card Fix
+   ============================================ */
+
+/* The main blog article container - FORCE dark background */
+[data-theme='dark'] article.margin-top--xl,
+[data-theme='dark'] .blog-post-page article,
+[data-theme='dark'] [class*="blogPost"] article,
+[data-theme='dark'] main article {
+  background: #1a1a2e !important;
+  color: #e2e8f0 !important;
+}
+
+/* All text inside the article */
+[data-theme='dark'] article.margin-top--xl *,
+[data-theme='dark'] .blog-post-page article *,
+[data-theme='dark'] [class*="blogPost"] article *,
+[data-theme='dark'] main article p,
+[data-theme='dark'] main article li,
+[data-theme='dark'] main article span {
+  color: #e2e8f0 !important;
+}
+
+/* Headings inside article */
+[data-theme='dark'] main article h1,
+[data-theme='dark'] main article h2,
+[data-theme='dark'] main article h3,
+[data-theme='dark'] main article h4 {
+  color: #f1f5f9 !important;
+}
+
+/* Strong/bold text */
+[data-theme='dark'] main article strong,
+[data-theme='dark'] main article b {
+  color: #ffffff !important;
+}
+
+/* Links */
+[data-theme='dark'] main article a:not(.tag) {
+  color: #818cf8 !important;
+}
+
+/* Tags should keep their style */
+[data-theme='dark'] main article .tag,
+[data-theme='dark'] main article a.tag {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+}
+
+/* ============================================
+   FORCE DARK BACKGROUND ON BLOG CARD
+   ============================================ */
+[data-theme='dark'] .container article,
+[data-theme='dark'] .row article,
+[data-theme='dark'] article[itemprop="blogPost"],
+[data-theme='dark'] div[class*="col"] article {
+  background-color: #1a1a2e !important;
+  border-color: #2d2d5a !important;
+}
+
+/* Target the white card specifically */
+[data-theme='dark'] article {
+  background-color: #1a1a2e !important;
+}
+
+/* Ensure markdown content inside is visible */
+[data-theme='dark'] article .markdown,
+[data-theme='dark'] article .markdown > * {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] article .markdown h1,
+[data-theme='dark'] article .markdown h2,
+[data-theme='dark'] article .markdown h3,
+[data-theme='dark'] article .markdown h4 {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] article .markdown strong {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] article .markdown p,
+[data-theme='dark'] article .markdown li,
+[data-theme='dark'] article .markdown span,
+[data-theme='dark'] article .markdown div {
+  color: #e2e8f0 !important;
+}
+
+/* Blog Sidebar */
+.blog-sidebar {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .blog-sidebar {
+  background: #1e1e3f;
+  border-color: #2d2d5a;
+}
+
+/* Blog Archive */
+.blog-archive h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme='dark'] .blog-archive h2 {
+  color: #f1f5f9;
+  border-bottom-color: #334155;
+}
+
+/* Pagination */
+.pagination-nav {
+  margin-top: 3rem;
+}
+
+.pagination-nav__link {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .pagination-nav__link {
+  background: #1e1e3f;
+  border-color: #2d2d5a;
+}
+
+.pagination-nav__link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #6366f1;
+}
+
+[data-theme='dark'] .pagination-nav__link:hover {
+  border-color: #818cf8;
+}
+
+.pagination-nav__label {
+  font-weight: 600;
+  color: #6366f1;
+}
+
+[data-theme='dark'] .pagination-nav__label {
+  color: #818cf8;
+}
+
+.pagination-nav__sublabel {
+  color: #64748b;
+}
+
+[data-theme='dark'] .pagination-nav__sublabel {
+  color: #94a3b8;
+}
+
+/* Button hover effects */
+.button {
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Smooth animations */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary);
+}

@@ -85,6 +85,11 @@ const config = {
             position: 'left',
           },
           {
+            to: '/blog',
+            label: 'Blog',
+            position: 'left',
+          },
+          {
             href: 'https://github.com/p2devs/InkNest/releases',
             label: 'Release Notes',
             position: 'right',
