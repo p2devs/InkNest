@@ -1,30 +1,30 @@
-import React, {useEffect, useState} from 'react';
-import {FlatList, StyleSheet} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
-import {getVersion} from 'react-native-device-info';
-import {useFeatureFlag} from 'configcat-react';
+import { getVersion } from 'react-native-device-info';
+import { useFeatureFlag } from 'configcat-react';
 
-import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
+import { fetchComicDetails } from '../../../Redux/Actions/GlobalActions';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
-import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import { AppendAd } from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
-import {rewardAdsShown} from '../../../Redux/Reducers';
-import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
-import CommunityTab from '../../../features/community/screens/CommunityTab';
+import { rewardAdsShown } from '../../../Redux/Reducers';
+import { showRewardedAd } from '../../../InkNest-Externals/Redux/Actions/Download';
+import CommunityTab from '../../../InkNest-Externals/Community/Screens/CommunityBoard';
 
-export function ComicDetails({route, navigation}) {
+export function ComicDetails({ route, navigation }) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
-    {name: 'Chapters', active: true},
-    {name: 'Community', active: false},
+    { name: 'Chapters', active: true },
+    { name: 'Community', active: false },
     // {name: 'Bookmarks', active: false},
   ]);
-  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+  const { value: forIosValue, loading: forIosLoading } = useFeatureFlag(
     'forIos',
     'Default',
   );
@@ -82,8 +82,8 @@ export function ComicDetails({route, navigation}) {
       }
     })();
   }, [hasRewardAdsShown]);
-  
-  
+
+
   useEffect(() => {
     if (getVersion() === forIosValue && forIosLoading === false) {
     } else {
@@ -135,7 +135,7 @@ export function ComicDetails({route, navigation}) {
           ListHeaderComponent={renderComicHeader}
           data={forIosLoading === false ? AppendAd(reverseChapterList()) : []}
           style={styles.container}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <ChapterCard
               item={item}
               index={index}

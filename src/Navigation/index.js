@@ -1,20 +1,20 @@
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {AppNavigation} from './AppNavigation';
-import {navigationRef} from './NavigationService';
-import {Platform, StatusBar, AppState} from 'react-native';
-import {useDispatch} from 'react-redux';
-import {ClearError} from '../Redux/Reducers';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { AppNavigation } from './AppNavigation';
+import { navigationRef } from './NavigationService';
+import { Platform, StatusBar, AppState } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { ClearError } from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
 import messaging from '@react-native-firebase/messaging';
-import {firebase} from '@react-native-firebase/perf';
+import { firebase } from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
-import {firebase as fire} from '@react-native-firebase/analytics';
+import { firebase as fire } from '@react-native-firebase/analytics';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {
   configureGoogleSignIn,
   listenToAuthChanges,
-} from '../features/community/services/CommunityActions';
+} from '../InkNest-Externals/Community/Logic/CommunityActions';
 
 import {
   check,
@@ -141,10 +141,10 @@ export function RootNavigation() {
   useEffect(() => {
     // Configure Google Sign-In
     configureGoogleSignIn();
-    
+
     // Listen to auth state changes
     const unsubscribe = dispatch(listenToAuthChanges());
-    
+
     allowToReceiveInAppMessages();
     requestUserPermission();
     if (!__DEV__) {
@@ -152,7 +152,7 @@ export function RootNavigation() {
       toggleCrashlytics();
       AnalyticsEnabled();
     }
-    
+
     return () => {
       if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
