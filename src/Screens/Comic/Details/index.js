@@ -23,6 +23,7 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
 import {rewardAdsShown} from '../../../Redux/Reducers';
 import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
+import CommunityTab from '../../../features/community/screens/CommunityTab';
 
 const IOS_PLACEHOLDER_CHAPTERS = [
   {
@@ -48,8 +49,12 @@ const IOS_PLACEHOLDER_CHAPTERS = [
 ];
 
 export function ComicDetails({route, navigation}) {
-  const [PageLink] = useState(route?.params?.link);
-  const [tabBar, setTabBar] = useState([{name: 'Chapters', active: true}]);
+  const [PageLink, setPageLink] = useState(route?.params?.link);
+  const [tabBar, setTabBar] = useState([
+    {name: 'Chapters', active: true},
+    {name: 'Community', active: false},
+    // {name: 'Bookmarks', active: false},
+  ]);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
@@ -218,6 +223,30 @@ export function ComicDetails({route, navigation}) {
     }
   }, [PageLink, dispatch, forIosLoading, isIosOverrideActive, reportError]);
 
+  const renderComicHeader = () => (
+    <HeaderComponent
+      link={PageLink}
+      image={route?.params?.image}
+      title={route?.params?.title}
+      tabBar={tabBar}
+      onTabBar={index => {
+        crashlytics().log('Comic Details Tab Clicked');
+        analytics().logEvent('Comic_Details_Tab_Clicked', {
+          TabName: tabBar[index].name?.toString(),
+        });
+        tabBar.map(tab => (tab.active = false));
+        tabBar[index].active = true;
+        setTabBar([...tabBar]);
+      }}
+      sort={sort}
+      setSORT={() => {
+        crashlytics().log('Comic Details Sort Clicked');
+        analytics().logEvent('Comic_Details_Sort_Clicked');
+        setSort(!sort);
+      }}
+    />
+  );
+
   if (error) return <Error error={error} />;
 
   return (
@@ -284,14 +313,22 @@ export function ComicDetails({route, navigation}) {
         }
         data={listData}
         style={styles.container}
-        renderItem={({item, index}) => (
-          <ChapterCard
-            item={item}
-            index={index}
-            isBookmark={false}
-            detailPageLink={PageLink}
-          />
-        )}
+        renderItem={({item, index}) =>
+          isChapterTab || isRecentTab ? (
+            <ChapterCard
+              item={item}
+              index={index}
+              isBookmark={false}
+              detailPageLink={PageLink}
+            />
+          ) : (
+            <CommunityTab
+              comicLink={PageLink}
+              navigation={navigation}
+              headerComponent={renderComicHeader()}
+            />
+          )
+        }
         keyExtractor={(item, index) =>
           item?.link ? `${item.link}-${index}` : `ad-${index}`
         }

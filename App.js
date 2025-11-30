@@ -13,6 +13,10 @@ import {CONFIGCAT_SDK_KEY_TEST, CONFIGCAT_SDK_KEY_PROD} from '@env';
 import {BannerProvider} from './src/Components/UIComp/AnimeAdBanner/BannerContext';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+import {
+  configureGoogleSignIn,
+  listenToAuthChanges,
+} from './src/features/community/services/CommunityActions';
 
 /**
  * The main App component that sets up the root of the application.
@@ -24,6 +28,12 @@ import analytics from '@react-native-firebase/analytics';
  */
 const App = () => {
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+    
+    // Listen to auth state changes
+    const unsubscribeAuth = store.dispatch(listenToAuthChanges());
+    
     if (!__DEV__) {
       // Initialize Firebase Crashlytics
       crashlytics().log('App mounted.');
@@ -43,9 +53,15 @@ const App = () => {
       ErrorUtils.setGlobalHandler(errorHandler);
 
       return () => {
-        // Clean up if needed
+        // Clean up auth listener
+        if (unsubscribeAuth) unsubscribeAuth();
       };
     }
+    
+    return () => {
+      // Clean up auth listener
+      if (unsubscribeAuth) unsubscribeAuth();
+    };
   }, []);
 
   return (

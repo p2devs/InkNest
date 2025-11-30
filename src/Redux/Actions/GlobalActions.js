@@ -22,6 +22,22 @@ import {
   ComicDetailPageClasses,
 } from '../../Screens/Comic/APIs/constance';
 
+const hasLoadedChapterData = data => {
+  if (!data) {
+    return false;
+  }
+  const hasChapters = Array.isArray(data.chapters) && data.chapters.length > 0;
+  const hasIssues = Array.isArray(data.issues) && data.issues.length > 0;
+  return hasChapters || hasIssues;
+};
+
+const buildWatchedData = (data, link) => ({
+  title: data?.title,
+  link,
+  image: data?.imgSrc,
+  lastOpenAt: new Date().getTime(),
+});
+
 /**
  * Action creator for handling watched data.
  *
@@ -97,15 +113,12 @@ export const fetchComicDetails =
   async (dispatch, getState) => {
     dispatch(fetchDataStart());
     try {
-      const stateData = getState().data.dataByUrl[link];
-      let watchedData = {
-        title: stateData?.title,
-        link,
-        image: stateData?.imgSrc,
-        lastOpenAt: new Date().getTime(),
-      };
+      const state = getState();
+      const stateData = state?.data?.dataByUrl?.[link];
+      const hasUsableStateData = hasLoadedChapterData(stateData);
+      let watchedData = buildWatchedData(stateData, link);
 
-      if (!refresh && stateData) {
+      if (!refresh && stateData && hasUsableStateData) {
         dispatch(StopLoading());
         dispatch(ClearError());
         dispatch(checkDownTime());
@@ -181,16 +194,12 @@ export const fetchComicDetails =
         };
       }
 
-      watchedData = {
-        title: comicDetails.title,
-        link,
-        image: comicDetails.imgSrc,
-        lastOpenAt: new Date().getTime(),
-      };
+      watchedData = buildWatchedData(comicDetails, link);
 
       if (refresh) {
         dispatch(updateData({url: link, data: comicDetails}));
         dispatch(StopLoading());
+        dispatch(WatchedData(watchedData));
         return;
       }
 

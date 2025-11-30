@@ -1,4 +1,4 @@
-import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
+import { parseReadAllComicsDetails } from '../../../Components/Func/parseFunc';
 
 export const HomePageCardClasses = {
   azcomic: {
@@ -123,7 +123,7 @@ export const ComicDetailPageClasses = {
   },
   comichubfree: {
     detailsContainer: '.movie-info',
-    title: '.movie-title span.title-1',
+    title: '.movie-dl dt:contains("Alternate name:") + dd',
     imgSrc: '.movie-image img',
     getImageAttr: 'data-src',
     summary: '#film-content',

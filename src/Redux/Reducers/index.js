@@ -14,7 +14,11 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
-  localComicProgress: null, // Tracks reading progress for imported local comics: { lastReadPage, totalPages, timestamp }
+  // Community & Auth state
+  user: null, // {uid, displayName, photoURL, email, subscriptionTier}
+  communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
+  communityComics: {}, // {comicLink: {title, coverImage, detailsPath, lastActivityAt}}
+  userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
 };
 
 /**
@@ -256,18 +260,99 @@ const Reducers = createSlice({
       // Update the flag indicating whether reward ads have been shown
       state.hasRewardAdsShown = action.payload;
     },
-    updateLocalComicProgress: (state, action) => {
-      // Update reading progress for imported local comics
-      const {lastReadPage, totalPages} = action.payload;
-      state.localComicProgress = {
-        lastReadPage,
-        totalPages,
-        timestamp: Date.now(),
-      };
+    // Community & Auth reducers
+    setUser: (state, action) => {
+      state.user = action.payload;
     },
-    clearLocalComicProgress: state => {
-      // Clear local comic reading progress (e.g., when importing a new comic)
-      state.localComicProgress = null;
+    clearUser: state => {
+      state.user = null;
+      state.userActivity = {postsToday: 0, repliesToday: 0, lastReset: new Date().toDateString()};
+    },
+    setCommunityPosts: (state, action) => {
+      const {comicLink, posts = [], append = false, comicMeta = null} = action.payload;
+      const existing = state.communityPosts[comicLink]?.posts || [];
+
+      let nextPosts;
+      if (append) {
+        const existingIds = new Set(existing.map(post => post.id));
+        const dedupedNewPosts = posts.filter(post => !existingIds.has(post.id));
+        nextPosts = [...existing, ...dedupedNewPosts];
+      } else {
+        nextPosts = posts;
+      }
+
+      state.communityPosts[comicLink] = {
+        ...(state.communityPosts[comicLink] || {}),
+        posts: nextPosts,
+        lastFetch: Date.now(),
+      };
+
+      if (comicMeta?.comicLink) {
+        const existingMeta = state.communityPosts[comicLink].comicMeta || {};
+        state.communityPosts[comicLink].comicMeta = {
+          ...existingMeta,
+          ...comicMeta,
+        };
+        state.communityComics[comicMeta.comicLink] = {
+          ...(state.communityComics[comicMeta.comicLink] || {}),
+          ...comicMeta,
+          lastSeenAt: Date.now(),
+        };
+      }
+    },
+    addCommunityPost: (state, action) => {
+      const {comicLink, post, comicMeta} = action.payload;
+      if (!state.communityPosts[comicLink]) {
+        state.communityPosts[comicLink] = {posts: [], lastFetch: Date.now()};
+      }
+      state.communityPosts[comicLink].posts.unshift(post);
+      if (comicMeta?.comicLink) {
+        state.communityComics[comicMeta.comicLink] = {
+          ...(state.communityComics[comicMeta.comicLink] || {}),
+          ...comicMeta,
+          lastSeenAt: Date.now(),
+        };
+      }
+    },
+    updateCommunityPost: (state, action) => {
+      const {comicLink, postId, updates} = action.payload;
+      if (state.communityPosts[comicLink]) {
+        const postIndex = state.communityPosts[comicLink].posts.findIndex(
+          p => p.id === postId,
+        );
+        if (postIndex !== -1) {
+          state.communityPosts[comicLink].posts[postIndex] = {
+            ...state.communityPosts[comicLink].posts[postIndex],
+            ...updates,
+          };
+        }
+      }
+    },
+    incrementUserActivity: (state, action) => {
+      const {type} = action.payload; // 'post' or 'reply'
+      const today = new Date().toDateString();
+      
+      if (state.userActivity.lastReset !== today) {
+        state.userActivity = {postsToday: 0, repliesToday: 0, lastReset: today};
+      }
+      
+      if (type === 'post') {
+        state.userActivity.postsToday += 1;
+      } else if (type === 'reply') {
+        state.userActivity.repliesToday += 1;
+      }
+    },
+    upsertCommunityComicMeta: (state, action) => {
+      const {comicLink, meta = {}} = action.payload || {};
+      if (!comicLink) {
+        return;
+      }
+      state.communityComics[comicLink] = {
+        ...(state.communityComics[comicLink] || {}),
+        ...meta,
+        comicLink,
+        lastSeenAt: Date.now(),
+      };
     },
   },
 });
@@ -294,7 +379,13 @@ export const {
   clearHistory,
   setScrollPreference,
   rewardAdsShown,
-  updateLocalComicProgress,
-  clearLocalComicProgress,
+  // Community & Auth actions
+  setUser,
+  clearUser,
+  setCommunityPosts,
+  addCommunityPost,
+  updateCommunityPost,
+  incrementUserActivity,
+  upsertCommunityComicMeta,
 } = Reducers.actions;
 export default Reducers.reducer;

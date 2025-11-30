@@ -11,6 +11,10 @@ import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
+import {
+  configureGoogleSignIn,
+  listenToAuthChanges,
+} from '../features/community/services/CommunityActions';
 
 import {
   check,
@@ -50,6 +54,7 @@ export function RootNavigation() {
   const dispatch = useDispatch();
   const routeNameRef = useRef();
   const [appState, setAppState] = useState(AppState.currentState);
+  const consentRequestedRef = useRef(false);
 
   // Add this useEffect to track app state
   useEffect(() => {
@@ -134,6 +139,12 @@ export function RootNavigation() {
   }
 
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+    
+    // Listen to auth state changes
+    const unsubscribe = dispatch(listenToAuthChanges());
+    
     allowToReceiveInAppMessages();
     requestUserPermission();
     if (!__DEV__) {
@@ -141,6 +152,12 @@ export function RootNavigation() {
       toggleCrashlytics();
       AnalyticsEnabled();
     }
+    
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useLayoutEffect(() => {
