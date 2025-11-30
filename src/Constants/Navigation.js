@@ -27,4 +27,6 @@ export const NAVIGATION = {
   WebSourcesList: 'WebSourcesList',
   WebSearch: 'WebSearch',
   Library: 'Library',
+  CreatePost: 'CreatePost',
+  PostDetail: 'PostDetail',
 };
