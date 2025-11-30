@@ -11,6 +11,10 @@ import {firebase} from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {firebase as fire} from '@react-native-firebase/analytics';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
+import {
+  configureGoogleSignIn,
+  listenToAuthChanges,
+} from '../features/community/services/CommunityActions';
 
 import {
   check,
@@ -54,6 +58,7 @@ export function RootNavigation() {
   const dispatch = useDispatch();
   const routeNameRef = useRef();
   const [appState, setAppState] = useState(AppState.currentState);
+  const consentRequestedRef = useRef(false);
 
   // Add this useEffect to track app state
   useEffect(() => {
@@ -139,7 +144,12 @@ export function RootNavigation() {
 
   // Request user consent for personalized ads from Google Mobile Ads SDK
   useEffect(() => {
-    // Request consent information and load/present a consent form if necessary
+    if (appState !== 'active' || consentRequestedRef.current) {
+      return;
+    }
+
+    consentRequestedRef.current = true;
+
     AdsConsent.gatherConsent()
       .then(() => startGoogleMobileAdsSDK())
       .catch(error => {
@@ -147,7 +157,7 @@ export function RootNavigation() {
         // Still initialize ads even if consent gathering failed
         startGoogleMobileAdsSDK();
       });
-  }, []);
+  }, [appState]);
 
   // Start Google Mobile Ads SDK with user consent
   async function startGoogleMobileAdsSDK() {
@@ -185,6 +195,12 @@ export function RootNavigation() {
   }
 
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+    
+    // Listen to auth state changes
+    const unsubscribe = dispatch(listenToAuthChanges());
+    
     allowToReceiveInAppMessages();
     requestUserPermission();
     if (!__DEV__) {
@@ -192,6 +208,12 @@ export function RootNavigation() {
       toggleCrashlytics();
       AnalyticsEnabled();
     }
+    
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useLayoutEffect(() => {

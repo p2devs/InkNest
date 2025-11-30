@@ -15,11 +15,13 @@ import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
 import {rewardAdsShown} from '../../../Redux/Reducers';
 import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
+import CommunityTab from '../../../features/community/screens/CommunityTab';
 
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
     {name: 'Chapters', active: true},
+    {name: 'Community', active: false},
     // {name: 'Bookmarks', active: false},
   ]);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
@@ -91,55 +93,67 @@ export function ComicDetails({route, navigation}) {
     }
   }, [PageLink, forIosLoading]);
 
+  const renderComicHeader = () => (
+    <HeaderComponent
+      link={PageLink}
+      image={route?.params?.image}
+      title={route?.params?.title}
+      tabBar={tabBar}
+      onTabBar={index => {
+        crashlytics().log('Comic Details Tab Clicked');
+        analytics().logEvent('Comic_Details_Tab_Clicked', {
+          TabName: tabBar[index].name?.toString(),
+        });
+        tabBar.map(tab => (tab.active = false));
+        tabBar[index].active = true;
+        setTabBar([...tabBar]);
+      }}
+      sort={sort}
+      setSORT={() => {
+        crashlytics().log('Comic Details Sort Clicked');
+        analytics().logEvent('Comic_Details_Sort_Clicked');
+        setSort(!sort);
+      }}
+    />
+  );
+
   if (error) return <Error error={error} />;
 
   return (
     <>
       <LoadingModal loading={loading} />
-      <FlatList
-        ListHeaderComponent={
-          <HeaderComponent
-            link={PageLink}
-            image={route?.params?.image}
-            title={route?.params?.title}
-            tabBar={tabBar}
-            onTabBar={index => {
-              crashlytics().log('Comic Details Tab Clicked');
-              analytics().logEvent('Comic_Details_Tab_Clicked', {
-                TabName: tabBar[index].name?.toString(),
-              });
-              tabBar.map(tab => (tab.active = false));
-              tabBar[index].active = true;
-              setTabBar([...tabBar]);
-            }}
-            sort={sort}
-            setSORT={() => {
-              crashlytics().log('Comic Details Sort Clicked');
-              analytics().logEvent('Comic_Details_Sort_Clicked');
-              setSort(!sort);
-            }}
-          />
-        }
-        data={forIosLoading === false ? AppendAd(reverseChapterList()) : []}
-        style={styles.container}
-        renderItem={({item, index}) => (
-          <ChapterCard
-            item={item}
-            index={index}
-            isBookmark={tabBar[1]?.active}
-            detailPageLink={PageLink}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          <PaginationFooter
-            pagination={ComicDetail?.pagination}
-            pageLink={PageLink}
-            route={route}
-            navigation={navigation}
-          />
-        }
-      />
+      {tabBar[1]?.active ? (
+        // Show Community Tab inline with header
+        <CommunityTab
+          comicLink={PageLink}
+          navigation={navigation}
+          headerComponent={renderComicHeader()}
+        />
+      ) : (
+        // Show Chapters Tab
+        <FlatList
+          ListHeaderComponent={renderComicHeader}
+          data={forIosLoading === false ? AppendAd(reverseChapterList()) : []}
+          style={styles.container}
+          renderItem={({item, index}) => (
+            <ChapterCard
+              item={item}
+              index={index}
+              isBookmark={tabBar[1]?.active}
+              detailPageLink={PageLink}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <PaginationFooter
+              pagination={ComicDetail?.pagination}
+              pageLink={PageLink}
+              route={route}
+              navigation={navigation}
+            />
+          }
+        />
+      )}
     </>
   );
 }
