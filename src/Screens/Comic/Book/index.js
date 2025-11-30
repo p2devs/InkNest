@@ -512,7 +512,7 @@ export function ComicBook({ navigation, route }) {
 
                     setIsModalVisible(false);
                     setImageLinkIndex(0);
-                    navigation.navigate(NAVIGATION.comicDetails, {
+                    navigation.replace(NAVIGATION.comicDetails, {
                       link: detailsPageLink,
                     });
 
