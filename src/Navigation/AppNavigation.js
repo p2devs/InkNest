@@ -1,8 +1,8 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import {NAVIGATION} from '../Constants';
-import {AboutUs, Search} from '../Screens';
-import {BottomNavigation} from './BottomNavigation';
+import { NAVIGATION } from '../Constants';
+import { AboutUs, Search } from '../Screens';
+import { BottomNavigation } from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import {
   ComicBook,
@@ -12,8 +12,8 @@ import {
   MockBooks,
   SeeAll,
 } from '../Screens/Comic';
-import CreatePostModal from '../features/community/screens/CommunityTab/CreatePostModal';
-import PostDetailScreen from '../features/community/screens/CommunityTab/PostDetailScreen';
+import CreatePostModal from '../InkNest-Externals/Community/Components/CreatePost/CreatePostModal';
+import PostDetailScreen from '../InkNest-Externals/Community/Screens/PostDetailScreen';
 import {
   MangaBook,
   MangaDetails,
