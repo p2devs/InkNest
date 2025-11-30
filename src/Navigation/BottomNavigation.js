@@ -8,12 +8,12 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
-import {useSelector} from 'react-redux';
-import {ComicBookmarks, Home, OfflineComic, Library} from '../Screens/Comic';
+import {Home, OfflineComic, Library} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
+import CommunityBoardScreen from '../features/community/screens/CommunityBoardScreen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -55,6 +55,14 @@ const TabBarIcon = props => {
     return (
       <Feather
         name={props.name}
+        size={props.size ? props.size : 24}
+        color={props.tintColor}
+      />
+    );
+  } else if (props.name === 'community') {
+    return (
+      <Ionicons
+        name="chatbubbles-outline"
         size={props.size ? props.size : 24}
         color={props.tintColor}
       />
@@ -153,6 +161,21 @@ export function BottomNavigation() {
                 focused={focused}
                 tintColor={color}
                 name="download-for-offline"
+              />
+            ),
+          }}
+        />
+
+        <BottomTab.Screen
+          name={NAVIGATION.communityBoard}
+          component={CommunityBoardScreen}
+          options={{
+            tabBarLabel: 'Community',
+            tabBarIcon: ({focused, color}) => (
+              <TabBarIcon
+                focused={focused}
+                tintColor={color}
+                name="community"
               />
             ),
           }}

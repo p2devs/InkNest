@@ -12,6 +12,8 @@ import {
   MockBooks,
   SeeAll,
 } from '../Screens/Comic';
+import CreatePostModal from '../features/community/screens/CommunityTab/CreatePostModal';
+import PostDetailScreen from '../features/community/screens/CommunityTab/PostDetailScreen';
 import {
   MangaBook,
   MangaDetails,
@@ -60,6 +62,8 @@ export function AppNavigation() {
         component={DownloadComicBook}
       />
       <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
+      <Stack.Screen name="CreatePost" component={CreatePostModal} />
+      <Stack.Screen name="PostDetail" component={PostDetailScreen} />
     </Stack.Navigator>
   );
 }

@@ -3,6 +3,7 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <GoogleSignIn/GoogleSignIn.h>
 
 @implementation AppDelegate
 
@@ -22,11 +23,15 @@
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  // Handle deep linking if needed
   if ([RCTLinkingManager application:application openURL:url options:options]) {
     return YES;
   }
-  
+
+  // Allow Google Sign-In to consume the callback URL if it matches one of its schemes
+  if ([[GIDSignIn sharedInstance] handleURL:url]) {
+    return YES;
+  }
+
   return NO;
 }
 
