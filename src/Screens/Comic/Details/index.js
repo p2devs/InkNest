@@ -14,16 +14,16 @@ import {useFeatureFlag} from 'configcat-react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
-import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
+import { fetchComicDetails } from '../../../Redux/Actions/GlobalActions';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
-import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
+import { AppendAd } from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
-import {rewardAdsShown} from '../../../Redux/Reducers';
-import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
-import CommunityTab from '../../../features/community/screens/CommunityTab';
+import { rewardAdsShown } from '../../../Redux/Reducers';
+import { showRewardedAd } from '../../../InkNest-Externals/Redux/Actions/Download';
+import CommunityTab from '../../../InkNest-Externals/Community/Screens/CommunityBoard';
 
 const IOS_PLACEHOLDER_CHAPTERS = [
   {
@@ -51,11 +51,11 @@ const IOS_PLACEHOLDER_CHAPTERS = [
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
-    {name: 'Chapters', active: true},
-    {name: 'Community', active: false},
+    { name: 'Chapters', active: true },
+    { name: 'Community', active: false },
     // {name: 'Bookmarks', active: false},
   ]);
-  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+  const { value: forIosValue, loading: forIosLoading } = useFeatureFlag(
     'forIos',
     'Default',
   );

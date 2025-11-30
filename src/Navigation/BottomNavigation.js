@@ -1,19 +1,19 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {getVersion} from 'react-native-device-info';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getVersion } from 'react-native-device-info';
 
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {Settings} from '../Screens';
-import {NAVIGATION} from '../Constants';
-import {Home, OfflineComic, Library} from '../Screens/Comic';
-import {View, StyleSheet} from 'react-native';
-import {useFeatureFlag} from 'configcat-react';
+import { Settings } from '../Screens';
+import { NAVIGATION } from '../Constants';
+import { Home, OfflineComic, Library } from '../Screens/Comic';
+import { View, StyleSheet } from 'react-native';
+import { useFeatureFlag } from 'configcat-react';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
-import CommunityBoardScreen from '../features/community/screens/CommunityBoardScreen';
+import CommunityBoardScreen from '../InkNest-Externals/Community/Screens/CommunityBoardScreen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -85,7 +85,7 @@ const TabBarIcon = props => {
  * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
  */
 export function BottomNavigation() {
-  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const { value: forIosValue } = useFeatureFlag('forIos', 'Default');
 
   return (
     <>
@@ -116,7 +116,7 @@ export function BottomNavigation() {
           name={NAVIGATION.home}
           component={Home}
           options={{
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon focused={focused} tintColor={color} name="home" />
             ),
           }}
@@ -126,7 +126,7 @@ export function BottomNavigation() {
           name={NAVIGATION.Library}
           component={Library}
           options={{
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon focused={focused} tintColor={color} name="library" />
             ),
           }}
@@ -137,7 +137,7 @@ export function BottomNavigation() {
             name={NAVIGATION.sources}
             component={LinkListScreen}
             options={{
-              tabBarIcon: ({focused, color}) => (
+              tabBarIcon: ({ focused, color }) => (
                 <TabBarIcon focused={focused} tintColor={color} name="source" />
               ),
               // tabBarBadge: 1,
@@ -156,7 +156,7 @@ export function BottomNavigation() {
           name={NAVIGATION.offlineComic}
           component={OfflineComic}
           options={{
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -171,7 +171,7 @@ export function BottomNavigation() {
           component={CommunityBoardScreen}
           options={{
             tabBarLabel: 'Community',
-            tabBarIcon: ({focused, color}) => (
+            tabBarIcon: ({ focused, color }) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -186,7 +186,7 @@ export function BottomNavigation() {
             name={NAVIGATION.settings}
             component={Settings}
             options={{
-              tabBarIcon: ({focused, color}) => (
+              tabBarIcon: ({ focused, color }) => (
                 <TabBarIcon
                   focused={focused}
                   tintColor={color}

@@ -34,7 +34,7 @@ import {
   signOut as signOutAction,
   signInWithGoogle,
   signInWithApple,
-} from '../../features/community/services/CommunityActions';
+} from '../../InkNest-Externals/Community/Logic/CommunityActions';
 import LoginPrompt from '../../Components/Auth/LoginPrompt';
 
 export function Settings({ navigation }) {
