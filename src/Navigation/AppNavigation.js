@@ -62,8 +62,8 @@ export function AppNavigation() {
         component={DownloadComicBook}
       />
       <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
-      <Stack.Screen name="CreatePost" component={CreatePostModal} />
-      <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+      <Stack.Screen name={NAVIGATION.CreatePost} component={CreatePostModal} />
+      <Stack.Screen name={NAVIGATION.PostDetail} component={PostDetailScreen} />
     </Stack.Navigator>
   );
 }
