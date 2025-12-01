@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import React, {memo} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -16,7 +16,6 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import Header from '../../../../Components/UIComp/Header';
 import DescriptionView from '../../../../Components/UIComp/DescriptionView';
@@ -24,8 +23,7 @@ import {goBack} from '../../../../Navigation/NavigationService';
 import {updateData} from '../../../../Redux/Reducers';
 import {fetchComicDetails} from '../../../../Redux/Actions/GlobalActions';
 
-const HeaderComponent = memo(
-  ({image, title, link, tabBar, onTabBar, sort, setSORT}) => {
+const HeaderComponent = memo(({image, title, link, tabBar, onTabBar}) => {
     const dispatch = useDispatch();
     const ComicDetail = useSelector(state => state.data.dataByUrl[link]);
 
@@ -229,14 +227,6 @@ const HeaderComponent = memo(
                 </TouchableOpacity>
               ))}
             </View>
-            <FontAwesome5
-              name={sort ? 'sort-numeric-up' : 'sort-numeric-down-alt'}
-              size={heightPercentageToDP('2.2%')}
-              color={'#fff'}
-              onPress={() => {
-                setSORT();
-              }}
-            />
           </View>
         </View>
       </SafeAreaView>
