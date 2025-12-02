@@ -120,7 +120,7 @@ export function ComicDetails({route, navigation}) {
       })
       .filter(Boolean)
       .sort((a, b) => (b.readAt || 0) - (a.readAt || 0));
-  }, [readingHistory?.readComics]);
+  }, [isRecentTab, readingHistory, availableChapters]);
 
   const shouldShowChapterSearch =
     isChapterTab && !forIosLoading && sortedChapters.length > 10;
