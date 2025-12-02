@@ -102,16 +102,31 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data, ComicDetailslink, imageLength} = action.payload;
+      const {url, data, ComicDetailslink, imageLength, readAt} =
+        action.payload;
       //keep the old data and update the new data
       state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
 
-      if (ComicDetailslink && imageLength) {
-        state.history[ComicDetailslink] = {
-          ...state?.history?.[ComicDetailslink],
+      const hasReadingProgress =
+        ComicDetailslink && imageLength && data?.lastReadPage !== undefined;
+
+      if (hasReadingProgress) {
+        const detailLinkKey = ComicDetailslink.split('?')[0];
+        const chapterLinkKey = url?.split('?')[0];
+        if (!chapterLinkKey) return;
+
+        const existingEntry =
+          state?.history?.[detailLinkKey]?.readComics?.[chapterLinkKey];
+
+        state.history[detailLinkKey] = {
+          ...state?.history?.[detailLinkKey],
           readComics: {
-            ...state?.history?.[ComicDetailslink]?.readComics,
-            [url]: {totalPage: imageLength, lastReadPage: data.lastReadPage},
+            ...state?.history?.[detailLinkKey]?.readComics,
+            [chapterLinkKey]: {
+              totalPage: imageLength,
+              lastReadPage: data.lastReadPage,
+              readAt: readAt ?? existingEntry?.readAt ?? 0,
+            },
           },
         };
       }

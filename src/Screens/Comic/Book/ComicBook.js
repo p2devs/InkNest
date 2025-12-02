@@ -290,6 +290,7 @@ export function ComicBook({navigation, route}) {
                         data: {lastReadPage: newIndex},
                         imageLength: ComicBook?.images?.length,
                         ComicDetailslink: ComicBook?.ComicDetailslink,
+                        readAt: Date.now(),
                       }),
                     );
                   }
@@ -313,6 +314,7 @@ export function ComicBook({navigation, route}) {
                         data: {lastReadPage: newIndex},
                         imageLength: ComicBook?.images?.length,
                         ComicDetailslink: ComicBook?.ComicDetailslink,
+                        readAt: Date.now(),
                       }),
                     );
                   }
