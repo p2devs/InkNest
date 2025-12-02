@@ -4,10 +4,55 @@
         <title>InkNest Blog</title>
         <link>https://p2devs.github.io/InkNest/blog</link>
         <description>InkNest Blog</description>
-        <lastBuildDate>Thu, 27 Nov 2025 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 02 Dec 2025 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[InkNest v1.4.2 Release]]></title>
+            <link>https://p2devs.github.io/InkNest/blog/release-v1.4.2</link>
+            <guid>https://p2devs.github.io/InkNest/blog/release-v1.4.2</guid>
+            <pubDate>Tue, 02 Dec 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.2 is now available!]]></description>
+            <content:encoded><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.2</strong> is now available!</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-whats-new">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-chapter-search--navigation">🔍 Chapter Search &amp; Navigation<a class="hash-link" aria-label="Direct link to 🔍 Chapter Search &amp; Navigation" title="Direct link to 🔍 Chapter Search &amp; Navigation" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-chapter-search--navigation">​</a></h3>
+<ul>
+<li><strong>Searchable Chapter List</strong> - Quickly find specific chapters with the new search functionality</li>
+<li><strong>Sort Toggle</strong> - Switch between ascending/descending order for easier navigation</li>
+<li><strong>Smart Search Display</strong> - Search bar only appears for comics with longer chapter lists</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-recent-reading-history">📖 Recent Reading History<a class="hash-link" aria-label="Direct link to 📖 Recent Reading History" title="Direct link to 📖 Recent Reading History" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-recent-reading-history">​</a></h3>
+<ul>
+<li><strong>New "Recent" Tab</strong> - Access your recently read chapters sorted by when you last read them</li>
+<li><strong>Per-Chapter Timestamps</strong> - Each chapter now tracks when you last read it (<code>readAt</code>)</li>
+<li><strong>Seamless History Tracking</strong> - Reading progress is automatically saved with timestamps</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-performance--stability">⚡ Performance &amp; Stability<a class="hash-link" aria-label="Direct link to ⚡ Performance &amp; Stability" title="Direct link to ⚡ Performance &amp; Stability" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-performance--stability">​</a></h3>
+<ul>
+<li><strong>Improved Error Handling</strong> - Better handling around rewarded ads and detail fetching with Crashlytics integration</li>
+<li><strong>Stable Key Generation</strong> - More reliable list rendering with stable keyExtractor</li>
+<li><strong>Conditional Pagination</strong> - Smarter pagination and footer handling in chapter lists</li>
+<li><strong>Dependency Updates</strong> - Updated core packages for better stability</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes">🐛 Bug Fixes<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes" title="Direct link to 🐛 Bug Fixes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-bug-fixes">​</a></h3>
+<ul>
+<li>Fixed duplicate keys by normalizing detail/chapter links</li>
+<li>Preserved existing <code>readAt</code> timestamps when updating progress</li>
+<li>Improved error handling for edge cases</li>
+<li>Removed unused imports and props for cleaner code</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-code-quality">🧹 Code Quality<a class="hash-link" aria-label="Direct link to 🧹 Code Quality" title="Direct link to 🧹 Code Quality" href="https://p2devs.github.io/InkNest/blog/release-v1.4.2#-code-quality">​</a></h3>
+<ul>
+<li>Simplified useEffect dependencies throughout the codebase</li>
+<li>Refactored reducer logic for better progress tracking</li>
+<li>iOS feature-flag override improvements</li>
+</ul>
+<hr>
+<p><strong>Update now</strong> to enjoy a smoother chapter navigation experience! 📚</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
+            <category>Release</category>
+        </item>
         <item>
             <title><![CDATA[InkNest v1.4.1 Release]]></title>
             <link>https://p2devs.github.io/InkNest/blog/release-v1.4.1</link>
