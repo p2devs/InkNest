@@ -67,7 +67,7 @@ export function ComicDetails({route, navigation}) {
   const historyKey = useMemo(() => PageLink?.split('?')[0] ?? '', [PageLink]);
   const readingHistory = useSelector(state => state.data.history[historyKey]);
 
-  const appVersion = useMemo(() => getVersion(), []);
+  const appVersion = getVersion();
   const isIosOverrideActive =
     !forIosLoading && appVersion === forIosValue && !!forIosValue;
 
