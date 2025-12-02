@@ -64,7 +64,7 @@ export function ComicDetails({route, navigation}) {
   const error = useSelector(state => state.data.error);
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
   const hasRewardAdsShown = useSelector(state => state.data.hasRewardAdsShown);
-  const historyKey = useMemo(() => PageLink?.split('?')[0], [PageLink]);
+  const historyKey = useMemo(() => PageLink?.split('?')[0] ?? '', [PageLink]);
   const readingHistory = useSelector(state => state.data.history[historyKey]);
 
   const appVersion = useMemo(() => getVersion(), []);
