@@ -108,7 +108,7 @@ export function ComicDetails({route, navigation}) {
 
     return Object.entries(readingHistory.readComics)
       .map(([chapterLink, meta]) => {
-        const normalized = chapterLink?.split('?')[0];
+        const normalized = chapterLink?.split('?')?.[0] || '';
         const baseChapter =
           chapterMap.get(chapterLink) ||
           (normalized ? chapterMap.get(normalized) : null);
@@ -120,7 +120,7 @@ export function ComicDetails({route, navigation}) {
       })
       .filter(Boolean)
       .sort((a, b) => (b.readAt || 0) - (a.readAt || 0));
-  }, [availableChapters, isRecentTab, readingHistory?.readComics]);
+  }, [readingHistory?.readComics]);
 
   const shouldShowChapterSearch =
     isChapterTab && !forIosLoading && sortedChapters.length > 10;
@@ -163,12 +163,11 @@ export function ComicDetails({route, navigation}) {
     try {
       crashlytics().log(message);
       if (err) {
-        crashlytics().recordError(
-          err instanceof Error ? err : new Error(String(err)),
-        );
+        crashlytics().recordError(err);
       }
-    } catch (_) {
-      // Avoid crashing the UI if Crashlytics logging fails.
+    } catch (_error) {
+      crashlytics().log('Error reporting failed');
+      crashlytics().recordError(_error);
     }
   }, []);
 
@@ -201,7 +200,7 @@ export function ComicDetails({route, navigation}) {
         ...prev.filter(tab => tab.name !== 'Recent' && tab.name !== 'Chapters'),
       ]);
     }
-  }, [readingHistory?.readComics]);
+  }, []);
 
   useEffect(() => {
     if (isIosOverrideActive) {
@@ -342,10 +341,6 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#fff',
     padding: 0,
-  },
-  searchPlaceholder: {
-    flex: 1,
-    minHeight: 44,
   },
   sortButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
