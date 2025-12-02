@@ -1534,6 +1534,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@configcat/sdk@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@configcat/sdk@npm:1.0.2"
+  checksum: 4bf7cac9940c44f9f3379da47117f027d04e244da1d0ed561b30626880e528eb9a35cea014414d631aa2ff65b153c9fcb04e8f7d7b67a1c665d611e05bc67e79
+  languageName: node
+  linkType: hard
+
 "@dr.pogodin/react-native-fs@npm:2.29.1":
   version: 2.29.1
   resolution: "@dr.pogodin/react-native-fs@npm:2.29.1"
@@ -4040,7 +4047,7 @@ __metadata:
     axios: 1.8.4
     babel-jest: ^29.6.3
     cheerio: 1.0.0-rc.12
-    configcat-react: ^4.8.1
+    configcat-react: ^5.0.3
     eslint: ^8.19.0
     jest: ^29.6.3
     moti: ^0.29.0
@@ -5135,25 +5142,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"configcat-common@npm:9.3.1":
-  version: 9.3.1
-  resolution: "configcat-common@npm:9.3.1"
+"configcat-react@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "configcat-react@npm:5.0.3"
   dependencies:
-    tslib: ^2.4.1
-  checksum: f6373c956b7fc65ff058c75a0c5b6efadd71f08a7b119bc7cdc511b2572af893e948bd289f686d140262549b9b35cf5d1b1b6ff7dd896231b57962e126b733fa
-  languageName: node
-  linkType: hard
-
-"configcat-react@npm:^4.8.1":
-  version: 4.8.1
-  resolution: "configcat-react@npm:4.8.1"
-  dependencies:
-    configcat-common: 9.3.1
+    "@configcat/sdk": ^1.0.2
     tslib: ^2.4.1
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: c92f5af9dd90ec9ff4012a7036aca240e63f3ff1485bec7b058a7b3d1b0a036e83c90cc29e28f0e980ee58ce7cbead69b93feed4007c47620f0de145ea275779
+  checksum: 6fcc8c04947b7d48c0cf0b4410ace429fa1d56856d516fd67a9e392fa15ee2cf16583bf8a3ac74060d907561a4a637be41c203f6d34f819479d750c00abfb2cc
   languageName: node
   linkType: hard
 
