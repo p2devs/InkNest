@@ -9,6 +9,7 @@ export const NAVIGATION = {
   search: 'Search',
   bookmarks: 'Bookmarks',
   settings: 'Settings',
+  notifications: 'Notifications',
   communityBoard: 'Community',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',

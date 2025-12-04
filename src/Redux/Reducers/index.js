@@ -19,6 +19,7 @@ const initialState = {
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
   communityComics: {}, // {comicLink: {title, coverImage, detailsPath, lastActivityAt}}
   userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
+  notifications: [], // [{id,title,body,data,receivedAt,read}]
 };
 
 /**
@@ -354,6 +355,33 @@ const Reducers = createSlice({
         lastSeenAt: Date.now(),
       };
     },
+    hydrateNotifications: (state, action) => {
+      state.notifications = Array.isArray(action.payload)
+        ? action.payload
+        : [];
+    },
+    appendNotification: (state, action) => {
+      const notification = action.payload;
+      if (!notification?.id) {
+        return;
+      }
+      const deduped = state.notifications.filter(
+        existing => existing.id !== notification.id,
+      );
+      state.notifications = [notification, ...deduped].slice(0, 50);
+    },
+    markNotificationAsRead: (state, action) => {
+      const targetId = action.payload;
+      if (!targetId) {
+        return;
+      }
+      state.notifications = state.notifications.map(item =>
+        item.id === targetId ? {...item, read: true} : item,
+      );
+    },
+    clearNotifications: state => {
+      state.notifications = [];
+    },
   },
 });
 
@@ -387,5 +415,9 @@ export const {
   updateCommunityPost,
   incrementUserActivity,
   upsertCommunityComicMeta,
+  hydrateNotifications,
+  appendNotification,
+  markNotificationAsRead,
+  clearNotifications,
 } = Reducers.actions;
 export default Reducers.reducer;
