@@ -7,6 +7,8 @@ import {
   View,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 import {
@@ -15,6 +17,7 @@ import {
 } from 'react-native-responsive-screen';
 import {useDispatch, useSelector} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 
 import Header from '../../../../Components/UIComp/Header';
@@ -23,9 +26,21 @@ import {goBack} from '../../../../Navigation/NavigationService';
 import {updateData} from '../../../../Redux/Reducers';
 import {fetchComicDetails} from '../../../../Redux/Actions/GlobalActions';
 
-const HeaderComponent = memo(({image, title, link, tabBar, onTabBar}) => {
+const HeaderComponent = memo(
+  ({
+    image,
+    title,
+    link,
+    tabBar,
+    onTabBar,
+    notificationBell,
+    onRequestLoginPrompt,
+  }) => {
     const dispatch = useDispatch();
     const ComicDetail = useSelector(state => state.data.dataByUrl[link]);
+    const bellBusy = notificationBell?.loading || notificationBell?.syncing;
+    const bellDisabled = bellBusy || !notificationBell?.canToggle;
+    const shouldRenderBell = !!notificationBell;
 
     return (
       <SafeAreaView
@@ -79,7 +94,62 @@ const HeaderComponent = memo(({image, title, link, tabBar, onTabBar}) => {
               Comic Details
             </Text>
 
-            <View style={{flexDirection: 'row', gap: 16}}>
+            <View style={{flexDirection: 'row', gap: 16, alignItems: 'center'}}>
+              {shouldRenderBell ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    if (!notificationBell.enabled) {
+                      onRequestLoginPrompt?.();
+                      return;
+                    }
+                    if (notificationBell.restricted) {
+                      notificationBell.toggleSubscription();
+                      return;
+                    }
+                    if (bellDisabled) {
+                      Alert.alert(
+                        'Want to Enable Notifications?',
+                        'contact the InkNest admin team to enable notifications for your account.',
+                      );
+                      return;
+                    }
+                    notificationBell.toggleSubscription();
+                  }}
+                  disabled={bellBusy}
+                  style={{
+                    opacity: bellBusy || notificationBell.restricted ? 0.6 : 1,
+                  }}>
+                  {bellBusy ? (
+                    <ActivityIndicator
+                      size={heightPercentageToDP('2.2%')}
+                      color="#FFF"
+                    />
+                  ) : (
+                    <MaterialIcons
+                      name={
+                        notificationBell.isSubscribed
+                          ? 'notifications-on'
+                          : 'notifications-none'
+                      }
+                      size={heightPercentageToDP('3%')}
+                      color={
+                        notificationBell.isSubscribed
+                          ? 'gold'
+                          : notificationBell.restricted
+                          ? 'rgba(255,255,255,0.5)'
+                          : '#FFF'
+                      }
+                      style={
+                        !notificationBell.enabled
+                          ? {opacity: 0.5}
+                          : notificationBell.restricted
+                          ? {opacity: 0.7}
+                          : null
+                      }
+                    />
+                  )}
+                </TouchableOpacity>
+              ) : null}
               <TouchableOpacity
                 onPress={() => {
                   dispatch(

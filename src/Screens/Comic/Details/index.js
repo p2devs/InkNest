@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
+  Alert,
   FlatList,
   StyleSheet,
   TextInput,
@@ -14,16 +15,22 @@ import {useFeatureFlag} from 'configcat-react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
-import { fetchComicDetails } from '../../../Redux/Actions/GlobalActions';
+import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
-import { AppendAd } from '../../../InkNest-Externals/Ads/AppendAd';
+import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
-import { rewardAdsShown } from '../../../Redux/Reducers';
-import { showRewardedAd } from '../../../InkNest-Externals/Redux/Actions/Download';
+import {rewardAdsShown} from '../../../Redux/Reducers';
+import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
 import CommunityTab from '../../../InkNest-Externals/Community/Screens/CommunityBoard';
+import useComicNotificationSubscription from '../../../InkNest-Externals/Notifications/hooks/useComicNotificationSubscription';
+import LoginPrompt from '../../../Components/Auth/LoginPrompt';
+import {
+  signInWithApple,
+  signInWithGoogle,
+} from '../../../InkNest-Externals/Community/Logic/CommunityActions';
 
 const IOS_PLACEHOLDER_CHAPTERS = [
   {
@@ -51,17 +58,19 @@ const IOS_PLACEHOLDER_CHAPTERS = [
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
   const [tabBar, setTabBar] = useState([
-    { name: 'Chapters', active: true },
-    { name: 'Community', active: false },
+    {name: 'Chapters', active: true},
+    {name: 'Community', active: false},
     // {name: 'Bookmarks', active: false},
   ]);
-  const { value: forIosValue, loading: forIosLoading } = useFeatureFlag(
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
   );
 
   const [sort, setSort] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -164,6 +173,59 @@ export function ComicDetails({route, navigation}) {
     return AppendAd(filteredChapters);
   }, [filteredChapters, filteredRecentChapters, forIosLoading, isRecentTab]);
 
+  const comicMeta = useMemo(() => {
+    const resolvedGenres = Array.isArray(ComicDetail?.genres)
+      ? ComicDetail.genres.join(', ')
+      : ComicDetail?.genres || '';
+    return {
+      title: ComicDetail?.title ?? route?.params?.title ?? '',
+      imgSrc: ComicDetail?.imgSrc ?? route?.params?.image ?? '',
+      baseUrl: ComicDetail?.baseUrl ?? '',
+      publisher: ComicDetail?.publisher ?? '',
+      genres: resolvedGenres,
+      status: ComicDetail?.status ?? '',
+    };
+  }, [ComicDetail, route?.params?.image, route?.params?.title]);
+
+  const notificationBell = useComicNotificationSubscription(
+    PageLink,
+    comicMeta,
+  );
+
+  const handleRequestLoginPrompt = useCallback(() => {
+    setShowLoginPrompt(true);
+  }, []);
+
+  const handleCloseLoginPrompt = useCallback(() => {
+    if (!authLoading) {
+      setShowLoginPrompt(false);
+    }
+  }, [authLoading]);
+
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      setAuthLoading(true);
+      await dispatch(signInWithGoogle());
+      setShowLoginPrompt(false);
+    } catch (error) {
+      Alert.alert('Sign in failed', 'Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }, [dispatch]);
+
+  const handleAppleSignIn = useCallback(async () => {
+    try {
+      setAuthLoading(true);
+      await dispatch(signInWithApple());
+      setShowLoginPrompt(false);
+    } catch (error) {
+      Alert.alert('Sign in failed', 'Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }, [dispatch]);
+
   const reportError = useCallback((message, err) => {
     try {
       crashlytics().log(message);
@@ -244,10 +306,31 @@ export function ComicDetails({route, navigation}) {
         analytics().logEvent('Comic_Details_Sort_Clicked');
         setSort(!sort);
       }}
+      notificationBell={notificationBell}
+        onRequestLoginPrompt={handleRequestLoginPrompt}
     />
   );
 
   if (error) return <Error error={error} />;
+
+  if (!isChapterTab && !isRecentTab) {
+    return (
+      <>
+        <CommunityTab
+          comicLink={PageLink}
+          navigation={navigation}
+          headerComponent={renderComicHeader()}
+        />
+        <LoginPrompt
+          visible={showLoginPrompt}
+          loading={authLoading}
+          onClose={handleCloseLoginPrompt}
+          onGoogleSignIn={handleGoogleSignIn}
+          onAppleSignIn={handleAppleSignIn}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -272,6 +355,8 @@ export function ComicDetails({route, navigation}) {
                   })),
                 );
               }}
+              notificationBell={notificationBell}
+              onRequestLoginPrompt={handleRequestLoginPrompt}
             />
             {shouldShowSearch ? (
               <View style={styles.searchContainer}>
@@ -313,22 +398,14 @@ export function ComicDetails({route, navigation}) {
         }
         data={listData}
         style={styles.container}
-        renderItem={({item, index}) =>
-          isChapterTab || isRecentTab ? (
-            <ChapterCard
-              item={item}
-              index={index}
-              isBookmark={false}
-              detailPageLink={PageLink}
-            />
-          ) : (
-            <CommunityTab
-              comicLink={PageLink}
-              navigation={navigation}
-              headerComponent={renderComicHeader()}
-            />
-          )
-        }
+        renderItem={({item, index}) => (
+          <ChapterCard
+            item={item}
+            index={index}
+            isBookmark={false}
+            detailPageLink={PageLink}
+          />
+        )}
         keyExtractor={(item, index) =>
           item?.link ? `${item.link}-${index}` : `ad-${index}`
         }
@@ -344,6 +421,13 @@ export function ComicDetails({route, navigation}) {
           ) : null
         }
         keyboardShouldPersistTaps="handled"
+      />
+      <LoginPrompt
+        visible={showLoginPrompt}
+        loading={authLoading}
+        onClose={handleCloseLoginPrompt}
+        onGoogleSignIn={handleGoogleSignIn}
+        onAppleSignIn={handleAppleSignIn}
       />
     </>
   );

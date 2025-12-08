@@ -141,6 +141,37 @@ export function RootNavigation() {
         return null;
       }
 
+      if (data.type === 'comic_chapter_update') {
+        const detailLink = data.detailLink || data.link || data.comicLink;
+        const chapterLink = data.latestChapterLink || data.chapterLink;
+        const comicTitle = data.comicTitle || data.title;
+
+        if (chapterLink) {
+          return {
+            name: NAVIGATION.comicBook,
+            params: {
+              comicBookLink: chapterLink,
+              DetailsPage: {
+                link: detailLink,
+                title: comicTitle,
+                image: data.image || data.coverImage || null,
+              },
+            },
+          };
+        }
+
+        if (detailLink) {
+          return {
+            name: NAVIGATION.comicDetails,
+            params: {
+              link: detailLink,
+              title: comicTitle,
+              image: data.image || data.coverImage || null,
+            },
+          };
+        }
+      }
+
       if (data.postId && data.comicLink) {
         const initialPost =
           typeof data.initialPost === 'string'

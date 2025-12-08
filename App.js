@@ -17,6 +17,7 @@ import {
   configureGoogleSignIn,
   listenToAuthChanges,
 } from './src/InkNest-Externals/Community/Logic/CommunityActions';
+import NotificationSubscriptionBootstrapper from './src/InkNest-Externals/Notifications/components/NotificationSubscriptionBootstrapper';
 
 /**
  * The main App component that sets up the root of the application.
@@ -72,6 +73,7 @@ const App = () => {
           <PersistGate loading={<Loading />} persistor={persistor}>
             <PaperProvider>
               <BannerProvider>
+                <NotificationSubscriptionBootstrapper />
                 <RootNavigation />
                 <Toast />
                 <ForceUpdate />

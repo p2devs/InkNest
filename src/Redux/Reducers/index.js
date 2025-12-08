@@ -1,5 +1,26 @@
 import {createSlice} from '@reduxjs/toolkit';
 
+const SUBSCRIPTION_CACHE_TTL_MS = 1000;
+
+const resolveCacheTtlMs = (incomingTtl, previousTtl = SUBSCRIPTION_CACHE_TTL_MS) => {
+  if (
+    typeof incomingTtl === 'number' &&
+    Number.isFinite(incomingTtl) &&
+    incomingTtl > 0
+  ) {
+    return incomingTtl;
+  }
+
+  if (
+    typeof previousTtl === 'number' &&
+    Number.isFinite(previousTtl) &&
+    previousTtl > 0
+  ) {
+    return previousTtl;
+  }
+
+  return SUBSCRIPTION_CACHE_TTL_MS;
+};
 const initialState = {
   dataByUrl: {},
   loading: false,
@@ -20,6 +41,7 @@ const initialState = {
   communityComics: {}, // {comicLink: {title, coverImage, detailsPath, lastActivityAt}}
   userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
   notifications: [], // [{id,title,body,data,receivedAt,read}]
+  notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
 };
 
 /**
@@ -382,6 +404,74 @@ const Reducers = createSlice({
     clearNotifications: state => {
       state.notifications = [];
     },
+    setNotificationSubscriptionCache: (state, action) => {
+      const {
+        uid,
+        allowed,
+        subscribedList,
+        fetchedAt = Date.now(),
+        cacheTtlMs,
+        cacheSource = 'success',
+      } = action.payload || {};
+      if (!uid) {
+        return;
+      }
+      const previousEntry = state.notificationSubscriptions[uid];
+      const previousList = Array.isArray(previousEntry?.subscribedList)
+        ? [...previousEntry.subscribedList]
+        : [];
+      let nextList = previousList;
+
+      if (Array.isArray(subscribedList) && previousList.length === 0) {
+        nextList = Array.from(
+          new Set(
+            subscribedList.filter(item => typeof item === 'string' && item),
+          ),
+        );
+      }
+
+      const allowedProvided = typeof allowed === 'boolean';
+      const nextAllowed = allowedProvided
+        ? allowed
+        : typeof previousEntry?.allowed === 'boolean'
+        ? previousEntry.allowed
+        : undefined;
+      const resolvedCacheTtl = resolveCacheTtlMs(
+        cacheTtlMs,
+        previousEntry?.cacheTtlMs,
+      );
+      state.notificationSubscriptions[uid] = {
+        lastFetched: fetchedAt,
+        allowed: nextAllowed,
+        subscribedList: nextList,
+        cacheTtlMs: resolvedCacheTtl,
+        cacheSource,
+      };
+    },
+    updateNotificationSubscriptionList: (state, action) => {
+      const {uid, detailLink, subscribed} = action.payload || {};
+      if (!uid || !detailLink) {
+        return;
+      }
+      if (!state.notificationSubscriptions[uid]) {
+        state.notificationSubscriptions[uid] = {
+          lastFetched: 0,
+          allowed: true,
+          subscribedList: [],
+          cacheTtlMs: resolveCacheTtlMs(),
+        };
+      }
+      const list = state.notificationSubscriptions[uid].subscribedList || [];
+      if (subscribed) {
+        if (!list.includes(detailLink)) {
+          list.push(detailLink);
+        }
+      } else {
+        state.notificationSubscriptions[uid].subscribedList = list.filter(
+          item => item !== detailLink,
+        );
+      }
+    },
   },
 });
 
@@ -419,5 +509,7 @@ export const {
   appendNotification,
   markNotificationAsRead,
   clearNotifications,
+  setNotificationSubscriptionCache,
+  updateNotificationSubscriptionList,
 } = Reducers.actions;
 export default Reducers.reducer;
