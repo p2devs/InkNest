@@ -62,6 +62,7 @@ export function ComicDetails({route, navigation}) {
     {name: 'Community', active: false},
     // {name: 'Bookmarks', active: false},
   ]);
+  
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
@@ -258,6 +259,9 @@ export function ComicDetails({route, navigation}) {
       }
     })();
   }, [dispatch, hasRewardAdsShown, reportError]);
+
+  console.log(PageLink,PageLink.includes("comicbookplus"));
+  
 
   useEffect(() => {
     if (readingHistory?.readComics) {

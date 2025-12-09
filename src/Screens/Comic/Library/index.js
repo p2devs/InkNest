@@ -339,7 +339,7 @@ export function Library({navigation}) {
                         link: item?.link?.toString(),
                         title: item?.title?.toString(),
                       });
-                      type === 'readallcomics'
+                      type === 'readallcomics' || type == 'comicbookplus'
                         ? navigation.navigate(NAVIGATION.comicBook, {
                             comicBookLink: item?.link,
                           })

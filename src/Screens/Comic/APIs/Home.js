@@ -17,6 +17,11 @@ export const getComics = async (hostName, page, type = null) => {
     )
       params = '';
 
+    // Special handling for comicbookplus
+    if (hostName === ComicHostName.comicbookplus) {
+      params = `?cbplus=latestuploads_l_s_${page}`;
+    }
+
     const requestUrl = `${hostName}${params}`;
 
     const response = await APICaller.get(requestUrl);
@@ -37,6 +42,10 @@ export const getComics = async (hostName, page, type = null) => {
         let link = $(element).find(tagConfig.cardLinkClass).attr('href');
         if (link) {
           link = link.replace(/\/\d+$/, '');
+          // For comicbookplus, construct full URL
+          if (hostName === ComicHostName.comicbookplus && link.startsWith('/?')) {
+            link = hostName + link.substring(1);
+          }
         }
         let image = $(element)
           .find(tagConfig.imageClass)
@@ -117,6 +126,7 @@ const HomeType = {
     getComics(ComicHostName.comichubfree, 1),
   ],
   readallcomics: [getComics(ComicHostName.readallcomics, 1)],
+  comicbookplus: [getComics(ComicHostName.comicbookplus, 0, 'latest-uploads')],
 };
 
 export const getComicsHome = async (

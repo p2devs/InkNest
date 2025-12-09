@@ -2,6 +2,7 @@ export const ComicHostName = {
   readcomicsonline: 'https://readcomicsonline.ru/',
   comichubfree: 'https://comichubfree.com/',
   readallcomics: 'https://readallcomics.com/',
+  comicbookplus: 'https://comicbookplus.com/',
 };
 export const AnimeHostName = {
   gogoanimes: 'https://ww12.gogoanimes.fi/',

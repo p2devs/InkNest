@@ -38,8 +38,6 @@ export function ComicBook({ navigation, route }) {
   const { comicBookLink, pageJump, isDownloadComic, DetailsPage } = route?.params;
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
 
-  console.log(route?.params, 'sdf')
-
   const [detailsPageLink, setDetailsPageLink] = useState(
     DetailsPage?.link ?? comicBook?.detailsLink ?? '',
   );
@@ -344,6 +342,8 @@ export function ComicBook({ navigation, route }) {
     );
   }
 
+  console.log(comicBook?.images,'comicBook?.images');
+  
   return (
     <>
       <SafeAreaView style={styles.container} edges={["top"]}>
