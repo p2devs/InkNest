@@ -442,7 +442,6 @@ const styles = StyleSheet.create({
   },
   emptyListContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingVertical: 32,
   },
   emptyState: {
