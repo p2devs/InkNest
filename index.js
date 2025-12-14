@@ -10,19 +10,20 @@ import 'react-native-gesture-handler';
 import messaging from '@react-native-firebase/messaging';
 import crashlytics from '@react-native-firebase/crashlytics';
 import {
-	appendNotificationToStorage,
-	buildNotificationPayload,
+  appendNotificationToStorage,
+  buildNotificationPayload,
 } from './src/Utils/notificationHelpers';
 
-AppRegistry.registerComponent(appName, () => App);
-
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-	try {
-		const payload = buildNotificationPayload(remoteMessage, false);
-		if (payload) {
-			await appendNotificationToStorage(payload);
-		}
-	} catch (error) {
-		crashlytics().recordError(error);
-	}
+  try {
+    const payload = buildNotificationPayload(remoteMessage, false);
+    console.log('Payload:', payload);
+    if (payload) {
+      await appendNotificationToStorage(payload);
+    }
+  } catch (error) {
+    crashlytics().recordError(error);
+  }
 });
+
+AppRegistry.registerComponent(appName, () => App);

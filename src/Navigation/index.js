@@ -1,4 +1,10 @@
-import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {AppNavigation} from './AppNavigation';
 import {navigationRef} from './NavigationService';
@@ -84,7 +90,7 @@ export function RootNavigation() {
   const persistNotifications = useCallback(async nextList => {
     notificationCacheRef.current = nextList;
     try {
-      await persistNotificationList(nextList);
+      // await persistNotificationList(nextList);
     } catch (error) {
       crashlytics().recordError(error);
     }
@@ -97,7 +103,7 @@ export function RootNavigation() {
       const storedSignature = JSON.stringify(stored);
       if (cachedSignature !== storedSignature) {
         notificationCacheRef.current = stored;
-        dispatch(hydrateNotifications(stored));
+        // dispatch(hydrateNotifications(stored));
       }
     } catch (error) {
       if (__DEV__) {
@@ -271,7 +277,12 @@ export function RootNavigation() {
         navigateToNotificationTarget(parsedPayload);
       }
     },
-    [buildNotificationPayload, dispatch, navigateToNotificationTarget, persistNotifications],
+    [
+      buildNotificationPayload,
+      dispatch,
+      navigateToNotificationTarget,
+      persistNotifications,
+    ],
   );
 
   useEffect(() => {

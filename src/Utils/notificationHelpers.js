@@ -31,18 +31,12 @@ export const buildNotificationPayload = (remoteMessage, autoRead = false) => {
   }, {});
 
   return {
-    id:
-      remoteMessage.messageId ||
-      normalizedData.notificationId ||
-      `${now}`,
+    id: remoteMessage.messageId || normalizedData.notificationId || `${now}`,
     title:
       remoteMessage.notification?.title ||
       normalizedData.title ||
       'New notification',
-    body:
-      remoteMessage.notification?.body ||
-      normalizedData.body ||
-      '',
+    body: remoteMessage.notification?.body || normalizedData.body || '',
     data: normalizedData,
     receivedAt: now,
     read: autoRead,
@@ -61,6 +55,7 @@ export const loadStoredNotifications = async () => {
 };
 
 export const persistNotificationList = async list => {
+  console.log('List:', list);
   await AsyncStorage.setItem(
     NOTIFICATION_STORAGE_KEY,
     JSON.stringify(toArray(list)),
@@ -83,7 +78,9 @@ export const appendNotificationToStorage = async payload => {
   }
   try {
     const stored = await loadStoredNotifications();
+    console.log('Stored:', stored);
     const merged = mergeNotificationLists(payload, stored);
+    console.log('Merged:', merged);
     await persistNotificationList(merged);
     return merged;
   } catch (error) {
