@@ -5,22 +5,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {AppNavigation} from './AppNavigation';
-import {navigationRef} from './NavigationService';
-import {Platform, StatusBar, AppState} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
+import { AppNavigation } from './AppNavigation';
+import { navigationRef } from './NavigationService';
+import { Platform, StatusBar, AppState } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   ClearError,
   appendNotification,
-  hydrateNotifications,
+  mergeNotifications,
   markNotificationAsRead,
 } from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
 import messaging from '@react-native-firebase/messaging';
-import {firebase} from '@react-native-firebase/perf';
+import { firebase } from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
-import {firebase as fire} from '@react-native-firebase/analytics';
+import { firebase as fire } from '@react-native-firebase/analytics';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {
   configureGoogleSignIn,
@@ -31,10 +31,10 @@ import {
   requestNotifications,
   checkNotifications,
 } from 'react-native-permissions';
-import {NAVIGATION} from '../Constants';
+import { NAVIGATION } from '../Constants';
 import {
   buildNotificationPayload,
-  loadStoredNotifications,
+  consumeStoredNotifications,
   mergeNotificationLists,
   persistNotificationList,
   tryParseJSON,
@@ -87,34 +87,17 @@ export function RootNavigation() {
     };
   }, []);
 
-  const persistNotifications = useCallback(async nextList => {
-    notificationCacheRef.current = nextList;
-    try {
-      // await persistNotificationList(nextList);
-    } catch (error) {
-      crashlytics().recordError(error);
-    }
-  }, []);
-
   const refreshNotificationsFromStorage = useCallback(async () => {
     try {
-      const stored = await loadStoredNotifications();
-      const cachedSignature = JSON.stringify(notificationCacheRef.current);
-      const storedSignature = JSON.stringify(stored);
-      if (cachedSignature !== storedSignature) {
-        notificationCacheRef.current = stored;
-        // dispatch(hydrateNotifications(stored));
+      const stored = await consumeStoredNotifications();
+      if (stored && stored.length > 0) {
+        dispatch(mergeNotifications(stored));
       }
     } catch (error) {
       if (__DEV__) {
-        console.warn('Failed to hydrate notifications', error);
+        console.warn('Failed to merge offline notifications', error);
       }
       crashlytics().recordError(error);
-      notificationCacheRef.current = [];
-      dispatch(hydrateNotifications([]));
-      try {
-        await persistNotificationList([]);
-      } catch (_) {}
     }
   }, [dispatch]);
 
@@ -127,18 +110,6 @@ export function RootNavigation() {
       refreshNotificationsFromStorage();
     }
   }, [appState, refreshNotificationsFromStorage]);
-
-  useEffect(() => {
-    if (!Array.isArray(notificationsState)) {
-      return;
-    }
-    const cachedSignature = JSON.stringify(notificationCacheRef.current);
-    const stateSignature = JSON.stringify(notificationsState);
-    if (cachedSignature === stateSignature) {
-      return;
-    }
-    persistNotifications(notificationsState);
-  }, [notificationsState, persistNotifications]);
 
   const resolveNotificationTarget = useCallback(
     payload => {
@@ -225,7 +196,7 @@ export function RootNavigation() {
       return;
     }
 
-    const {target, notificationId} = pendingNotificationNavRef.current;
+    const { target, notificationId } = pendingNotificationNavRef.current;
     navigationRef.current.navigate(target.name, target.params);
     if (notificationId) {
       dispatch(markNotificationAsRead(notificationId));
@@ -270,19 +241,18 @@ export function RootNavigation() {
         parsedPayload,
         notificationCacheRef.current,
       );
-      persistNotifications(deduped);
+      // We still persist to storage for background/offline safety, 
+      // but we don't rely on it as the source of truth for the UI anymore.
+      // The 'consumeStoredNotifications' will pick this up if the app restarts.
+      persistNotificationList(deduped).catch(() => { });
+
       dispatch(appendNotification(parsedPayload));
 
       if (shouldNavigate) {
         navigateToNotificationTarget(parsedPayload);
       }
     },
-    [
-      buildNotificationPayload,
-      dispatch,
-      navigateToNotificationTarget,
-      persistNotifications,
-    ],
+    [buildNotificationPayload, dispatch, navigateToNotificationTarget],
   );
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const SUBSCRIPTION_CACHE_TTL_MS = 1000;
 
@@ -120,7 +120,7 @@ const Reducers = createSlice({
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -130,10 +130,10 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data, ComicDetailslink, imageLength, readAt} =
+      const { url, data, ComicDetailslink, imageLength, readAt } =
         action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
+      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
 
       const hasReadingProgress =
         ComicDetailslink && imageLength && data?.lastReadPage !== undefined;
@@ -162,7 +162,7 @@ const Reducers = createSlice({
       // state.dataByUrl[url] = data;
     },
     DownloadComicBook: (state, action) => {
-      const {link, data, title} = action.payload;
+      const { link, data, title } = action.payload;
 
       state.DownloadComic[link] = {
         title,
@@ -174,19 +174,19 @@ const Reducers = createSlice({
             ...data,
             comicBook: state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook
               ? {
-                  ...state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook,
-                  ...data?.comicBook,
-                  ...(data?.lastReadPage !== undefined
-                    ? {lastReadPage: data.lastReadPage}
-                    : {}),
-                }
+                ...state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook,
+                ...data?.comicBook,
+                ...(data?.lastReadPage !== undefined
+                  ? { lastReadPage: data.lastReadPage }
+                  : {}),
+              }
               : data?.comicBook,
           },
         },
       };
     },
     updateDownloadedComicBook: (state, action) => {
-      const {comicDetailsLink, chapterLink, data} = action.payload;
+      const { comicDetailsLink, chapterLink, data } = action.payload;
 
       if (
         !comicDetailsLink ||
@@ -204,17 +204,17 @@ const Reducers = createSlice({
         ...data,
         comicBook: existingEntry?.comicBook
           ? {
-              ...existingEntry.comicBook,
-              ...(data?.comicBook ?? {}),
-              ...(data?.lastReadPage !== undefined
-                ? {lastReadPage: data.lastReadPage}
-                : {}),
-            }
+            ...existingEntry.comicBook,
+            ...(data?.comicBook ?? {}),
+            ...(data?.lastReadPage !== undefined
+              ? { lastReadPage: data.lastReadPage }
+              : {}),
+          }
           : existingEntry?.comicBook,
       };
     },
     DeleteDownloadedComicBook: (state, action) => {
-      const {comicBooksLink, ChapterLink} = action.payload;
+      const { comicBooksLink, ChapterLink } = action.payload;
       delete state.DownloadComic[comicBooksLink]?.comicBooks[ChapterLink];
       if (
         Object.keys(state.DownloadComic[comicBooksLink]?.comicBooks).length ===
@@ -290,10 +290,10 @@ const Reducers = createSlice({
     },
     clearUser: state => {
       state.user = null;
-      state.userActivity = {postsToday: 0, repliesToday: 0, lastReset: new Date().toDateString()};
+      state.userActivity = { postsToday: 0, repliesToday: 0, lastReset: new Date().toDateString() };
     },
     setCommunityPosts: (state, action) => {
-      const {comicLink, posts = [], append = false, comicMeta = null} = action.payload;
+      const { comicLink, posts = [], append = false, comicMeta = null } = action.payload;
       const existing = state.communityPosts[comicLink]?.posts || [];
 
       let nextPosts;
@@ -338,9 +338,9 @@ const Reducers = createSlice({
       }
     },
     addCommunityPost: (state, action) => {
-      const {comicLink, post, comicMeta} = action.payload;
+      const { comicLink, post, comicMeta } = action.payload;
       if (!state.communityPosts[comicLink]) {
-        state.communityPosts[comicLink] = {posts: [], lastFetch: Date.now()};
+        state.communityPosts[comicLink] = { posts: [], lastFetch: Date.now() };
       }
       state.communityPosts[comicLink].posts.unshift(post);
 
@@ -362,7 +362,7 @@ const Reducers = createSlice({
       }
     },
     updateCommunityPost: (state, action) => {
-      const {comicLink, postId, updates} = action.payload;
+      const { comicLink, postId, updates } = action.payload;
       if (state.communityPosts[comicLink]) {
         const postIndex = state.communityPosts[comicLink].posts.findIndex(
           p => p.id === postId,
@@ -386,7 +386,7 @@ const Reducers = createSlice({
       }
     },
     cacheCommunityPost: (state, action) => {
-      const {postId, comicLink, post = {}} = action.payload || {};
+      const { postId, comicLink, post = {} } = action.payload || {};
       const id = postId || post?.id;
       if (!id) {
         return;
@@ -403,13 +403,13 @@ const Reducers = createSlice({
       };
     },
     incrementUserActivity: (state, action) => {
-      const {type} = action.payload; // 'post' or 'reply'
+      const { type } = action.payload; // 'post' or 'reply'
       const today = new Date().toDateString();
-      
+
       if (state.userActivity.lastReset !== today) {
-        state.userActivity = {postsToday: 0, repliesToday: 0, lastReset: today};
+        state.userActivity = { postsToday: 0, repliesToday: 0, lastReset: today };
       }
-      
+
       if (type === 'post') {
         state.userActivity.postsToday += 1;
       } else if (type === 'reply') {
@@ -417,7 +417,7 @@ const Reducers = createSlice({
       }
     },
     upsertCommunityComicMeta: (state, action) => {
-      const {comicLink, meta = {}} = action.payload || {};
+      const { comicLink, meta = {} } = action.payload || {};
       if (!comicLink) {
         return;
       }
@@ -428,10 +428,17 @@ const Reducers = createSlice({
         lastSeenAt: Date.now(),
       };
     },
-    hydrateNotifications: (state, action) => {
-      state.notifications = Array.isArray(action.payload)
-        ? action.payload
-        : [];
+    mergeNotifications: (state, action) => {
+      const incoming = Array.isArray(action.payload) ? action.payload : [];
+      if (incoming.length === 0) {
+        return;
+      }
+      const existingIds = new Set(state.notifications.map(n => n.id));
+      const newNotifications = incoming.filter(n => !existingIds.has(n.id));
+
+      state.notifications = [...newNotifications, ...state.notifications]
+        .sort((a, b) => b.receivedAt - a.receivedAt)
+        .slice(0, 50);
     },
     appendNotification: (state, action) => {
       const notification = action.payload;
@@ -449,7 +456,7 @@ const Reducers = createSlice({
         return;
       }
       state.notifications = state.notifications.map(item =>
-        item.id === targetId ? {...item, read: true} : item,
+        item.id === targetId ? { ...item, read: true } : item,
       );
     },
     clearNotifications: state => {
@@ -485,8 +492,8 @@ const Reducers = createSlice({
       const nextAllowed = allowedProvided
         ? allowed
         : typeof previousEntry?.allowed === 'boolean'
-        ? previousEntry.allowed
-        : undefined;
+          ? previousEntry.allowed
+          : undefined;
       const resolvedCacheTtl = resolveCacheTtlMs(
         cacheTtlMs,
         previousEntry?.cacheTtlMs,
@@ -500,7 +507,7 @@ const Reducers = createSlice({
       };
     },
     updateNotificationSubscriptionList: (state, action) => {
-      const {uid, detailLink, subscribed} = action.payload || {};
+      const { uid, detailLink, subscribed } = action.payload || {};
       if (!uid || !detailLink) {
         return;
       }
@@ -557,7 +564,7 @@ export const {
   cacheCommunityPost,
   incrementUserActivity,
   upsertCommunityComicMeta,
-  hydrateNotifications,
+  mergeNotifications,
   appendNotification,
   markNotificationAsRead,
   clearNotifications,

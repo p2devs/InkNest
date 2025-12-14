@@ -54,6 +54,20 @@ export const loadStoredNotifications = async () => {
   return toArray(parsed);
 };
 
+export const consumeStoredNotifications = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    await AsyncStorage.removeItem(NOTIFICATION_STORAGE_KEY);
+    const parsed = JSON.parse(raw);
+    return toArray(parsed);
+  } catch (error) {
+    return [];
+  }
+};
+
 export const persistNotificationList = async list => {
   console.log('List:', list);
   await AsyncStorage.setItem(
