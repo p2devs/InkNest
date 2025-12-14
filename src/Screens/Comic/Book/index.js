@@ -341,8 +341,6 @@ export function ComicBook({ navigation, route }) {
       </SafeAreaView>
     );
   }
-
-  console.log(comicBook?.images,'comicBook?.images');
   
   return (
     <>

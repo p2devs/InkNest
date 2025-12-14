@@ -62,7 +62,7 @@ export function ComicDetails({route, navigation}) {
     {name: 'Community', active: false},
     // {name: 'Bookmarks', active: false},
   ]);
-  
+
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     'Default',
@@ -260,15 +260,15 @@ export function ComicDetails({route, navigation}) {
     })();
   }, [dispatch, hasRewardAdsShown, reportError]);
 
-  console.log(PageLink,PageLink.includes("comicbookplus"));
-  
+  console.log(PageLink, PageLink.includes('comicbookplus'));
 
   useEffect(() => {
     if (readingHistory?.readComics) {
       setTabBar(prev => [
         {name: 'Recent', active: true},
-        {name: 'Chapters', active: false},
-        ...prev.filter(tab => tab.name !== 'Recent' && tab.name !== 'Chapters'),
+        ...prev
+          .filter(tab => tab.name !== 'Recent')
+          .map(tab => ({...tab, active: false})),
       ]);
     }
   }, []);
@@ -311,7 +311,7 @@ export function ComicDetails({route, navigation}) {
         setSort(!sort);
       }}
       notificationBell={notificationBell}
-        onRequestLoginPrompt={handleRequestLoginPrompt}
+      onRequestLoginPrompt={handleRequestLoginPrompt}
     />
   );
 
