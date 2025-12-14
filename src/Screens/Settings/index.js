@@ -28,7 +28,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { NAVIGATION } from '../../Constants';
 import Header from '../../Components/UIComp/Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { setScrollPreference } from '../../Redux/Reducers';
+import { setScrollPreference, setGravityScrollEnabled } from '../../Redux/Reducers';
 import DonationBanner from '../../InkNest-Externals/Donation/DonationBanner';
 import {
   signOut as signOutAction,
@@ -43,6 +43,7 @@ export function Settings({ navigation }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dispatch = useDispatch();
   const scrollPreference = useSelector(state => state.data.scrollPreference);
+  const gravityScrollEnabled = useSelector(state => state.data.gravityScrollEnabled);
   const user = useSelector(state => state.data.user);
   const isAuthenticated = !!user;
 
@@ -293,6 +294,58 @@ export function Settings({ navigation }) {
               color: '#007AFF',
             }}>
             {scrollPreference === 'horizontal' ? 'Horizontal' : 'Vertical'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            paddingVertical: hp('1%'),
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+          onPress={() => {
+            analytics().logEvent('toggle_gravity_scroll', {
+              item: 'Gravity Scroll',
+              currentStatus: gravityScrollEnabled,
+            });
+
+            dispatch(setGravityScrollEnabled(!gravityScrollEnabled));
+
+            Alert.alert(
+              'Gravity Scroll',
+              `Gravity Scroll is now ${!gravityScrollEnabled ? 'Enabled' : 'Disabled'
+              }. Twist your wrist to scroll!`,
+              [{ text: 'OK' }],
+            );
+          }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons
+              name="rotate-3d-variant"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Gravity Scroll
+            </Text>
+          </View>
+          <Text
+            style={{
+              fontSize: hp('1.8%'),
+              color: gravityScrollEnabled ? '#4CAF50' : '#FF6347',
+            }}>
+            {gravityScrollEnabled ? 'On' : 'Off'}
           </Text>
         </TouchableOpacity>
 

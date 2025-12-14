@@ -8,6 +8,7 @@ import {
   Linking,
   Share,
   Animated,
+  Vibration,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,6 +32,7 @@ import {
 import { updateData, setScrollPreference } from '../../../Redux/Reducers';
 import { handleScrollModeChange } from '../../../Utils/ScrollModeUtils';
 import { NAVIGATION } from '../../../Constants';
+import { useGravityScroll } from '../../../Hooks/useGravityScroll';
 
 export function ComicBook({ navigation, route }) {
   const ref = useRef(null);
@@ -58,11 +60,30 @@ export function ComicBook({ navigation, route }) {
   const userScrollPreference = useSelector(
     state => state?.data?.scrollPreference,
   );
+  const gravityScrollEnabled = useSelector(
+    state => state?.data?.gravityScrollEnabled,
+  );
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
   const [isVerticalScroll, setIsVerticalScroll] = useState(
     userScrollPreference === 'vertical',
   );
+
+  const handleGravityNext = useCallback(() => {
+    if (comicBook?.images?.length > 0 && imageLinkIndex < comicBook.images.length - 1) {
+      Vibration.vibrate(50);
+      setImageLinkIndex(prev => prev + 1);
+    }
+  }, [comicBook?.images, imageLinkIndex]);
+
+  const handleGravityPrevious = useCallback(() => {
+    if (imageLinkIndex > 0) {
+      Vibration.vibrate(50);
+      setImageLinkIndex(prev => prev - 1);
+    }
+  }, [imageLinkIndex]);
+
+  useGravityScroll(gravityScrollEnabled, handleGravityNext, handleGravityPrevious);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({ downloaded: 0, total: 0 });
@@ -341,11 +362,11 @@ export function ComicBook({ navigation, route }) {
       </SafeAreaView>
     );
   }
-  
+
   return (
     <>
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Animated.View
             style={{
               opacity: headerOpacity,
@@ -377,7 +398,7 @@ export function ComicBook({ navigation, route }) {
                   dispatch(
                     updateData({
                       url: comicBookLink,
-                      data: {lastReadPage: imageLinkIndex},
+                      data: { lastReadPage: imageLinkIndex },
                       imageLength: comicBook?.images?.length ?? 0,
                       ComicDetailslink: ComicDetails?.link,
                       readAt: Date.now(),
@@ -390,7 +411,7 @@ export function ComicBook({ navigation, route }) {
                   name="arrow-back"
                   size={24}
                   color="#fff"
-                  style={{marginRight: 10, opacity: 0.9}}
+                  style={{ marginRight: 10, opacity: 0.9 }}
                 />
               </TouchableOpacity>
               <Text

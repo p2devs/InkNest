@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ export default function VerticalView({
   resolutions,
   onTap,
 }) {
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const [imageResolutionLoading, setImageResolutionLoading] = useState(true);
   const [imagesLinks, setImagesLinks] = useState('');
   const ref = useRef(null);
@@ -48,7 +48,8 @@ export default function VerticalView({
     );
 
     setImagesLinks(data[safeIndex]);
-    currentIndexRef.current = safeIndex;
+    // Do not update currentIndexRef here, as it prevents the scroll effect from triggering
+    // currentIndexRef.current = safeIndex; 
   }, [activeIndex, data]);
 
   useEffect(() => {
@@ -68,14 +69,14 @@ export default function VerticalView({
   }, [imagesLinks, data]);
 
   // Only call useImageResolution with a valid image source
-  const {isFetching, resolution} = useImageResolution(imageSource);
+  const { isFetching, resolution } = useImageResolution(imageSource);
 
   // Calculate size only when resolution is available
   const size = resolution
     ? fitContainer(resolution.width / resolution.height, {
-        width,
-        height,
-      })
+      width,
+      height,
+    })
     : null;
 
   // Set imageSizeAcuired when size is first calculated
@@ -100,7 +101,7 @@ export default function VerticalView({
       return;
     }
 
-    if (!imageSizeAcuired || initialSyncDone || !ref.current) {
+    if (!imageSizeAcuired || !ref.current) {
       return;
     }
 
@@ -110,16 +111,21 @@ export default function VerticalView({
       maxIndex,
     );
 
-    if (safeIndex === 0) {
-      currentIndexRef.current = 0;
-      setInitialSyncDone(true);
+    // If we are already at the target index and have synced initially, do nothing.
+    if (initialSyncDone && safeIndex === currentIndexRef.current) {
       return;
     }
 
     try {
-      ref.current.scrollToIndex({index: safeIndex, animated: false});
+      // Use animated: true for smooth scrolling if it's not the initial sync
+      ref.current.scrollToIndex({
+        index: safeIndex,
+        animated: initialSyncDone,
+      });
       currentIndexRef.current = safeIndex;
-      setInitialSyncDone(true);
+      if (!initialSyncDone) {
+        setInitialSyncDone(true);
+      }
     } catch (error) {
       // Ignore out of range errors while list recalculates
     }
@@ -193,7 +199,7 @@ export default function VerticalView({
         data={data}
         getItemLayout={getItemLayout}
         keyExtractor={(item, index) => `${item}-${index}`}
-        renderItem={({item, index}) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{
               marginBottom: ITEM_SPACING,
@@ -214,8 +220,8 @@ export default function VerticalView({
             {/* Render placeholder or image based on size availability */}
             {size?.width && size?.height ? (
               <Image
-                source={{uri: item}}
-                style={{...size}}
+                source={{ uri: item }}
+                style={{ ...size }}
                 resizeMethod={'scale'}
               />
             ) : (
@@ -234,7 +240,13 @@ export default function VerticalView({
         onScrollEndDrag={handleScrollEnd}
         onMomentumScrollEnd={handleScrollEnd}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: ITEM_SPACING}}
+        contentContainerStyle={{ paddingBottom: ITEM_SPACING }}
+        onScrollToIndexFailed={info => {
+          const wait = new Promise(resolve => setTimeout(resolve, 500));
+          wait.then(() => {
+            ref.current?.scrollToIndex({ index: info.index, animated: true });
+          });
+        }}
       />
       {zoomMode && (
         <View
@@ -254,8 +266,8 @@ export default function VerticalView({
               maxScale={6}
               pinchCenteringMode={'sync'}>
               <Image
-                source={{uri: imagesLinks}}
-                style={{...size}}
+                source={{ uri: imagesLinks }}
+                style={{ ...size }}
                 resizeMethod="scale"
               />
             </ResumableZoom>
