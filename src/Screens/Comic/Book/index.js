@@ -9,6 +9,7 @@ import {
   Share,
   Animated,
   Vibration,
+  Alert,
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +30,7 @@ import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../InkNest-Externals/Redux/Actions/Download';
-import { updateData, setScrollPreference } from '../../../Redux/Reducers';
+import { updateData, setScrollPreference, setGravityScrollEnabled } from '../../../Redux/Reducers';
 import { handleScrollModeChange } from '../../../Utils/ScrollModeUtils';
 import { NAVIGATION } from '../../../Constants';
 import { useGravityScroll } from '../../../Hooks/useGravityScroll';
@@ -60,7 +61,7 @@ export function ComicBook({ navigation, route }) {
   const userScrollPreference = useSelector(
     state => state?.data?.scrollPreference,
   );
-  const gravityScrollEnabled = useSelector(
+  const userGravityScrollPreference = useSelector(
     state => state?.data?.gravityScrollEnabled,
   );
 
@@ -68,6 +69,7 @@ export function ComicBook({ navigation, route }) {
   const [isVerticalScroll, setIsVerticalScroll] = useState(
     userScrollPreference === 'vertical',
   );
+  const [isGravityScroll, setIsGravityScroll] = useState(userGravityScrollPreference);
 
   const handleGravityNext = useCallback(() => {
     if (comicBook?.images?.length > 0 && imageLinkIndex < comicBook.images.length - 1) {
@@ -83,7 +85,7 @@ export function ComicBook({ navigation, route }) {
     }
   }, [imageLinkIndex]);
 
-  useGravityScroll(gravityScrollEnabled, handleGravityNext, handleGravityPrevious);
+  useGravityScroll(isGravityScroll, handleGravityNext, handleGravityPrevious);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({ downloaded: 0, total: 0 });
@@ -510,6 +512,53 @@ export function ComicBook({ navigation, route }) {
                     {!isVerticalScroll
                       ? 'Vertical Scroll'
                       : 'Horizontal Scroll'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => {
+                    const newGravityMode = !isGravityScroll;
+                    const modeText = newGravityMode ? 'Enable' : 'Disable';
+
+                    Alert.alert(
+                      `${modeText} Gravity Scroll`,
+                      `Do you want to ${modeText.toLowerCase()} gravity scroll for this comic?`,
+                      [
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'This time only',
+                          onPress: () => {
+                            setIsGravityScroll(newGravityMode);
+                            setIsModalVisible(false);
+                            analytics().logEvent('toggle_gravity_scroll_temporary', {
+                              screen: 'ComicBook',
+                              enabled: newGravityMode,
+                            });
+                          },
+                        },
+                        {
+                          text: 'Save as default',
+                          onPress: () => {
+                            setIsGravityScroll(newGravityMode);
+                            dispatch(setGravityScrollEnabled(newGravityMode));
+                            setIsModalVisible(false);
+                            analytics().logEvent('toggle_gravity_scroll_default', {
+                              screen: 'ComicBook',
+                              enabled: newGravityMode,
+                            });
+                          },
+                        },
+                      ],
+                    );
+                  }}>
+                  <Text style={styles.text}>
+                    {isGravityScroll
+                      ? 'Disable Gravity Scroll'
+                      : 'Enable Gravity Scroll'}
                   </Text>
                 </TouchableOpacity>
 
