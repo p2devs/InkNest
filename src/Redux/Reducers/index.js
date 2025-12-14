@@ -38,6 +38,7 @@ const initialState = {
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
+  communityPostIndex: {}, // {postId: { ...post, comicLink }} for cross-screen hydration
   communityComics: {}, // {comicLink: {title, coverImage, detailsPath, lastActivityAt}}
   userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
   notifications: [], // [{id,title,body,data,receivedAt,read}]
@@ -310,6 +311,19 @@ const Reducers = createSlice({
         lastFetch: Date.now(),
       };
 
+      nextPosts.forEach(post => {
+        if (!post?.id) {
+          return;
+        }
+        const existingEntry = state.communityPostIndex[post.id] || {};
+        state.communityPostIndex[post.id] = {
+          ...existingEntry,
+          ...post,
+          id: post.id,
+          comicLink,
+        };
+      });
+
       if (comicMeta?.comicLink) {
         const existingMeta = state.communityPosts[comicLink].comicMeta || {};
         state.communityPosts[comicLink].comicMeta = {
@@ -329,6 +343,16 @@ const Reducers = createSlice({
         state.communityPosts[comicLink] = {posts: [], lastFetch: Date.now()};
       }
       state.communityPosts[comicLink].posts.unshift(post);
+
+      if (post?.id) {
+        const existingEntry = state.communityPostIndex[post.id] || {};
+        state.communityPostIndex[post.id] = {
+          ...existingEntry,
+          ...post,
+          id: post.id,
+          comicLink,
+        };
+      }
       if (comicMeta?.comicLink) {
         state.communityComics[comicMeta.comicLink] = {
           ...(state.communityComics[comicMeta.comicLink] || {}),
@@ -350,6 +374,33 @@ const Reducers = createSlice({
           };
         }
       }
+
+      if (postId) {
+        const existingEntry = state.communityPostIndex[postId] || {};
+        state.communityPostIndex[postId] = {
+          ...existingEntry,
+          ...updates,
+          id: postId,
+          comicLink: existingEntry.comicLink || comicLink,
+        };
+      }
+    },
+    cacheCommunityPost: (state, action) => {
+      const {postId, comicLink, post = {}} = action.payload || {};
+      const id = postId || post?.id;
+      if (!id) {
+        return;
+      }
+
+      const resolvedComicLink = comicLink || post?.comicLink || state.communityPostIndex[id]?.comicLink;
+      const existingEntry = state.communityPostIndex[id] || {};
+
+      state.communityPostIndex[id] = {
+        ...existingEntry,
+        ...post,
+        id,
+        comicLink: resolvedComicLink,
+      };
     },
     incrementUserActivity: (state, action) => {
       const {type} = action.payload; // 'post' or 'reply'
@@ -503,6 +554,7 @@ export const {
   setCommunityPosts,
   addCommunityPost,
   updateCommunityPost,
+  cacheCommunityPost,
   incrementUserActivity,
   upsertCommunityComicMeta,
   hydrateNotifications,
