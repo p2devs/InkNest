@@ -1,17 +1,17 @@
-import React, { useMemo } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { getVersion } from 'react-native-device-info';
+import React, {useMemo} from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {getVersion} from 'react-native-device-info';
 
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import { Settings } from '../Screens';
-import { NAVIGATION } from '../Constants';
-import { Home, OfflineComic, Library } from '../Screens/Comic';
-import { View, StyleSheet } from 'react-native';
-import { useFeatureFlag } from 'configcat-react';
-import { useSelector } from 'react-redux';
+import {Settings} from '../Screens';
+import {NAVIGATION} from '../Constants';
+import {Home, OfflineComic, Library} from '../Screens/Comic';
+import {View, StyleSheet} from 'react-native';
+import {useFeatureFlag} from 'configcat-react';
+import {useSelector} from 'react-redux';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
 import CommunityBoardScreen from '../InkNest-Externals/Community/Screens/CommunityBoardScreen';
@@ -28,7 +28,7 @@ const BottomTab = createBottomTabNavigator();
  * @param {string} props.tintColor - The color of the icon.
  * @returns {JSX.Element} The icon component.
  */
-const TabBarIcon = ({ name, tintColor, size = 24, showDot = false }) => {
+const TabBarIcon = ({name, tintColor, size = 24, showDot = false}) => {
   let icon = null;
 
   if (name === 'home') {
@@ -64,10 +64,10 @@ const TabBarIcon = ({ name, tintColor, size = 24, showDot = false }) => {
  * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
  */
 export function BottomNavigation() {
-  const { value: forIosValue } = useFeatureFlag('forIos', 'Default');
-  const notifications = useSelector(state => state.notifications?.notifications || []);
+  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const notifications = useSelector(state => state.data?.notifications || []);
   const hasUnreadNotifications = useMemo(
-    () => notifications.some(notification => !notification?.isRead),
+    () => notifications.some(notification => !notification?.read),
     [notifications],
   );
 
@@ -100,7 +100,7 @@ export function BottomNavigation() {
           name={NAVIGATION.home}
           component={Home}
           options={{
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="home" />
             ),
           }}
@@ -110,7 +110,7 @@ export function BottomNavigation() {
           name={NAVIGATION.Library}
           component={Library}
           options={{
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="library" />
             ),
           }}
@@ -121,7 +121,7 @@ export function BottomNavigation() {
             name={NAVIGATION.sources}
             component={LinkListScreen}
             options={{
-              tabBarIcon: ({ focused, color }) => (
+              tabBarIcon: ({focused, color}) => (
                 <TabBarIcon focused={focused} tintColor={color} name="source" />
               ),
               // tabBarBadge: 1,
@@ -140,7 +140,7 @@ export function BottomNavigation() {
           name={NAVIGATION.offlineComic}
           component={OfflineComic}
           options={{
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -155,7 +155,7 @@ export function BottomNavigation() {
           component={NotificationsScreen}
           options={{
             tabBarLabel: 'Alerts',
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -171,7 +171,7 @@ export function BottomNavigation() {
           component={CommunityBoardScreen}
           options={{
             tabBarLabel: 'Community',
-            tabBarIcon: ({ focused, color }) => (
+            tabBarIcon: ({focused, color}) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
@@ -186,7 +186,7 @@ export function BottomNavigation() {
             name={NAVIGATION.settings}
             component={Settings}
             options={{
-              tabBarIcon: ({ focused, color }) => (
+              tabBarIcon: ({focused, color}) => (
                 <TabBarIcon
                   focused={focused}
                   tintColor={color}
