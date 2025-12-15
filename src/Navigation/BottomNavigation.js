@@ -15,7 +15,6 @@ import {useSelector} from 'react-redux';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
 import CommunityBoardScreen from '../InkNest-Externals/Community/Screens/CommunityBoardScreen';
-import NotificationsScreen from '../Screens/Notifications/NotificationsScreen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -40,10 +39,6 @@ const TabBarIcon = ({name, tintColor, size = 24}) => {
   } else if (name === 'community') {
     return (
       <Ionicons name="chatbubbles-outline" size={size} color={tintColor} />
-    );
-  } else if (name === 'notifications') {
-    return (
-      <Ionicons name="notifications-outline" size={size} color={tintColor} />
     );
   }
 };
@@ -104,6 +99,12 @@ export function BottomNavigation() {
             tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="library" />
             ),
+            tabBarBadge: hasUnreadNotifications ? 1 : undefined,
+            tabBarBadgeStyle: {
+              maxWidth: 8.6,
+              maxHeight: 9,
+              fontSize: 1,
+            },
           }}
         />
 
@@ -118,21 +119,6 @@ export function BottomNavigation() {
             }}
           />
         )}
-
-        <BottomTab.Screen
-          name={NAVIGATION.notifications}
-          component={NotificationsScreen}
-          options={{
-            tabBarLabel: 'Alerts',
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="notifications"
-              />
-            ),
-          }}
-        />
 
         <BottomTab.Screen
           name={NAVIGATION.communityBoard}

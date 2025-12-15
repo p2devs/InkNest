@@ -11,9 +11,14 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
 
 import {NAVIGATION} from '../../Constants';
 import {markNotificationAsRead} from '../../Redux/Reducers';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const formatTimestamp = ts => {
   if (!ts) {
@@ -51,7 +56,8 @@ const normalizeLink = link => (link ? link.split('?')[0] : '');
 
 const NotificationCard = ({item, comicMeta, onPress}) => {
   const showComicMeta = Boolean(comicMeta?.title || comicMeta?.imgSrc);
-  const coverImage = comicMeta?.imgSrc || comicMeta?.image || comicMeta?.coverImage;
+  const coverImage =
+    comicMeta?.imgSrc || comicMeta?.image || comicMeta?.coverImage;
   const categoryLabel =
     item?.data?.category || item?.data?.type || comicMeta?.title || 'Alert';
 
@@ -65,7 +71,11 @@ const NotificationCard = ({item, comicMeta, onPress}) => {
           <Text style={styles.titleText} numberOfLines={1}>
             {item.title || comicMeta?.title || 'Notification'}
           </Text>
-          {!item.read ? <View style={styles.newBadge}><Text style={styles.newBadgeText}>NEW</Text></View> : null}
+          {!item.read ? (
+            <View style={styles.newBadge}>
+              <Text style={styles.newBadgeText}>NEW</Text>
+            </View>
+          ) : null}
         </View>
         <Text style={styles.timestamp}>{formatTimestamp(item.receivedAt)}</Text>
       </View>
@@ -81,9 +91,15 @@ const NotificationCard = ({item, comicMeta, onPress}) => {
         </View>
         <View style={styles.metaChip}>
           <Ionicons name="time-outline" size={13} color="#9FA8DA" />
-          <Text style={styles.metaChipText}>{formatRelativeTime(item.receivedAt)}</Text>
+          <Text style={styles.metaChipText}>
+            {formatRelativeTime(item.receivedAt)}
+          </Text>
         </View>
-        <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.5)" />
+        <Ionicons
+          name="chevron-forward"
+          size={16}
+          color="rgba(255,255,255,0.5)"
+        />
       </View>
       {showComicMeta ? (
         <View style={styles.comicMetaContainer}>
@@ -142,64 +158,61 @@ const NotificationsScreen = ({navigation}) => {
     return enhancedNotifications.filter(item => !item.read).length;
   }, [enhancedNotifications]);
 
-  const handleNavigationForNotification = useCallback(
-    item => {
-      if (!item?.data) {
-        return null;
-      }
+  const handleNavigationForNotification = useCallback(item => {
+    if (!item?.data) {
+      return null;
+    }
 
-      const data = item.data;
-      if (data.postId && data.comicLink) {
-        return {
-          name: NAVIGATION.PostDetail,
-          params: {
-            comicLink: data.comicLink,
-            postId: data.postId,
-            initialPost:
-              typeof data.initialPost === 'string'
-                ? (() => {
-                    try {
-                      return JSON.parse(data.initialPost);
-                    } catch (error) {
-                      return null;
-                    }
-                  })()
-                : data.initialPost || null,
-          },
-        };
-      }
-
-      if ((data.link || data.comicLink) && (data.title || data.comicTitle)) {
-        return {
-          name: NAVIGATION.comicDetails,
-          params: {
-            link: data.link || data.comicLink,
-            title: data.title || data.comicTitle || item.title,
-            image: data.image || data.coverImage || null,
-          },
-        };
-      }
-
-      if (data.screen) {
-        return {
-          name: data.screen,
-          params:
-            typeof data.params === 'string'
+    const data = item.data;
+    if (data.postId && data.comicLink) {
+      return {
+        name: NAVIGATION.PostDetail,
+        params: {
+          comicLink: data.comicLink,
+          postId: data.postId,
+          initialPost:
+            typeof data.initialPost === 'string'
               ? (() => {
                   try {
-                    return JSON.parse(data.params);
+                    return JSON.parse(data.initialPost);
                   } catch (error) {
-                    return {};
+                    return null;
                   }
                 })()
-              : data.params || {},
-        };
-      }
+              : data.initialPost || null,
+        },
+      };
+    }
 
-      return null;
-    },
-    [],
-  );
+    if ((data.link || data.comicLink) && (data.title || data.comicTitle)) {
+      return {
+        name: NAVIGATION.comicDetails,
+        params: {
+          link: data.link || data.comicLink,
+          title: data.title || data.comicTitle || item.title,
+          image: data.image || data.coverImage || null,
+        },
+      };
+    }
+
+    if (data.screen) {
+      return {
+        name: data.screen,
+        params:
+          typeof data.params === 'string'
+            ? (() => {
+                try {
+                  return JSON.parse(data.params);
+                } catch (error) {
+                  return {};
+                }
+              })()
+            : data.params || {},
+      };
+    }
+
+    return null;
+  }, []);
 
   const handlePress = useCallback(
     item => {
@@ -236,21 +249,27 @@ const NotificationsScreen = ({navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={enhancedNotifications}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListHeaderComponent={
           <View style={styles.headerWrapper}>
-            <Text style={styles.headerEyebrow}>Inbox</Text>
+            <View style={styles.navRow}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.headerEyebrow}>Inbox</Text>
+            </View>
             <View style={styles.headerRow}>
               <View>
                 <Text style={styles.headerTitle}>Alerts</Text>
                 <Text style={styles.headerSubtitle}>
-                  {unreadCount > 0
-                    ? `${unreadCount} unread`
-                    : 'All caught up'}
+                  {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
                 </Text>
               </View>
               {unreadCount > 0 ? (
@@ -261,19 +280,22 @@ const NotificationsScreen = ({navigation}) => {
                   <Text style={styles.headerActionText}>Mark all read</Text>
                 </TouchableOpacity>
               ) : (
-                <Ionicons name="checkmark-circle-outline" size={28} color="#6BE0B1" />
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={28}
+                  color="#6BE0B1"
+                />
               )}
             </View>
           </View>
         }
-        contentContainerStyle={
-          enhancedNotifications.length === 0
-            ? styles.emptyListContainer
-            : null
-        }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="notifications-off-outline" size={48} color="#6B666D" />
+            <Ionicons
+              name="notifications-off-outline"
+              size={48}
+              color="#6B666D"
+            />
             <Text style={styles.emptyTitle}>No notifications yet</Text>
             <Text style={styles.emptySubtitle}>
               We'll keep this space updated whenever new alerts arrive.
@@ -282,7 +304,7 @@ const NotificationsScreen = ({navigation}) => {
         }
         refreshControl={<RefreshControl refreshing={false} tintColor="#fff" />}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -291,19 +313,27 @@ export default NotificationsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0C0814',
+    backgroundColor: '#14142A',
   },
   headerWrapper: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
+    paddingHorizontal: wp('6%'),
+    paddingBottom: hp('1.5%'),
+    paddingTop: hp('2%'),
+  },
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp('1.5%'),
+  },
+  backButton: {
+    marginRight: 12,
   },
   headerEyebrow: {
     color: 'rgba(255,255,255,0.5)',
     textTransform: 'uppercase',
-    fontSize: 11,
+    fontSize: hp('1.6%'),
     letterSpacing: 1.1,
-    marginBottom: 6,
+    fontWeight: '600',
   },
   headerRow: {
     flexDirection: 'row',
@@ -312,30 +342,31 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: '700',
   },
   headerSubtitle: {
     color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
+    marginTop: hp('0.5%'),
+    fontSize: 12,
   },
   headerAction: {
     backgroundColor: 'rgba(119,137,255,0.2)',
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: wp('4%'),
+    paddingVertical: hp('1%'),
   },
   headerActionText: {
     color: '#AFC4FF',
-    fontSize: 12,
+    fontSize: hp('1.6%'),
     fontWeight: '600',
   },
   card: {
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 14,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
+    padding: wp('4%'),
+    marginHorizontal: wp('6%'),
+    marginVertical: hp('1%'),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.04)',
     shadowColor: '#000',
@@ -352,7 +383,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: hp('1%'),
   },
   titleGroup: {
     flexDirection: 'row',
@@ -362,7 +393,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: hp('2%'),
     fontWeight: '700',
     flex: 1,
   },
@@ -374,25 +405,25 @@ const styles = StyleSheet.create({
   },
   newBadgeText: {
     color: '#90A8FF',
-    fontSize: 10,
+    fontSize: hp('1.2%'),
     fontWeight: '700',
   },
   timestamp: {
-    fontSize: 12,
+    fontSize: hp('1.5%'),
     color: 'rgba(255,255,255,0.6)',
     marginLeft: 12,
   },
   bodyText: {
     color: 'rgba(255,255,255,0.85)',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 10,
+    fontSize: hp('1.8%'),
+    lineHeight: hp('2.5%'),
+    marginBottom: hp('1.2%'),
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: hp('0.8%'),
     gap: 10,
   },
   metaChip: {
@@ -405,20 +436,20 @@ const styles = StyleSheet.create({
   },
   metaChipText: {
     color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
+    fontSize: hp('1.5%'),
     marginLeft: 6,
   },
   comicMetaContainer: {
     flexDirection: 'row',
-    marginTop: 14,
+    marginTop: hp('1.8%'),
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 10,
     padding: 10,
   },
   comicCover: {
-    width: 48,
-    height: 72,
+    width: wp('12%'),
+    height: hp('9%'),
     borderRadius: 8,
     marginRight: 12,
   },
@@ -433,31 +464,27 @@ const styles = StyleSheet.create({
   comicTitle: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: hp('1.8%'),
     marginBottom: 4,
   },
   comicSubTitle: {
     color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
-  },
-  emptyListContainer: {
-    flexGrow: 1,
-    paddingVertical: 32,
+    fontSize: hp('1.5%'),
   },
   emptyState: {
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: wp('8%'),
   },
   emptyTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: hp('2.2%'),
     fontWeight: '600',
-    marginTop: 16,
+    marginTop: hp('2%'),
   },
   emptySubtitle: {
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
-    fontSize: 14,
-    marginTop: 8,
+    fontSize: hp('1.8%'),
+    marginTop: hp('1%'),
   },
 });

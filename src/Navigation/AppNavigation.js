@@ -24,6 +24,7 @@ import {
 } from '../InkNest-Externals/Screens/Manga';
 import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 import WebSearchScreen from '../InkNest-Externals/Screens/Webview/WebSearchScreen';
+import NotificationsScreen from '../Screens/Notifications/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,10 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
       <Stack.Screen name={NAVIGATION.CreatePost} component={CreatePostModal} />
       <Stack.Screen name={NAVIGATION.PostDetail} component={PostDetailScreen} />
+      <Stack.Screen
+        name={NAVIGATION.notifications}
+        component={NotificationsScreen}
+      />
     </Stack.Navigator>
   );
 }

@@ -15,6 +15,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {getVersion} from 'react-native-device-info';
@@ -37,6 +38,10 @@ export function Library({navigation}) {
   const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
   const History = useSelector(state => state.data.history);
+  const notifications = useSelector(state => state.data?.notifications || []);
+  const hasUnreadNotifications = notifications.some(
+    notification => !notification?.read,
+  );
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
@@ -136,6 +141,36 @@ export function Library({navigation}) {
                   navigation.navigate(NAVIGATION.bookmarks);
                 }}>
                 <FontAwesome6 name="book-bookmark" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  borderRadius: 100,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  width: 40,
+                  height: 40,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => {
+                  crashlytics().log('Notifications button clicked');
+                  navigation.navigate(NAVIGATION.notifications);
+                }}>
+                <Ionicons name="notifications-outline" size={20} color="#fff" />
+                {hasUnreadNotifications && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: '#F74B78',
+                      borderWidth: 1,
+                      borderColor: '#14142A',
+                    }}
+                  />
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
