@@ -109,7 +109,7 @@ const HeaderComponent = memo(
                     if (bellDisabled) {
                       Alert.alert(
                         'Want to Enable Notifications?',
-                        'contact the InkNest admin team to enable notifications for your account.',
+                        'Notifications are reserved for supporters. Please consider supporting us to enable them—contact us on Discord for more information.',
                       );
                       return;
                     }
