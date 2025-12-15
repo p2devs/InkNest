@@ -15,6 +15,7 @@ import {useSelector} from 'react-redux';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
 import CommunityBoardScreen from '../InkNest-Externals/Community/Screens/CommunityBoardScreen';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -101,8 +102,8 @@ export function BottomNavigation() {
             ),
             tabBarBadge: hasUnreadNotifications ? 1 : undefined,
             tabBarBadgeStyle: {
-              maxWidth: 8.6,
-              maxHeight: 9,
+              maxWidth: heightPercentageToDP('.86%'),
+              maxHeight: heightPercentageToDP('0.9%'),
               fontSize: 1,
             },
           }}
@@ -134,8 +135,8 @@ export function BottomNavigation() {
             ),
             tabBarBadge: hasUnreadNotifications ? 1 : undefined,
             tabBarBadgeStyle: {
-              maxWidth: 8.6,
-              maxHeight: 9,
+              maxWidth: heightPercentageToDP('.86%'),
+              maxHeight: heightPercentageToDP('0.9%'),
               fontSize: 1,
             },
           }}
