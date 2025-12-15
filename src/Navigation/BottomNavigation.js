@@ -8,7 +8,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
-import {Home, OfflineComic, Library} from '../Screens/Comic';
+import {Home, Library} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
 import {useSelector} from 'react-redux';
@@ -28,33 +28,24 @@ const BottomTab = createBottomTabNavigator();
  * @param {string} props.tintColor - The color of the icon.
  * @returns {JSX.Element} The icon component.
  */
-const TabBarIcon = ({name, tintColor, size = 24, showDot = false}) => {
-  let icon = null;
-
+const TabBarIcon = ({name, tintColor, size = 24}) => {
   if (name === 'home') {
-    icon = <Feather name={name} size={size} color={tintColor} />;
+    return <Feather name={name} size={size} color={tintColor} />;
   } else if (name === 'library') {
-    icon = <Ionicons name={name} size={size} color={tintColor} />;
+    return <Ionicons name={name} size={size} color={tintColor} />;
   } else if (name === 'download-for-offline' || name === 'source') {
-    icon = <MaterialIcons name={name} size={size} color={tintColor} />;
+    return <MaterialIcons name={name} size={size} color={tintColor} />;
   } else if (name === 'settings') {
-    icon = <Feather name={name} size={size} color={tintColor} />;
+    return <Feather name={name} size={size} color={tintColor} />;
   } else if (name === 'community') {
-    icon = (
+    return (
       <Ionicons name="chatbubbles-outline" size={size} color={tintColor} />
     );
   } else if (name === 'notifications') {
-    icon = (
+    return (
       <Ionicons name="notifications-outline" size={size} color={tintColor} />
     );
   }
-
-  return (
-    <View style={styles.iconWrapper}>
-      {icon}
-      {showDot ? <View style={styles.iconDot} /> : null}
-    </View>
-  );
 };
 
 /**
@@ -124,31 +115,9 @@ export function BottomNavigation() {
               tabBarIcon: ({focused, color}) => (
                 <TabBarIcon focused={focused} tintColor={color} name="source" />
               ),
-              // tabBarBadge: 1,
-              // tabBarBadgeStyle: {
-              //   maxWidth: 10,
-              //   maxHeight: 10,
-              //   fontSize: 5,
-              //   lineHeight: 9,
-              //   alignSelf: undefined,
-              // },
             }}
           />
         )}
-
-        <BottomTab.Screen
-          name={NAVIGATION.offlineComic}
-          component={OfflineComic}
-          options={{
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="download-for-offline"
-              />
-            ),
-          }}
-        />
 
         <BottomTab.Screen
           name={NAVIGATION.notifications}
@@ -160,7 +129,6 @@ export function BottomNavigation() {
                 focused={focused}
                 tintColor={color}
                 name="notifications"
-                showDot={hasUnreadNotifications}
               />
             ),
           }}
@@ -178,6 +146,12 @@ export function BottomNavigation() {
                 name="community"
               />
             ),
+            tabBarBadge: hasUnreadNotifications ? 1 : undefined,
+            tabBarBadgeStyle: {
+              maxWidth: 8.6,
+              maxHeight: 9,
+              fontSize: 1,
+            },
           }}
         />
 

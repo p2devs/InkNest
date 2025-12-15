@@ -11,6 +11,7 @@ import {
   DownloadComicBook,
   MockBooks,
   SeeAll,
+  OfflineComic,
 } from '../Screens/Comic';
 import CreatePostModal from '../InkNest-Externals/Community/Components/CreatePost/CreatePostModal';
 import PostDetailScreen from '../InkNest-Externals/Community/Screens/PostDetailScreen';
@@ -61,6 +62,7 @@ export function AppNavigation() {
         name={NAVIGATION.downloadComicBook}
         component={DownloadComicBook}
       />
+      <Stack.Screen name={NAVIGATION.offlineComic} component={OfflineComic} />
       <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
       <Stack.Screen name={NAVIGATION.CreatePost} component={CreatePostModal} />
       <Stack.Screen name={NAVIGATION.PostDetail} component={PostDetailScreen} />

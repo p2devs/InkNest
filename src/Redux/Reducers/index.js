@@ -35,6 +35,7 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
+  hasSeenOfflineMovedAlert: false,
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
@@ -283,6 +284,9 @@ const Reducers = createSlice({
     rewardAdsShown: (state, action) => {
       // Update the flag indicating whether reward ads have been shown
       state.hasRewardAdsShown = action.payload;
+    },
+    markOfflineMovedAlertSeen: state => {
+      state.hasSeenOfflineMovedAlert = true;
     },
     // Community & Auth reducers
     setUser: (state, action) => {
@@ -555,6 +559,7 @@ export const {
   clearHistory,
   setScrollPreference,
   rewardAdsShown,
+  markOfflineMovedAlertSeen,
   // Community & Auth actions
   setUser,
   clearUser,
