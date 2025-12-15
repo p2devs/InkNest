@@ -19,6 +19,7 @@ import {
 import {NAVIGATION} from '../../Constants';
 import {markNotificationAsRead} from '../../Redux/Reducers';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {fetchComicDetails} from '../../Redux/Actions/GlobalActions';
 
 const formatTimestamp = ts => {
   if (!ts) {
@@ -184,11 +185,17 @@ const NotificationsScreen = ({navigation}) => {
       };
     }
 
-    if ((data.link || data.comicLink) && (data.title || data.comicTitle)) {
+    if (
+      (data.link || data.comicLink || data.detailLink) &&
+      (data.title || data.comicTitle)
+    ) {
+      dispatch(
+        fetchComicDetails(data.link || data.comicLink || data.detailLink, true),
+      );
       return {
         name: NAVIGATION.comicDetails,
         params: {
-          link: data.link || data.comicLink,
+          link: data.link || data.comicLink || data.detailLink,
           title: data.title || data.comicTitle || item.title,
           image: data.image || data.coverImage || null,
         },
@@ -256,36 +263,39 @@ const NotificationsScreen = ({navigation}) => {
         renderItem={renderItem}
         ListHeaderComponent={
           <View style={styles.headerWrapper}>
-            <View style={styles.navRow}>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}
-                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                <Ionicons name="arrow-back" size={24} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.headerEyebrow}>Inbox</Text>
-            </View>
-            <View style={styles.headerRow}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <View
+              style={[
+                styles.headerRow,
+                {flex: 1, justifyContent: 'space-between'},
+              ]}>
               <View>
-                <Text style={styles.headerTitle}>Alerts</Text>
+                <Text style={styles.headerTitle}>Inbox</Text>
                 <Text style={styles.headerSubtitle}>
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
                 </Text>
               </View>
-              {unreadCount > 0 ? (
-                <TouchableOpacity
-                  onPress={handleMarkAllRead}
-                  style={styles.headerAction}
-                  activeOpacity={0.9}>
-                  <Text style={styles.headerActionText}>Mark all read</Text>
-                </TouchableOpacity>
-              ) : (
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={28}
-                  color="#6BE0B1"
-                />
-              )}
+              <View style={styles.headerRow}>
+                {unreadCount > 0 ? (
+                  <TouchableOpacity
+                    onPress={handleMarkAllRead}
+                    style={styles.headerAction}
+                    activeOpacity={0.9}>
+                    <Text style={styles.headerActionText}>Mark all read</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={28}
+                    color="#6BE0B1"
+                  />
+                )}
+              </View>
             </View>
           </View>
         }
@@ -319,17 +329,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('6%'),
     paddingBottom: hp('1.5%'),
     paddingTop: hp('2%'),
-  },
-  navRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: hp('1.5%'),
   },
   backButton: {
     marginRight: 12,
   },
-  headerEyebrow: {
-    color: 'rgba(255,255,255,0.5)',
+  headerTitle: {
+    color: 'rgba(255, 255, 255, 1)',
     textTransform: 'uppercase',
     fontSize: hp('1.6%'),
     letterSpacing: 1.1,
@@ -339,11 +346,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
   },
   headerSubtitle: {
     color: 'rgba(255,255,255,0.7)',
