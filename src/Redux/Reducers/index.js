@@ -36,6 +36,7 @@ const initialState = {
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
   hasSeenOfflineMovedAlert: false,
+  localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
@@ -287,6 +288,19 @@ const Reducers = createSlice({
     },
     markOfflineMovedAlertSeen: state => {
       state.hasSeenOfflineMovedAlert = true;
+    },
+    clearLocalComicProgress: state => {
+      // Clear any local comic reading progress when importing a new comic
+      state.localComicProgress = null;
+    },
+    updateLocalComicProgress: (state, action) => {
+      // Update reading progress for locally imported comics
+      const { lastReadPage, totalPages } = action.payload;
+      state.localComicProgress = {
+        ...state.localComicProgress,
+        lastReadPage,
+        totalPages,
+      };
     },
     // Community & Auth reducers
     setUser: (state, action) => {
@@ -560,6 +574,8 @@ export const {
   setScrollPreference,
   rewardAdsShown,
   markOfflineMovedAlertSeen,
+  clearLocalComicProgress,
+  updateLocalComicProgress,
   // Community & Auth actions
   setUser,
   clearUser,
