@@ -9,5 +9,5 @@ export const AnimeHostName = {
   s3taku: 'https://s3taku.com/',
 };
 export const MangaHostName = {
-  manganato: 'https://manganato.com/',
+  mangakatana: 'https://mangakatana.com/',
 };

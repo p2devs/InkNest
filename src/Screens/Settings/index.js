@@ -242,6 +242,48 @@ export function Settings({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity
+          onPress={() => {
+            analytics().logEvent('manga_open', {
+              item: 'Manga Home screen',
+            });
+            navigation.navigate(NAVIGATION.homeManga);
+          }}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: 'row' }}>
+            <MaterialCommunityIcons
+              name="book-open-page-variant"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Read Manga
+            </Text>
+          </View>
+          <Feather
+            name="chevron-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={{
             paddingVertical: hp('1%'),
             backgroundColor: '#FFF',
