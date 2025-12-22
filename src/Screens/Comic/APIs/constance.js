@@ -1,4 +1,4 @@
-import { parseReadAllComicsDetails } from '../../../Components/Func/parseFunc';
+import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
 
 export const HomePageCardClasses = {
   azcomic: {
@@ -198,8 +198,8 @@ export const ComicBookPageClasses = {
     imageContainer: 'div[style*="margin:0px auto"]',
     imageSelector: 'img',
     imageAttr: 'src',
-    titleSelector: 'h3[style*="color: #0363df"]',
-    titleAttr: 'alt',
+    titleSelector: 'h3[style*="color: #0363df"] strong',
+    titleAttr: 'textContent',
     detailsLinkSelector: 'a[rel="category tag"]',
   },
   comicbookplus: {

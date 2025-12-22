@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -10,32 +10,32 @@ import {
   Animated,
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { Gallery, useImageResolution } from 'react-native-zoom-toolkit';
-import { useSharedValue } from 'react-native-reanimated';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {Gallery, useImageResolution} from 'react-native-zoom-toolkit';
+import {useSharedValue} from 'react-native-reanimated';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import analytics from '@react-native-firebase/analytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
+import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Header from '../../../Components/UIComp/Header';
-import { goBack } from '../../../Navigation/NavigationService';
+import {goBack} from '../../../Navigation/NavigationService';
 import GalleryImage from './GalleryImage';
 import VerticalView from './VerticalView';
 import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../InkNest-Externals/Redux/Actions/Download';
-import { updateData, setScrollPreference } from '../../../Redux/Reducers';
-import { handleScrollModeChange } from '../../../Utils/ScrollModeUtils';
-import { NAVIGATION } from '../../../Constants';
+import {updateData, setScrollPreference} from '../../../Redux/Reducers';
+import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
+import {NAVIGATION} from '../../../Constants';
 
-export function ComicBook({ navigation, route }) {
+export function ComicBook({navigation, route}) {
   const ref = useRef(null);
   const dispatch = useDispatch();
-  const { comicBookLink, pageJump, isDownloadComic, DetailsPage } = route?.params;
+  const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
 
   const [detailsPageLink, setDetailsPageLink] = useState(
@@ -48,7 +48,7 @@ export function ComicBook({ navigation, route }) {
     useSelector(
       state =>
         state?.data?.DownloadComic?.[detailsPageLink]?.comicBooks?.[
-        comicBookLink
+          comicBookLink
         ],
     ),
   );
@@ -65,7 +65,7 @@ export function ComicBook({ navigation, route }) {
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const [progress, setProgress] = useState({ downloaded: 0, total: 0 });
+  const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const [isNextChapter, setIsNextChapter] = useState(false);
   const [isPreviousChapter, setIsPreviousChapter] = useState(false);
   const headerOpacity = useRef(new Animated.Value(1)).current;
@@ -164,11 +164,11 @@ export function ComicBook({ navigation, route }) {
     };
   }, [comicBook?.images]);
 
-  const { isFetching, resolution } = useImageResolution(imageSource);
+  const {isFetching, resolution} = useImageResolution(imageSource);
 
   const renderItem = useCallback(
     (item, index) => {
-      let assets = { uri: item };
+      let assets = {uri: item};
       return (
         <GalleryImage asset={assets} index={index} activeIndex={activeIndex} />
       );
@@ -243,7 +243,7 @@ export function ComicBook({ navigation, route }) {
       <SafeAreaView
         style={[
           styles.container,
-          { justifyContent: 'center', alignItems: 'center' },
+          {justifyContent: 'center', alignItems: 'center'},
         ]}>
         <Text style={styles.text}>Loading comic data...</Text>
       </SafeAreaView>
@@ -275,7 +275,7 @@ export function ComicBook({ navigation, route }) {
               name="arrow-back"
               size={24}
               color="#fff"
-              style={{ marginRight: 10, opacity: 0.9 }}
+              style={{marginRight: 10, opacity: 0.9}}
             />
           </TouchableOpacity>
           <Text
@@ -287,9 +287,9 @@ export function ComicBook({ navigation, route }) {
             }}>
             Comic Book
           </Text>
-          <View style={{ flex: 0.1 }} />
+          <View style={{flex: 0.1}} />
         </Header>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <Text style={styles.text}>Error: {error}</Text>
         </View>
       </SafeAreaView>
@@ -321,7 +321,7 @@ export function ComicBook({ navigation, route }) {
               name="arrow-back"
               size={24}
               color="#fff"
-              style={{ marginRight: 10, opacity: 0.9 }}
+              style={{marginRight: 10, opacity: 0.9}}
             />
           </TouchableOpacity>
           <Text
@@ -333,18 +333,18 @@ export function ComicBook({ navigation, route }) {
             }}>
             Comic Book
           </Text>
-          <View style={{ flex: 0.1 }} />
+          <View style={{flex: 0.1}} />
         </Header>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <Text style={styles.text}>No data available</Text>
         </View>
       </SafeAreaView>
     );
   }
-  
+
   return (
     <>
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={{flex: 1}}>
           <Animated.View
             style={{
@@ -495,7 +495,7 @@ export function ComicBook({ navigation, route }) {
                 <TouchableOpacity
                   style={[
                     styles.button,
-                    { backgroundColor: !detailsPageLink ? '#555' : '#FF6347' },
+                    {backgroundColor: !detailsPageLink ? '#555' : '#FF6347'},
                   ]}
                   disabled={!detailsPageLink}
                   onPress={() => {
@@ -517,7 +517,7 @@ export function ComicBook({ navigation, route }) {
                     dispatch(
                       updateData({
                         url: comicBookLink,
-                        data: { lastReadPage: imageLinkIndex },
+                        data: {lastReadPage: imageLinkIndex},
                         imageLength: comicBook?.images?.length ?? 0,
                         ComicDetailslink: ComicDetails?.link,
                         readAt: Date.now(),
@@ -530,7 +530,7 @@ export function ComicBook({ navigation, route }) {
                 <TouchableOpacity
                   style={[
                     styles.button,
-                    { backgroundColor: isPreviousChapter ? '#555' : '#FF6347' },
+                    {backgroundColor: isPreviousChapter ? '#555' : '#FF6347'},
                   ]}
                   disabled={isPreviousChapter}
                   onPress={() => {
@@ -548,7 +548,7 @@ export function ComicBook({ navigation, route }) {
                 <TouchableOpacity
                   style={[
                     styles.button,
-                    { backgroundColor: isNextChapter ? '#555' : '#FF6347' },
+                    {backgroundColor: isNextChapter ? '#555' : '#FF6347'},
                   ]}
                   disabled={isNextChapter}
                   onPress={() => {
@@ -563,41 +563,43 @@ export function ComicBook({ navigation, route }) {
                   <Text style={styles.text}>Next Chapter</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.button}
-                  disabled={downloadLoading || isComicDownload}
-                  onPress={() => {
-                    if (isComicDownload) return;
-                    if (downloadLoading) return;
+                {DetailsPage?.title && comicBookLink ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    disabled={downloadLoading || isComicDownload}
+                    onPress={() => {
+                      if (isComicDownload) return;
+                      if (downloadLoading) return;
 
-                    analytics().logEvent('download_comic', {
-                      screen: 'ComicBook',
-                      comicBookLink: comicBookLink?.toString(),
-                      DetailsPageLink: detailsPageLink?.toString(),
-                      pageJump: pageJump,
-                      isDownloadComic: isDownloadComic,
-                      isVerticalScroll: isVerticalScroll,
-                    });
-                    showRewardedAd();
-                    dispatch(
-                      downloadComicBook({
-                        comicDetails: DetailsPage,
-                        comicBook: { ...comicBook, link: comicBookLink },
-                        setLoadingStatus: setDownloadLoading,
-                        onProgress: (downloaded, total) => {
-                          setProgress({ downloaded, total });
-                        },
-                      }),
-                    );
-                  }}>
-                  <Text style={styles.text}>
-                    {isComicDownload
-                      ? 'Downloaded'
-                      : downloadLoading
+                      analytics().logEvent('download_comic', {
+                        screen: 'ComicBook',
+                        comicBookLink: comicBookLink?.toString(),
+                        DetailsPageLink: detailsPageLink?.toString(),
+                        pageJump: pageJump,
+                        isDownloadComic: isDownloadComic,
+                        isVerticalScroll: isVerticalScroll,
+                      });
+                      showRewardedAd();
+                      dispatch(
+                        downloadComicBook({
+                          comicDetails: DetailsPage,
+                          comicBook: {...comicBook, link: comicBookLink},
+                          setLoadingStatus: setDownloadLoading,
+                          onProgress: (downloaded, total) => {
+                            setProgress({downloaded, total});
+                          },
+                        }),
+                      );
+                    }}>
+                    <Text style={styles.text}>
+                      {isComicDownload
+                        ? 'Downloaded'
+                        : downloadLoading
                         ? `Downloading ${progress.downloaded}/${progress.total}`
                         : 'Download Comic'}
-                  </Text>
-                </TouchableOpacity>
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
 
                 <TouchableOpacity
                   style={styles.button}

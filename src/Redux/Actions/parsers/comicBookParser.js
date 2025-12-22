@@ -50,7 +50,12 @@ export const parseStandardComicBook = ($, config) => {
   });
 
   // Extract title
-  title = container.find(titleSelector).first().attr(titleAttr)?.trim() || '';
+  const titleEl = container.find(titleSelector).first();
+
+  title =
+    titleAttr === 'textContent'
+      ? titleEl.text().trim()
+      : titleEl.attr(titleAttr)?.replace(/\s*-\s*page\s*\d+$/i, '').trim() || '';
 
   // Extract details page link if available
   if (detailsLinkSelector) {
