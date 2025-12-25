@@ -55,6 +55,7 @@
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^5.0.0",
     "react-native-screens": "3.35.0",
+    "react-native-sensors": "^7.3.6",
     "react-native-svg": "^15.8.0",
     "react-native-toast-message": "^2.2.1",
     "react-native-unarchive": "^1.1.0",
