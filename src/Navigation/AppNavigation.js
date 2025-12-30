@@ -1,8 +1,8 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import {NAVIGATION} from '../Constants';
-import {AboutUs, Search} from '../Screens';
-import {BottomNavigation} from './BottomNavigation';
+import { NAVIGATION } from '../Constants';
+import { AboutUs, Search } from '../Screens';
+import { BottomNavigation } from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import {
   ComicBook,
@@ -11,7 +11,10 @@ import {
   DownloadComicBook,
   MockBooks,
   SeeAll,
+  OfflineComic,
 } from '../Screens/Comic';
+import CreatePostModal from '../InkNest-Externals/Community/Components/CreatePost/CreatePostModal';
+import PostDetailScreen from '../InkNest-Externals/Community/Screens/PostDetailScreen';
 import {
   MangaBook,
   MangaDetails,
@@ -21,6 +24,7 @@ import {
 } from '../InkNest-Externals/Screens/Manga';
 import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 import WebSearchScreen from '../InkNest-Externals/Screens/Webview/WebSearchScreen';
+import NotificationsScreen from '../Screens/Notifications/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,7 +63,14 @@ export function AppNavigation() {
         name={NAVIGATION.downloadComicBook}
         component={DownloadComicBook}
       />
+      <Stack.Screen name={NAVIGATION.offlineComic} component={OfflineComic} />
       <Stack.Screen name={NAVIGATION.bookmarks} component={ComicBookmarks} />
+      <Stack.Screen name={NAVIGATION.CreatePost} component={CreatePostModal} />
+      <Stack.Screen name={NAVIGATION.PostDetail} component={PostDetailScreen} />
+      <Stack.Screen
+        name={NAVIGATION.notifications}
+        component={NotificationsScreen}
+      />
     </Stack.Navigator>
   );
 }

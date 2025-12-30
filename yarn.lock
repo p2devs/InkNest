@@ -2244,6 +2244,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@invertase/react-native-apple-authentication@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@invertase/react-native-apple-authentication@npm:2.5.0"
+  checksum: 30d7bf1d62b75c109f03a360f10bcf63d5dbb106104b99758a2eba691c25c17d7f071b9fb7b7fac9af7059b055739002a21bda7a5c4a9b746305d0c4054704a3
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -3036,6 +3043,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/auth@npm:21.7.1":
+  version: 21.7.1
+  resolution: "@react-native-firebase/auth@npm:21.7.1"
+  dependencies:
+    plist: ^3.1.0
+  peerDependencies:
+    "@react-native-firebase/app": 21.7.1
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: ad66d3d4db7f98f98a15fafcce3fa9f9be91c31f5aba92a66e7254d618e3ffc6a9755cb559ca6132437e7ad220ffe8829c27a7cefc7063659cb15daff9bd5de5
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/crashlytics@npm:21.7.1":
   version: 21.7.1
   resolution: "@react-native-firebase/crashlytics@npm:21.7.1"
@@ -3048,6 +3070,15 @@ __metadata:
     expo:
       optional: true
   checksum: 952c88a03234146d9201b0c92e5ce592305336e8c33f2228393a52a8438ab0e8a21de2cdd18dd3898bde0def75f41b9f137f05d22f355e92c5d64604259da511
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/firestore@npm:21.7.1":
+  version: 21.7.1
+  resolution: "@react-native-firebase/firestore@npm:21.7.1"
+  peerDependencies:
+    "@react-native-firebase/app": 21.7.1
+  checksum: 2f659f6b64a49e8d4d10aac8c2dc2231b3d79a30f05c670e05834647e1a1aae2c8d594b2e84fbdc67fa90755e9988333d15c9937c6656e2c6a76f00da9e69470
   languageName: node
   linkType: hard
 
@@ -3084,6 +3115,20 @@ __metadata:
     expo:
       optional: true
   checksum: 8575eb7a91f5cda34e39ff86c77b6bb0481b738c7c2c29b72476f2a399cb618aa2ca6384e760fbcc3b2fbbd7a8f762e4d15e2f96e954b75d77205888b5f2719c
+  languageName: node
+  linkType: hard
+
+"@react-native-google-signin/google-signin@npm:^16.0.0":
+  version: 16.0.0
+  resolution: "@react-native-google-signin/google-signin@npm:16.0.0"
+  peerDependencies:
+    expo: ">=52.0.40"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: a03f66e0473e28eb4a5bf53afe802cef15b24f81d332474ad13bb564dbbbe4c2aa01e9c35dfe5fd3e8d97d81e34b4f7f0acee02c5d4e3e3258f8fc49e9c62d8b
   languageName: node
   linkType: hard
 
@@ -4012,6 +4057,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xmldom/xmldom@npm:^0.8.8":
+  version: 0.8.11
+  resolution: "@xmldom/xmldom@npm:0.8.11"
+  checksum: 72020f3d5c74b54e25d19f2cd7b2d87484926cc7febdf02347dc3e06364186641d54e9e94baaaaba30e99528e6727adcd1baef6d0809e7460aee3a5be890b132
+  languageName: node
+  linkType: hard
+
 "InkNest@workspace:.":
   version: 0.0.0-use.local
   resolution: "InkNest@workspace:."
@@ -4021,6 +4073,7 @@ __metadata:
     "@babel/runtime": ^7.25.0
     "@candlefinance/faster-image": ^1.7.2
     "@dr.pogodin/react-native-fs": 2.29.1
+    "@invertase/react-native-apple-authentication": ^2.5.0
     "@react-native-async-storage/async-storage": ^2.0.0
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
@@ -4029,10 +4082,13 @@ __metadata:
     "@react-native-documents/picker": ^10.1.7
     "@react-native-firebase/analytics": 21.7.1
     "@react-native-firebase/app": 21.7.1
+    "@react-native-firebase/auth": 21.7.1
     "@react-native-firebase/crashlytics": 21.7.1
+    "@react-native-firebase/firestore": 21.7.1
     "@react-native-firebase/in-app-messaging": 21.7.1
     "@react-native-firebase/messaging": 21.7.1
     "@react-native-firebase/perf": 21.7.1
+    "@react-native-google-signin/google-signin": ^16.0.0
     "@react-native-picker/picker": ^2.9.0
     "@react-native/babel-preset": 0.76.9
     "@react-native/eslint-config": 0.76.9
@@ -9519,6 +9575,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"plist@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "plist@npm:3.1.0"
+  dependencies:
+    "@xmldom/xmldom": ^0.8.8
+    base64-js: ^1.5.1
+    xmlbuilder: ^15.1.1
+  checksum: c8ea013da8646d4c50dff82f9be39488054621cc229957621bb00add42b5d4ce3657cf58d4b10c50f7dea1a81118f825838f838baeb4e6f17fab453ecf91d424
+  languageName: node
+  linkType: hard
+
 "popmotion@npm:11.0.3":
   version: 11.0.3
   resolution: "popmotion@npm:11.0.3"
@@ -11950,6 +12017,13 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: f9bb062abf54cc8f02d94ca86dcd349c3945d63851f5d07a3a61c2fcb755b15a88e943a63cf580cbdb5b74436d67ef6b67f745b8f7c0814e411379138e1863cb
+  languageName: node
+  linkType: hard
+
+"xmlbuilder@npm:^15.1.1":
+  version: 15.1.1
+  resolution: "xmlbuilder@npm:15.1.1"
+  checksum: 14f7302402e28d1f32823583d121594a9dca36408d40320b33f598bd589ca5163a352d076489c9c64d2dc1da19a790926a07bf4191275330d4de2b0d85bb1843
   languageName: node
   linkType: hard
 

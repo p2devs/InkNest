@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,34 +8,93 @@ import {
   StyleSheet,
   Share,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
-import {getVersion, getBuildNumber} from 'react-native-device-info';
+import { getVersion, getBuildNumber } from 'react-native-device-info';
 import analytics from '@react-native-firebase/analytics';
 
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {NAVIGATION} from '../../Constants';
+import { NAVIGATION } from '../../Constants';
 import Header from '../../Components/UIComp/Header';
-import {useDispatch, useSelector} from 'react-redux';
-import {setScrollPreference} from '../../Redux/Reducers';
+import { useDispatch, useSelector } from 'react-redux';
+import { setScrollPreference } from '../../Redux/Reducers';
 import DonationBanner from '../../InkNest-Externals/Donation/DonationBanner';
+import {
+  signOut as signOutAction,
+  signInWithGoogle,
+  signInWithApple,
+} from '../../InkNest-Externals/Community/Logic/CommunityActions';
+import LoginPrompt from '../../Components/Auth/LoginPrompt';
 
-export function Settings({navigation}) {
+export function Settings({ navigation }) {
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dispatch = useDispatch();
   const scrollPreference = useSelector(state => state.data.scrollPreference);
+  const user = useSelector(state => state.data.user);
+  const isAuthenticated = !!user;
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log out of InkNest?',
+      'This disconnects your community progress from this device until you sign in again.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsLoggingOut(true);
+              await analytics().logEvent('settings_logout_confirmed');
+              await dispatch(signOutAction());
+            } catch (error) {
+              Alert.alert(
+                'Sign out failed',
+                'Please check your connection and try again.',
+              );
+            } finally {
+              setIsLoggingOut(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleLoginRedirect = () => {
+    analytics().logEvent('settings_login_prompt_open');
+    setShowLoginPrompt(true);
+  };
+
+  const handleAuthPress = () => {
+    if (isAuthenticated) {
+      handleLogout();
+    } else {
+      handleLoginRedirect();
+    }
+  };
+
+  const authPrimaryLabel = isAuthenticated ? 'Log out' : 'Log in';
+  const authSubtitle = isAuthenticated
+    ? `Signed in as ${user.displayName || 'Reader'}`
+    : 'Connect your account from Community';
+  const authIcon = isAuthenticated ? 'log-out' : 'log-in';
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#14142A'}} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#14142A' }} edges={['top']}>
       <Header title="Settings" />
       <DonationBanner />
 
@@ -61,7 +120,7 @@ export function Settings({navigation}) {
             name="information-circle-outline"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -94,7 +153,7 @@ export function Settings({navigation}) {
             name="update"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -128,7 +187,7 @@ export function Settings({navigation}) {
             name="database"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
           <Text
             style={{
@@ -158,12 +217,12 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Entypo
               name={'open-book'}
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -178,7 +237,49 @@ export function Settings({navigation}) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            analytics().logEvent('manga_open', {
+              item: 'Manga Home screen',
+            });
+            navigation.navigate(NAVIGATION.homeManga);
+          }}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: 'row' }}>
+            <MaterialCommunityIcons
+              name="book-open-page-variant"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Read Manga
+            </Text>
+          </View>
+          <Feather
+            name="chevron-right"
+            size={hp('2.5%')}
+            color="#000"
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
 
@@ -207,17 +308,17 @@ export function Settings({navigation}) {
             Alert.alert(
               'Reading Preference Changed',
               `Your comic reading mode is now set to ${newPreference} scrolling.`,
-              [{text: 'OK'}],
+              [{ text: 'OK' }],
             );
           }}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialIcons
               name={
                 scrollPreference === 'horizontal' ? 'swap-horiz' : 'swap-vert'
               }
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -255,12 +356,12 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <MaterialIcons
               name="discord"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -275,7 +376,7 @@ export function Settings({navigation}) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -296,12 +397,12 @@ export function Settings({navigation}) {
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <MaterialIcons
               name="policy"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -316,7 +417,7 @@ export function Settings({navigation}) {
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -346,12 +447,12 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or Manga, InkNest has s
             justifyContent: 'space-between',
             paddingVertical: hp('1%'),
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Entypo
               name="slideshare"
               size={hp('2.5%')}
               color="#000"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <Text
               style={{
@@ -366,17 +467,102 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or Manga, InkNest has s
             name="arrow-up-right"
             size={hp('2.5%')}
             color="#000"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleAuthPress}
+          disabled={isLoggingOut}
+          style={{
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: hp('1%'),
+          }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            {isLoggingOut ? (
+              <ActivityIndicator
+                size={hp('2.5%')}
+                color="#000"
+                style={{ marginRight: 10 }}
+              />
+            ) : (
+              <Feather
+                name={authIcon}
+                size={hp('2.5%')}
+                color="#000"
+                style={{ marginRight: 10 }}
+              />
+            )}
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: hp('2%'),
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}>
+                {authPrimaryLabel}
+              </Text>
+              <Text
+                style={{
+                  fontSize: hp('1.6%'),
+                  color: '#555',
+                }}
+                numberOfLines={1}>
+                {authSubtitle}
+              </Text>
+            </View>
+          </View>
+          <Feather
+            name="chevron-right"
+            size={hp('2.3%')}
+            color="#000"
+            style={{ marginLeft: 8 }}
           />
         </TouchableOpacity>
       </ScrollView>
       <View
-        style={{padding: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Text style={{color: 'silver', fontSize: 13}}>
+        style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: 'silver', fontSize: 13 }}>
           V {getVersion()} - {getBuildNumber()}
         </Text>
       </View>
-    </SafeAreaView>
+      <LoginPrompt
+        visible={showLoginPrompt}
+        loading={isLoggingIn}
+        onClose={() => !isLoggingIn && setShowLoginPrompt(false)}
+        onGoogleSignIn={async () => {
+          try {
+            setIsLoggingIn(true);
+            await dispatch(signInWithGoogle());
+            setShowLoginPrompt(false);
+          } catch (error) {
+            console.error(error);
+            Alert.alert('Sign in failed', 'Please try again.');
+          } finally {
+            setIsLoggingIn(false);
+          }
+        }}
+        onAppleSignIn={async () => {
+          try {
+            setIsLoggingIn(true);
+            await dispatch(signInWithApple());
+            setShowLoginPrompt(false);
+          } catch (error) {
+            console.error(error);
+            Alert.alert('Sign in failed', 'Please try again.');
+          } finally {
+            setIsLoggingIn(false);
+          }
+        }}
+      />
+    </SafeAreaView >
   );
 }
 

@@ -105,6 +105,18 @@ export const HomePageCardClasses = {
       imageAttr: 'data-src',
     },
   },
+  comicbookplus: {
+    'latest-uploads': {
+      cardClass: '.cbpLtableleft, .cbpLtable, .cbpLtableright',
+      cardTitleClass: '.w a.ya',
+      cardLinkClass: '.w a.ya',
+      imageClass: 'td.v img',
+      genresClass: null,
+      statusClass: null,
+      dateClass: 'time[itemprop="dateModified"]',
+      imageAttr: 'src',
+    },
+  },
 };
 
 export const ComicDetailPageClasses = {
@@ -123,7 +135,7 @@ export const ComicDetailPageClasses = {
   },
   comichubfree: {
     detailsContainer: '.movie-info',
-    title: '.movie-title span.title-1',
+    title: '.movie-dl dt:contains("Alternate name:") + dd',
     imgSrc: '.movie-image img',
     getImageAttr: 'data-src',
     summary: '#film-content',
@@ -148,6 +160,23 @@ export const ComicDetailPageClasses = {
     chapterLinkAttr: 'href',
     customParser: parseReadAllComicsDetails,
   },
+  comicbookplus: {
+    detailsContainer: '.introtext',
+    title: 'h1.sectionh1',
+    imgSrc: '.introtext img.leftmargin',
+    getImageAttr: 'src',
+    summary: null,
+    chaptersList: 'table.catlistings tr.overrow',
+    chapterTitle: 'td.n a[itemprop="url"] span[itemprop="name"]',
+    chapterLink: 'td.n a[itemprop="url"]',
+    chapterDate: 'td.r:nth-child(7)',
+    detailsDL: '.introtext table td.d',
+    detailsValue: '.introtext table td.e',
+    pagination: null,
+    genre: '.introtext a[itemprop="genre"]',
+    publisher: '.introtext span[itemprop="name"]',
+    publisherLink: '.introtext a[itemprop="url"]',
+  },
 };
 
 export const ComicBookPageClasses = {
@@ -169,8 +198,15 @@ export const ComicBookPageClasses = {
     imageContainer: 'div[style*="margin:0px auto"]',
     imageSelector: 'img',
     imageAttr: 'src',
-    titleSelector: 'h3[style*="color: #0363df"]',
-    titleAttr: 'alt',
+    titleSelector: 'h3[style*="color: #0363df"] strong',
+    titleAttr: 'textContent',
     detailsLinkSelector: 'a[rel="category tag"]',
+  },
+  comicbookplus: {
+    useJsVars: true,
+    websiteVar: 'website',
+    comicLocVar: 'comicloc',
+    numPagesVar: 'comicnumpages',
+    imagePattern: '{website}{comicloc}/{page}.jpg',
   },
 };

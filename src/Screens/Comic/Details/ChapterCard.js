@@ -100,7 +100,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink}) => {
           title: ComicDetail?.title,
           imgSrc: ComicDetail?.imgSrc,
         },
-        comicBook: {...data, link: item.link},
+        comicBook: {...data, ...item},
         setLoadingStatus,
         onProgress: (downloaded, total) => setProgress({downloaded, total}),
       }),

@@ -1,5 +1,26 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
+const SUBSCRIPTION_CACHE_TTL_MS = 1000;
+
+const resolveCacheTtlMs = (incomingTtl, previousTtl = SUBSCRIPTION_CACHE_TTL_MS) => {
+  if (
+    typeof incomingTtl === 'number' &&
+    Number.isFinite(incomingTtl) &&
+    incomingTtl > 0
+  ) {
+    return incomingTtl;
+  }
+
+  if (
+    typeof previousTtl === 'number' &&
+    Number.isFinite(previousTtl) &&
+    previousTtl > 0
+  ) {
+    return previousTtl;
+  }
+
+  return SUBSCRIPTION_CACHE_TTL_MS;
+};
 const initialState = {
   dataByUrl: {},
   loading: false,
@@ -14,7 +35,16 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
-  localComicProgress: null, // Tracks reading progress for imported local comics: { lastReadPage, totalPages, timestamp }
+  hasSeenOfflineMovedAlert: false,
+  localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
+  // Community & Auth state
+  user: null, // {uid, displayName, photoURL, email, subscriptionTier}
+  communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
+  communityPostIndex: {}, // {postId: { ...post, comicLink }} for cross-screen hydration
+  communityComics: {}, // {comicLink: {title, coverImage, detailsPath, lastActivityAt}}
+  userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
+  notifications: [], // [{id,title,body,data,receivedAt,read}]
+  notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
 };
 
 /**
@@ -92,7 +122,7 @@ const Reducers = createSlice({
       state.error = null;
     },
     fetchDataSuccess: (state, action) => {
-      const {url, data} = action.payload;
+      const { url, data } = action.payload;
       state.dataByUrl[url] = data;
       state.loading = false;
       state.downTime = false;
@@ -102,10 +132,10 @@ const Reducers = createSlice({
       state.error = action.payload;
     },
     updateData: (state, action) => {
-      const {url, data, ComicDetailslink, imageLength, readAt} =
+      const { url, data, ComicDetailslink, imageLength, readAt } =
         action.payload;
       //keep the old data and update the new data
-      state.dataByUrl[url] = {...state.dataByUrl[url], ...data};
+      state.dataByUrl[url] = { ...state.dataByUrl[url], ...data };
 
       const hasReadingProgress =
         ComicDetailslink && imageLength && data?.lastReadPage !== undefined;
@@ -134,7 +164,7 @@ const Reducers = createSlice({
       // state.dataByUrl[url] = data;
     },
     DownloadComicBook: (state, action) => {
-      const {link, data, title} = action.payload;
+      const { link, data, title } = action.payload;
 
       state.DownloadComic[link] = {
         title,
@@ -146,19 +176,19 @@ const Reducers = createSlice({
             ...data,
             comicBook: state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook
               ? {
-                  ...state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook,
-                  ...data?.comicBook,
-                  ...(data?.lastReadPage !== undefined
-                    ? {lastReadPage: data.lastReadPage}
-                    : {}),
-                }
+                ...state.DownloadComic[link]?.comicBooks?.[data?.link]?.comicBook,
+                ...data?.comicBook,
+                ...(data?.lastReadPage !== undefined
+                  ? { lastReadPage: data.lastReadPage }
+                  : {}),
+              }
               : data?.comicBook,
           },
         },
       };
     },
     updateDownloadedComicBook: (state, action) => {
-      const {comicDetailsLink, chapterLink, data} = action.payload;
+      const { comicDetailsLink, chapterLink, data } = action.payload;
 
       if (
         !comicDetailsLink ||
@@ -176,17 +206,17 @@ const Reducers = createSlice({
         ...data,
         comicBook: existingEntry?.comicBook
           ? {
-              ...existingEntry.comicBook,
-              ...(data?.comicBook ?? {}),
-              ...(data?.lastReadPage !== undefined
-                ? {lastReadPage: data.lastReadPage}
-                : {}),
-            }
+            ...existingEntry.comicBook,
+            ...(data?.comicBook ?? {}),
+            ...(data?.lastReadPage !== undefined
+              ? { lastReadPage: data.lastReadPage }
+              : {}),
+          }
           : existingEntry?.comicBook,
       };
     },
     DeleteDownloadedComicBook: (state, action) => {
-      const {comicBooksLink, ChapterLink} = action.payload;
+      const { comicBooksLink, ChapterLink } = action.payload;
       delete state.DownloadComic[comicBooksLink]?.comicBooks[ChapterLink];
       if (
         Object.keys(state.DownloadComic[comicBooksLink]?.comicBooks).length ===
@@ -256,18 +286,267 @@ const Reducers = createSlice({
       // Update the flag indicating whether reward ads have been shown
       state.hasRewardAdsShown = action.payload;
     },
-    updateLocalComicProgress: (state, action) => {
-      // Update reading progress for imported local comics
-      const {lastReadPage, totalPages} = action.payload;
-      state.localComicProgress = {
-        lastReadPage,
-        totalPages,
-        timestamp: Date.now(),
-      };
+    markOfflineMovedAlertSeen: state => {
+      state.hasSeenOfflineMovedAlert = true;
     },
     clearLocalComicProgress: state => {
-      // Clear local comic reading progress (e.g., when importing a new comic)
+      // Clear any local comic reading progress when importing a new comic
       state.localComicProgress = null;
+    },
+    updateLocalComicProgress: (state, action) => {
+      // Update reading progress for locally imported comics
+      const { lastReadPage, totalPages } = action.payload;
+      state.localComicProgress = {
+        ...state.localComicProgress,
+        lastReadPage,
+        totalPages,
+      };
+    },
+    // Community & Auth reducers
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+    clearUser: state => {
+      state.user = null;
+      state.userActivity = { postsToday: 0, repliesToday: 0, lastReset: new Date().toDateString() };
+    },
+    setCommunityPosts: (state, action) => {
+      const { comicLink, posts = [], append = false, comicMeta = null } = action.payload;
+      const existing = state.communityPosts[comicLink]?.posts || [];
+
+      let nextPosts;
+      if (append) {
+        const existingIds = new Set(existing.map(post => post.id));
+        const dedupedNewPosts = posts.filter(post => !existingIds.has(post.id));
+        nextPosts = [...existing, ...dedupedNewPosts];
+      } else {
+        nextPosts = posts;
+      }
+
+      state.communityPosts[comicLink] = {
+        ...(state.communityPosts[comicLink] || {}),
+        posts: nextPosts,
+        lastFetch: Date.now(),
+      };
+
+      nextPosts.forEach(post => {
+        if (!post?.id) {
+          return;
+        }
+        const existingEntry = state.communityPostIndex[post.id] || {};
+        state.communityPostIndex[post.id] = {
+          ...existingEntry,
+          ...post,
+          id: post.id,
+          comicLink,
+        };
+      });
+
+      if (comicMeta?.comicLink) {
+        const existingMeta = state.communityPosts[comicLink].comicMeta || {};
+        state.communityPosts[comicLink].comicMeta = {
+          ...existingMeta,
+          ...comicMeta,
+        };
+        state.communityComics[comicMeta.comicLink] = {
+          ...(state.communityComics[comicMeta.comicLink] || {}),
+          ...comicMeta,
+          lastSeenAt: Date.now(),
+        };
+      }
+    },
+    addCommunityPost: (state, action) => {
+      const { comicLink, post, comicMeta } = action.payload;
+      if (!state.communityPosts[comicLink]) {
+        state.communityPosts[comicLink] = { posts: [], lastFetch: Date.now() };
+      }
+      state.communityPosts[comicLink].posts.unshift(post);
+
+      if (post?.id) {
+        const existingEntry = state.communityPostIndex[post.id] || {};
+        state.communityPostIndex[post.id] = {
+          ...existingEntry,
+          ...post,
+          id: post.id,
+          comicLink,
+        };
+      }
+      if (comicMeta?.comicLink) {
+        state.communityComics[comicMeta.comicLink] = {
+          ...(state.communityComics[comicMeta.comicLink] || {}),
+          ...comicMeta,
+          lastSeenAt: Date.now(),
+        };
+      }
+    },
+    updateCommunityPost: (state, action) => {
+      const { comicLink, postId, updates } = action.payload;
+      if (state.communityPosts[comicLink]) {
+        const postIndex = state.communityPosts[comicLink].posts.findIndex(
+          p => p.id === postId,
+        );
+        if (postIndex !== -1) {
+          state.communityPosts[comicLink].posts[postIndex] = {
+            ...state.communityPosts[comicLink].posts[postIndex],
+            ...updates,
+          };
+        }
+      }
+
+      if (postId) {
+        const existingEntry = state.communityPostIndex[postId] || {};
+        state.communityPostIndex[postId] = {
+          ...existingEntry,
+          ...updates,
+          id: postId,
+          comicLink: existingEntry.comicLink || comicLink,
+        };
+      }
+    },
+    cacheCommunityPost: (state, action) => {
+      const { postId, comicLink, post = {} } = action.payload || {};
+      const id = postId || post?.id;
+      if (!id) {
+        return;
+      }
+
+      const resolvedComicLink = comicLink || post?.comicLink || state.communityPostIndex[id]?.comicLink;
+      const existingEntry = state.communityPostIndex[id] || {};
+
+      state.communityPostIndex[id] = {
+        ...existingEntry,
+        ...post,
+        id,
+        comicLink: resolvedComicLink,
+      };
+    },
+    incrementUserActivity: (state, action) => {
+      const { type } = action.payload; // 'post' or 'reply'
+      const today = new Date().toDateString();
+
+      if (state.userActivity.lastReset !== today) {
+        state.userActivity = { postsToday: 0, repliesToday: 0, lastReset: today };
+      }
+
+      if (type === 'post') {
+        state.userActivity.postsToday += 1;
+      } else if (type === 'reply') {
+        state.userActivity.repliesToday += 1;
+      }
+    },
+    upsertCommunityComicMeta: (state, action) => {
+      const { comicLink, meta = {} } = action.payload || {};
+      if (!comicLink) {
+        return;
+      }
+      state.communityComics[comicLink] = {
+        ...(state.communityComics[comicLink] || {}),
+        ...meta,
+        comicLink,
+        lastSeenAt: Date.now(),
+      };
+    },
+    mergeNotifications: (state, action) => {
+      const incoming = Array.isArray(action.payload) ? action.payload : [];
+      if (incoming.length === 0) {
+        return;
+      }
+      const existingIds = new Set(state.notifications.map(n => n.id));
+      const newNotifications = incoming.filter(n => !existingIds.has(n.id));
+
+      state.notifications = [...newNotifications, ...state.notifications]
+        .sort((a, b) => b.receivedAt - a.receivedAt)
+        .slice(0, 50);
+    },
+    appendNotification: (state, action) => {
+      const notification = action.payload;
+      if (!notification?.id) {
+        return;
+      }
+      const deduped = state.notifications.filter(
+        existing => existing.id !== notification.id,
+      );
+      state.notifications = [notification, ...deduped].slice(0, 50);
+    },
+    markNotificationAsRead: (state, action) => {
+      const targetId = action.payload;
+      if (!targetId) {
+        return;
+      }
+      state.notifications = state.notifications.map(item =>
+        item.id === targetId ? { ...item, read: true } : item,
+      );
+    },
+    clearNotifications: state => {
+      state.notifications = [];
+    },
+    setNotificationSubscriptionCache: (state, action) => {
+      const {
+        uid,
+        allowed,
+        subscribedList,
+        fetchedAt = Date.now(),
+        cacheTtlMs,
+        cacheSource = 'success',
+      } = action.payload || {};
+      if (!uid) {
+        return;
+      }
+      const previousEntry = state.notificationSubscriptions[uid];
+      const previousList = Array.isArray(previousEntry?.subscribedList)
+        ? [...previousEntry.subscribedList]
+        : [];
+      let nextList = previousList;
+
+      if (Array.isArray(subscribedList) && previousList.length === 0) {
+        nextList = Array.from(
+          new Set(
+            subscribedList.filter(item => typeof item === 'string' && item),
+          ),
+        );
+      }
+
+      const allowedProvided = typeof allowed === 'boolean';
+      const nextAllowed = allowedProvided
+        ? allowed
+        : typeof previousEntry?.allowed === 'boolean'
+          ? previousEntry.allowed
+          : undefined;
+      const resolvedCacheTtl = resolveCacheTtlMs(
+        cacheTtlMs,
+        previousEntry?.cacheTtlMs,
+      );
+      state.notificationSubscriptions[uid] = {
+        lastFetched: fetchedAt,
+        allowed: nextAllowed,
+        subscribedList: nextList,
+        cacheTtlMs: resolvedCacheTtl,
+        cacheSource,
+      };
+    },
+    updateNotificationSubscriptionList: (state, action) => {
+      const { uid, detailLink, subscribed } = action.payload || {};
+      if (!uid || !detailLink) {
+        return;
+      }
+      if (!state.notificationSubscriptions[uid]) {
+        state.notificationSubscriptions[uid] = {
+          lastFetched: 0,
+          allowed: true,
+          subscribedList: [],
+          cacheTtlMs: resolveCacheTtlMs(),
+        };
+      }
+      const list = state.notificationSubscriptions[uid].subscribedList || [];
+      if (subscribed) {
+        if (!list.includes(detailLink)) {
+          list.push(detailLink);
+        }
+      } else {
+        state.notificationSubscriptions[uid].subscribedList = list.filter(
+          item => item !== detailLink,
+        );
+      }
     },
   },
 });
@@ -294,7 +573,23 @@ export const {
   clearHistory,
   setScrollPreference,
   rewardAdsShown,
-  updateLocalComicProgress,
+  markOfflineMovedAlertSeen,
   clearLocalComicProgress,
+  updateLocalComicProgress,
+  // Community & Auth actions
+  setUser,
+  clearUser,
+  setCommunityPosts,
+  addCommunityPost,
+  updateCommunityPost,
+  cacheCommunityPost,
+  incrementUserActivity,
+  upsertCommunityComicMeta,
+  mergeNotifications,
+  appendNotification,
+  markNotificationAsRead,
+  clearNotifications,
+  setNotificationSubscriptionCache,
+  updateNotificationSubscriptionList,
 } = Reducers.actions;
 export default Reducers.reducer;

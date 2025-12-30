@@ -1,25 +1,44 @@
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {AppNavigation} from './AppNavigation';
-import {navigationRef} from './NavigationService';
-import {Platform, StatusBar, AppState} from 'react-native';
-import {useDispatch} from 'react-redux';
-import {ClearError} from '../Redux/Reducers';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { AppNavigation } from './AppNavigation';
+import { navigationRef } from './NavigationService';
+import { Platform, StatusBar, AppState } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  ClearError,
+  appendNotification,
+  mergeNotifications,
+  markNotificationAsRead,
+} from '../Redux/Reducers';
 import analytics from '@react-native-firebase/analytics';
 import messaging from '@react-native-firebase/messaging';
-import {firebase} from '@react-native-firebase/perf';
+import { firebase } from '@react-native-firebase/perf';
 import crashlytics from '@react-native-firebase/crashlytics';
-import {firebase as fire} from '@react-native-firebase/analytics';
+import { firebase as fire } from '@react-native-firebase/analytics';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
+import {
+  configureGoogleSignIn,
+  listenToAuthChanges,
+} from '../InkNest-Externals/Community/Logic/CommunityActions';
 
 import {
-  check,
-  request,
-  PERMISSIONS,
-  RESULTS,
   requestNotifications,
   checkNotifications,
 } from 'react-native-permissions';
+import { NAVIGATION } from '../Constants';
+import {
+  buildNotificationPayload,
+  consumeStoredNotifications,
+  mergeNotificationLists,
+  persistNotificationList,
+  tryParseJSON,
+} from '../Utils/notificationHelpers';
 
 /**
  * RootNavigation component handles the main navigation logic for the application.
@@ -50,6 +69,11 @@ export function RootNavigation() {
   const dispatch = useDispatch();
   const routeNameRef = useRef();
   const [appState, setAppState] = useState(AppState.currentState);
+  const notificationsState = useSelector(
+    state => state?.data?.notifications || [],
+  );
+  const notificationCacheRef = useRef([]);
+  const pendingNotificationNavRef = useRef(null);
 
   // Add this useEffect to track app state
   useEffect(() => {
@@ -63,12 +87,208 @@ export function RootNavigation() {
     };
   }, []);
 
+  const refreshNotificationsFromStorage = useCallback(async () => {
+    try {
+      const stored = await consumeStoredNotifications();
+      if (stored && stored.length > 0) {
+        dispatch(mergeNotifications(stored));
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('Failed to merge offline notifications', error);
+      }
+      crashlytics().recordError(error);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    refreshNotificationsFromStorage();
+  }, [refreshNotificationsFromStorage]);
+
+  useEffect(() => {
+    if (appState === 'active') {
+      refreshNotificationsFromStorage();
+    }
+  }, [appState, refreshNotificationsFromStorage]);
+
+  const resolveNotificationTarget = useCallback(
+    payload => {
+      const data = payload?.data;
+      if (!data) {
+        return null;
+      }
+
+      if (data.type === 'comic_chapter_update') {
+        const detailLink = data.detailLink || data.link || data.comicLink;
+        const chapterLink = data.latestChapterLink || data.chapterLink;
+        const comicTitle = data.comicTitle || data.title;
+
+        if (chapterLink) {
+          return {
+            name: NAVIGATION.comicBook,
+            params: {
+              comicBookLink: chapterLink,
+              DetailsPage: {
+                link: detailLink,
+                title: comicTitle,
+                image: data.image || data.coverImage || null,
+              },
+            },
+          };
+        }
+
+        if (detailLink) {
+          return {
+            name: NAVIGATION.comicDetails,
+            params: {
+              link: detailLink,
+              title: comicTitle,
+              image: data.image || data.coverImage || null,
+            },
+          };
+        }
+      }
+
+      if (data.postId && data.comicLink) {
+        const initialPost =
+          typeof data.initialPost === 'string'
+            ? tryParseJSON(data.initialPost)
+            : data.initialPost || null;
+        return {
+          name: NAVIGATION.PostDetail,
+          params: {
+            comicLink: data.comicLink,
+            postId: data.postId,
+            initialPost,
+          },
+        };
+      }
+
+      if ((data.link || data.comicLink) && (data.title || data.comicTitle)) {
+        return {
+          name: NAVIGATION.comicDetails,
+          params: {
+            link: data.link || data.comicLink,
+            title: data.title || data.comicTitle,
+            image: data.image || data.coverImage || null,
+          },
+        };
+      }
+
+      if (data.screen) {
+        const parsedParams =
+          typeof data.params === 'string'
+            ? tryParseJSON(data.params)
+            : data.params || {};
+        return {
+          name: data.screen,
+          params: parsedParams,
+        };
+      }
+
+      return null;
+    },
+    [tryParseJSON],
+  );
+
+  const flushPendingNavigation = useCallback(() => {
+    if (!pendingNotificationNavRef.current || !navigationRef.current) {
+      return;
+    }
+
+    const { target, notificationId } = pendingNotificationNavRef.current;
+    navigationRef.current.navigate(target.name, target.params);
+    if (notificationId) {
+      dispatch(markNotificationAsRead(notificationId));
+    }
+    pendingNotificationNavRef.current = null;
+  }, [dispatch]);
+
+  const navigateToNotificationTarget = useCallback(
+    payload => {
+      const target = resolveNotificationTarget(payload);
+      if (!target) {
+        return;
+      }
+
+      if (navigationRef.current) {
+        navigationRef.current.navigate(target.name, target.params);
+        if (payload?.id) {
+          dispatch(markNotificationAsRead(payload.id));
+        }
+        return;
+      }
+
+      pendingNotificationNavRef.current = {
+        target,
+        notificationId: payload?.id,
+      };
+    },
+    [dispatch, resolveNotificationTarget],
+  );
+
+  const handleIncomingNotification = useCallback(
+    (remoteMessage, shouldNavigate = false) => {
+      const parsedPayload = buildNotificationPayload(
+        remoteMessage,
+        shouldNavigate,
+      );
+      if (!parsedPayload?.id) {
+        return;
+      }
+
+      const deduped = mergeNotificationLists(
+        parsedPayload,
+        notificationCacheRef.current,
+      );
+      // We still persist to storage for background/offline safety, 
+      // but we don't rely on it as the source of truth for the UI anymore.
+      // The 'consumeStoredNotifications' will pick this up if the app restarts.
+      persistNotificationList(deduped).catch(() => { });
+
+      dispatch(appendNotification(parsedPayload));
+
+      if (shouldNavigate) {
+        navigateToNotificationTarget(parsedPayload);
+      }
+    },
+    [buildNotificationPayload, dispatch, navigateToNotificationTarget],
+  );
+
+  useEffect(() => {
+    const unsubscribeForeground = messaging().onMessage(remoteMessage => {
+      handleIncomingNotification(remoteMessage, false);
+    });
+
+    const unsubscribeOpened = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        handleIncomingNotification(remoteMessage, true);
+      },
+    );
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          handleIncomingNotification(remoteMessage, true);
+        }
+      })
+      .catch(error => {
+        crashlytics().recordError(error);
+      });
+
+    return () => {
+      unsubscribeForeground();
+      unsubscribeOpened();
+    };
+  }, [handleIncomingNotification]);
+
   // Request user permission for notifications on Android and iOS devices
   async function requestUserPermission() {
     crashlytics().log('Requesting the notification permission.');
     checkNotifications();
     requestNotifications(['alert', 'sound']);
-    FCMPushNotification();
+    await FCMPushNotification();
   }
 
   // FCM Push Notification for Android and iOS devices using Firebase Cloud Messaging
@@ -134,6 +354,12 @@ export function RootNavigation() {
   }
 
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+
+    // Listen to auth state changes
+    const unsubscribe = dispatch(listenToAuthChanges());
+
     allowToReceiveInAppMessages();
     requestUserPermission();
     if (!__DEV__) {
@@ -141,6 +367,12 @@ export function RootNavigation() {
       toggleCrashlytics();
       AnalyticsEnabled();
     }
+
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -152,6 +384,7 @@ export function RootNavigation() {
       ref={navigationRef}
       onReady={() => {
         routeNameRef.current = navigationRef.current.getCurrentRoute().name;
+        flushPendingNavigation();
       }}
       onStateChange={async () => {
         //if screen change then clear error and stop loading

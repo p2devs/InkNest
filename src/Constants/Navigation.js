@@ -9,6 +9,8 @@ export const NAVIGATION = {
   search: 'Search',
   bookmarks: 'Bookmarks',
   settings: 'Settings',
+  notifications: 'Notifications',
+  communityBoard: 'Community',
   bottomNavigation: 'BottomNavigation',
   aboutUs: 'AboutUs',
   update: 'Update',
@@ -26,4 +28,6 @@ export const NAVIGATION = {
   WebSourcesList: 'WebSourcesList',
   WebSearch: 'WebSearch',
   Library: 'Library',
+  CreatePost: 'CreatePost',
+  PostDetail: 'PostDetail',
 };

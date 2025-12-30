@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {getVersion} from 'react-native-device-info';
 
@@ -8,12 +8,14 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {Settings} from '../Screens';
 import {NAVIGATION} from '../Constants';
-import {useSelector} from 'react-redux';
-import {ComicBookmarks, Home, OfflineComic, Library} from '../Screens/Comic';
+import {Home, Library} from '../Screens/Comic';
 import {View, StyleSheet} from 'react-native';
 import {useFeatureFlag} from 'configcat-react';
+import {useSelector} from 'react-redux';
 import LinkListScreen from '../InkNest-Externals/Screens/Webview/LinkListScreen';
 import FloatingDonationButton from '../InkNest-Externals/Donation/FloatingDonationButton';
+import CommunityBoardScreen from '../InkNest-Externals/Community/Screens/CommunityBoardScreen';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -26,46 +28,18 @@ const BottomTab = createBottomTabNavigator();
  * @param {string} props.tintColor - The color of the icon.
  * @returns {JSX.Element} The icon component.
  */
-const TabBarIcon = props => {
-  if (props.name === 'home') {
+const TabBarIcon = ({name, tintColor, size = 24}) => {
+  if (name === 'home') {
+    return <Feather name={name} size={size} color={tintColor} />;
+  } else if (name === 'library') {
+    return <Ionicons name={name} size={size} color={tintColor} />;
+  } else if (name === 'download-for-offline' || name === 'source') {
+    return <MaterialIcons name={name} size={size} color={tintColor} />;
+  } else if (name === 'settings') {
+    return <Feather name={name} size={size} color={tintColor} />;
+  } else if (name === 'community') {
     return (
-      <Feather
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
-    );
-  } else if (props.name === 'library') {
-    return (
-      <Ionicons
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
-    );
-  } else if (props.name === 'download-for-offline') {
-    return (
-      <MaterialIcons
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
-    );
-  } else if (props.name === 'settings') {
-    return (
-      <Feather
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
-    );
-  } else if (props.name === 'source') {
-    return (
-      <MaterialIcons
-        name={props.name}
-        size={props.size ? props.size : 24}
-        color={props.tintColor}
-      />
+      <Ionicons name="chatbubbles-outline" size={size} color={tintColor} />
     );
   }
 };
@@ -78,6 +52,11 @@ const TabBarIcon = props => {
  */
 export function BottomNavigation() {
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const notifications = useSelector(state => state.data?.notifications || []);
+  const hasUnreadNotifications = useMemo(
+    () => notifications.some(notification => !notification?.read),
+    [notifications],
+  );
 
   return (
     <>
@@ -121,6 +100,12 @@ export function BottomNavigation() {
             tabBarIcon: ({focused, color}) => (
               <TabBarIcon focused={focused} tintColor={color} name="library" />
             ),
+            tabBarBadge: hasUnreadNotifications ? 1 : undefined,
+            tabBarBadgeStyle: {
+              maxWidth: heightPercentageToDP('.86%'),
+              maxHeight: heightPercentageToDP('0.9%'),
+              fontSize: 1,
+            },
           }}
         />
 
@@ -132,29 +117,28 @@ export function BottomNavigation() {
               tabBarIcon: ({focused, color}) => (
                 <TabBarIcon focused={focused} tintColor={color} name="source" />
               ),
-              // tabBarBadge: 1,
-              // tabBarBadgeStyle: {
-              //   maxWidth: 10,
-              //   maxHeight: 10,
-              //   fontSize: 5,
-              //   lineHeight: 9,
-              //   alignSelf: undefined,
-              // },
             }}
           />
         )}
 
         <BottomTab.Screen
-          name={NAVIGATION.offlineComic}
-          component={OfflineComic}
+          name={NAVIGATION.communityBoard}
+          component={CommunityBoardScreen}
           options={{
+            tabBarLabel: 'Community',
             tabBarIcon: ({focused, color}) => (
               <TabBarIcon
                 focused={focused}
                 tintColor={color}
-                name="download-for-offline"
+                name="community"
               />
             ),
+            tabBarBadge: hasUnreadNotifications ? 1 : undefined,
+            tabBarBadgeStyle: {
+              maxWidth: heightPercentageToDP('.86%'),
+              maxHeight: heightPercentageToDP('0.9%'),
+              fontSize: 1,
+            },
           }}
         />
 
@@ -178,3 +162,19 @@ export function BottomNavigation() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F74B78',
+  },
+});

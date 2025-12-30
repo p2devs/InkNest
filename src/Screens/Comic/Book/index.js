@@ -344,7 +344,7 @@ export function ComicBook({navigation, route}) {
 
   return (
     <>
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={{flex: 1}}>
           <Animated.View
             style={{
@@ -510,7 +510,7 @@ export function ComicBook({navigation, route}) {
 
                     setIsModalVisible(false);
                     setImageLinkIndex(0);
-                    navigation.navigate(NAVIGATION.comicDetails, {
+                    navigation.replace(NAVIGATION.comicDetails, {
                       link: detailsPageLink,
                     });
 
@@ -563,41 +563,43 @@ export function ComicBook({navigation, route}) {
                   <Text style={styles.text}>Next Chapter</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.button}
-                  disabled={downloadLoading || isComicDownload}
-                  onPress={() => {
-                    if (isComicDownload) return;
-                    if (downloadLoading) return;
+                {DetailsPage?.title && comicBookLink ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    disabled={downloadLoading || isComicDownload}
+                    onPress={() => {
+                      if (isComicDownload) return;
+                      if (downloadLoading) return;
 
-                    analytics().logEvent('download_comic', {
-                      screen: 'ComicBook',
-                      comicBookLink: comicBookLink?.toString(),
-                      DetailsPageLink: detailsPageLink?.toString(),
-                      pageJump: pageJump,
-                      isDownloadComic: isDownloadComic,
-                      isVerticalScroll: isVerticalScroll,
-                    });
-                    showRewardedAd();
-                    dispatch(
-                      downloadComicBook({
-                        comicDetails: DetailsPage,
-                        comicBook: {...comicBook, link: comicBookLink},
-                        setLoadingStatus: setDownloadLoading,
-                        onProgress: (downloaded, total) => {
-                          setProgress({downloaded, total});
-                        },
-                      }),
-                    );
-                  }}>
-                  <Text style={styles.text}>
-                    {isComicDownload
-                      ? 'Downloaded'
-                      : downloadLoading
-                      ? `Downloading ${progress.downloaded}/${progress.total}`
-                      : 'Download Comic'}
-                  </Text>
-                </TouchableOpacity>
+                      analytics().logEvent('download_comic', {
+                        screen: 'ComicBook',
+                        comicBookLink: comicBookLink?.toString(),
+                        DetailsPageLink: detailsPageLink?.toString(),
+                        pageJump: pageJump,
+                        isDownloadComic: isDownloadComic,
+                        isVerticalScroll: isVerticalScroll,
+                      });
+                      showRewardedAd();
+                      dispatch(
+                        downloadComicBook({
+                          comicDetails: DetailsPage,
+                          comicBook: {...comicBook, link: comicBookLink},
+                          setLoadingStatus: setDownloadLoading,
+                          onProgress: (downloaded, total) => {
+                            setProgress({downloaded, total});
+                          },
+                        }),
+                      );
+                    }}>
+                    <Text style={styles.text}>
+                      {isComicDownload
+                        ? 'Downloaded'
+                        : downloadLoading
+                        ? `Downloading ${progress.downloaded}/${progress.total}`
+                        : 'Download Comic'}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
 
                 <TouchableOpacity
                   style={styles.button}
