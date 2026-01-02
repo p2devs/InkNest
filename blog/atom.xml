@@ -2,11 +2,66 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://p2devs.github.io/InkNest/blog</id>
     <title>InkNest Blog</title>
-    <updated>2025-12-02T00:00:00.000Z</updated>
+    <updated>2026-01-02T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://p2devs.github.io/InkNest/blog"/>
     <subtitle>InkNest Blog</subtitle>
     <icon>https://p2devs.github.io/InkNest/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[InkNest v1.4.3 Release]]></title>
+        <id>https://p2devs.github.io/InkNest/blog/release-v1.4.3</id>
+        <link href="https://p2devs.github.io/InkNest/blog/release-v1.4.3"/>
+        <updated>2026-01-02T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.3 is now available!]]></summary>
+        <content type="html"><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.3</strong> is now available!</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#-whats-new">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-google--apple-sign-in">🔐 Google &amp; Apple Sign-In<a class="hash-link" aria-label="Direct link to 🔐 Google &amp; Apple Sign-In" title="Direct link to 🔐 Google &amp; Apple Sign-In" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#-google--apple-sign-in">​</a></h3>
+<ul>
+<li><strong>Multi-provider auth</strong> with Google and Apple, including iOS URL scheme + entitlement updates</li>
+<li><strong>Auth state listener</strong> keeps Redux in sync with Firebase users and profiles</li>
+<li><strong>New <code>LoginPrompt</code> &amp; <code>UserAvatar</code> components</strong> for smooth sign-in and profile display</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="️-community--navigation">🏘️ Community &amp; Navigation<a class="hash-link" aria-label="Direct link to 🏘️ Community &amp; Navigation" title="Direct link to 🏘️ Community &amp; Navigation" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#%EF%B8%8F-community--navigation">​</a></h3>
+<ul>
+<li><strong>Community posts &amp; replies</strong>: create posts, reply threads, tagged chapters, participant stats, and real-time updates</li>
+<li><strong>Navigation updates</strong>: new routes/modals for community, notifications, and detail views</li>
+<li><strong>User activity tracking</strong>: lightweight counters for posts/replies and cached post metadata</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-notifications">🔔 Notifications<a class="hash-link" aria-label="Direct link to 🔔 Notifications" title="Direct link to 🔔 Notifications" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#-notifications">​</a></h3>
+<ul>
+<li><strong>Background push handling</strong> that stores payloads and logs errors to Crashlytics</li>
+<li><strong>NotificationSubscriptionBootstrapper</strong> wired into the app root for subscription management</li>
+<li>iOS background fetch mode enabled for more reliable delivery</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-reading-data-pipeline">📚 Reading Data Pipeline<a class="hash-link" aria-label="Direct link to 📚 Reading Data Pipeline" title="Direct link to 📚 Reading Data Pipeline" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#-reading-data-pipeline">​</a></h3>
+<ul>
+<li>Refactored comic parsing into dedicated parser utilities (details, chapters, search, advanced filters)</li>
+<li>Safer error handling with centralized downtime detection and Crashlytics logging</li>
+<li>Cleaner host-specific URL handling and pagination support</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-dependencies--config">📦 Dependencies &amp; Config<a class="hash-link" aria-label="Direct link to 📦 Dependencies &amp; Config" title="Direct link to 📦 Dependencies &amp; Config" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#-dependencies--config">​</a></h3>
+<ul>
+<li>Added auth/identity deps: <code>@react-native-firebase/auth</code>, <code>@react-native-firebase/firestore</code>, <code>@react-native-google-signin/google-signin</code>, <code>@invertase/react-native-apple-authentication</code></li>
+<li><code>example.env</code> now includes <code>GOOGLE_WEB_CLIENT_ID</code> and <code>IOS_GOOGLE_CLIENT_ID</code></li>
+<li>iOS updates: Google Sign-In URL types, <code>GIDClientID</code>, Apple Sign-In entitlement, privacy API reasons</li>
+<li>Version bump: <strong>Android 32 / 1.4.3</strong>, <strong>iOS 1.4.3</strong>; InkNest-Externals submodule refreshed</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="️-upgrade-notes">🛠️ Upgrade Notes<a class="hash-link" aria-label="Direct link to 🛠️ Upgrade Notes" title="Direct link to 🛠️ Upgrade Notes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.3#%EF%B8%8F-upgrade-notes">​</a></h2>
+<ul>
+<li>Set <code>GOOGLE_WEB_CLIENT_ID</code> and <code>IOS_GOOGLE_CLIENT_ID</code> in your env files</li>
+<li>Update Info.plist/entitlements with your real Google/Apple credentials and URL scheme</li>
+<li>Run <code>cd ios &amp;&amp; pod install</code> after pulling to pick up new native deps</li>
+<li>Ensure Firebase messaging is configured for push (APNs key/certs and FCM server key)</li>
+</ul>
+<hr>
+<p><strong>Update now</strong> to enjoy Apple/Google sign-in, richer community features, and smarter notifications! 📚</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content>
+        <author>
+            <name>P2Devs</name>
+            <uri>https://github.com/p2devs</uri>
+        </author>
+        <category label="Release" term="Release"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[InkNest v1.4.2 Release]]></title>
         <id>https://p2devs.github.io/InkNest/blog/release-v1.4.2</id>
