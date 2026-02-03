@@ -4116,6 +4116,7 @@ __metadata:
     react-native-gesture-handler: ^2.20.2
     react-native-google-mobile-ads: ^14.5.0
     react-native-linear-gradient: ^2.8.3
+    react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.12.5
     react-native-permissions: ^5.2.1
     react-native-reanimated: 3.16.1
@@ -4123,6 +4124,7 @@ __metadata:
     react-native-responsive-screen: ^1.4.2
     react-native-safe-area-context: ^5.0.0
     react-native-screens: 3.35.0
+    react-native-sensors: ^7.3.6
     react-native-svg: ^15.8.0
     react-native-svg-transformer: ^1.5.0
     react-native-toast-message: ^2.2.1
@@ -9893,6 +9895,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-orientation-locker@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "react-native-orientation-locker@npm:1.7.0"
+  peerDependencies:
+    react: ">=16.13.1"
+    react-native: ">=0.63.2"
+    react-native-windows: ">=0.63.3"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 495010b3150adcbc1dcb24e0ca5c13838f02dbcee7c6ec391fe07bd47f9b75ac57b0ec1144aaab5d6ed62e7a354497e9fa5399359d896099ecbea439908817cf
+  languageName: node
+  linkType: hard
+
 "react-native-paper@npm:^5.12.5":
   version: 5.13.1
   resolution: "react-native-paper@npm:5.13.1"
@@ -9991,6 +10007,18 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: cb8a0c8d8a41a8a1065cc2253e4272a970366a7d80bc54e889b2f48de7ccccd3e828e2701de39c0453a67956ec0cad140fb506324cce04419b5e2eb495c038c2
+  languageName: node
+  linkType: hard
+
+"react-native-sensors@npm:^7.3.6":
+  version: 7.3.6
+  resolution: "react-native-sensors@npm:7.3.6"
+  dependencies:
+    rxjs: ">= 6"
+  peerDependencies:
+    prop-types: ^15.6.0
+    react-native: ">=0.39.0"
+  checksum: e7a6dd2564ba0ff167465ab4d9f813cdc896f5be342022b2339c57446095392e6a4ed88144cb3c873184a98f32dd08fc45a10d7bed21682495815dfc1e304c1e
   languageName: node
   linkType: hard
 
@@ -10525,6 +10553,15 @@ __metadata:
   dependencies:
     queue-microtask: ^1.2.2
   checksum: cb4f97ad25a75ebc11a8ef4e33bb962f8af8516bb2001082ceabd8902e15b98f4b84b4f8a9b222e5d57fc3bd1379c483886ed4619367a7680dad65316993021d
+  languageName: node
+  linkType: hard
+
+"rxjs@npm:>= 6":
+  version: 7.8.2
+  resolution: "rxjs@npm:7.8.2"
+  dependencies:
+    tslib: ^2.1.0
+  checksum: 2f233d7c832a6c255dabe0759014d7d9b1c9f1cb2f2f0d59690fd11c883c9826ea35a51740c06ab45b6ade0d9087bde9192f165cba20b6730d344b831ef80744
   languageName: node
   linkType: hard
 

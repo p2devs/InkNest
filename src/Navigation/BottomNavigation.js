@@ -50,9 +50,11 @@ const TabBarIcon = ({name, tintColor, size = 24}) => {
  *
  * @returns {JSX.Element} The BottomTab.Navigator component with configured screens.
  */
+const EMPTY_NOTIFICATIONS = [];
+
 export function BottomNavigation() {
   const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
-  const notifications = useSelector(state => state.data?.notifications || []);
+  const notifications = useSelector(state => state.data?.notifications ?? EMPTY_NOTIFICATIONS);
   const hasUnreadNotifications = useMemo(
     () => notifications.some(notification => !notification?.read),
     [notifications],
