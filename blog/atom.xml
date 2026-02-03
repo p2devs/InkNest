@@ -2,11 +2,75 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://p2devs.github.io/InkNest/blog</id>
     <title>InkNest Blog</title>
-    <updated>2026-01-02T00:00:00.000Z</updated>
+    <updated>2026-02-03T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://p2devs.github.io/InkNest/blog"/>
     <subtitle>InkNest Blog</subtitle>
     <icon>https://p2devs.github.io/InkNest/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[InkNest v1.4.4 Release]]></title>
+        <id>https://p2devs.github.io/InkNest/blog/release-v1.4.4</id>
+        <link href="https://p2devs.github.io/InkNest/blog/release-v1.4.4"/>
+        <updated>2026-02-03T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.4 is now available!]]></summary>
+        <content type="html"><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.4</strong> is now available!</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-whats-new">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-gravity-scroll---hands-free-reading">📱 Gravity Scroll - Hands-Free Reading<a class="hash-link" aria-label="Direct link to 📱 Gravity Scroll - Hands-Free Reading" title="Direct link to 📱 Gravity Scroll - Hands-Free Reading" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-gravity-scroll---hands-free-reading">​</a></h3>
+<p>The headline feature of this release is <strong>Gravity Scroll</strong>, a revolutionary way to read manga hands-free! Simply tilt your device to navigate through pages.</p>
+<ul>
+<li><strong>Tilt-based navigation</strong>: Tilt your phone forward to scroll up, backward to scroll down</li>
+<li><strong>Customizable sensitivity</strong>: 10-level sensitivity slider (1-10) to adjust tilt responsiveness</li>
+<li><strong>Auto/Manual calibration</strong>: Choose between automatic calibration when your phone is still, or manual calibration with a tap</li>
+<li><strong>Haptic feedback</strong>: Light vibration confirms scroll start/stop for tactile feedback</li>
+<li><strong>Real-time tilt indicator</strong>: Visual display shows your current tilt angle and scroll direction</li>
+<li><strong>Built-in walkthrough</strong>: Interactive tutorial introduces new users to gravity scroll controls</li>
+</ul>
+<p><strong>Battery optimization</strong>: The feature uses throttled sensor updates (10Hz) and frame processing (30fps) to minimize battery impact while maintaining smooth scrolling.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-android-enhancements">🔧 Android Enhancements<a class="hash-link" aria-label="Direct link to 🔧 Android Enhancements" title="Direct link to 🔧 Android Enhancements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-android-enhancements">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="new-permissions">New Permissions<a class="hash-link" aria-label="Direct link to New Permissions" title="Direct link to New Permissions" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#new-permissions">​</a></h4>
+<ul>
+<li>Added <code>VIBRATE</code> permission to AndroidManifest.xml for haptic feedback support</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="proguard-rules">ProGuard Rules<a class="hash-link" aria-label="Direct link to ProGuard Rules" title="Direct link to ProGuard Rules" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#proguard-rules">​</a></h4>
+<ul>
+<li>Updated ProGuard rules to include Google Play Services, Firebase, and OkHttp libraries for better release build optimization</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes">🐛 Bug Fixes<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes" title="Direct link to 🐛 Bug Fixes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-bug-fixes">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="navigation--notifications">Navigation &amp; Notifications<a class="hash-link" aria-label="Direct link to Navigation &amp; Notifications" title="Direct link to Navigation &amp; Notifications" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#navigation--notifications">​</a></h4>
+<ul>
+<li>Fixed null safety issue in BottomNavigation notification handling that could cause crashes with certain notification payloads</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="authentication">Authentication<a class="hash-link" aria-label="Direct link to Authentication" title="Direct link to Authentication" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#authentication">​</a></h4>
+<ul>
+<li>Added validation to ensure Google Sign-In configuration is properly set before attempting sign-in, preventing confusing error messages</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-dependencies--configuration">📦 Dependencies &amp; Configuration<a class="hash-link" aria-label="Direct link to 📦 Dependencies &amp; Configuration" title="Direct link to 📦 Dependencies &amp; Configuration" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-dependencies--configuration">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="new-dependencies">New Dependencies<a class="hash-link" aria-label="Direct link to New Dependencies" title="Direct link to New Dependencies" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#new-dependencies">​</a></h4>
+<ul>
+<li><code>react-native-sensors</code> (^7.3.6) - Access device accelerometer for tilt detection</li>
+<li><code>react-native-orientation-locker</code> (^1.7.0) - Enhanced orientation control during reading</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="build-configuration">Build Configuration<a class="hash-link" aria-label="Direct link to Build Configuration" title="Direct link to Build Configuration" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#build-configuration">​</a></h4>
+<ul>
+<li>Version bump: <strong>Android 33 / 1.4.4</strong>, <strong>iOS 1.4.4</strong></li>
+<li>InkNest-Externals submodule refreshed with latest changes</li>
+<li>iOS build script cleanup - removed unused input and output paths</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="️-upgrade-notes">🛠️ Upgrade Notes<a class="hash-link" aria-label="Direct link to 🛠️ Upgrade Notes" title="Direct link to 🛠️ Upgrade Notes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#%EF%B8%8F-upgrade-notes">​</a></h2>
+<ul>
+<li>Run <code>cd ios &amp;&amp; pod install</code> after pulling to pick up new native dependencies</li>
+<li>Gravity Scroll is opt-in - enable it from the reading settings to try hands-free reading</li>
+<li>For best results with Gravity Scroll, hold your device in a comfortable position and calibrate before use</li>
+</ul>
+<hr>
+<p><strong>Update now</strong> to enjoy hands-free manga reading with Gravity Scroll! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content>
+        <author>
+            <name>P2Devs</name>
+            <uri>https://github.com/p2devs</uri>
+        </author>
+        <category label="Release" term="Release"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[InkNest v1.4.3 Release]]></title>
         <id>https://p2devs.github.io/InkNest/blog/release-v1.4.3</id>
