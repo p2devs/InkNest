@@ -1,21 +1,40 @@
 import { MMKV } from 'react-native-mmkv';
-import {
-  migrateAsyncStorageToMMKV,
-  createMMKVAdapter,
-} from './migrateStorage';
 
 // Create MMKV instance
 const mmkvStorage = new MMKV({
   id: 'inknest-redux-storage',
-  // Optional: encryption for sensitive data
-  // encryptionKey: 'your-encryption-key',
 });
 
+/**
+ * Adapter to make MMKV work with redux-persist
+ * redux-persist expects setItem/getItem/removeItem that return Promises
+ */
+const storage = {
+  setItem: (key, value) => {
+    try {
+      mmkvStorage.set(key, value);
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  getItem: (key) => {
+    try {
+      const value = mmkvStorage.getString(key);
+      return Promise.resolve(value ?? null);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  removeItem: (key) => {
+    try {
+      mmkvStorage.delete(key);
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+};
+
 // Export the adapter for redux-persist
-export const storage = createMMKVAdapter(mmkvStorage);
-
-// Export MMKV instance for direct access if needed
-export { mmkvStorage };
-
-// Export migration function to be called before store initialization
-export { migrateAsyncStorageToMMKV };
+export { storage, mmkvStorage };

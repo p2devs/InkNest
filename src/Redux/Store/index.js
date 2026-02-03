@@ -1,59 +1,71 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {persistStore, persistReducer} from 'redux-persist';
-import {storage, migrateAsyncStorageToMMKV, mmkvStorage} from '../Storage/Storage';
+import {storage, mmkvStorage} from '../Storage/Storage';
+import {migrateAsyncStorageToMMKV} from '../Storage/migrateStorage';
 import Reducers from '../Reducers';
 import crashlytics from '@react-native-firebase/crashlytics';
 
+// Store and persistor references
+let store = null;
+let persistor = null;
+let isStoreInitialized = false;
+
 const persistConfig = {
   key: 'root',
-  version: 1, // Add version for future state migrations
+  version: 1,
   storage: storage,
   blacklist: ['error', 'status', 'loading', 'downTime', 'hasRewardAdsShown'],
-  // Add state reconciler to handle version changes
-  stateReconciler: (inboundState, originalState) => {
-    // If inbound state is invalid/corrupted, return original state
-    if (!inboundState || typeof inboundState !== 'object') {
-      return originalState;
-    }
-    return inboundState;
-  },
+  // Important: Don't write until rehydration is complete
+  writeDelayed: true,
 };
 
-const persistedReducer = persistReducer(persistConfig, Reducers);
+/**
+ * Create the Redux store
+ */
+function createStore() {
+  const persistedReducer = persistReducer(persistConfig, Reducers);
+  
+  const newStore = configureStore({
+    reducer: {
+      data: persistedReducer,
+    },
+    middleware: getDefaultMiddleware =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+      }),
+  });
+
+  const newPersistor = persistStore(newStore);
+  
+  return { store: newStore, persistor: newPersistor };
+}
 
 /**
- * Redux store configuration with persisted reducer.
- * @constant {import('@reduxjs/toolkit').EnhancedStore} store
- * @description Configures the Redux store with a persisted reducer and custom middleware settings.
- * The store is set up using Redux Toolkit's configureStore with:
- * - A persisted reducer for data persistence
- * - Disabled serializable check in middleware to allow non-serializable values
+ * Initialize the store after migration
+ * This should be called AFTER migration is complete
  */
-const store = configureStore({
-  reducer: {
-    data: persistedReducer,
-  },
-  middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }),
-});
+export function initializeStore() {
+  if (isStoreInitialized) {
+    return { store, persistor };
+  }
 
-const persistor = persistStore(store);
+  const result = createStore();
+  store = result.store;
+  persistor = result.persistor;
+  isStoreInitialized = true;
+  
+  return { store, persistor };
+}
 
 /**
  * Perform storage migration from AsyncStorage to MMKV
- * Call this function ONCE during app initialization (before rendering)
+ * Call this function BEFORE initializing the store
  * @returns {Promise<boolean>}
  */
 export async function performStorageMigration() {
   try {
+    // Run the migration
     const success = await migrateAsyncStorageToMMKV(mmkvStorage);
-    if (success) {
-      // After successful migration, purge and rehydrate to load migrated data
-      await persistor.purge();
-      await persistor.persist();
-    }
     return success;
   } catch (error) {
     console.error('Migration error:', error);
@@ -66,12 +78,22 @@ export async function performStorageMigration() {
  * Get storage size info for debugging/monitoring
  */
 export function getStorageInfo() {
+  if (!mmkvStorage) {
+    return { size: 0, isHealthy: false };
+  }
   const size = mmkvStorage.getSize();
   return {
     size: size,
-    // MMKV has no practical limit (depends on device storage)
-    isHealthy: size > 0 || size === 0, // Size 0 means empty, which is fine
+    isHealthy: size >= 0,
   };
 }
 
-export {store, persistor};
+/**
+ * Check if store is initialized
+ */
+export function isStoreReady() {
+  return isStoreInitialized && store !== null && persistor !== null;
+}
+
+// Export store and persistor (will be null until initializeStore is called)
+export { store, persistor };
