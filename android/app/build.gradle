@@ -85,8 +85,13 @@ android {
         applicationId "com.p2devs.inknest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+<<<<<<< HEAD
         versionCode 33
         versionName "1.4.4"
+=======
+        versionCode 32
+        versionName "1.4.3"
+>>>>>>> origin/main
 
         // Increase memory allocated to Gradle
         dexOptions {

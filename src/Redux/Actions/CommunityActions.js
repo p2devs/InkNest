@@ -78,6 +78,16 @@ export const signInWithGoogle = () => async dispatch => {
     crashlytics().log('Attempting Google Sign-In');
     analytics().logEvent('auth_attempt', {method: 'google'});
 
+    // Ensure configuration is run before sign in
+    configureGoogleSignIn();
+
+    const webClientId = GOOGLE_WEB_CLIENT_ID;
+    if (!webClientId || webClientId === 'YOUR_WEB_CLIENT_ID_HERE') {
+      throw new Error(
+        'Google Sign-In is not configured. Please check your GOOGLE_WEB_CLIENT_ID.',
+      );
+    }
+
     // Check if device supports Google Play
     await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
 
