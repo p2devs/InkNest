@@ -27,6 +27,14 @@
 <li><strong>Built-in walkthrough</strong>: Interactive tutorial introduces new users to gravity scroll controls</li>
 </ul>
 <p><strong>Battery optimization</strong>: The feature uses throttled sensor updates (10Hz) and frame processing (30fps) to minimize battery impact while maintaining smooth scrolling.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="️-critical-data-loss-fix-mmkv-migration">🛡️ Critical Data Loss Fix (MMKV Migration)<a class="hash-link" aria-label="Direct link to 🛡️ Critical Data Loss Fix (MMKV Migration)" title="Direct link to 🛡️ Critical Data Loss Fix (MMKV Migration)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#%EF%B8%8F-critical-data-loss-fix-mmkv-migration">​</a></h3>
+<p><strong>Fixed random data loss issues</strong> where history, bookmarks, and downloads would occasionally disappear when closing and reopening the app.</p>
+<ul>
+<li><strong>Root cause</strong>: AsyncStorage has a 6MB limit on Android. When users accumulated large amounts of history and downloads, storage would fail silently, causing data loss on app restart.</li>
+<li><strong>Solution</strong>: Migrated from AsyncStorage to <strong>MMKV</strong> - a faster, more reliable storage solution without size limits.</li>
+<li><strong>Zero data loss</strong>: Seamless one-time migration automatically transfers all existing data (history, bookmarks, downloads) to the new storage on first app launch.</li>
+<li><strong>Better reliability</strong>: MMKV is significantly faster and has no practical storage limits, preventing future data loss issues.</li>
+</ul>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-android-enhancements">🔧 Android Enhancements<a class="hash-link" aria-label="Direct link to 🔧 Android Enhancements" title="Direct link to 🔧 Android Enhancements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#-android-enhancements">​</a></h3>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="new-permissions">New Permissions<a class="hash-link" aria-label="Direct link to New Permissions" title="Direct link to New Permissions" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#new-permissions">​</a></h4>
 <ul>
@@ -50,6 +58,7 @@
 <ul>
 <li><code>react-native-sensors</code> (^7.3.6) - Access device accelerometer for tilt detection</li>
 <li><code>react-native-orientation-locker</code> (^1.7.0) - Enhanced orientation control during reading</li>
+<li><code>react-native-mmkv</code> (^3.x) - High-performance storage for reliable data persistence</li>
 </ul>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="build-configuration">Build Configuration<a class="hash-link" aria-label="Direct link to Build Configuration" title="Direct link to Build Configuration" href="https://p2devs.github.io/InkNest/blog/release-v1.4.4#build-configuration">​</a></h4>
 <ul>
@@ -62,9 +71,10 @@
 <li>Run <code>cd ios &amp;&amp; pod install</code> after pulling to pick up new native dependencies</li>
 <li>Gravity Scroll is opt-in - enable it from the reading settings to try hands-free reading</li>
 <li>For best results with Gravity Scroll, hold your device in a comfortable position and calibrate before use</li>
+<li><strong>Your data will be automatically migrated</strong> on first launch - no action needed!</li>
 </ul>
 <hr>
-<p><strong>Update now</strong> to enjoy hands-free manga reading with Gravity Scroll! 📚✨</p>
+<p><strong>Update now</strong> to enjoy hands-free manga reading with Gravity Scroll and keep your data safe with MMKV storage! 📚✨</p>
 <p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
             <category>Release</category>
         </item>
