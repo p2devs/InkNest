@@ -4116,6 +4116,8 @@ __metadata:
     react-native-gesture-handler: ^2.20.2
     react-native-google-mobile-ads: ^14.5.0
     react-native-linear-gradient: ^2.8.3
+    react-native-mmkv: ^4.1.2
+    react-native-nitro-modules: ^0.33.5
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.12.5
     react-native-permissions: ^5.2.1
@@ -9892,6 +9894,27 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-mmkv@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "react-native-mmkv@npm:4.1.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-nitro-modules: "*"
+  checksum: 7e3f774c1bd2f3a608980342ee3d89a3f58b00f9b713cf873205b2aa15ae0e0805f96804a7ed53410cb2a2e797677b64c838db7c9647469e768f2f3acbb2f821
+  languageName: node
+  linkType: hard
+
+"react-native-nitro-modules@npm:^0.33.5":
+  version: 0.33.5
+  resolution: "react-native-nitro-modules@npm:0.33.5"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 07435b309efacef43d3d7ec0320740f1c4c06124aaab715fe552e70b153d55565f445804e87cbf1ca893fae95c84016388661c4ee9d295b35f09c59f528add0d
   languageName: node
   linkType: hard
 

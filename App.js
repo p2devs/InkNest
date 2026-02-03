@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { persistor, store } from './src/Redux/Store';
+import { persistor, store, performStorageMigration } from './src/Redux/Store';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RootNavigation } from './src/Navigation';
 import Loading from './src/Components/UIComp/Loading';
@@ -18,6 +18,39 @@ import {
   listenToAuthChanges,
 } from './src/InkNest-Externals/Community/Logic/CommunityActions';
 import NotificationSubscriptionBootstrapper from './src/InkNest-Externals/Notifications/components/NotificationSubscriptionBootstrapper';
+
+/**
+ * Migration gate component that handles AsyncStorage -> MMKV migration
+ * before rendering the app
+ */
+function MigrationGate({ children }) {
+  const [isMigrating, setIsMigrating] = useState(true);
+  const [migrationError, setMigrationError] = useState(null);
+
+  useEffect(() => {
+    async function runMigration() {
+      try {
+        // Perform migration from AsyncStorage to MMKV
+        await performStorageMigration();
+        setIsMigrating(false);
+      } catch (error) {
+        console.error('Migration failed:', error);
+        crashlytics().recordError(error);
+        setMigrationError(error);
+        // Even on error, allow app to continue (may lose old data but app works)
+        setIsMigrating(false);
+      }
+    }
+
+    runMigration();
+  }, []);
+
+  if (isMigrating) {
+    return <Loading />;
+  }
+
+  return children;
+}
 
 /**
  * The main App component that sets up the root of the application.
@@ -70,16 +103,18 @@ const App = () => {
       <ConfigCatProvider
         sdkKey={__DEV__ ? CONFIGCAT_SDK_KEY_TEST : CONFIGCAT_SDK_KEY_PROD}>
         <Provider store={store}>
-          <PersistGate loading={<Loading />} persistor={persistor}>
-            <PaperProvider>
-              <BannerProvider>
-                <NotificationSubscriptionBootstrapper />
-                <RootNavigation />
-                <Toast />
-                <ForceUpdate />
-              </BannerProvider>
-            </PaperProvider>
-          </PersistGate>
+          <MigrationGate>
+            <PersistGate loading={<Loading />} persistor={persistor}>
+              <PaperProvider>
+                <BannerProvider>
+                  <NotificationSubscriptionBootstrapper />
+                  <RootNavigation />
+                  <Toast />
+                  <ForceUpdate />
+                </BannerProvider>
+              </PaperProvider>
+            </PersistGate>
+          </MigrationGate>
         </Provider>
       </ConfigCatProvider>
     </GestureHandlerRootView>
