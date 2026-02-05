@@ -19,7 +19,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import Header from '../../../../Components/UIComp/Header';
 import DescriptionView from '../../../../Components/UIComp/DescriptionView';
 import {goBack} from '../../../../Navigation/NavigationService';
 import {updateData} from '../../../../Redux/Reducers';
