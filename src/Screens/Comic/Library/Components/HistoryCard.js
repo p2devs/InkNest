@@ -1,8 +1,9 @@
-import React, {useMemo, useState} from 'react';
-import {TouchableOpacity, Image, View, Text} from 'react-native';
+import React, {useMemo} from 'react';
+import {TouchableOpacity, Image, View, Text, StyleSheet} from 'react-native';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {useSelector} from 'react-redux';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {navigate} from '../../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../../Constants';
@@ -28,18 +29,7 @@ const HistoryCard = ({item, index}) => {
   return (
     <TouchableOpacity
       key={index}
-      style={{
-        height: 144,
-        width: 264,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        marginTop: 12,
-        marginRight: 12,
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        flexDirection: 'row',
-        gap: 12,
-      }}
+      style={styles.card}
       onPress={() => {
         crashlytics().log('History Card Comic Details button clicked');
         analytics().logEvent('history_card_comic_details_button', {
@@ -49,108 +39,111 @@ const HistoryCard = ({item, index}) => {
         navigate(NAVIGATION.comicDetails, item);
       }}>
       <Image
-        style={{
-          borderRadius: 7,
-          height: 128,
-          width: 88,
-        }}
+        style={styles.image}
         resizeMode="cover"
-        source={{
-          uri: item?.image,
-        }}
+        source={{uri: item?.image}}
       />
-      <View
-        style={{
-          width: 145,
-        }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: '500',
-            color: '#fff',
-            marginVertical: 8,
-          }}
-          numberOfLines={2}>
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={2}>
           {item?.title}
         </Text>
-        <Text
-          style={{
-            opacity: 0.5,
-            color: '#fff',
-            fontSize: 12,
-          }}
-          numberOfLines={1}>
-          {item?.genres}
-        </Text>
 
-        <View
-          style={{
-            marginVertical: 4,
-          }}
-        />
+        <View style={styles.progressContainer}>
+          <View style={styles.progressRow}>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, {width: `${progress}%`}]} />
+            </View>
+            <Text style={styles.progressText}>{progress.toFixed(0)}%</Text>
+          </View>
+        </View>
 
-        <Progress progress={progress} height={10} innerheight={6} />
-
-        <View
-          style={{
-            marginVertical: 4,
-          }}
-        />
-
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: '500',
-            color: '#f56b00',
+        <TouchableOpacity
+          style={styles.resumeButton}
+          onPress={() => {
+            crashlytics().log('History Card Comic Details button clicked');
+            analytics().logEvent('history_card_comic_details_button', {
+              link: item?.link?.toString(),
+              title: item?.title?.toString(),
+            });
+            navigate(NAVIGATION.comicDetails, item);
           }}>
-          Continue Reading
-        </Text>
+          <Text style={styles.resumeText}>Resume</Text>
+          <Ionicons name="play" size={12} color="#FFF" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
 };
 
-export default HistoryCard;
-function Progress({progress, height, innerheight}) {
-  const [width, setWidth] = useState(0);
+const styles = StyleSheet.create({
+  card: {
+    width: 280,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginTop: 12,
+    marginRight: 12,
+    padding: 12,
+    flexDirection: 'row',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  image: {
+    borderRadius: 10,
+    height: 120,
+    width: 85,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  progressContainer: {
+    marginBottom: 12,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressBarBg: {
+    flex: 1,
+    height: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#667EEA',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#667EEA',
+    minWidth: 28,
+  },
+  resumeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#667EEA',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  resumeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+  },
+});
 
-  return (
-    <>
-      <Text
-        style={{
-          fontSize: 8,
-          color: '#fff',
-          opacity: 0.5,
-        }}>
-        {progress.toFixed(2)}% Completed
-      </Text>
-      <View
-        style={{
-          overflow: 'hidden',
-          borderRadius: height,
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          height: height,
-          paddingHorizontal: 2,
-          paddingVertical: 2,
-          marginVertical: 4,
-        }}
-        onLayout={e => {
-          if (width !== 0) {
-            return;
-          }
-          setWidth(e.nativeEvent.layout.width);
-        }}>
-        <View
-          style={{
-            backgroundColor: '#3268de',
-            height: innerheight,
-            borderRadius: innerheight,
-            top: 0,
-            left: 0,
-            width: `${progress}%`,
-          }}
-        />
-      </View>
-    </>
-  );
-}
+export default HistoryCard;
