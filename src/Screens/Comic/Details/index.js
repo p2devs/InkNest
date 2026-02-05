@@ -16,12 +16,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
+import {navigate} from '../../../Navigation/NavigationService';
+import {NAVIGATION} from '../../../Constants';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
 import Error from '../../../Components/UIComp/Error';
 import ChapterCard from './ChapterCard';
 import HeaderComponent from './Components/HeaderComponent';
 import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import PaginationFooter from './Components/FooterPagination';
+import ContinueReadingFAB from './Components/ContinueReadingFAB';
 import {rewardAdsShown} from '../../../Redux/Reducers';
 import {showRewardedAd} from '../../../InkNest-Externals/Redux/Actions/Download';
 import CommunityTab from '../../../InkNest-Externals/Community/Screens/CommunityBoard';
@@ -107,6 +110,56 @@ export function ComicDetails({route, navigation}) {
   );
   const isChapterTab = activeTab === 'Chapters';
   const isRecentTab = activeTab === 'Recent';
+
+  // Get the last read chapter for Continue Reading FAB
+  const lastReadChapter = useMemo(() => {
+    if (!readingHistory?.readComics) return null;
+    
+    const entries = Object.entries(readingHistory.readComics);
+    if (entries.length === 0) return null;
+    
+    // Sort by readAt timestamp (most recent first)
+    const sorted = entries.sort((a, b) => (b[1]?.readAt || 0) - (a[1]?.readAt || 0));
+    const [chapterLink, meta] = sorted[0];
+    
+    // Find chapter details
+    const chapter = availableChapters.find(ch => 
+      ch.link === chapterLink || ch.link.split('?')[0] === chapterLink.split('?')[0]
+    );
+    
+    if (!chapter) return null;
+    
+    const comicBook = meta?.comicBook || {};
+    const totalPages = comicBook.images?.length || meta?.totalPages || 0;
+    const currentPage = (meta?.lastReadPage || 0) + 1;
+    const progress = totalPages > 0 ? (currentPage / totalPages) * 100 : 0;
+    
+    return {
+      ...chapter,
+      currentPage,
+      totalPages,
+      progress,
+    };
+  }, [readingHistory, availableChapters]);
+
+  const handleContinueReading = useCallback(() => {
+    if (!lastReadChapter) return;
+    
+    crashlytics().log('Continue Reading FAB clicked');
+    analytics().logEvent('Continue_Reading_Clicked', {
+      chapter: lastReadChapter.title,
+    });
+    
+    navigate(NAVIGATION.comicBook, {
+      comicBookLink: lastReadChapter.link,
+      pageJump: lastReadChapter.currentPage - 1,
+      DetailsPage: {
+        link: PageLink,
+        title: ComicDetail?.title,
+        imgSrc: ComicDetail?.imgSrc,
+      },
+    });
+  }, [lastReadChapter, PageLink, ComicDetail]);
 
   const recentChapters = useMemo(() => {
     if (!isRecentTab || !readingHistory?.readComics) {
@@ -408,6 +461,7 @@ export function ComicDetails({route, navigation}) {
             index={index}
             isBookmark={false}
             detailPageLink={PageLink}
+            isFirst={index === 0}
           />
         )}
         keyExtractor={(item, index) =>
@@ -433,6 +487,18 @@ export function ComicDetails({route, navigation}) {
         onGoogleSignIn={handleGoogleSignIn}
         onAppleSignIn={handleAppleSignIn}
       />
+      
+      {/* Continue Reading FAB - only show on Chapters tab when there's reading history */}
+      {isChapterTab && lastReadChapter && (
+        <ContinueReadingFAB
+          visible={true}
+          chapterTitle={lastReadChapter.title}
+          progress={lastReadChapter.progress}
+          currentPage={lastReadChapter.currentPage}
+          totalPages={lastReadChapter.totalPages}
+          onPress={handleContinueReading}
+        />
+      )}
     </>
   );
 }
