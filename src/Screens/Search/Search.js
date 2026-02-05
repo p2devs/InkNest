@@ -26,15 +26,49 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/UIComp/Header';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {SearchAnime} from '../../Components/Func/parseFunc';
-import Card from '../Comic/Components/Card';
 import {searchComic} from '../../Redux/Actions/GlobalActions';
-import HomeRenderItem from '../../Components/UIComp/HomeRenderItem';
+
+// Generate a consistent gradient color based on string
+const getGradientColors = (str) => {
+  const colors = [
+    ['#FF6B6B', '#EE5A6F'],
+    ['#4ECDC4', '#44A08D'],
+    ['#667EEA', '#764BA2'],
+    ['#F093FB', '#F5576C'],
+    ['#4FACFE', '#00F2FE'],
+    ['#43E97B', '#38F9D7'],
+    ['#FA709A', '#FEE140'],
+    ['#A8EDEA', '#FED6E3'],
+    ['#FF9A9E', '#FECFEF'],
+    ['#FFECD2', '#FCB69F'],
+  ];
+  let hash = 0;
+  for (let i = 0; i < str?.length || 0; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
+// Get initials from title
+const getInitials = (title) => {
+  if (!title) return '?';
+  const words = title.trim().split(/\s+/);
+  if (words.length === 1) {
+    return title.substring(0, 2).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
+// Comic badge component
+const ComicBadge = ({text, colors}) => (
+  <View style={[styles.badge, {backgroundColor: colors[0] + '30'}]}>
+    <Text style={[styles.badgeText, {color: colors[0]}]}>{text}</Text>
+  </View>
+);
 
 export function Search({navigation}) {
   const dispatch = useDispatch();
   const loading = useSelector(state => state.data.loading);
-  const IsAnime = useSelector(state => state.data.Anime);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('ReadAllComic');
   const [viewAll, setViewAll] = useState(null);
@@ -43,8 +77,30 @@ export function Search({navigation}) {
     ComicHub: [],
     ComicOnline: [],
   });
+  const [sortedSources, setSortedSources] = useState(['ReadAllComic', 'ComicHub', 'ComicOnline']);
   const flatlistRef = useRef();
   let Tag = View;
+
+  // Sort sources by result count and set active tab to the one with most results
+  const updateSourcesOrder = (data) => {
+    const sourcesWithCounts = [
+      {name: 'ReadAllComic', count: data.ReadAllComic?.length || 0},
+      {name: 'ComicHub', count: data.ComicHub?.length || 0},
+      {name: 'ComicOnline', count: data.ComicOnline?.length || 0},
+    ];
+    
+    // Sort by count descending
+    sourcesWithCounts.sort((a, b) => b.count - a.count);
+    
+    const sorted = sourcesWithCounts.map(s => s.name);
+    setSortedSources(sorted);
+    
+    // Set active tab to the source with most results (if any have results)
+    const bestSource = sourcesWithCounts.find(s => s.count > 0);
+    if (bestSource) {
+      setActiveTab(bestSource.name);
+    }
+  };
 
   const fetchData = async () => {
     if (loading) return;
@@ -54,7 +110,6 @@ export function Search({navigation}) {
       search: searchTerm?.trim()?.toString(),
     });
 
-    // https://readcomicsonline.ru/comic/{comic-name}/{chapter-name}
     let link = searchTerm.trim();
     if (
       (!link.startsWith('https://comichubfree.com/comic/') &&
@@ -74,183 +129,130 @@ export function Search({navigation}) {
           dispatch(searchComic(link, 'readallcomics')),
         ]);
 
-      setSearchData({
+      const newData = {
         ReadAllComic: readallcomicsResult ?? [],
         ComicHub: comichubfreeResult ?? [],
         ComicOnline: readcomicsonlineResult ?? [],
-      });
+      };
+      
+      setSearchData(newData);
+      updateSourcesOrder(newData);
       return;
     }
-    // remove the last element if present in the link like 5, 100, etc
     link = link.replace(/\/\d+$/, '');
-
-    // navigate to the comic details screen
-    navigation.navigate(NAVIGATION.comicDetails, {
-      link: link,
-    });
+    navigation.navigate(NAVIGATION.comicDetails, {link});
   };
 
   const renderItem = ({item, index}) => {
+    if (item.user === 'user') {
+      return (
+        <View style={styles.userMessageContainer}>
+          <Tag intensity={60} tint="dark" style={styles.userMessageBubble}>
+            <Text style={styles.userMessageText}>{item.query}</Text>
+          </Tag>
+        </View>
+      );
+    }
+
+    if (item.user === 'error') {
+      return (
+        <View style={styles.errorContainer}>
+          <Tag intensity={60} tint="dark" style={styles.errorBubble}>
+            <Text style={styles.errorText}>{item.error}</Text>
+          </Tag>
+        </View>
+      );
+    }
+
+    const colors = getGradientColors(item?.title);
+    const initials = getInitials(item?.title);
+    const isEven = index % 2 === 0;
+
     return (
-      <View key={index} style={{borderRadius: 12}}>
-        {item.user === 'user' ? (
-          <View
-            style={{
-              flex: 1,
-              marginHorizontal: widthPercentageToDP('2%'),
-              flexDirection: 'row',
-              alignItems: 'center',
-              alignSelf: 'flex-end',
-              maxWidth: widthPercentageToDP('76%'),
-            }}>
-            <Tag
-              intensity={60}
-              tint="dark"
-              style={[
-                {
-                  marginVertical: 5,
-                  marginHorizontal: 5,
-                  borderRadius: 10,
-                  padding: 5,
-                  backgroundColor: 'white',
-                  flexDirection: 'row',
-                  gap: 5,
-                },
-                styles.itemContainer,
-              ]}>
-              <Text style={styles.title}>{item.query}</Text>
-            </Tag>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate(NAVIGATION.comicDetails, {
+            link: item?.link,
+            title: item?.title,
+          });
+        }}
+        activeOpacity={0.7}
+        style={[styles.resultCard, isEven && styles.resultCardEven]}>
+        {/* Avatar with gradient */}
+        <View
+          style={[
+            styles.avatar,
+            {backgroundColor: colors[0]},
+            isEven && {backgroundColor: colors[1]},
+          ]}>
+          <Text style={styles.avatarText}>{initials}</Text>
+        </View>
+
+        {/* Content */}
+        <View style={styles.resultContent}>
+          <View style={styles.resultHeader}>
+            <Text style={styles.resultNumber}>#{index + 1}</Text>
+            <ComicBadge text={activeTab} colors={colors} />
           </View>
-        ) : item.user === 'error' ? (
-          <View
-            style={{
-              flex: 1,
-              marginHorizontal: widthPercentageToDP('2%'),
-              flexDirection: 'row',
-              alignItems: 'center',
-              maxWidth: widthPercentageToDP('76%'),
-            }}>
-            <Tag
-              intensity={60}
-              tint="dark"
-              style={[
-                {
-                  marginVertical: 5,
-                  marginHorizontal: 5,
-                  borderRadius: 10,
-                  padding: 5,
-                  backgroundColor: 'white',
-                },
-                styles.itemContainer,
-              ]}>
-              <Text style={styles.error}>{item.error}</Text>
-            </Tag>
+          
+          <Text style={styles.resultTitle} numberOfLines={2}>
+            {item?.title}
+          </Text>
+          
+          <View style={styles.resultFooter}>
+            <MaterialCommunityIcons
+              name="book-open-variant"
+              size={12}
+              color="rgba(255,255,255,0.5)"
+            />
+            <Text style={styles.resultFooterText}>Tap to read</Text>
           </View>
-        ) : (
+        </View>
+
+        {/* Arrow indicator */}
+        <View style={styles.arrowContainer}>
           <View
-            style={{
-              flex: 1,
-              marginHorizontal: widthPercentageToDP('2%'),
-              flexDirection: 'row',
-              alignItems: 'center',
-              maxWidth: widthPercentageToDP('96%'),
-              position: 'relative',
-            }}>
-            <Tag
-              intensity={60}
-              tint="dark"
-              style={[
-                {
-                  marginVertical: 5,
-                  marginHorizontal: 5,
-                  borderRadius: 10,
-                  padding: 5,
-                  backgroundColor: 'white',
-                },
-                styles.itemContainer,
-              ]}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate(NAVIGATION.comicDetails, {
-                      link: item?.link,
-                      title: item?.title,
-                    });
-                  }}
-                  key={index}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 12,
-                  }}>
-                  <Text style={{fontSize: 14, color: 'white', marginLeft: 12}}>
-                    {index + 1}.
-                  </Text>
-                  <Text style={styles.link}>{item?.title}</Text>
-                </TouchableOpacity>
-                {item?.results?.length > 10 && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setViewAll(item.results);
-                    }}
-                    style={{
-                      flexDirection: 'row',
-                      alignSelf: 'flex-end',
-                      bottom: 6,
-                      marginRight: 6,
-                    }}>
-                    <Text style={styles.link}>View all</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </Tag>
+            style={[
+              styles.arrowCircle,
+              {backgroundColor: colors[0] + '20'},
+            ]}>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors[0]}
+            />
           </View>
-        )}
-      </View>
+        </View>
+
+        {/* Decorative corner accent */}
+        <View
+          style={[
+            styles.cornerAccent,
+            {backgroundColor: colors[0]},
+            isEven && {backgroundColor: colors[1]},
+          ]}
+        />
+      </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#14142a'}} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <Header
-          style={{
-            width: '100%',
-            height: heightPercentageToDP('4%'),
-            backgroundColor: '#14142a',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-            borderBottomWidth: 0,
-            marginBottom: 5,
-          }}>
+        {/* Header */}
+        <Header style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons
-              name={'arrow-back'}
+              name="arrow-back"
               size={heightPercentageToDP('2.5%')}
-              color={'#FFF'}
+              color="#FFF"
             />
           </TouchableOpacity>
-          <View
-            style={{
-              flexDirection: 'row',
-              left: widthPercentageToDP('7%'),
-            }}>
-            <Text
-              style={{
-                fontSize: heightPercentageToDP('2%'),
-                fontWeight: 'bold',
-                color: '#FFF',
-              }}>
-              {'Search'}
-            </Text>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Search</Text>
           </View>
           <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+            style={styles.webSearchBtn}
             onPress={() => {
               crashlytics().log('Advanced Search button clicked');
               analytics().logEvent('advanced_search', {
@@ -258,243 +260,159 @@ export function Search({navigation}) {
               });
               navigation.navigate(NAVIGATION.WebSearch);
             }}>
-            <Text
-              style={{
-                fontSize: heightPercentageToDP('1.5%'),
-                fontWeight: 'bold',
-                color: '#FFF',
-                textDecorationLine: 'underline',
-              }}>
-              Web Search
-            </Text>
+            <Text style={styles.webSearchText}>Web Search</Text>
           </TouchableOpacity>
         </Header>
-        <View
-          style={{
-            paddingHorizontal: widthPercentageToDP('2%'),
-            paddingVertical: heightPercentageToDP('2%'),
-            backgroundColor: '#14142a',
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              paddingHorizontal: 12,
-              borderWidth: 1,
-              borderColor: '#FFF',
-              borderRadius: 12,
-              alignItems: 'center',
-              backgroundColor: '#14142a',
-            }}>
+
+        {/* Search Input */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputWrapper}>
+            <MaterialCommunityIcons
+              name="magnify"
+              size={22}
+              color="rgba(255,255,255,0.6)"
+              style={styles.searchIcon}
+            />
             <TextInput
               style={styles.input}
-              placeholder={
-                IsAnime
-                  ? 'Send us what you want to see...'
-                  : 'Find a comic and share its link!'
-              }
+              placeholder="Find comics across sources..."
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
-              placeholderTextColor={'#FFF'}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               keyboardType="web-search"
             />
             <TouchableOpacity disabled={loading} onPress={fetchData}>
               {loading ? (
-                <ActivityIndicator size="small" color="gold" />
+                <ActivityIndicator size="small" color="#667EEA" />
               ) : (
-                <MaterialCommunityIcons
-                  name="cube-send"
-                  size={24}
-                  color={!loading ? 'white' : 'silver'}
-                />
+                <View style={styles.sendButton}>
+                  <MaterialCommunityIcons
+                    name="arrow-right"
+                    size={20}
+                    color="#FFF"
+                  />
+                </View>
               )}
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{paddingHorizontal: 12, gap: 15, marginBottom: 10}}>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 24,
-              paddingHorizontal: 16,
-              borderBottomColor: 'rgba(255,255,255,0.1)',
-              borderBottomWidth: 1,
-              justifyContent: 'space-between',
-            }}>
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={Object.keys(searchData)}
-              renderItem={({item, idx}) => {
-                return (
-                  <TouchableOpacity
-                    key={idx}
-                    onPress={() => {
-                      setActiveTab(item);
-                    }}
-                    style={{
-                      marginRight: 28,
-                      borderBottomColor:
-                        activeTab === item ? '#3268de' : 'transparent',
-                      borderBottomWidth: 2,
-                      paddingBottom: 4,
-                      flexDirection: 'row',
-                      gap: 6,
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: '700',
-                        color:
-                          activeTab === item
-                            ? 'rgba(255,255,255,1)'
-                            : 'rgba(255,255,255,0.6)',
-                      }}>
-                      {item}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: '700',
-                        color:
-                          activeTab === item
-                            ? 'rgba(255, 6, 6, 1)'
-                            : 'rgba(255, 6, 6, 0.6)',
-                      }}>
-                      ({searchData[item]?.length})
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          </View>
+
+        {/* Source Tabs */}
+        <View style={styles.tabsContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={sortedSources}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() => setActiveTab(item)}
+                style={[
+                  styles.tabButton,
+                  activeTab === item && styles.tabButtonActive,
+                ]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === item && styles.tabTextActive,
+                  ]}>
+                  {item}
+                </Text>
+                <View
+                  style={[
+                    styles.tabBadge,
+                    activeTab === item && styles.tabBadgeActive,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.tabBadgeText,
+                      activeTab === item && styles.tabBadgeTextActive,
+                    ]}>
+                    {searchData[item]?.length || 0}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.tabsContent}
+          />
         </View>
 
+        {/* Results List */}
         <FlatList
           scrollsToTop
           ref={flatlistRef}
-          style={{flex: 1, backgroundColor: '#14142a'}}
-          ListEmptyComponent={
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <MaterialCommunityIcons
-                name="book-open-page-variant-outline"
-                size={heightPercentageToDP('10%')}
-                color="gold"
-                style={{marginRight: 10}}
-              />
-              <Text
-                style={[styles.title, {fontSize: heightPercentageToDP('2%')}]}>
-                Send us what you want to read
-              </Text>
-              <Text
-                style={[styles.title, {fontSize: heightPercentageToDP('2%')}]}>
-                we will find it for you
-              </Text>
-              <Text
-                style={[styles.title, {fontSize: heightPercentageToDP('2%')}]}>
-                and show you the results
-              </Text>
-            </View>
-          }
+          style={styles.resultsList}
+          ListEmptyComponent={() => {
+            // Check if any source has results
+            const totalResults = Object.values(searchData).reduce(
+              (sum, arr) => sum + (arr?.length || 0),
+              0
+            );
+            const hasResultsElsewhere = totalResults > 0;
+            
+            return (
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconContainer}>
+                  <MaterialCommunityIcons
+                    name={hasResultsElsewhere ? "book-off" : "book-search"}
+                    size={heightPercentageToDP('8%')}
+                    color={hasResultsElsewhere ? "#FF6B6B" : "#667EEA"}
+                  />
+                </View>
+                <Text style={styles.emptyTitle}>
+                  {hasResultsElsewhere 
+                    ? `No results in ${activeTab}` 
+                    : 'Ready to explore?'}
+                </Text>
+                <Text style={styles.emptySubtitle}>
+                  {hasResultsElsewhere 
+                    ? 'This source has no comics. Check the other tabs above!' 
+                    : 'Search for your favorite comics across multiple sources'}
+                </Text>
+              </View>
+            );
+          }}
           data={searchData?.[activeTab ?? 'ComicOnline'] ?? []}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{flexGrow: 1}}
-          ListFooterComponent={
-            <View style={{marginVertical: heightPercentageToDP('6%')}} />
-          }
+          contentContainerStyle={styles.resultsContent}
+          ListFooterComponent={<View style={styles.footerSpace} />}
           maxToRenderPerBatch={15}
           initialNumToRender={10}
         />
+
+        {/* View All Modal */}
         <Modal
           transparent
           animationType="slide"
           visible={viewAll !== null}
-          onRequestClose={() => {
-            setViewAll(null);
-          }}>
+          onRequestClose={() => setViewAll(null)}>
           <TouchableOpacity
-            onPress={() => {
-              setViewAll(null);
-            }}
+            onPress={() => setViewAll(null)}
             activeOpacity={1}
-            style={{
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-            }}
+            style={styles.modalOverlay}
           />
           <Tag
             intensity={10}
             tint="light"
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              left: 0,
-              // backgroundColor: 'rgba(255,255,255,0.5)',
-              backgroundColor: 'steelblue',
-              flex: 1,
-              maxHeight: heightPercentageToDP('60%'),
-              width: '100%',
-              borderRadius: 12,
-            }}>
-            <View style={{flexGrow: 1, zIndex: 10}}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 12,
-                  paddingVertical: 15,
-                  borderBottomWidth: 0.5,
-                  borderColor: '#fff',
-                }}>
-                <Text style={{color: 'white', fontSize: 20, fontWeight: '900'}}>
-                  Comic List
-                </Text>
+            style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>All Results</Text>
                 <TouchableOpacity
-                  style={{
-                    width: heightPercentageToDP('3%'),
-                    height: heightPercentageToDP('3%'),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: heightPercentageToDP('2.4%'),
-                    backgroundColor: 'red',
-                    //add shadow to the close button
-                  }}
-                  onPress={() => {
-                    setViewAll(null);
-                  }}>
-                  {/* <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.freepik.com/512/3588/3588762.png',
-                    }}
-                    style={{ width: 30, height: 30 }}
-                  /> */}
-                  <AntDesign
-                    name="close"
-                    size={heightPercentageToDP('2.4%')}
-                    color="white"
-                  />
+                  style={styles.modalCloseBtn}
+                  onPress={() => setViewAll(null)}>
+                  <AntDesign name="close" size={20} color="#FFF" />
                 </TouchableOpacity>
               </View>
 
-              <View
-                style={{
-                  flexDirection: 'column',
-                  flexGrow: 1,
-                }}>
-                <FlatList
-                  data={viewAll ?? []}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({item, index}) => (
+              <FlatList
+                data={viewAll ?? []}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({item, index}) => {
+                  const colors = getGradientColors(item.title);
+                  return (
                     <TouchableOpacity
                       onPress={() => {
                         navigation.navigate(NAVIGATION.comicDetails, {
@@ -503,29 +421,29 @@ export function Search({navigation}) {
                         });
                         setViewAll(null);
                       }}
-                      key={index}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: 12,
-                        borderBottomWidth: 0.5,
-                        borderColor: '#fff',
-                      }}>
-                      <Text
-                        style={{fontSize: 14, color: 'white', marginLeft: 4}}>
-                        {index + 1}.
-                      </Text>
-                      <Text style={styles.link}>{item.title}</Text>
+                      style={styles.modalItem}>
+                      <View
+                        style={[
+                          styles.modalAvatar,
+                          {backgroundColor: colors[0]},
+                        ]}>
+                        <Text style={styles.modalAvatarText}>
+                          {getInitials(item.title)}
+                        </Text>
+                      </View>
+                      <Text style={styles.modalItemText}>{item.title}</Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color="rgba(255,255,255,0.3)"
+                      />
                     </TouchableOpacity>
-                  )}
-                  ListFooterComponent={
-                    <View
-                      style={{marginVertical: heightPercentageToDP('6%')}}
-                    />
-                  }
-                />
-              </View>
+                  );
+                }}
+                ListFooterComponent={
+                  <View style={styles.footerSpace} />
+                }
+              />
             </View>
           </Tag>
         </Modal>
@@ -535,57 +453,373 @@ export function Search({navigation}) {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0F0F1A',
+  },
   container: {
     flex: 1,
   },
+  
+  // Header
+  header: {
+    width: '100%',
+    height: heightPercentageToDP('5%'),
+    backgroundColor: '#0F0F1A',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+  },
+  headerTitle: {
+    fontSize: heightPercentageToDP('2.2%'),
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  webSearchBtn: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  webSearchText: {
+    fontSize: heightPercentageToDP('1.5%'),
+    fontWeight: '600',
+    color: '#667EEA',
+  },
+  
+  // Search Input
+  searchContainer: {
+    paddingHorizontal: widthPercentageToDP('4%'),
+    paddingVertical: heightPercentageToDP('2%'),
+    backgroundColor: '#0F0F1A',
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
   input: {
+    flex: 1,
     height: heightPercentageToDP('6%'),
-    width: '80%',
+    color: '#FFF',
+    fontSize: 16,
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#667EEA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Tabs
+  tabsContainer: {
+    paddingVertical: 8,
+    backgroundColor: '#0F0F1A',
+  },
+  tabsContent: {
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  tabButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginRight: 10,
+    gap: 8,
+  },
+  tabButtonActive: {
+    backgroundColor: '#667EEA',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  tabTextActive: {
     color: '#FFF',
   },
-  loader: {
-    marginTop: 20,
-  },
-  error: {
-    color: Platform.OS == 'ios' ? '#FF0090' : '#FF004F',
-    // marginTop: 10,
-    // alignSelf: 'center',
-    paddingVertical: 5,
-    flexWrap: 'wrap',
-    maxWidth: widthPercentageToDP('70%'),
-  },
-  noResults: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: '#FFF',
-  },
-  itemContainer: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: 'steelblue',
+  tabBadge: {
+    minWidth: 20,
+    height: 20,
     borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  tabBadgeActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  tabBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  tabBadgeTextActive: {
+    color: '#FFF',
+  },
+  
+  // Results List
+  resultsList: {
+    flex: 1,
+    backgroundColor: '#0F0F1A',
+  },
+  resultsContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    gap: 12,
+  },
+  footerSpace: {
+    height: heightPercentageToDP('4%'),
+  },
+  
+  // Result Card
+  resultCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  resultCardEven: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFF',
+  },
+  resultContent: {
     flex: 1,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFF',
+  resultHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
   },
-  link: {
+  resultNumber: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.3)',
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  resultTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFF',
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  resultFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  resultFooterText: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.4)',
+  },
+  arrowContainer: {
+    marginLeft: 12,
+  },
+  arrowCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cornerAccent: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 60,
+    height: 4,
+    borderBottomLeftRadius: 4,
+    opacity: 0.8,
+  },
+  
+  // Empty State
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: heightPercentageToDP('15%'),
+    paddingHorizontal: 40,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 30,
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFF',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
     fontSize: 14,
-    color: 'gold',
-    paddingVertical: 5,
-    flexWrap: 'wrap',
-    maxWidth: widthPercentageToDP('70%'),
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+    lineHeight: 22,
   },
-  SwitchSelectedText: {
-    fontSize: heightPercentageToDP('2%'),
-    fontWeight: 'bold',
+  
+  // User/Error Messages
+  userMessageContainer: {
+    flex: 1,
+    marginHorizontal: widthPercentageToDP('2%'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    maxWidth: widthPercentageToDP('76%'),
+  },
+  userMessageBubble: {
+    marginVertical: 5,
+    marginHorizontal: 5,
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: '#667EEA',
+    flexDirection: 'row',
+    gap: 5,
+  },
+  userMessageText: {
+    fontSize: 14,
     color: '#FFF',
   },
-  SwitchUnselectedText: {
-    fontSize: heightPercentageToDP('1.5%'),
+  errorContainer: {
+    flex: 1,
+    marginHorizontal: widthPercentageToDP('2%'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: widthPercentageToDP('76%'),
+  },
+  errorBubble: {
+    marginVertical: 5,
+    marginHorizontal: 5,
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: 'rgba(255, 0, 79, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 79, 0.3)',
+  },
+  errorText: {
+    color: '#FF004F',
+    fontSize: 14,
+  },
+  
+  // Modal
+  modalOverlay: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    left: 0,
+    backgroundColor: '#1A1A2E',
+    flex: 1,
+    maxHeight: heightPercentageToDP('70%'),
+    width: '100%',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+  },
+  modalContent: {
+    flexGrow: 1,
+    zIndex: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    padding: 16,
+    paddingHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.03)',
+  },
+  modalAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalAvatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+  modalItemText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#FFF',
     fontWeight: '500',
-    color: '#FFF',
   },
 });
