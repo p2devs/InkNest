@@ -4,10 +4,90 @@
         <title>InkNest Blog</title>
         <link>https://p2devs.github.io/InkNest/blog</link>
         <description>InkNest Blog</description>
-        <lastBuildDate>Tue, 03 Feb 2026 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 06 Feb 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[InkNest v1.4.5 Release]]></title>
+            <link>https://p2devs.github.io/InkNest/blog/release-v1.4.5</link>
+            <guid>https://p2devs.github.io/InkNest/blog/release-v1.4.5</guid>
+            <pubDate>Fri, 06 Feb 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.5 is now available!]]></description>
+            <content:encoded><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.5</strong> is now available!</p>
+<p>This release brings significant UI enhancements across multiple screens, improved reading experience, and better library management.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#-whats-new">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="continue-reading-fab-details-screen">Continue Reading FAB (Details Screen)<a class="hash-link" aria-label="Direct link to Continue Reading FAB (Details Screen)" title="Direct link to Continue Reading FAB (Details Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#continue-reading-fab-details-screen">​</a></h4>
+<ul>
+<li>Added a <strong>floating action button</strong> for seamless navigation to your last read chapter</li>
+<li>Quick access to resume reading without scrolling through the chapter list</li>
+<li>Smart visibility based on your reading progress</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="chaptercard-redesign-details-screen">ChapterCard Redesign (Details Screen)<a class="hash-link" aria-label="Direct link to ChapterCard Redesign (Details Screen)" title="Direct link to ChapterCard Redesign (Details Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#chaptercard-redesign-details-screen">​</a></h4>
+<ul>
+<li><strong>Reading progress indicators</strong> - Visual bars showing how much of each chapter you've read</li>
+<li>New card styles with improved visual hierarchy</li>
+<li>Better organization of chapter information</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="historycard-refactor-library-screen">HistoryCard Refactor (Library Screen)<a class="hash-link" aria-label="Direct link to HistoryCard Refactor (Library Screen)" title="Direct link to HistoryCard Refactor (Library Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#historycard-refactor-library-screen">​</a></h4>
+<ul>
+<li>Completely redesigned history cards with enhanced UI</li>
+<li>Improved styling for better readability</li>
+<li>More intuitive interaction patterns</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="bookmarks-enhancement-bookmarks-screen">Bookmarks Enhancement (Bookmarks Screen)<a class="hash-link" aria-label="Direct link to Bookmarks Enhancement (Bookmarks Screen)" title="Direct link to Bookmarks Enhancement (Bookmarks Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#bookmarks-enhancement-bookmarks-screen">​</a></h4>
+<ul>
+<li><strong>Color accents</strong> for bookmarked items - visually distinguish your saved content</li>
+<li>Updated bookmark count display</li>
+<li>Improved layout for better content scanning</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="search-results-display-search-screen">Search Results Display (Search Screen)<a class="hash-link" aria-label="Direct link to Search Results Display (Search Screen)" title="Direct link to Search Results Display (Search Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#search-results-display-search-screen">​</a></h4>
+<ul>
+<li><strong>Gradient avatars</strong> for search results - more visually appealing source indicators</li>
+<li>Improved source sorting for better relevance</li>
+<li>Enhanced result presentation with cleaner layout</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="websearchscreen-redesign-web-search-screen">WebSearchScreen Redesign (Web Search Screen)<a class="hash-link" aria-label="Direct link to WebSearchScreen Redesign (Web Search Screen)" title="Direct link to WebSearchScreen Redesign (Web Search Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#websearchscreen-redesign-web-search-screen">​</a></h4>
+<ul>
+<li>Refactored search functionality with <strong>compact design</strong></li>
+<li>More efficient use of screen real estate</li>
+<li>Streamlined search flow</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="web-sources-enhancement-web-sources-screen">Web Sources Enhancement (Web Sources Screen)<a class="hash-link" aria-label="Direct link to Web Sources Enhancement (Web Sources Screen)" title="Direct link to Web Sources Enhancement (Web Sources Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#web-sources-enhancement-web-sources-screen">​</a></h4>
+<ul>
+<li>New <strong>source card design</strong> with modern aesthetics</li>
+<li>Added <strong>statistics section</strong> - see source performance at a glance</li>
+<li>Better organized source information</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bug-fixes--improvements">Bug Fixes &amp; Improvements<a class="hash-link" aria-label="Direct link to Bug Fixes &amp; Improvements" title="Direct link to Bug Fixes &amp; Improvements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#bug-fixes--improvements">​</a></h2>
+<ul>
+<li>Enhanced chapter title extraction with <strong>fallback to text content</strong></li>
+<li>More reliable parsing across different source formats</li>
+<li>Replaced <code>SafeAreaView</code> with <code>View</code> for better layout control</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-full-changelog">📋 Full Changelog<a class="hash-link" aria-label="Direct link to 📋 Full Changelog" title="Direct link to 📋 Full Changelog" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#-full-changelog">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="root-repository">Root Repository<a class="hash-link" aria-label="Direct link to Root Repository" title="Direct link to Root Repository" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#root-repository">​</a></h3>
+<ul>
+<li><code>5297f95</code> - refactor(CommunityBoard): Improve code readability and replace SafeAreaView with View</li>
+<li><code>557fbcf</code> - feat: Enhance ChapterCard with reading progress and new styles; add ContinueReadingFAB</li>
+<li><code>8d1df84</code> - feat(Bookmarks): Enhance bookmarks display with color accents and update bookmark count</li>
+<li><code>e6dc3bd</code> - feat(Library): Refactor HistoryCard component and enhance UI with new styles and functionality</li>
+<li><code>2ddcba7</code> - feat: Enhance UI with new source card design and add statistics section</li>
+<li><code>d47e44b</code> - feat(WebSearchScreen): Refactor search functionality and enhance UI with compact design</li>
+<li><code>b9d4ef2</code> - feat(search): enhance search results display with gradient avatars and improved source sorting</li>
+<li><code>3337628</code> - feat(parser): enhance chapter title extraction with fallback to text content</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="inknest-externals-submodule">InkNest-Externals Submodule<a class="hash-link" aria-label="Direct link to InkNest-Externals Submodule" title="Direct link to InkNest-Externals Submodule" href="https://p2devs.github.io/InkNest/blog/release-v1.4.5#inknest-externals-submodule">​</a></h3>
+<ul>
+<li><code>a9de02e</code> - refactor(CommunityBoard): Improve code readability and replace SafeAreaView with View</li>
+<li><code>e388243</code> - feat(LinkListScreen): Enhance UI with new source card design and add statistics section</li>
+<li><code>0aea75f</code> - feat(WebSearchScreen): Refactor search functionality and enhance UI with compact design</li>
+</ul>
+<hr>
+<p><strong>Update now</strong> to enjoy the enhanced UI and improved reading experience! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
+            <category>Release</category>
+        </item>
         <item>
             <title><![CDATA[InkNest v1.4.4 Release]]></title>
             <link>https://p2devs.github.io/InkNest/blog/release-v1.4.4</link>
