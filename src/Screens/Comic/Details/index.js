@@ -292,12 +292,6 @@ export function ComicDetails({route, navigation}) {
     }
   }, []);
 
-  const handleSortToggle = useCallback(() => {
-    crashlytics().log('Comic Details Sort Clicked');
-    analytics().logEvent('Comic_Details_Sort_Clicked');
-    setSort(prev => !prev);
-  }, []);
-
   useEffect(() => {
     (async () => {
       if (!hasRewardAdsShown) {
@@ -342,144 +336,134 @@ export function ComicDetails({route, navigation}) {
     }
   }, [PageLink, dispatch, forIosLoading, isIosOverrideActive, reportError]);
 
-  const renderComicHeader = () => (
-    <HeaderComponent
-      link={PageLink}
-      image={route?.params?.image}
-      title={route?.params?.title}
-      tabBar={tabBar}
-      onTabBar={index => {
-        crashlytics().log('Comic Details Tab Clicked');
-        analytics().logEvent('Comic_Details_Tab_Clicked', {
-          TabName: tabBar[index].name?.toString(),
-        });
-        tabBar.map(tab => (tab.active = false));
-        tabBar[index].active = true;
-        setTabBar([...tabBar]);
-      }}
-      sort={sort}
-      setSORT={() => {
-        crashlytics().log('Comic Details Sort Clicked');
-        analytics().logEvent('Comic_Details_Sort_Clicked');
-        setSort(!sort);
-      }}
-      notificationBell={notificationBell}
-      onRequestLoginPrompt={handleRequestLoginPrompt}
-    />
-  );
+  const handleTabChange = useCallback(index => {
+    crashlytics().log('Comic Details Tab Clicked');
+    analytics().logEvent('Comic_Details_Tab_Clicked', {
+      TabName: tabBar[index]?.name?.toString(),
+    });
+    setTabBar(prev =>
+      prev.map((tab, tabIndex) => ({
+        ...tab,
+        active: tabIndex === index,
+      })),
+    );
+  }, [tabBar]);
+
+  const handleSortToggle = useCallback(() => {
+    crashlytics().log('Comic Details Sort Clicked');
+    analytics().logEvent('Comic_Details_Sort_Clicked');
+    setSort(prev => !prev);
+  }, []);
 
   if (error) return <Error error={error} />;
 
-  if (!isChapterTab && !isRecentTab) {
-    return (
-      <>
-        <CommunityTab
-          comicLink={PageLink}
-          navigation={navigation}
-          headerComponent={renderComicHeader()}
-        />
-        <LoginPrompt
-          visible={showLoginPrompt}
-          loading={authLoading}
-          onClose={handleCloseLoginPrompt}
-          onGoogleSignIn={handleGoogleSignIn}
-          onAppleSignIn={handleAppleSignIn}
-        />
-      </>
-    );
-  }
-
   return (
-    <>
-      <LoadingModal loading={loading} />
-      <FlatList
-        ListHeaderComponent={
-          <>
-            <HeaderComponent
-              link={PageLink}
-              image={route?.params?.image}
-              title={route?.params?.title}
-              tabBar={tabBar}
-              onTabBar={index => {
-                crashlytics().log('Comic Details Tab Clicked');
-                analytics().logEvent('Comic_Details_Tab_Clicked', {
-                  TabName: tabBar[index].name?.toString(),
-                });
-                setTabBar(prev =>
-                  prev.map((tab, tabIndex) => ({
-                    ...tab,
-                    active: tabIndex === index,
-                  })),
-                );
-              }}
-              notificationBell={notificationBell}
-              onRequestLoginPrompt={handleRequestLoginPrompt}
-            />
-            {shouldShowSearch ? (
-              <View style={styles.searchContainer}>
-                <View style={styles.searchInputWrapper}>
-                  <Ionicons
-                    name="search"
-                    size={18}
-                    color="rgba(255,255,255,0.6)"
-                    style={styles.searchIcon}
-                  />
-                  <TextInput
-                    style={styles.searchInput}
-                    placeholder={
-                      isRecentTab ? 'Search recent reads' : 'Search chapters'
-                    }
-                    placeholderTextColor="rgba(255,255,255,0.6)"
-                    value={searchQuery}
-                    onChangeText={text => setSearchQuery(text)}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    keyboardAppearance="dark"
-                  />
-                </View>
-                {isChapterTab ? (
-                  <TouchableOpacity
-                    style={styles.sortButton}
-                    onPress={handleSortToggle}
-                    activeOpacity={0.7}>
-                    <FontAwesome5
-                      name={sort ? 'sort-numeric-up' : 'sort-numeric-down-alt'}
-                      size={16}
-                      color="#fff"
-                    />
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            ) : null}
-          </>
-        }
-        data={listData}
-        style={styles.container}
-        renderItem={({item, index}) => (
-          <ChapterCard
-            item={item}
-            index={index}
-            isBookmark={false}
-            detailPageLink={PageLink}
-            isFirst={index === 0}
-          />
-        )}
-        keyExtractor={(item, index) =>
-          item?.link ? `${item.link}-${index}` : `ad-${index}`
-        }
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          isChapterTab ? (
-            <PaginationFooter
-              pagination={ComicDetail?.pagination}
-              pageLink={PageLink}
-              route={route}
-              navigation={navigation}
-            />
-          ) : null
-        }
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.container}>
+      {/* Header - always rendered at the top level */}
+      <HeaderComponent
+        link={PageLink}
+        image={route?.params?.image}
+        title={route?.params?.title}
+        tabBar={tabBar}
+        onTabBar={handleTabChange}
+        sort={sort}
+        setSORT={handleSortToggle}
+        notificationBell={notificationBell}
+        onRequestLoginPrompt={handleRequestLoginPrompt}
       />
+      
+      {/* Tab Content - only switches the content below header */}
+      <View style={styles.contentContainer}>
+        {!isChapterTab && !isRecentTab ? (
+          <CommunityTab
+            comicLink={PageLink}
+            navigation={navigation}
+            headerComponent={null}
+          />
+        ) : (
+          <>
+            <LoadingModal loading={loading} />
+            <FlatList
+              ListHeaderComponent={
+                shouldShowSearch ? (
+                  <View style={styles.searchContainer}>
+                    <View style={styles.searchInputWrapper}>
+                      <Ionicons
+                        name="search"
+                        size={18}
+                        color="rgba(255,255,255,0.6)"
+                        style={styles.searchIcon}
+                      />
+                      <TextInput
+                        style={styles.searchInput}
+                        placeholder={
+                          isRecentTab ? 'Search recent reads' : 'Search chapters'
+                        }
+                        placeholderTextColor="rgba(255,255,255,0.6)"
+                        value={searchQuery}
+                        onChangeText={text => setSearchQuery(text)}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        keyboardAppearance="dark"
+                      />
+                    </View>
+                    {isChapterTab ? (
+                      <TouchableOpacity
+                        style={styles.sortButton}
+                        onPress={handleSortToggle}
+                        activeOpacity={0.7}>
+                        <FontAwesome5
+                          name={sort ? 'sort-numeric-up' : 'sort-numeric-down-alt'}
+                          size={16}
+                          color="#fff"
+                        />
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+                ) : null
+              }
+              data={listData}
+              style={styles.container}
+              renderItem={({item, index}) => (
+                <ChapterCard
+                  item={item}
+                  index={index}
+                  isBookmark={false}
+                  detailPageLink={PageLink}
+                  isFirst={index === 0}
+                />
+              )}
+              keyExtractor={(item, index) =>
+                item?.link ? `${item.link}-${index}` : `ad-${index}`
+              }
+              showsVerticalScrollIndicator={false}
+              ListFooterComponent={
+                isChapterTab ? (
+                  <PaginationFooter
+                    pagination={ComicDetail?.pagination}
+                    pageLink={PageLink}
+                    route={route}
+                    navigation={navigation}
+                  />
+                ) : null
+              }
+              keyboardShouldPersistTaps="handled"
+            />
+            {/* Continue Reading FAB - only show on Chapters tab when there's reading history */}
+            {isChapterTab && lastReadChapter && (
+              <ContinueReadingFAB
+                visible={true}
+                chapterTitle={lastReadChapter.title}
+                progress={lastReadChapter.progress}
+                currentPage={lastReadChapter.currentPage}
+                totalPages={lastReadChapter.totalPages}
+                onPress={handleContinueReading}
+              />
+            )}
+          </>
+        )}
+      </View>
+      
       <LoginPrompt
         visible={showLoginPrompt}
         loading={authLoading}
@@ -487,19 +471,7 @@ export function ComicDetails({route, navigation}) {
         onGoogleSignIn={handleGoogleSignIn}
         onAppleSignIn={handleAppleSignIn}
       />
-      
-      {/* Continue Reading FAB - only show on Chapters tab when there's reading history */}
-      {isChapterTab && lastReadChapter && (
-        <ContinueReadingFAB
-          visible={true}
-          chapterTitle={lastReadChapter.title}
-          progress={lastReadChapter.progress}
-          currentPage={lastReadChapter.currentPage}
-          totalPages={lastReadChapter.totalPages}
-          onPress={handleContinueReading}
-        />
-      )}
-    </>
+    </View>
   );
 }
 
@@ -507,6 +479,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142a',
+  },
+  contentContainer: {
+    flex: 1,
   },
   searchContainer: {
     paddingHorizontal: 16,

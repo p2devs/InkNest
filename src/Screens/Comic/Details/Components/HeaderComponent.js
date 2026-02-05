@@ -49,9 +49,9 @@ const HeaderComponent = memo(
         parts.push(ComicDetail.releaseDate);
       }
       
-      if (ComicDetail?.genres?.length > 0) {
+      if (Array.isArray(ComicDetail?.genres) && ComicDetail.genres.length > 0) {
         parts.push(ComicDetail.genres.slice(0, 2).join(', '));
-      } else if (ComicDetail?.tags?.length > 0) {
+      } else if (Array.isArray(ComicDetail?.tags) && ComicDetail.tags.length > 0) {
         parts.push(ComicDetail.tags.slice(0, 2).join(', '));
       }
       
@@ -166,7 +166,7 @@ const HeaderComponent = memo(
             <Text style={styles.metaText}>{formatMetaInfo()}</Text>
             
             {/* Genre Tags */}
-            {ComicDetail?.genres?.length > 0 && (
+            {Array.isArray(ComicDetail?.genres) && ComicDetail.genres.length > 0 && (
               <View style={styles.genreContainer}>
                 {ComicDetail.genres.slice(0, 3).map((genre, idx) => (
                   <View key={idx} style={styles.genrePill}>
