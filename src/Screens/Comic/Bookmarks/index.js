@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 export function ComicBookmarks({navigation}) {
+  const [bookMarksLength, setBookMarksLength] = useState(0);
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header
@@ -44,10 +45,15 @@ export function ComicBookmarks({navigation}) {
           }}>
           Bookmarks
         </Text>
-        <View style={{flex: 0.1}} />
+        <View style={styles.countBadge}>
+          <Text style={styles.countText}>{bookMarksLength}</Text>
+        </View>
       </Header>
       <View style={styles.container}>
-        <Bookmarks navigation={navigation} />
+        <Bookmarks
+          navigation={navigation}
+          bookmarkLength={setBookMarksLength}
+        />
       </View>
     </SafeAreaView>
   );
@@ -71,5 +77,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
     color: '#007aff',
+  },
+  countBadge: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 16,
+    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#667EEA',
   },
 });
