@@ -14,7 +14,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: storage,
-  blacklist: ['error', 'status', 'loading', 'downTime', 'hasRewardAdsShown'],
+  blacklist: ['error', 'status', 'loading', 'downTime', 'hasRewardAdsShown', 'Search'],
   // Important: Don't write until rehydration is complete
   writeDelayed: true,
 };

@@ -15,7 +15,6 @@ import {
 } from 'react-native-responsive-screen';
 import {useDispatch, useSelector} from 'react-redux';
 
-
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -138,12 +137,9 @@ const HeaderComponent = memo(
             </View>
           </View>
 
-          {/* Cover Image Section */}
-          <View
-            style={[
-              styles.coverSection,
-              Platform.isPad && {marginTop: widthPercentageToDP('10%')},
-            ]}>
+          {/* Horizontal Layout: Cover Image Left, Details Right */}
+          <View style={styles.contentSection}>
+            {/* Left - Cover Image */}
             <View style={styles.coverContainer}>
               <Image
                 style={styles.coverImage}
@@ -156,32 +152,36 @@ const HeaderComponent = memo(
               <View style={styles.shineOverlay} />
             </View>
 
-            <Text style={styles.comicTitle}>
-              {ComicDetail?.title ?? title}
-            </Text>
+            {/* Right - Comic Info */}
+            <View style={styles.infoContainer}>
+              <Text style={styles.comicTitle} numberOfLines={2}>
+                {ComicDetail?.title ?? title}
+              </Text>
+
+              {/* Meta Info */}
+              <Text style={styles.metaText} numberOfLines={2}>
+                {formatMetaInfo()}
+              </Text>
+
+              {/* Genre Tags */}
+              {Array.isArray(ComicDetail?.genres) && ComicDetail.genres.length > 0 && (
+                <View style={styles.genreContainer}>
+                  {ComicDetail.genres.slice(0, 2).map((genre, idx) => (
+                    <View key={idx} style={styles.genrePill}>
+                      <Text style={styles.genreText}>{genre}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
           </View>
 
-          {/* Meta Info Section */}
-          <View style={styles.metaSection}>
-            <Text style={styles.metaText}>{formatMetaInfo()}</Text>
-            
-            {/* Genre Tags */}
-            {Array.isArray(ComicDetail?.genres) && ComicDetail.genres.length > 0 && (
-              <View style={styles.genreContainer}>
-                {ComicDetail.genres.slice(0, 3).map((genre, idx) => (
-                  <View key={idx} style={styles.genrePill}>
-                    <Text style={styles.genreText}>{genre}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-            
-            {ComicDetail?.summary ? (
-              <View style={styles.descriptionContainer}>
-                <DescriptionView vol={ComicDetail?.summary} />
-              </View>
-            ) : null}
-          </View>
+          {/* Description - Below the horizontal layout */}
+          {ComicDetail?.summary ? (
+            <View style={styles.descriptionContainer}>
+              <DescriptionView vol={ComicDetail?.summary} />
+            </View>
+          ) : null}
 
           {/* Tab Bar */}
           <View style={styles.tabBarContainer}>
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: heightPercentageToDP('38%'),
+    height: heightPercentageToDP('30%'),
     overflow: 'hidden',
   },
   backgroundImage: {
@@ -300,77 +300,78 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  coverSection: {
-    alignItems: 'center',
-    marginTop: -4,
+  // New horizontal layout styles
+  contentSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    marginTop: 8,
+    gap: 16,
   },
   coverContainer: {
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 6,
+    padding: 4,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6},
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 10,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   coverImage: {
-    width: widthPercentageToDP('28%'),
-    height: heightPercentageToDP('20%'),
+    width: widthPercentageToDP('22%'),
+    height: heightPercentageToDP('16%'),
     borderRadius: 8,
   },
   shineOverlay: {
     position: 'absolute',
-    top: 6,
-    left: 6,
-    right: 6,
+    top: 4,
+    left: 4,
+    right: 4,
     height: '50%',
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingTop: 4,
+  },
   comicTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: '#fff',
-    textAlign: 'center',
-    marginTop: 12,
     marginBottom: 6,
-    paddingHorizontal: 24,
-  },
-  metaSection: {
-    paddingHorizontal: 20,
-    gap: 4,
-    marginTop: 4,
+    lineHeight: 22,
   },
   metaText: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
     lineHeight: 18,
+    marginBottom: 8,
   },
   genreContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 4,
+    gap: 6,
   },
   genrePill: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   genreText: {
-    fontSize: 11,
+    fontSize: 10,
     color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '500',
   },
   descriptionContainer: {
-    marginTop: 8,
+    marginTop: 12,
+    paddingHorizontal: 16,
   },
   tabBarContainer: {
     marginTop: 12,

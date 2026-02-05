@@ -26,7 +26,6 @@ import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
 import HistoryCard from './Components/HistoryCard';
-import {AppendAd} from '../../../InkNest-Externals/Ads/AppendAd';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
@@ -41,7 +40,6 @@ const getSectionColor = (index) => {
 };
 
 export function Library({navigation}) {
-  const flatListRef = useRef(null);
   const [comicsData, setComicsData] = useState({});
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState('readcomicsonline');

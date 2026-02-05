@@ -240,6 +240,9 @@ const Reducers = createSlice({
       state.Search = [action.payload, ...state.Search];
       // state.Search.push(action.payload);
     },
+    clearSearch: state => {
+      state.Search = [];
+    },
     StopLoading: state => {
       state.loading = false;
     },
@@ -571,6 +574,7 @@ export const {
   DeleteDownloadedComicBook,
   updateDownloadedComicBook,
   clearHistory,
+  clearSearch,
   setScrollPreference,
   rewardAdsShown,
   markOfflineMovedAlertSeen,
