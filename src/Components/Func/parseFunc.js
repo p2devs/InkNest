@@ -15,7 +15,11 @@ export const parseReadAllComicsDetails = ($, config, link) => {
 
     const chapters = [];
     $(config.chapters).each((_, el) => {
-      const title = $(el).attr(config.chapterTitleAttr);
+      // Try to get title from attribute first, fallback to text content
+      let title = $(el).attr(config.chapterTitleAttr);
+      if (!title) {
+        title = $(el).text().trim();
+      }
       const link = $(el).attr(config.chapterLinkAttr);
       if (title && link) {
         chapters.push({title, link});
