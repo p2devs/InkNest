@@ -153,7 +153,7 @@ const Reducers = createSlice({
           readComics: {
             ...state?.history?.[detailLinkKey]?.readComics,
             [chapterLinkKey]: {
-              totalPage: imageLength,
+              totalPages: imageLength,
               lastReadPage: data.lastReadPage,
               readAt: readAt ?? existingEntry?.readAt ?? 0,
             },

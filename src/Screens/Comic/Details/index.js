@@ -449,8 +449,8 @@ export function ComicDetails({route, navigation}) {
               }
               keyboardShouldPersistTaps="handled"
             />
-            {/* Continue Reading FAB - only show on Chapters tab when there's reading history */}
-            {isChapterTab && lastReadChapter && (
+            {/* Continue Reading FAB - show on Chapters and Recent tabs when there's reading history */}
+            {(isChapterTab || isRecentTab) && lastReadChapter && (
               <ContinueReadingFAB
                 visible={true}
                 chapterTitle={lastReadChapter.title}
@@ -482,6 +482,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    position: 'relative',
   },
   searchContainer: {
     paddingHorizontal: 16,
