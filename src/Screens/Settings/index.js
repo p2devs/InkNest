@@ -36,9 +36,6 @@ import {
   signInWithApple,
 } from '../../InkNest-Externals/Community/Logic/CommunityActions';
 import LoginPrompt from '../../Components/Auth/LoginPrompt';
-import { forceMigration, debugStorages } from '../../Redux/Storage/migrateStorage';
-import { mmkvStorage } from '../../Redux/Storage/Storage';
-import { getMigrationDiagnostic, manualRecoverData } from '../../Utils/MigrationHelper';
 
 export function Settings({ navigation }) {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -529,97 +526,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or Manga, InkNest has s
             style={{ marginLeft: 8 }}
           />
         </TouchableOpacity>
-        {/* Data Recovery Option - for users who lost data during migration */}
-        <TouchableOpacity
-          onPress={async () => {
-            // First check if recovery is possible
-            const diagnostic = await getMigrationDiagnostic();
-            console.log('Migration diagnostic:', diagnostic);
-            
-            if (!diagnostic.summary.dataInAsyncStorage) {
-              Alert.alert(
-                'No Backup Data Found',
-                'Unfortunately, your previous reading history and bookmarks could not be found. This can happen if:\n\n• The app was uninstalled before updating\n• iOS cleared the app data during update\n• You are on a new device\n\nWe apologize for the inconvenience.',
-                [{ text: 'OK' }]
-              );
-              return;
-            }
-            
-            if (diagnostic.summary.dataInMMKV) {
-              Alert.alert(
-                'Data Already Recovered',
-                'Your data appears to already be in the new storage format. If you are still missing history or bookmarks, please contact support.',
-                [
-                  { text: 'OK' },
-                  __DEV__ && {
-                    text: 'Force Re-sync',
-                    onPress: async () => {
-                      const result = await manualRecoverData();
-                      Alert.alert(
-                        result.success ? 'Success' : 'Failed',
-                        result.message || result.error
-                      );
-                    }
-                  }
-                ].filter(Boolean)
-              );
-              return;
-            }
-            
-            // Recovery is possible
-            Alert.alert(
-              'Recover Lost Data?',
-              `We found ${diagnostic.asyncStorage.persistDataSize} bytes of your previous data that can be recovered. This will restore your reading history and bookmarks.\n\nThe app will need to restart after recovery.`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Recover Now',
-                  style: 'default',
-                  onPress: async () => {
-                    try {
-                      const result = await manualRecoverData();
-                      if (result.success) {
-                        Alert.alert(
-                          'Recovery Successful! 🎉',
-                          'Your reading history and bookmarks have been recovered. Please close and reopen the app to see your restored data.',
-                          [{ text: 'OK' }]
-                        );
-                      } else {
-                        Alert.alert('Recovery Failed', result.error);
-                      }
-                    } catch (error) {
-                      Alert.alert('Error', error.message);
-                    }
-                  }
-                }
-              ]
-            );
-          }}
-          style={{
-            paddingVertical: hp('1%'),
-            backgroundColor: '#ff6b6b',
-            marginHorizontal: widthPercentageToDP('2%'),
-            marginVertical: hp('1%'),
-            paddingHorizontal: 10,
-            borderRadius: 5,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <Ionicons
-              name="warning-outline"
-              size={hp('2.5%')}
-              color="#fff"
-              style={{ marginRight: 10 }}
-            />
-            <Text
-              style={{
-                fontSize: hp('2%'),
-                fontWeight: 'bold',
-                color: '#fff',
-              }}>
-              Recover Lost Data
-            </Text>
-          </TouchableOpacity>
+
       </ScrollView>
       <View
         style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>

@@ -1,7 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {persistStore, persistReducer} from 'redux-persist';
 import {storage, mmkvStorage} from '../Storage/Storage';
-import {migrateAsyncStorageToMMKV} from '../Storage/migrateStorage';
 import Reducers from '../Reducers';
 import crashlytics from '@react-native-firebase/crashlytics';
 
@@ -41,8 +40,7 @@ function createStore() {
 }
 
 /**
- * Initialize the store after migration
- * This should be called AFTER migration is complete
+ * Initialize the Redux store
  */
 export function initializeStore() {
   if (isStoreInitialized) {
@@ -55,23 +53,6 @@ export function initializeStore() {
   isStoreInitialized = true;
   
   return { store, persistor };
-}
-
-/**
- * Perform storage migration from AsyncStorage to MMKV
- * Call this function BEFORE initializing the store
- * @returns {Promise<boolean>}
- */
-export async function performStorageMigration() {
-  try {
-    // Run the migration
-    const success = await migrateAsyncStorageToMMKV(mmkvStorage);
-    return success;
-  } catch (error) {
-    console.error('Migration error:', error);
-    crashlytics().recordError(error);
-    return false;
-  }
 }
 
 /**

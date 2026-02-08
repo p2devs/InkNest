@@ -3,7 +3,6 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { 
   initializeStore, 
-  performStorageMigration, 
   store, 
   persistor,
   isStoreReady 
@@ -72,7 +71,6 @@ function AppContent() {
  */
 const App = () => {
   const [isReady, setIsReady] = useState(false);
-  const [migrationError, setMigrationError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -81,11 +79,7 @@ const App = () => {
       try {
         console.log('[App] Starting app setup...');
         
-        // Run migration before anything else
-        console.log('[App] Running storage migration...');
-        await performStorageMigration();
-        
-        // Initialize store after migration
+        // Initialize store
         console.log('[App] Initializing store...');
         initializeStore();
         
@@ -100,18 +94,6 @@ const App = () => {
       } catch (error) {
         console.error('[App] Setup failed:', error);
         crashlytics().recordError(error);
-        
-        // Try to recover by initializing store anyway
-        try {
-          initializeStore();
-          if (isStoreReady() && isMounted) {
-            setIsReady(true);
-          }
-        } catch (recoveryError) {
-          if (isMounted) {
-            setMigrationError(recoveryError);
-          }
-        }
       }
     }
 

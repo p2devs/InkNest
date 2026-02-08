@@ -1553,6 +1553,12 @@ PODS:
     - fmt
     - glog
     - RCT-Folly/Default (= 2024.10.14.00)
+  - RCT-Folly/Default (2024.10.14.00):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
   - RCT-Folly/Fabric (2024.10.14.00):
     - boost
     - DoubleConversion
@@ -4009,12 +4015,12 @@ SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  boost: 22228ebe70e07fdba288beebc583f37bdeaf8133
+  boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
   BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
-  DoubleConversion: 6a3e10103e4ad99123ac5d1c6b7fe4b75a62bd57
+  DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   dr-pogodin-react-native-fs: 9c23f67b86378c98a83e57cbe3df1e0cf82ec82a
-  fast_float: 2b0d2731b4b7c89df458c6821c29d29b81f083e0
+  fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FasterImage: 0543472141d8f64716efdeb3bb886a6fe814f3b9
   FBLazyVector: 7605ea4810e0e10ae4815292433c09bf4324ba45
   Firebase: a64bf6a8546e6eab54f1c715cd6151f39d2329f4
@@ -4037,8 +4043,8 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: 1c6135e8a094cc6368949f5faeeca7ee8948b8aa
   FirebaseSessions: 32ed7a9387ae71efe3a35a7f20f3a7292950957b
   FirebaseSharedSwift: e17c654ef1f1a616b0b33054e663ad1035c8fd40
-  fmt: daf296b4da016df3f9c32c6379d906c30b81b86e
-  glog: 2ddc1958663dec0731dbfe3204d9cfe36aaeb46a
+  fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
+  glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
   GoogleAppMeasurement: 0471a5b5bff51f3a91b1e76df22c952d04c63967
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -4055,7 +4061,7 @@ SPEC CHECKSUMS:
   NitroModules: 8eedb6d7aba2c03eb1533c2caf4ebfad10cf551c
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
-  RCT-Folly: 86edbcc606c15fc0eced95db60b466fd5356e4b6
+  RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
   RCTDeprecation: ebe712bb05077934b16c6bf25228bdec34b64f83
   RCTRequired: ca91e5dd26b64f577b528044c962baf171c6b716
   RCTTypeSafety: e7678bd60850ca5a41df9b8dc7154638cb66871f
@@ -4148,4 +4154,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 508b472b779be51eb204147483558e3ddf0e43ea
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
