@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { mmkvStorage } from '../Redux/Storage/Storage';
 
 export const NOTIFICATION_STORAGE_KEY = 'INKNEST_COMMUNITY_NOTIFICATIONS';
 const MAX_NOTIFICATIONS = 50;
@@ -45,22 +45,12 @@ export const buildNotificationPayload = (remoteMessage, autoRead = false) => {
 
 const toArray = value => (Array.isArray(value) ? value : []);
 
-export const loadStoredNotifications = async () => {
-  const raw = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
+export const loadStoredNotifications = () => {
+  const raw = mmkvStorage.getString(NOTIFICATION_STORAGE_KEY);
   if (!raw) {
     return [];
   }
-  const parsed = JSON.parse(raw);
-  return toArray(parsed);
-};
-
-export const consumeStoredNotifications = async () => {
   try {
-    const raw = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-    await AsyncStorage.removeItem(NOTIFICATION_STORAGE_KEY);
     const parsed = JSON.parse(raw);
     return toArray(parsed);
   } catch (error) {
@@ -68,12 +58,23 @@ export const consumeStoredNotifications = async () => {
   }
 };
 
-export const persistNotificationList = async list => {
+export const consumeStoredNotifications = () => {
+  try {
+    const raw = mmkvStorage.getString(NOTIFICATION_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    mmkvStorage.delete(NOTIFICATION_STORAGE_KEY);
+    const parsed = JSON.parse(raw);
+    return toArray(parsed);
+  } catch (error) {
+    return [];
+  }
+};
+
+export const persistNotificationList = list => {
   console.log('List:', list);
-  await AsyncStorage.setItem(
-    NOTIFICATION_STORAGE_KEY,
-    JSON.stringify(toArray(list)),
-  );
+  mmkvStorage.set(NOTIFICATION_STORAGE_KEY, JSON.stringify(toArray(list)));
 };
 
 export const mergeNotificationLists = (incomingPayload, baseList = []) => {
@@ -91,14 +92,14 @@ export const appendNotificationToStorage = async payload => {
     return [];
   }
   try {
-    const stored = await loadStoredNotifications();
+    const stored = loadStoredNotifications();
     console.log('Stored:', stored);
     const merged = mergeNotificationLists(payload, stored);
     console.log('Merged:', merged);
-    await persistNotificationList(merged);
+    persistNotificationList(merged);
     return merged;
   } catch (error) {
-    await persistNotificationList([payload]);
+    persistNotificationList([payload]);
     return [payload];
   }
 };
