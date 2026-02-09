@@ -6,6 +6,7 @@ import appleAuth from '@invertase/react-native-apple-authentication';
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import {GOOGLE_WEB_CLIENT_ID, IOS_GOOGLE_CLIENT_ID} from '@env';
+import {Platform} from 'react-native';
 
 import {
   setUser,
@@ -30,6 +31,20 @@ import {getContentPreview} from '../../Utils/communityContent';
  * Handles authentication, posts, comments, and notifications for the community feature
  * Service layer pattern - easy to swap Firestore with REST API for backend migration
  */
+
+// FCM token request rate limiting - using object to avoid TDZ issues
+const fcmCache = {
+  lastRequest: 0,
+  token: null,
+  cooldown: 60000, // 60 seconds between requests
+};
+
+// Prevent duplicate syncs within 5 seconds (handles auth state listener double-fires)
+const syncState = {
+  inProgress: false,
+  lastTime: 0,
+  debounceMs: 5000,
+};
 
 // Configure Google Sign-In (call this in app initialization)
 export const configureGoogleSignIn = () => {
@@ -88,8 +103,10 @@ export const signInWithGoogle = () => async dispatch => {
       );
     }
 
-    // Check if device supports Google Play
-    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+        // Check if device supports Google Play (Android only)
+    if (Platform.OS === 'android') {
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+    }
 
     // Get user info from Google
     const {idToken} = assertSuccessfulGoogleResponse(
@@ -102,8 +119,8 @@ export const signInWithGoogle = () => async dispatch => {
     // Sign in to Firebase
     const userCredential = await auth().signInWithCredential(googleCredential);
 
-    // Sync user to Firestore and Redux
-    await syncUserToFirestore(userCredential.user, dispatch);
+    // Note: syncUserToFirestore is handled by listenToAuthChanges() listener
+    // to avoid duplicate FCM token requests (rate limiting)
 
     crashlytics().log('Google Sign-In successful');
     analytics().logEvent('login', {method: 'google'});
@@ -146,8 +163,8 @@ export const signInWithApple = () => async dispatch => {
     // Sign in to Firebase
     const userCredential = await auth().signInWithCredential(appleCredential);
 
-    // Sync user to Firestore and Redux
-    await syncUserToFirestore(userCredential.user, dispatch);
+    // Note: syncUserToFirestore is handled by listenToAuthChanges() listener
+    // to avoid duplicate FCM token requests (rate limiting)
 
     crashlytics().log('Apple Sign-In successful');
     analytics().logEvent('login', {method: 'apple'});
@@ -166,6 +183,15 @@ export const signInWithApple = () => async dispatch => {
  * @param {Function} dispatch - Redux dispatch
  */
 const syncUserToFirestore = async (firebaseUser, dispatch) => {
+  // Debounce: Prevent duplicate syncs within 5 seconds
+  const now = Date.now();
+  if (syncState.inProgress || (now - syncState.lastTime < syncState.debounceMs)) {
+    console.log('Skipping duplicate sync (debounced)');
+    return;
+  }
+  
+  syncState.inProgress = true;
+  
   try {
     const userRef = firestore().collection('users').doc(firebaseUser.uid);
     const userDoc = await userRef.get();
@@ -199,11 +225,38 @@ const syncUserToFirestore = async (firebaseUser, dispatch) => {
       analytics().logEvent('sign_up', {method: 'google_or_apple'});
     }
 
-    // Get and store FCM token for notifications
-    const fcmToken = await messaging().getToken();
+    // Get and store FCM token for notifications (with rate limit handling)
+    let fcmToken = fcmCache.token;
+    
+    // Only request new token if cooldown has passed
+    if (!fcmToken || now - fcmCache.lastRequest > fcmCache.cooldown) {
+      try {
+        fcmToken = await messaging().getToken();
+        // Update cached values
+        fcmCache.token = fcmToken;
+        fcmCache.lastRequest = now;
+      } catch (messagingError) {
+        // Log but don't fail auth if FCM token can't be retrieved
+        // This can happen due to rate limiting (too many requests)
+        if (messagingError.message?.includes('Too many server requests')) {
+          console.log('FCM token request rate limited, using cached token or skipping');
+        } else {
+          console.warn('FCM token fetch failed (non-critical):', messagingError.message);
+        }
+        crashlytics().log('FCM token fetch failed: ' + messagingError.message);
+        fcmToken = null;
+      }
+    } else {
+      console.log('Using cached FCM token (rate limit cooldown)');
+    }
+    
     if (fcmToken && fcmToken !== userData.fcmToken) {
-      await userRef.update({fcmToken});
-      userData.fcmToken = fcmToken;
+      try {
+        await userRef.update({fcmToken});
+        userData.fcmToken = fcmToken;
+      } catch (firestoreError) {
+        console.warn('Failed to update FCM token in Firestore:', firestoreError.message);
+      }
     }
 
     // Update Redux state
@@ -217,11 +270,14 @@ const syncUserToFirestore = async (firebaseUser, dispatch) => {
       }),
     );
 
+    syncState.lastTime = Date.now();
     return userData;
   } catch (error) {
     console.error('Error syncing user to Firestore:', error);
     crashlytics().recordError(error);
     throw error;
+  } finally {
+    syncState.inProgress = false;
   }
 };
 

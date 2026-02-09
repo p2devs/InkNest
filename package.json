@@ -20,7 +20,7 @@
   "dependencies": {
     "@candlefinance/faster-image": "^1.7.2",
     "@dr.pogodin/react-native-fs": "2.29.1",
-    "@invertase/react-native-apple-authentication": "^2.5.0",
+    "@invertase/react-native-apple-authentication": "^2.5.1",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-native-documents/picker": "^10.1.7",
@@ -32,7 +32,7 @@
     "@react-native-firebase/in-app-messaging": "21.7.1",
     "@react-native-firebase/messaging": "21.7.1",
     "@react-native-firebase/perf": "21.7.1",
-    "@react-native-google-signin/google-signin": "^16.0.0",
+    "@react-native-google-signin/google-signin": "^16.1.1",
     "@react-native-picker/picker": "^2.9.0",
     "@react-navigation/bottom-tabs": "6.5.20",
     "@react-navigation/native": "6.1.17",

@@ -1384,7 +1384,7 @@ PODS:
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - GoogleSignIn (9.0.0):
+  - GoogleSignIn (9.1.0):
     - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
     - GTMAppAuth (~> 5.0)
@@ -3296,7 +3296,7 @@ PODS:
     - React-perflogger
     - React-utils (= 0.76.9)
   - RecaptchaInterop (100.0.0)
-  - RNAppleAuthentication (2.5.0):
+  - RNAppleAuthentication (2.5.1):
     - React-Core
   - RNCAsyncStorage (2.1.2):
     - DoubleConversion
@@ -3420,7 +3420,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNGoogleSignin (16.0.0):
+  - RNGoogleSignin (16.1.1):
     - DoubleConversion
     - glog
     - GoogleSignIn (~> 9.0)
@@ -4048,7 +4048,7 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
   GoogleAppMeasurement: 0471a5b5bff51f3a91b1e76df22c952d04c63967
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
-  GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
+  GoogleSignIn: fcee2257188d5eda57a5e2b6a715550ffff9206d
   GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": 2fa52b3141e7789a28a737f251e0c45b4cb20a87
@@ -4126,7 +4126,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 049be6309e06c1027544819670913680f2029b8e
   ReactCommon: b2eb96a61b826ff327a773a74357b302cf6da678
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
-  RNAppleAuthentication: 9027af8aa92b4719ef1b6030a8e954d37079473a
+  RNAppleAuthentication: a89c9804592b38ed4ab11f0aee68d05ba12ad432
   RNCAsyncStorage: b3520cd01fc00fd0e7c633812c23708c95ef1b2b
   RNCPicker: 69d754b30ed729b3e0168c3d7545be95496c5b86
   RNDeviceInfo: d863506092aef7e7af3a1c350c913d867d795047
@@ -4140,7 +4140,7 @@ SPEC CHECKSUMS:
   RNFBPerf: 73ff374efe746483ba39e6be5b73d3d9902e4b70
   RNGestureHandler: 1940a14167f7002981a25983d1620c59440a03f7
   RNGoogleMobileAds: 03350a88a549e0aa1173c0c097f9d2e1dc817d44
-  RNGoogleSignin: f57a3ba8061206551c47134aafc4f34be349c86f
+  RNGoogleSignin: 9c016b5c025daf748894539b5d0bff9bcdd9eef9
   RNPermissions: accd6c29c55fdeb8e7068273d725f1c7a7d0febb
   RNReanimated: 71b26bd48c2934034f29cdd16cd00d343a0b3cd7
   RNScreens: 077868484ed19700474d56b1ee4b782c67660c41

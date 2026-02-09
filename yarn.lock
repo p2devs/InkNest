@@ -2244,10 +2244,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@invertase/react-native-apple-authentication@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "@invertase/react-native-apple-authentication@npm:2.5.0"
-  checksum: 30d7bf1d62b75c109f03a360f10bcf63d5dbb106104b99758a2eba691c25c17d7f071b9fb7b7fac9af7059b055739002a21bda7a5c4a9b746305d0c4054704a3
+"@invertase/react-native-apple-authentication@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "@invertase/react-native-apple-authentication@npm:2.5.1"
+  checksum: 30d627ef12ab2daf4ccf1242a4c060653bd922da750d0f52bd6901920edad936ac640e14fff878db5e64335f64fcac2a4f0b287a52d977bd1b3481006418a531
   languageName: node
   linkType: hard
 
@@ -3118,9 +3118,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-google-signin/google-signin@npm:^16.0.0":
-  version: 16.0.0
-  resolution: "@react-native-google-signin/google-signin@npm:16.0.0"
+"@react-native-google-signin/google-signin@npm:^16.1.1":
+  version: 16.1.1
+  resolution: "@react-native-google-signin/google-signin@npm:16.1.1"
   peerDependencies:
     expo: ">=52.0.40"
     react: "*"
@@ -3128,7 +3128,7 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: a03f66e0473e28eb4a5bf53afe802cef15b24f81d332474ad13bb564dbbbe4c2aa01e9c35dfe5fd3e8d97d81e34b4f7f0acee02c5d4e3e3258f8fc49e9c62d8b
+  checksum: a60ae09a7febe59a3d1e412dbcb88d5e892f53ccca15bcf98b4ef03e3aee7eec99569968d22906b1701a4fbcc904af79dfd7c7fbdeb99981dc0d0134e61f1a6f
   languageName: node
   linkType: hard
 
@@ -4073,7 +4073,7 @@ __metadata:
     "@babel/runtime": ^7.25.0
     "@candlefinance/faster-image": ^1.7.2
     "@dr.pogodin/react-native-fs": 2.29.1
-    "@invertase/react-native-apple-authentication": ^2.5.0
+    "@invertase/react-native-apple-authentication": ^2.5.1
     "@react-native-async-storage/async-storage": ^2.0.0
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
@@ -4088,7 +4088,7 @@ __metadata:
     "@react-native-firebase/in-app-messaging": 21.7.1
     "@react-native-firebase/messaging": 21.7.1
     "@react-native-firebase/perf": 21.7.1
-    "@react-native-google-signin/google-signin": ^16.0.0
+    "@react-native-google-signin/google-signin": ^16.1.1
     "@react-native-picker/picker": ^2.9.0
     "@react-native/babel-preset": 0.76.9
     "@react-native/eslint-config": 0.76.9
