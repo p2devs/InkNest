@@ -73,3 +73,26 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+**/global.jks
+**/google-services.json
+**/GoogleService-Info.plist
+
+
+#Files to ignore
+**/LocalComic/index.js
+**/Actions/Download.js
+**/OfflineComic/index.js
+**/ForceUpdate/Func.js
+
+#ignore app.json file
+app.json
+
+#ignore .env file
+.env
+
+
+## InkNest Some Files
+**/InkNest-Externals/*
+.qodo

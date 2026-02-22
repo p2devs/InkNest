@@ -7,7 +7,15 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "xcode": "xed -b ios",
+    "pod": "npx pod-install",
+    "ios-17": "react-native run-ios --simulator='iPhone 17'",
+    "clean": "watchman watch-del-all",
+    "clean:cache": "yarn cache clean && rm -rf node_modules && rm -rf ios/Pods && rm -rf ios/Podfile.lock && rm -rf android/.gradle && rm -rf android/app/build && rm -rf android/build && yarn install && cd ios && pod install && cd ..",
+    "build:release": "./script/gradle.sh && cd android && ./gradlew assembleRelease && cd .. && git checkout android/gradle.properties",
+    "submodule": "sh ./script/git-submodule.sh",
+    "setup": "yarn submodule && sh ./script/setup.sh"
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.84.0",

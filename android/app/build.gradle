@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.inknest"
+    namespace "com.p2devs.inknest"
     defaultConfig {
-        applicationId "com.inknest"
+        applicationId "com.p2devs.inknest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
