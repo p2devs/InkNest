@@ -1,9 +1,0 @@
-{
-  "name": "InkNest",
-  "displayName": "InkNest",
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-xxxxxxxx~xxxxxxxx",
-    "ios_app_id": "ca-app-pub-xxxxxxxx~xxxxxxxx",
-    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
-  }
-}
