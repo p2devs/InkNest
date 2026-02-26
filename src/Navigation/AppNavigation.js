@@ -1,8 +1,8 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import { NAVIGATION } from '../Constants';
-import { AboutUs, Search } from '../Screens';
-import { BottomNavigation } from './BottomNavigation';
+import {NAVIGATION} from '../Constants';
+import {AboutUs, Search} from '../Screens';
+import {BottomNavigation} from './BottomNavigation';
 import UpdateScreen from '../Screens/Update';
 import {
   ComicBook,
@@ -56,8 +56,16 @@ export function AppNavigation() {
       <Stack.Screen name={NAVIGATION.mangaSearch} component={MangaSearch} />
       <Stack.Screen name={NAVIGATION.search} component={Search} />
       <Stack.Screen name={NAVIGATION.seeAll} component={SeeAll} />
-      <Stack.Screen name={NAVIGATION.WebSources} component={WebViewScreen} />
-      <Stack.Screen name={NAVIGATION.WebSearch} component={WebSearchScreen} />
+      <Stack.Screen
+        name={NAVIGATION.WebSources}
+        component={WebViewScreen}
+        options={{gestureEnabled: false}}
+      />
+      <Stack.Screen
+        name={NAVIGATION.WebSearch}
+        component={WebSearchScreen}
+        options={{gestureEnabled: false}}
+      />
       <Stack.Screen name={NAVIGATION.mockBooks} component={MockBooks} />
       <Stack.Screen
         name={NAVIGATION.downloadComicBook}

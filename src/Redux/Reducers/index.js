@@ -32,6 +32,8 @@ const initialState = {
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
+  MangaBookMarks: {},
+  MangaHistory: {},
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
@@ -280,6 +282,38 @@ const Reducers = createSlice({
     },
     RemoveAnimeBookMark: (state, action) => {
       delete state.AnimeBookMarks[action?.payload?.url];
+    },
+    AddMangaBookMark: (state, action) => {
+      state.MangaBookMarks[action?.payload?.link] = action?.payload;
+    },
+    RemoveMangaBookMark: (state, action) => {
+      delete state.MangaBookMarks[action?.payload?.link];
+    },
+    pushMangaHistory: (state, action) => {
+      const link = action.payload.link;
+      state.MangaHistory[link] = {
+        ...state.MangaHistory[link],
+        ...action.payload,
+      };
+    },
+    updateMangaHistory: (state, action) => {
+      const {detailLink, chapterLink, totalPages, lastReadPage} = action.payload;
+      if (!detailLink || !chapterLink) return;
+      state.MangaHistory[detailLink] = {
+        ...state.MangaHistory[detailLink],
+        lastOpenAt: Date.now(),
+        readChapters: {
+          ...state.MangaHistory[detailLink]?.readChapters,
+          [chapterLink]: {
+            totalPages,
+            lastReadPage,
+            readAt: Date.now(),
+          },
+        },
+      };
+    },
+    clearMangaHistory: state => {
+      state.MangaHistory = {};
     },
     setScrollPreference: (state, action) => {
       // Update user's preferred comic reading scroll mode
@@ -570,6 +604,11 @@ export const {
   AnimeWatched,
   AddAnimeBookMark,
   RemoveAnimeBookMark,
+  AddMangaBookMark,
+  RemoveMangaBookMark,
+  pushMangaHistory,
+  updateMangaHistory,
+  clearMangaHistory,
   DownloadComicBook,
   DeleteDownloadedComicBook,
   updateDownloadedComicBook,

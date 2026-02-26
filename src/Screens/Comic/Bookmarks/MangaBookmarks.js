@@ -15,82 +15,98 @@ import analytics from '@react-native-firebase/analytics';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
-import {updateData} from '../../../Redux/Reducers';
+import {RemoveMangaBookMark} from '../../../Redux/Reducers';
 import Image from '../../../Components/UIComp/Image';
 import {NAVIGATION} from '../../../Constants';
 
-// Generate consistent colors
-const getBookmarkColor = (index) => {
-  const colors = ['#FF6B6B', '#4ECDC4', '#667EEA', '#F093FB', '#4FACFE', '#43E97B'];
+const getBookmarkColor = index => {
+  const colors = [
+    '#007AFF',
+    '#4ECDC4',
+    '#FF6B6B',
+    '#F093FB',
+    '#4FACFE',
+    '#43E97B',
+  ];
   return colors[index % colors.length];
 };
 
-export function Bookmarks({navigation}) {
+export function MangaBookmarks({navigation}) {
   const dispatch = useDispatch();
-  const data = useSelector(state => state.data.dataByUrl);
-  const bookmarks = Object.values(data).filter(item => item.Bookmark);
-
-  const getKey = title => {
-    return Object.keys(data).find(key => data[key].title === title);
-  };
+  const mangaBookmarks = useSelector(
+    state => state.data.MangaBookMarks || {},
+  );
+  const bookmarks = Object.values(mangaBookmarks);
 
   const renderItem = ({item, index}) => {
     const color = getBookmarkColor(index);
-    
+
     return (
       <TouchableOpacity
         style={styles.card}
         onPress={() => {
-          crashlytics().log('Comic Bookmark clicked');
-          analytics().logEvent('Comic_Bookmark_clicked', {
+          crashlytics().log('Manga Bookmark clicked');
+          analytics().logEvent('Manga_Bookmark_clicked', {
             title: item?.title?.toString(),
-            link: getKey(item.title)?.toString(),
+            link: item?.link?.toString(),
           });
-          navigation.navigate(NAVIGATION.comicDetails, {
+          navigation.navigate(NAVIGATION.mangaDetails, {
             title: item.title,
-            image: item.imgSrc,
-            link: getKey(item.title),
+            link: item.link,
           });
         }}>
         {/* Color accent */}
         <View style={[styles.colorAccent, {backgroundColor: color}]} />
-        
-        {/* Comic Cover */}
-        <Image source={{uri: item?.imgSrc}} style={styles.image} />
-        
+
+        {/* Manga Cover */}
+        <Image source={{uri: item?.image}} style={styles.image} />
+
         {/* Content */}
         <View style={styles.content}>
+          <View style={styles.mangaBadge}>
+            <Text style={styles.mangaBadgeText}>Manga</Text>
+          </View>
           <Text style={styles.title} numberOfLines={2}>
             {item.title}
           </Text>
-          
+
           {item?.genres && item.genres.length > 0 && (
             <View style={styles.metaRow}>
-              <MaterialCommunityIcons name="tag" size={12} color="rgba(255,255,255,0.5)" />
+              <MaterialCommunityIcons
+                name="tag"
+                size={12}
+                color="rgba(255,255,255,0.5)"
+              />
               <Text style={styles.metaText} numberOfLines={1}>
-                {Array.isArray(item.genres) ? item.genres.slice(0, 2).join(', ') : item.genres}
+                {Array.isArray(item.genres)
+                  ? item.genres.slice(0, 2).join(', ')
+                  : item.genres}
               </Text>
             </View>
           )}
-          
-          {item?.publisher && (
+
+          {item?.status && (
             <View style={styles.metaRow}>
-              <MaterialCommunityIcons name="office-building" size={12} color="rgba(255,255,255,0.5)" />
+              <MaterialCommunityIcons
+                name="information-outline"
+                size={12}
+                color="rgba(255,255,255,0.5)"
+              />
               <Text style={styles.metaText} numberOfLines={1}>
-                {item.publisher}
+                {item.status}
               </Text>
             </View>
           )}
-          
-          {item?.chapters && (
+
+          {item?.totalChapters > 0 && (
             <View style={styles.chapterBadge}>
               <Text style={styles.chapterText}>
-                {item.chapters.length} Chapters
+                {item.totalChapters} Chapters
               </Text>
             </View>
           )}
         </View>
-        
+
         {/* Remove bookmark button */}
         <TouchableOpacity
           style={[styles.bookmarkButton, {backgroundColor: color + '20'}]}
@@ -104,16 +120,11 @@ export function Bookmarks({navigation}) {
                   text: 'Remove',
                   style: 'destructive',
                   onPress: () => {
-                    crashlytics().log('Comic Bookmark removed');
-                    analytics().logEvent('Comic_Bookmark_removed', {
-                      url: getKey(item.title)?.toString(),
+                    crashlytics().log('Manga Bookmark removed');
+                    analytics().logEvent('Manga_Bookmark_removed', {
+                      link: item?.link?.toString(),
                     });
-                    dispatch(
-                      updateData({
-                        url: getKey(item.title),
-                        data: {Bookmark: false},
-                      }),
-                    );
+                    dispatch(RemoveMangaBookMark({link: item.link}));
                   },
                 },
               ],
@@ -139,12 +150,13 @@ export function Bookmarks({navigation}) {
               <MaterialCommunityIcons
                 name="bookmark-outline"
                 size={heightPercentageToDP('8%')}
-                color="#667EEA"
+                color="#007AFF"
               />
             </View>
-            <Text style={styles.emptyTitle}>No Bookmarks Yet</Text>
+            <Text style={styles.emptyTitle}>No Manga Bookmarks Yet</Text>
             <Text style={styles.emptySubtitle}>
-              Save your favorite comics to access them quickly
+              Save your favorite manga from the details page to access them
+              quickly
             </Text>
           </View>
         )}
@@ -157,20 +169,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142A',
-  },
-  countBadge: {
-    minWidth: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(102, 126, 234, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  countText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#667EEA',
   },
   listContent: {
     padding: 12,
@@ -205,6 +203,19 @@ const styles = StyleSheet.create({
     marginLeft: 14,
     justifyContent: 'center',
   },
+  mangaBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  mangaBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#007AFF',
+  },
   title: {
     color: '#FFF',
     fontSize: 15,
@@ -224,7 +235,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chapterBadge: {
-    backgroundColor: 'rgba(102, 126, 234, 0.15)',
+    backgroundColor: 'rgba(0, 122, 255, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 4,
@@ -232,7 +243,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chapterText: {
-    color: '#667EEA',
+    color: '#007AFF',
     fontSize: 10,
     fontWeight: '700',
   },
@@ -254,7 +265,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
