@@ -36,6 +36,7 @@ const initialState = {
   MangaHistory: {},
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
+  comicBackgroundColor: '#14142A', // Default comic reader background color
   hasRewardAdsShown: false,
   hasSeenOfflineMovedAlert: false,
   hasSeenV146Walkthrough: false,
@@ -319,6 +320,10 @@ const Reducers = createSlice({
     setScrollPreference: (state, action) => {
       // Update user's preferred comic reading scroll mode
       state.scrollPreference = action.payload;
+    },
+    setComicBackgroundColor: (state, action) => {
+      // Update user's preferred comic reader background color
+      state.comicBackgroundColor = action.payload;
     },
     rewardAdsShown: (state, action) => {
       // Update the flag indicating whether reward ads have been shown
@@ -619,6 +624,7 @@ export const {
   clearHistory,
   clearSearch,
   setScrollPreference,
+  setComicBackgroundColor,
   rewardAdsShown,
   markOfflineMovedAlertSeen,
   markV146WalkthroughSeen,
