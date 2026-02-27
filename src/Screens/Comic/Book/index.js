@@ -84,7 +84,7 @@ export function ComicBook({navigation, route}) {
     userScrollPreference === 'vertical',
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [modalView, setModalView] = useState('options'); // 'options' or 'colorPicker'
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const [isNextChapter, setIsNextChapter] = useState(false);
@@ -469,7 +469,12 @@ export function ComicBook({navigation, route}) {
             transparent={true}
             visible={isModalVisible}
             onRequestClose={() => {
-              setIsModalVisible(!isModalVisible);
+              if (modalView === 'colorPicker') {
+                setModalView('options');
+              } else {
+                setIsModalVisible(false);
+                setModalView('options');
+              }
             }}>
             <SafeAreaView
               style={{
@@ -477,6 +482,75 @@ export function ComicBook({navigation, route}) {
                 padding: 20,
                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
               }}>
+            {modalView === 'colorPicker' ? (
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <View style={styles.colorPickerContainer}>
+                  <View style={styles.colorPickerHeader}>
+                    <Text style={styles.colorPickerTitle}>Background Color</Text>
+                    <TouchableOpacity onPress={() => setModalView('options')}>
+                      <Ionicons name="close" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.colorPickerSubtitle}>
+                    Choose your reading background
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.colorOptionsContainer}>
+                    {BACKGROUND_COLORS.map(colorOption => {
+                      const isSelected = savedBackgroundColor === colorOption.color;
+                      const isLightColor = colorOption.color === '#FFFFFF' || colorOption.color === '#F5E6D3' || colorOption.color === '#FFFDD0';
+                      return (
+                        <TouchableOpacity
+                          key={colorOption.id}
+                          style={[
+                            styles.colorOption,
+                            {backgroundColor: colorOption.color},
+                            isSelected && styles.colorOptionSelected,
+                          ]}
+                          onPress={() => {
+                            dispatch(setComicBackgroundColor(colorOption.color));
+                            analytics().logEvent('comic_background_color_changed', {
+                              color: colorOption.name,
+                              colorCode: colorOption.color,
+                            });
+                            setModalView('options');
+                          }}>
+                          <MaterialCommunityIcons
+                            name={colorOption.icon}
+                            size={24}
+                            color={isLightColor ? '#333' : '#fff'}
+                          />
+                          <Text
+                            style={[
+                              styles.colorOptionText,
+                              {color: isLightColor ? '#333' : '#fff'},
+                            ]}>
+                            {colorOption.name}
+                          </Text>
+                          {isSelected && (
+                            <View style={styles.checkmark}>
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={20}
+                                color="#4CAF50"
+                              />
+                            </View>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                  <TouchableOpacity
+                    style={styles.colorPickerCloseBtn}
+                    onPress={() => setModalView('options')}>
+                    <Text style={styles.colorPickerCloseText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <>
               <View
                 style={{
                   flexDirection: 'row',
@@ -488,6 +562,7 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsModalVisible(false);
+                    setModalView('options');
                   }}>
                   <Ionicons name="close" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -523,8 +598,7 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => {
-                    setIsModalVisible(false);
-                    setTimeout(() => setShowColorPicker(true), 300);
+                    setModalView('colorPicker');
                   }}>
                   <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
                     <MaterialCommunityIcons
@@ -682,6 +756,7 @@ export function ComicBook({navigation, route}) {
               <TouchableOpacity
                 onPress={() => {
                   setIsModalVisible(false);
+                  setModalView('options');
                 }}
                 style={{
                   backgroundColor: '#FF6347',
@@ -691,85 +766,11 @@ export function ComicBook({navigation, route}) {
                 }}>
                 <Text style={styles.text}>Close</Text>
               </TouchableOpacity>
+              </>
+            )}
             </SafeAreaView>
           </Modal>
         </SafeAreaView>
-      )}
-
-      {/* Background Color Picker Modal */}
-      {showColorPicker && (
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={showColorPicker}
-          onRequestClose={() => setShowColorPicker(false)}>
-          <View style={styles.colorPickerOverlay}>
-            <View style={styles.colorPickerContainer}>
-              <View style={styles.colorPickerHeader}>
-                <Text style={styles.colorPickerTitle}>Background Color</Text>
-                <TouchableOpacity onPress={() => setShowColorPicker(false)}>
-                  <Ionicons name="close" size={24} color="#fff" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.colorPickerSubtitle}>
-                Choose your reading background
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.colorOptionsContainer}>
-                {BACKGROUND_COLORS.map(colorOption => {
-                  const isSelected = savedBackgroundColor === colorOption.color;
-                  const isLightColor = colorOption.color === '#FFFFFF' || colorOption.color === '#F5E6D3' || colorOption.color === '#FFFDD0';
-                  return (
-                    <TouchableOpacity
-                      key={colorOption.id}
-                      style={[
-                        styles.colorOption,
-                        {backgroundColor: colorOption.color},
-                        isSelected && styles.colorOptionSelected,
-                      ]}
-                      onPress={() => {
-                        dispatch(setComicBackgroundColor(colorOption.color));
-                        analytics().logEvent('comic_background_color_changed', {
-                          color: colorOption.name,
-                          colorCode: colorOption.color,
-                        });
-                        setShowColorPicker(false);
-                      }}>
-                      <MaterialCommunityIcons
-                        name={colorOption.icon}
-                        size={24}
-                        color={isLightColor ? '#333' : '#fff'}
-                      />
-                      <Text
-                        style={[
-                          styles.colorOptionText,
-                          {color: isLightColor ? '#333' : '#fff'},
-                        ]}>
-                        {colorOption.name}
-                      </Text>
-                      {isSelected && (
-                        <View style={styles.checkmark}>
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={20}
-                            color={isLightColor ? '#4CAF50' : '#4CAF50'}
-                          />
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-              <TouchableOpacity
-                style={styles.colorPickerCloseBtn}
-                onPress={() => setShowColorPicker(false)}>
-                <Text style={styles.colorPickerCloseText}>Done</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       )}
     </>
   );
