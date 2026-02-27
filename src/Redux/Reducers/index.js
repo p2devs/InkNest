@@ -38,6 +38,7 @@ const initialState = {
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   hasRewardAdsShown: false,
   hasSeenOfflineMovedAlert: false,
+  hasSeenV146Walkthrough: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
@@ -325,6 +326,9 @@ const Reducers = createSlice({
     },
     markOfflineMovedAlertSeen: state => {
       state.hasSeenOfflineMovedAlert = true;
+    },
+    markV146WalkthroughSeen: state => {
+      state.hasSeenV146Walkthrough = true;
     },
     clearLocalComicProgress: state => {
       // Clear any local comic reading progress when importing a new comic
@@ -617,6 +621,7 @@ export const {
   setScrollPreference,
   rewardAdsShown,
   markOfflineMovedAlertSeen,
+  markV146WalkthroughSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
   // Community & Auth actions

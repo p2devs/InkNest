@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Provider} from 'react-redux';
+import {Provider, useSelector, useDispatch} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {
   initializeStore,
@@ -23,6 +23,43 @@ import {
   listenToAuthChanges,
 } from './src/InkNest-Externals/Community/Logic/CommunityActions';
 import NotificationSubscriptionBootstrapper from './src/InkNest-Externals/Notifications/components/NotificationSubscriptionBootstrapper';
+import V146Walkthrough from './src/Components/Walkthrough/V146Walkthrough';
+import {markV146WalkthroughSeen} from './src/Redux/Reducers';
+
+/**
+ * WalkthroughHandler - handles v1.4.6 walkthrough visibility
+ * Must be inside Provider to use Redux hooks
+ */
+function WalkthroughHandler() {
+  const dispatch = useDispatch();
+  const hasSeenV146Walkthrough = useSelector(state => state.data.hasSeenV146Walkthrough);
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
+
+  useEffect(() => {
+    // Show walkthrough if not seen before (after PersistGate rehydrates state)
+    if (hasSeenV146Walkthrough === false) {
+      setShowWalkthrough(true);
+    }
+  }, [hasSeenV146Walkthrough]);
+
+  const handleWalkthroughComplete = () => {
+    dispatch(markV146WalkthroughSeen());
+    setShowWalkthrough(false);
+  };
+
+  const handleWalkthroughClose = () => {
+    dispatch(markV146WalkthroughSeen());
+    setShowWalkthrough(false);
+  };
+
+  return (
+    <V146Walkthrough
+      visible={showWalkthrough}
+      onClose={handleWalkthroughClose}
+      onComplete={handleWalkthroughComplete}
+    />
+  );
+}
 
 /**
  * AppContent component - rendered after store is initialized
@@ -55,6 +92,7 @@ function AppContent() {
             <RootNavigation />
             <Toast />
             <ForceUpdate />
+            <WalkthroughHandler />
           </BannerProvider>
         </PaperProvider>
       </PersistGate>
