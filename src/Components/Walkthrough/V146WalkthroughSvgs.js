@@ -333,6 +333,175 @@ const ReadingProgressSvgBase = ({ size = 180 }) => (
   </Svg>
 );
 
+// Step 6: ReadAllComic Enhanced Results SVG
+const ReadAllComicEnhancedSvgBase = ({ size = 180 }) => (
+  <Svg width={size} height={size * 0.85} viewBox="0 0 180 153">
+    <Defs>
+      <LinearGradient id="readAllGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <Stop offset="0%" stopColor={COMICS_PURPLE} />
+        <Stop offset="100%" stopColor={MANGA_BLUE} />
+      </LinearGradient>
+    </Defs>
+
+    {/* Search result card */}
+    <G transform="translate(15, 10)">
+      {/* Card background */}
+      <Rect x="0" y="0" width="150" height="80" rx="12" fill="#2a2a4a" stroke="url(#readAllGrad)" strokeWidth="1" />
+
+      {/* Cover image placeholder */}
+      <Rect x="10" y="10" width="40" height="60" rx="6" fill="url(#readAllGrad)" />
+      <Rect x="16" y="20" width="28" height="3" rx="1" fill={WHITE} opacity="0.5" />
+      <Rect x="16" y="28" width="20" height="2" rx="1" fill={WHITE} opacity="0.3" />
+
+      {/* Content area */}
+      <G transform="translate(58, 12)">
+        {/* Badge */}
+        <Rect x="0" y="0" width="55" height="14" rx="4" fill={COMICS_PURPLE} opacity="0.3" />
+        <SvgText x="27.5" y="10" textAnchor="middle" fill={COMICS_PURPLE} fontSize="7" fontWeight="700">
+          READALLCOMIC
+        </SvgText>
+
+        {/* Title */}
+        <SvgText x="0" y="28" fill={WHITE} fontSize="10" fontWeight="600">
+          Spider-Man #1
+        </SvgText>
+
+        {/* Publisher row */}
+        <G transform="translate(0, 35)">
+          <Circle cx="5" cy="4" r="3" fill="#888" />
+          <SvgText x="12" y="7" fill="#888" fontSize="8">Marvel</SvgText>
+        </G>
+
+        {/* Meta info */}
+        <G transform="translate(0, 48)">
+          <Rect x="0" y="0" width="35" height="12" rx="3" fill="#4CAF50" opacity="0.2" />
+          <SvgText x="17.5" y="9" textAnchor="middle" fill="#4CAF50" fontSize="7">45 Issues</SvgText>
+
+          <Rect x="40" y="0" width="30" height="12" rx="3" fill="#FF9800" opacity="0.2" />
+          <SvgText x="55" y="9" textAnchor="middle" fill="#FF9800" fontSize="7">2d ago</SvgText>
+        </G>
+      </G>
+
+      {/* Arrow indicator */}
+      <G transform="translate(130, 30)">
+        <Circle cx="8" cy="8" r="10" fill={COMICS_PURPLE} opacity="0.2" />
+        <Path d="M6 8 L10 8 L8 6 M10 8 L8 10" stroke={COMICS_PURPLE} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      </G>
+    </G>
+
+    {/* Feature highlights */}
+    <G transform="translate(15, 100)">
+      {/* Cover icon */}
+      <G transform="translate(0, 0)">
+        <Circle cx="12" cy="12" r="14" fill="#2a2a4a" />
+        <Rect x="6" y="6" width="12" height="14" rx="2" fill="#4CAF50" />
+        <SvgText x="12" y="42" textAnchor="middle" fill="#888" fontSize="8">Cover</SvgText>
+      </G>
+
+      {/* Publisher icon */}
+      <G transform="translate(45, 0)">
+        <Circle cx="12" cy="12" r="14" fill="#2a2a4a" />
+        <Rect x="6" y="8" width="12" height="8" rx="1" fill="#FF9800" />
+        <SvgText x="12" y="42" textAnchor="middle" fill="#888" fontSize="8">Publisher</SvgText>
+      </G>
+
+      {/* Issues icon */}
+      <G transform="translate(90, 0)">
+        <Circle cx="12" cy="12" r="14" fill="#2a2a4a" />
+        <Rect x="7" y="6" width="10" height="6" rx="1" fill={MANGA_BLUE} />
+        <Rect x="7" y="14" width="10" height="6" rx="1" fill={MANGA_BLUE} opacity="0.6" />
+        <SvgText x="12" y="42" textAnchor="middle" fill="#888" fontSize="8">Issues</SvgText>
+      </G>
+
+      {/* Latest icon */}
+      <G transform="translate(135, 0)">
+        <Circle cx="12" cy="12" r="14" fill="#2a2a4a" />
+        <Path d="M12 7 L12 12 L16 14" stroke={COMICS_PURPLE} strokeWidth="2" strokeLinecap="round" fill="none" />
+        <SvgText x="12" y="42" textAnchor="middle" fill="#888" fontSize="8">Latest</SvgText>
+      </G>
+    </G>
+  </Svg>
+);
+
+// Step 7: Comic Background Color SVG
+const ComicBackgroundSvgBase = ({ size = 180 }) => (
+  <Svg width={size} height={size * 0.85} viewBox="0 0 180 153">
+    <Defs>
+      <LinearGradient id="bgColorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <Stop offset="0%" stopColor={COMICS_PURPLE} />
+        <Stop offset="100%" stopColor={MANGA_BLUE} />
+      </LinearGradient>
+    </Defs>
+
+    {/* Comic reader preview */}
+    <G transform="translate(20, 10)">
+      {/* Reader frame */}
+      <Rect x="0" y="0" width="140" height="70" rx="10" fill="#1a1a2e" stroke="#333" strokeWidth="1" />
+
+      {/* Comic page preview */}
+      <Rect x="10" y="8" width="55" height="54" rx="4" fill="#2a2a4a" />
+      <Rect x="15" y="15" width="45" height="8" rx="2" fill="#3a3a5a" />
+      <Rect x="15" y="28" width="40" height="4" rx="1" fill="#3a3a5a" />
+      <Rect x="15" y="36" width="42" height="4" rx="1" fill="#3a3a5a" />
+      <Rect x="15" y="44" width="35" height="4" rx="1" fill="#3a3a5a" />
+
+      {/* Second page */}
+      <Rect x="75" y="8" width="55" height="54" rx="4" fill="#F5E6D3" />
+      <Rect x="80" y="15" width="45" height="8" rx="2" fill="#D4C4B0" />
+      <Rect x="80" y="28" width="40" height="4" rx="1" fill="#D4C4B0" />
+      <Rect x="80" y="36" width="42" height="4" rx="1" fill="#D4C4B0" />
+      <Rect x="80" y="44" width="35" height="4" rx="1" fill="#D4C4B0" />
+    </G>
+
+    {/* Color palette */}
+    <G transform="translate(20, 90)">
+      {/* Default */}
+      <G transform="translate(0, 0)">
+        <Rect x="0" y="0" width="24" height="24" rx="12" fill="#14142A" stroke="#667EEA" strokeWidth="2" />
+        <SvgText x="12" y="38" textAnchor="middle" fill="#888" fontSize="8">Default</SvgText>
+      </G>
+
+      {/* White */}
+      <G transform="translate(30, 0)">
+        <Rect x="0" y="0" width="24" height="24" rx="12" fill="#FFFFFF" stroke="#333" strokeWidth="1" />
+        <SvgText x="12" y="38" textAnchor="middle" fill="#888" fontSize="8">White</SvgText>
+      </G>
+
+      {/* Black */}
+      <G transform="translate(60, 0)">
+        <Rect x="0" y="0" width="24" height="24" rx="12" fill="#000000" stroke="#444" strokeWidth="1" />
+        <SvgText x="12" y="38" textAnchor="middle" fill="#888" fontSize="8">Black</SvgText>
+      </G>
+
+      {/* Sepia - selected */}
+      <G transform="translate(90, 0)">
+        <Rect x="0" y="0" width="24" height="24" rx="12" fill="#F5E6D3" stroke="url(#bgColorGrad)" strokeWidth="3" />
+        <Path d="M12 7 L12 17 M7 12 L17 12" stroke="#8B7765" strokeWidth="2" strokeLinecap="round" />
+        <SvgText x="12" y="38" textAnchor="middle" fill="#888" fontSize="8">Sepia</SvgText>
+      </G>
+
+      {/* Cream */}
+      <G transform="translate(120, 0)">
+        <Rect x="0" y="0" width="24" height="24" rx="12" fill="#FFFDD0" stroke="#333" strokeWidth="1" />
+        <SvgText x="12" y="38" textAnchor="middle" fill="#888" fontSize="8">Cream</SvgText>
+      </G>
+    </G>
+
+    {/* Palette icon */}
+    <G transform="translate(75, 135)">
+      <Circle cx="15" cy="10" r="12" fill="url(#bgColorGrad)" opacity="0.2" />
+      <Path
+        d="M15 2 C8 2 2 8 2 15 C2 22 8 25 12 24 C14 23 14 20 12 18 C10 16 10 13 12 11 C14 9 18 9 20 11 C22 13 22 16 20 18 C19 19 19 21 20 22 C22 23 26 20 26 15 C26 8 22 2 15 2 Z"
+        fill="url(#bgColorGrad)"
+        transform="scale(0.7) translate(8, 5)"
+      />
+      <SvgText x="15" y="28" textAnchor="middle" fill="#aaa" fontSize="9">
+        Customize in Settings
+      </SvgText>
+    </G>
+  </Svg>
+);
+
 // Step 6: Get Started SVG - Celebration/checkmark
 const GetStartedSvgBase = ({ size = 180 }) => (
   <Svg width={size} height={size * 0.75} viewBox="0 0 180 135">
@@ -384,6 +553,8 @@ export const MangaTabSvg = createAnimatedSvg(MangaTabSvgBase);
 export const UnifiedSearchSvg = createAnimatedSvg(UnifiedSearchSvgBase);
 export const MangaBookmarksSvg = createAnimatedSvg(MangaBookmarksSvgBase);
 export const ReadingProgressSvg = createAnimatedSvg(ReadingProgressSvgBase);
+export const ReadAllComicEnhancedSvg = createAnimatedSvg(ReadAllComicEnhancedSvgBase);
+export const ComicBackgroundSvg = createAnimatedSvg(ComicBackgroundSvgBase);
 export const GetStartedSvg = createAnimatedSvg(GetStartedSvgBase);
 
 export default {
@@ -392,5 +563,7 @@ export default {
   UnifiedSearchSvg,
   MangaBookmarksSvg,
   ReadingProgressSvg,
+  ReadAllComicEnhancedSvg,
+  ComicBackgroundSvg,
   GetStartedSvg,
 };

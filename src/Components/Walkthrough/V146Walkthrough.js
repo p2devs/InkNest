@@ -15,6 +15,8 @@ import {
   UnifiedSearchSvg,
   MangaBookmarksSvg,
   ReadingProgressSvg,
+  ReadAllComicEnhancedSvg,
+  ComicBackgroundSvg,
   GetStartedSvg,
 } from './V146WalkthroughSvgs';
 
@@ -55,6 +57,20 @@ const WALKTHROUGH_STEPS = [
     description:
       'Continue where you left off! Your manga reading progress is saved automatically.',
     SvgComponent: ReadingProgressSvg,
+  },
+  {
+    id: 'readallcomic-enhanced',
+    title: 'Enhanced Search Results',
+    description:
+      'ReadAllComic results now show cover images, publisher info, issue counts, and latest chapter updates.',
+    SvgComponent: ReadAllComicEnhancedSvg,
+  },
+  {
+    id: 'comic-background',
+    title: 'Custom Background Colors',
+    description:
+      'Personalize your reading experience! Choose from Default, White, Black, Sepia, or Cream backgrounds.',
+    SvgComponent: ComicBackgroundSvg,
   },
   {
     id: 'get-started',
