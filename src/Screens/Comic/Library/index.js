@@ -56,7 +56,7 @@ export function Library({navigation}) {
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
 
   useEffect(() => {

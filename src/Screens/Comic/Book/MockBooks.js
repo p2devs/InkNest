@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import {useFeatureFlag} from 'configcat-react';
+import {getVersion} from 'react-native-device-info';
 
 export function MockBooks({route}) {
   const {comicBookLink} = route?.params;
@@ -17,7 +18,7 @@ export function MockBooks({route}) {
   const [images, setImages] = useState([]);
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
 
   const {width} = Dimensions.get('window');

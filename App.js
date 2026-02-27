@@ -26,21 +26,36 @@ import NotificationSubscriptionBootstrapper from './src/InkNest-Externals/Notifi
 import V146Walkthrough from './src/Components/Walkthrough/V146Walkthrough';
 import {markV146WalkthroughSeen} from './src/Redux/Reducers';
 
+import {getVersion} from 'react-native-device-info';
+import {useFeatureFlag} from 'configcat-react';
+
 /**
  * WalkthroughHandler - handles v1.4.6 walkthrough visibility
  * Must be inside Provider to use Redux hooks
  */
 function WalkthroughHandler() {
+  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
+    'forIos',
+    getVersion(),
+  );
   const dispatch = useDispatch();
-  const hasSeenV146Walkthrough = useSelector(state => state.data.hasSeenV146Walkthrough);
+  const hasSeenV146Walkthrough = useSelector(
+    state => state.data.hasSeenV146Walkthrough,
+  );
   const [showWalkthrough, setShowWalkthrough] = useState(false);
 
   useEffect(() => {
-    // Show walkthrough if not seen before (after PersistGate rehydrates state)
-    if (hasSeenV146Walkthrough === false) {
-      setShowWalkthrough(true);
+    if (getVersion() === forIosValue && forIosLoading === false) {
+      return;
+    } else {
+      if (forIosLoading === false) {
+        // Show walkthrough if not seen before (after PersistGate rehydrates state)
+        if (hasSeenV146Walkthrough === false) {
+          setShowWalkthrough(true);
+        }
+      }
     }
-  }, [hasSeenV146Walkthrough]);
+  }, [hasSeenV146Walkthrough, forIosValue, forIosLoading]);
 
   const handleWalkthroughComplete = () => {
     dispatch(markV146WalkthroughSeen());
