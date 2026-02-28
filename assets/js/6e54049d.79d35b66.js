@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkink_nest=globalThis.webpackChunkink_nest||[]).push([[1308],{1894(e){e.exports=JSON.parse('{"tags":[{"label":"Release","permalink":"/InkNest/blog/tags/release","description":"Release announcements and updates","count":8}]}')}}]);

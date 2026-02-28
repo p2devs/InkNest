@@ -4,10 +4,95 @@
         <title>InkNest Blog</title>
         <link>https://p2devs.github.io/InkNest/blog</link>
         <description>InkNest Blog</description>
-        <lastBuildDate>Fri, 06 Feb 2026 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 28 Feb 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[InkNest v1.4.6 Release]]></title>
+            <link>https://p2devs.github.io/InkNest/blog/release-v1.4.6</link>
+            <guid>https://p2devs.github.io/InkNest/blog/release-v1.4.6</guid>
+            <pubDate>Sat, 28 Feb 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.6 is now available!]]></description>
+            <content:encoded><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.6</strong> is now available!</p>
+<p>This release is a big one — InkNest now supports <strong>Manga</strong> as a first-class content type alongside Comics. We've also improved authentication, storage, ad blocking, and squashed several bugs.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#-whats-new">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="manga-support-library--search">Manga Support (Library &amp; Search)<a class="hash-link" aria-label="Direct link to Manga Support (Library &amp; Search)" title="Direct link to Manga Support (Library &amp; Search)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#manga-support-library--search">​</a></h4>
+<ul>
+<li><strong>Manga tab in Library</strong> — Browse and manage your manga collection with a dedicated tab alongside Comics</li>
+<li><strong>Manga search integration</strong> — Search across manga sources directly from the Search screen with multi-source results</li>
+<li><strong>Manga history cards</strong> — New <code>MangaHistoryCard</code> component with reading progress tracking</li>
+<li><strong>Manga bookmarks</strong> — Dedicated <code>MangaBookmarks</code> screen for managing your saved manga</li>
+<li>Refactored state management for better handling of search results across multiple content types</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="manga-reading-progress-mangabook-screen">Manga Reading Progress (MangaBook Screen)<a class="hash-link" aria-label="Direct link to Manga Reading Progress (MangaBook Screen)" title="Direct link to Manga Reading Progress (MangaBook Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#manga-reading-progress-mangabook-screen">​</a></h4>
+<ul>
+<li><strong>Reading progress tracking</strong> via Redux — your place is saved as you read manga chapters</li>
+<li>Seamless resume reading experience across sessions</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="manga-bookmarking-mangadetails-screen">Manga Bookmarking (MangaDetails Screen)<a class="hash-link" aria-label="Direct link to Manga Bookmarking (MangaDetails Screen)" title="Direct link to Manga Bookmarking (MangaDetails Screen)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#manga-bookmarking-mangadetails-screen">​</a></h4>
+<ul>
+<li><strong>Bookmark manga</strong> with visual feedback directly from the details screen</li>
+<li>Integrated with the new MangaBookmarks section</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="enhanced-readallcomic-search-results">Enhanced ReadAllComic Search Results<a class="hash-link" aria-label="Direct link to Enhanced ReadAllComic Search Results" title="Direct link to Enhanced ReadAllComic Search Results" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#enhanced-readallcomic-search-results">​</a></h4>
+<ul>
+<li><strong>Rich result cards</strong> with cover images, publisher info, and issue counts</li>
+<li><strong>Latest chapter updates</strong> displayed directly in search results</li>
+<li>Improved layout with visual badges and metadata for better discoverability</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="comic-background-color-customization">Comic Background Color Customization<a class="hash-link" aria-label="Direct link to Comic Background Color Customization" title="Direct link to Comic Background Color Customization" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#comic-background-color-customization">​</a></h4>
+<ul>
+<li><strong>5 background color options</strong>: Default, White, Black, Sepia, and Cream</li>
+<li><strong>Color picker modal</strong> accessible from Settings screen</li>
+<li><strong>Per-comic customization</strong> — change background directly from the comic reader</li>
+<li>Automatic text color adjustment for light/dark backgrounds</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="linklistscreen-redesign-web-sources">LinkListScreen Redesign (Web Sources)<a class="hash-link" aria-label="Direct link to LinkListScreen Redesign (Web Sources)" title="Direct link to LinkListScreen Redesign (Web Sources)" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#linklistscreen-redesign-web-sources">​</a></h4>
+<ul>
+<li><strong>Animated card transitions</strong> for a smoother browsing experience</li>
+<li><strong>Filter functionality</strong> for better source management and discovery</li>
+<li>Refactored styles for consistency and improved UI</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-improvements">🔧 Improvements<a class="hash-link" aria-label="Direct link to 🔧 Improvements" title="Direct link to 🔧 Improvements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#-improvements">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="storage-migration--asyncstorage--mmkv">Storage Migration — AsyncStorage → MMKV<a class="hash-link" aria-label="Direct link to Storage Migration — AsyncStorage → MMKV" title="Direct link to Storage Migration — AsyncStorage → MMKV" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#storage-migration--asyncstorage--mmkv">​</a></h4>
+<ul>
+<li><strong>Removed AsyncStorage</strong> migration utility and related functions</li>
+<li><strong>Notification handling</strong> now uses <code>mmkvStorage</code> for faster, more reliable storage</li>
+<li>Cleaner storage layer with no legacy migration overhead</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="google-sign-in--keychain">Google Sign-In &amp; Keychain<a class="hash-link" aria-label="Direct link to Google Sign-In &amp; Keychain" title="Direct link to Google Sign-In &amp; Keychain" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#google-sign-in--keychain">​</a></h4>
+<ul>
+<li>Updated dependencies for Google Sign-In</li>
+<li>Added <strong>keychain access groups</strong> for improved credential handling on iOS</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="fcm-token-rate-limiting">FCM Token Rate Limiting<a class="hash-link" aria-label="Direct link to FCM Token Rate Limiting" title="Direct link to FCM Token Rate Limiting" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#fcm-token-rate-limiting">​</a></h4>
+<ul>
+<li>Implemented <strong>rate limiting and debounce</strong> for FCM token user sync to prevent excessive network calls</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="webview-enhancements">WebView Enhancements<a class="hash-link" aria-label="Direct link to WebView Enhancements" title="Direct link to WebView Enhancements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#webview-enhancements">​</a></h4>
+<ul>
+<li><strong>iOS select picker dismiss</strong> — Prevents crashes during navigation when select pickers are open</li>
+<li>Whitelisted Cloudflare challenge domains for smoother browsing</li>
+<li><strong>Safety timeout</strong> for ad block rule preparation</li>
+<li>Inline media playback support and improved error handling for content process termination</li>
+<li>Updated loading text for better user experience</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="ad-blocking">Ad Blocking<a class="hash-link" aria-label="Direct link to Ad Blocking" title="Direct link to Ad Blocking" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#ad-blocking">​</a></h4>
+<ul>
+<li>Updated ad block rules with improved detection logic</li>
+<li>Enhanced <code>AdBlockRules</code> and <code>WebSourcesList</code> for more effective ad filtering</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes">🐛 Bug Fixes<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes" title="Direct link to 🐛 Bug Fixes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.6#-bug-fixes">​</a></h2>
+<ul>
+<li>Fixed iOS crashes caused by undismissed select pickers during WebView navigation</li>
+<li>Improved WebView stability with better content process termination handling</li>
+<li>Cleaned up unnecessary code in <code>WebViewComponent</code></li>
+</ul>
+<p><strong>Update now</strong> to explore the new Manga support and enjoy a smoother reading experience! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
+            <category>Release</category>
+        </item>
         <item>
             <title><![CDATA[InkNest v1.4.5 Release]]></title>
             <link>https://p2devs.github.io/InkNest/blog/release-v1.4.5</link>
