@@ -68,7 +68,7 @@ const HistoryCard = ({item, index}) => {
             navigate(NAVIGATION.comicDetails, item);
           }}>
           <Text style={styles.resumeText}>Resume</Text>
-          <Ionicons name="play" size={12} color="#FFF" />
+          <Ionicons name="play" size={10} color="#667EEA" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -77,72 +77,66 @@ const HistoryCard = ({item, index}) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 280,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    marginTop: 12,
-    marginRight: 12,
-    padding: 12,
+    width: 240,
+    borderRadius: 12,
+    backgroundColor: '#1E1E38',
+    marginTop: 4,
+    marginRight: 10,
+    padding: 10,
     flexDirection: 'row',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    gap: 10,
   },
   image: {
-    borderRadius: 10,
-    height: 120,
-    width: 85,
+    borderRadius: 8,
+    height: 100,
+    width: 70,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
     color: '#fff',
-    marginBottom: 12,
-    lineHeight: 20,
+    marginBottom: 10,
+    lineHeight: 18,
   },
   progressContainer: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   progressBarBg: {
     flex: 1,
-    height: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 3,
+    height: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 2,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#667EEA',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   progressText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#667EEA',
-    minWidth: 28,
+    fontSize: 10,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.35)',
+    minWidth: 24,
   },
   resumeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#667EEA',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    gap: 4,
     alignSelf: 'flex-start',
   },
   resumeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#667EEA',
   },
 });
 

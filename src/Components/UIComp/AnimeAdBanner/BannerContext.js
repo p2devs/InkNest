@@ -10,7 +10,7 @@ export const BannerProvider = ({children}) => {
   const [bannerStates, setBannerStates] = useState({
     animeBanner: true,
   });
-  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const {value: forIosValue} = useFeatureFlag('forIos', getVersion());
 
   useEffect(() => {
     if (forIosValue !== getVersion()) {

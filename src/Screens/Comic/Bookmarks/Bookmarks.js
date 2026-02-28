@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -25,15 +25,11 @@ const getBookmarkColor = (index) => {
   return colors[index % colors.length];
 };
 
-export function Bookmarks({navigation, bookmarkLength}) {
+export function Bookmarks({navigation}) {
   const dispatch = useDispatch();
   const data = useSelector(state => state.data.dataByUrl);
   const bookmarks = Object.values(data).filter(item => item.Bookmark);
 
-  useEffect(() => {
-    bookmarkLength(bookmarks?.length);
-  }, [bookmarkLength, bookmarks?.length]);
-  
   const getKey = title => {
     return Object.keys(data).find(key => data[key].title === title);
   };

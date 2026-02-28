@@ -44,7 +44,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst}) => {
 
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
 
   const numbersBookmarks = ComicBook?.BookmarkPages?.length;

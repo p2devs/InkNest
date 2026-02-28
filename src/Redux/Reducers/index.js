@@ -32,10 +32,14 @@ const initialState = {
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
+  MangaBookMarks: {},
+  MangaHistory: {},
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
+  comicBackgroundColor: '#14142A', // Default comic reader background color
   hasRewardAdsShown: false,
   hasSeenOfflineMovedAlert: false,
+  hasSeenV146Walkthrough: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
@@ -281,9 +285,45 @@ const Reducers = createSlice({
     RemoveAnimeBookMark: (state, action) => {
       delete state.AnimeBookMarks[action?.payload?.url];
     },
+    AddMangaBookMark: (state, action) => {
+      state.MangaBookMarks[action?.payload?.link] = action?.payload;
+    },
+    RemoveMangaBookMark: (state, action) => {
+      delete state.MangaBookMarks[action?.payload?.link];
+    },
+    pushMangaHistory: (state, action) => {
+      const link = action.payload.link;
+      state.MangaHistory[link] = {
+        ...state.MangaHistory[link],
+        ...action.payload,
+      };
+    },
+    updateMangaHistory: (state, action) => {
+      const {detailLink, chapterLink, totalPages, lastReadPage} = action.payload;
+      if (!detailLink || !chapterLink) return;
+      state.MangaHistory[detailLink] = {
+        ...state.MangaHistory[detailLink],
+        lastOpenAt: Date.now(),
+        readChapters: {
+          ...state.MangaHistory[detailLink]?.readChapters,
+          [chapterLink]: {
+            totalPages,
+            lastReadPage,
+            readAt: Date.now(),
+          },
+        },
+      };
+    },
+    clearMangaHistory: state => {
+      state.MangaHistory = {};
+    },
     setScrollPreference: (state, action) => {
       // Update user's preferred comic reading scroll mode
       state.scrollPreference = action.payload;
+    },
+    setComicBackgroundColor: (state, action) => {
+      // Update user's preferred comic reader background color
+      state.comicBackgroundColor = action.payload;
     },
     rewardAdsShown: (state, action) => {
       // Update the flag indicating whether reward ads have been shown
@@ -291,6 +331,9 @@ const Reducers = createSlice({
     },
     markOfflineMovedAlertSeen: state => {
       state.hasSeenOfflineMovedAlert = true;
+    },
+    markV146WalkthroughSeen: state => {
+      state.hasSeenV146Walkthrough = true;
     },
     clearLocalComicProgress: state => {
       // Clear any local comic reading progress when importing a new comic
@@ -570,14 +613,21 @@ export const {
   AnimeWatched,
   AddAnimeBookMark,
   RemoveAnimeBookMark,
+  AddMangaBookMark,
+  RemoveMangaBookMark,
+  pushMangaHistory,
+  updateMangaHistory,
+  clearMangaHistory,
   DownloadComicBook,
   DeleteDownloadedComicBook,
   updateDownloadedComicBook,
   clearHistory,
   clearSearch,
   setScrollPreference,
+  setComicBackgroundColor,
   rewardAdsShown,
   markOfflineMovedAlertSeen,
+  markV146WalkthroughSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
   // Community & Auth actions

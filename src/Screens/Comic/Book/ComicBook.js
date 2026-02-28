@@ -46,7 +46,7 @@ export function ComicBook({ navigation, route }) {
   const [DownloadedBook, setDownloadedBook] = useState(null);
   const { value: forIosValue, loading: forIosLoading } = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
   const [images, setImages] = useState([]);
   // Add scrollMode state - 'horizontal' is the default as the app currently uses

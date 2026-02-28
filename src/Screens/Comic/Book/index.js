@@ -8,6 +8,7 @@ import {
   Linking,
   Share,
   Animated,
+  ScrollView,
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -18,6 +19,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import analytics from '@react-native-firebase/analytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import Header from '../../../Components/UIComp/Header';
@@ -28,15 +30,36 @@ import {
   downloadComicBook,
   showRewardedAd,
 } from '../../../InkNest-Externals/Redux/Actions/Download';
-import {updateData, setScrollPreference} from '../../../Redux/Reducers';
+import {updateData, setScrollPreference, setComicBackgroundColor} from '../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
 import {NAVIGATION} from '../../../Constants';
+
+// Background color options with their header colors
+const BACKGROUND_COLORS = [
+  {id: 'default', name: 'Default', color: '#14142A', headerColor: '#14142A', borderColor: 'rgba(255,255,255,0.2)', icon: 'palette'},
+  {id: 'white', name: 'White', color: '#FFFFFF', headerColor: 'rgba(255, 255, 255, 0.95)', borderColor: 'rgba(0,0,0,0.1)', icon: 'circle-outline'},
+  {id: 'black', name: 'Black', color: '#000000', headerColor: '#000000', borderColor: 'rgba(255,255,255,0.15)', icon: 'circle'},
+  {id: 'sepia', name: 'Sepia', color: '#F5E6D3', headerColor: 'rgba(245, 230, 211, 0.95)', borderColor: 'rgba(139, 119, 101, 0.3)', icon: 'coffee'},
+  {id: 'cream', name: 'Cream', color: '#FFFDD0', headerColor: 'rgba(255, 253, 208, 0.95)', borderColor: 'rgba(139, 119, 101, 0.2)', icon: 'ice-cream'},
+];
 
 export function ComicBook({navigation, route}) {
   const ref = useRef(null);
   const dispatch = useDispatch();
   const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
+
+  const userScrollPreference = useSelector(
+    state => state?.data?.scrollPreference,
+  );
+  const savedBackgroundColor = useSelector(
+    state => state?.data?.comicBackgroundColor,
+  );
+
+  // Get current background color config
+  const backgroundColorConfig = useMemo(() => {
+    return BACKGROUND_COLORS.find(c => c.color === savedBackgroundColor) || BACKGROUND_COLORS[0];
+  }, [savedBackgroundColor]);
 
   const [detailsPageLink, setDetailsPageLink] = useState(
     DetailsPage?.link ?? comicBook?.detailsLink ?? '',
@@ -55,15 +78,13 @@ export function ComicBook({navigation, route}) {
 
   const loading = useSelector(state => state?.data?.loading);
   const error = useSelector(state => state?.data?.error);
-  const userScrollPreference = useSelector(
-    state => state?.data?.scrollPreference,
-  );
 
   const [imageLinkIndex, setImageLinkIndex] = useState(0);
   const [isVerticalScroll, setIsVerticalScroll] = useState(
     userScrollPreference === 'vertical',
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalView, setModalView] = useState('options'); // 'options' or 'colorPicker'
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [progress, setProgress] = useState({downloaded: 0, total: 0});
   const [isNextChapter, setIsNextChapter] = useState(false);
@@ -243,16 +264,17 @@ export function ComicBook({navigation, route}) {
       <SafeAreaView
         style={[
           styles.container,
-          {justifyContent: 'center', alignItems: 'center'},
+          {justifyContent: 'center', alignItems: 'center', backgroundColor: backgroundColorConfig.color},
         ]}>
-        <Text style={styles.text}>Loading comic data...</Text>
+        <Text style={[styles.text, {color: backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0' ? '#333' : '#fff'}]}>Loading comic data...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
+    const isLightBg = backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0';
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, {backgroundColor: backgroundColorConfig.color}]}>
         <Header
           style={{
             width: '100%',
@@ -261,6 +283,7 @@ export function ComicBook({navigation, route}) {
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 12,
+            backgroundColor: backgroundColorConfig.headerColor,
           }}>
           <TouchableOpacity
             onPress={() => {
@@ -274,7 +297,7 @@ export function ComicBook({navigation, route}) {
             <Ionicons
               name="arrow-back"
               size={24}
-              color="#fff"
+              color={isLightBg ? '#333' : '#fff'}
               style={{marginRight: 10, opacity: 0.9}}
             />
           </TouchableOpacity>
@@ -282,7 +305,7 @@ export function ComicBook({navigation, route}) {
             style={{
               fontSize: 14,
               fontWeight: '700',
-              color: '#fff',
+              color: isLightBg ? '#333' : '#fff',
               opacity: 0.9,
             }}>
             Comic Book
@@ -290,15 +313,16 @@ export function ComicBook({navigation, route}) {
           <View style={{flex: 0.1}} />
         </Header>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.text}>Error: {error}</Text>
+          <Text style={[styles.text, {color: isLightBg ? '#333' : '#fff'}]}>Error: {error}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   if (!comicBook?.images?.length > 0) {
+    const isLightBg = backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0';
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, {backgroundColor: backgroundColorConfig.color}]}>
         <Header
           style={{
             width: '100%',
@@ -307,6 +331,7 @@ export function ComicBook({navigation, route}) {
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 12,
+            backgroundColor: backgroundColorConfig.headerColor,
           }}>
           <TouchableOpacity
             onPress={() => {
@@ -320,7 +345,7 @@ export function ComicBook({navigation, route}) {
             <Ionicons
               name="arrow-back"
               size={24}
-              color="#fff"
+              color={isLightBg ? '#333' : '#fff'}
               style={{marginRight: 10, opacity: 0.9}}
             />
           </TouchableOpacity>
@@ -328,7 +353,7 @@ export function ComicBook({navigation, route}) {
             style={{
               fontSize: 14,
               fontWeight: '700',
-              color: '#fff',
+              color: isLightBg ? '#333' : '#fff',
               opacity: 0.9,
             }}>
             Comic Book
@@ -336,7 +361,7 @@ export function ComicBook({navigation, route}) {
           <View style={{flex: 0.1}} />
         </Header>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.text}>No data available</Text>
+          <Text style={[styles.text, {color: isLightBg ? '#333' : '#fff'}]}>No data available</Text>
         </View>
       </SafeAreaView>
     );
@@ -344,7 +369,7 @@ export function ComicBook({navigation, route}) {
 
   return (
     <>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, {backgroundColor: backgroundColorConfig.color}]} edges={['top']}>
         <View style={{flex: 1}}>
           <Animated.View
             style={{
@@ -363,6 +388,8 @@ export function ComicBook({navigation, route}) {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingHorizontal: 12,
+                backgroundColor: backgroundColorConfig.headerColor,
+                borderBottomColor: backgroundColorConfig.borderColor,
               }}>
               <TouchableOpacity
                 onPress={() => {
@@ -389,7 +416,7 @@ export function ComicBook({navigation, route}) {
                 <Ionicons
                   name="arrow-back"
                   size={24}
-                  color="#fff"
+                  color={backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0' ? '#333' : '#fff'}
                   style={{marginRight: 10, opacity: 0.9}}
                 />
               </TouchableOpacity>
@@ -397,14 +424,14 @@ export function ComicBook({navigation, route}) {
                 style={{
                   fontSize: 14,
                   fontWeight: '700',
-                  color: '#fff',
+                  color: backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0' ? '#333' : '#fff',
                   opacity: 0.9,
                 }}>
                 Page: {imageLinkIndex + 1} / {comicBook?.images?.length}
               </Text>
 
               <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                <Ionicons name="menu" size={24} color="#fff" />
+                <Ionicons name="menu" size={24} color={backgroundColorConfig.color === '#FFFFFF' || backgroundColorConfig.color === '#F5E6D3' || backgroundColorConfig.color === '#FFFDD0' ? '#333' : '#fff'} />
               </TouchableOpacity>
             </Header>
           </Animated.View>
@@ -442,7 +469,12 @@ export function ComicBook({navigation, route}) {
             transparent={true}
             visible={isModalVisible}
             onRequestClose={() => {
-              setIsModalVisible(!isModalVisible);
+              if (modalView === 'colorPicker') {
+                setModalView('options');
+              } else {
+                setIsModalVisible(false);
+                setModalView('options');
+              }
             }}>
             <SafeAreaView
               style={{
@@ -450,6 +482,75 @@ export function ComicBook({navigation, route}) {
                 padding: 20,
                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
               }}>
+            {modalView === 'colorPicker' ? (
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <View style={styles.colorPickerContainer}>
+                  <View style={styles.colorPickerHeader}>
+                    <Text style={styles.colorPickerTitle}>Background Color</Text>
+                    <TouchableOpacity onPress={() => setModalView('options')}>
+                      <Ionicons name="close" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.colorPickerSubtitle}>
+                    Choose your reading background
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.colorOptionsContainer}>
+                    {BACKGROUND_COLORS.map(colorOption => {
+                      const isSelected = savedBackgroundColor === colorOption.color;
+                      const isLightColor = colorOption.color === '#FFFFFF' || colorOption.color === '#F5E6D3' || colorOption.color === '#FFFDD0';
+                      return (
+                        <TouchableOpacity
+                          key={colorOption.id}
+                          style={[
+                            styles.colorOption,
+                            {backgroundColor: colorOption.color},
+                            isSelected && styles.colorOptionSelected,
+                          ]}
+                          onPress={() => {
+                            dispatch(setComicBackgroundColor(colorOption.color));
+                            analytics().logEvent('comic_background_color_changed', {
+                              color: colorOption.name,
+                              colorCode: colorOption.color,
+                            });
+                            setModalView('options');
+                          }}>
+                          <MaterialCommunityIcons
+                            name={colorOption.icon}
+                            size={24}
+                            color={isLightColor ? '#333' : '#fff'}
+                          />
+                          <Text
+                            style={[
+                              styles.colorOptionText,
+                              {color: isLightColor ? '#333' : '#fff'},
+                            ]}>
+                            {colorOption.name}
+                          </Text>
+                          {isSelected && (
+                            <View style={styles.checkmark}>
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={20}
+                                color="#4CAF50"
+                              />
+                            </View>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                  <TouchableOpacity
+                    style={styles.colorPickerCloseBtn}
+                    onPress={() => setModalView('options')}>
+                    <Text style={styles.colorPickerCloseText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <>
               <View
                 style={{
                   flexDirection: 'row',
@@ -461,6 +562,7 @@ export function ComicBook({navigation, route}) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsModalVisible(false);
+                    setModalView('options');
                   }}>
                   <Ionicons name="close" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -490,6 +592,23 @@ export function ComicBook({navigation, route}) {
                       ? 'Vertical Scroll'
                       : 'Horizontal Scroll'}
                   </Text>
+                </TouchableOpacity>
+
+                {/* Background Color Picker */}
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => {
+                    setModalView('colorPicker');
+                  }}>
+                  <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                    <MaterialCommunityIcons
+                      name="palette"
+                      size={20}
+                      color="#fff"
+                      style={{marginRight: 8}}
+                    />
+                    <Text style={styles.text}>Background Color</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -637,6 +756,7 @@ export function ComicBook({navigation, route}) {
               <TouchableOpacity
                 onPress={() => {
                   setIsModalVisible(false);
+                  setModalView('options');
                 }}
                 style={{
                   backgroundColor: '#FF6347',
@@ -646,6 +766,8 @@ export function ComicBook({navigation, route}) {
                 }}>
                 <Text style={styles.text}>Close</Text>
               </TouchableOpacity>
+              </>
+            )}
             </SafeAreaView>
           </Modal>
         </SafeAreaView>
@@ -671,5 +793,75 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '100%',
     alignItems: 'center',
+  },
+  // Color Picker Modal Styles
+  colorPickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  colorPickerContainer: {
+    backgroundColor: '#1E1E38',
+    borderRadius: 20,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+  },
+  colorPickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  colorPickerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  colorPickerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: 20,
+  },
+  colorOptionsContainer: {
+    paddingVertical: 10,
+    gap: 12,
+  },
+  colorOption: {
+    width: 90,
+    height: 100,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    position: 'relative',
+  },
+  colorOptionSelected: {
+    borderWidth: 3,
+    borderColor: '#4CAF50',
+  },
+  colorOptionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  checkmark: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  colorPickerCloseBtn: {
+    backgroundColor: '#667EEA',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  colorPickerCloseText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

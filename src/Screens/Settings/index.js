@@ -9,8 +9,10 @@ import {
   Share,
   Alert,
   ActivityIndicator,
+  Modal,
+  ScrollView,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView as GHScrollView } from 'react-native-gesture-handler';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP,
@@ -28,7 +30,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { NAVIGATION } from '../../Constants';
 import Header from '../../Components/UIComp/Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { setScrollPreference, clearHistory } from '../../Redux/Reducers';
+import { setScrollPreference, clearHistory, setComicBackgroundColor } from '../../Redux/Reducers';
 import DonationBanner from '../../InkNest-Externals/Donation/DonationBanner';
 import {
   signOut as signOutAction,
@@ -37,14 +39,28 @@ import {
 } from '../../InkNest-Externals/Community/Logic/CommunityActions';
 import LoginPrompt from '../../Components/Auth/LoginPrompt';
 
+// Background color options
+const BACKGROUND_COLORS = [
+  {id: 'default', name: 'Default', color: '#14142A', icon: 'palette'},
+  {id: 'white', name: 'White', color: '#FFFFFF', icon: 'circle-outline'},
+  {id: 'black', name: 'Black', color: '#000000', icon: 'circle'},
+  {id: 'sepia', name: 'Sepia', color: '#F5E6D3', icon: 'coffee'},
+  {id: 'cream', name: 'Cream', color: '#FFFDD0', icon: 'ice-cream'},
+];
+
 export function Settings({ navigation }) {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const dispatch = useDispatch();
   const scrollPreference = useSelector(state => state.data.scrollPreference);
+  const savedBackgroundColor = useSelector(state => state.data.comicBackgroundColor);
   const user = useSelector(state => state.data.user);
   const isAuthenticated = !!user;
+
+  // Get current background color name
+  const currentBgColorName = BACKGROUND_COLORS.find(c => c.color === savedBackgroundColor)?.name || 'Default';
 
   const handleLogout = () => {
     Alert.alert(
@@ -98,7 +114,7 @@ export function Settings({ navigation }) {
       <Header title="Settings" />
       <DonationBanner />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <GHScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={{
             paddingVertical: hp('1%'),
@@ -338,6 +354,63 @@ export function Settings({ navigation }) {
           </Text>
         </TouchableOpacity>
 
+        {/* Background Color Option */}
+        <TouchableOpacity
+          style={{
+            paddingVertical: hp('1%'),
+            backgroundColor: '#FFF',
+            marginHorizontal: widthPercentageToDP('2%'),
+            marginVertical: hp('1%'),
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+          onPress={() => {
+            analytics().logEvent('open_background_color_picker', {
+              item: 'Comic Background Color',
+            });
+            setShowColorPicker(true);
+          }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons
+              name="palette"
+              size={hp('2.5%')}
+              color="#000"
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={{
+                fontSize: hp('2%'),
+                fontWeight: 'bold',
+                color: '#000',
+              }}>
+              Comic Background
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: savedBackgroundColor || '#14142A',
+                marginRight: 8,
+                borderWidth: 1,
+                borderColor: '#ccc',
+              }}
+            />
+            <Text
+              style={{
+                fontSize: hp('1.8%'),
+                color: '#007AFF',
+              }}>
+              {currentBgColorName}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={async () => {
             await analytics().logEvent('discord_open', {
@@ -527,7 +600,7 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or Manga, InkNest has s
           />
         </TouchableOpacity>
 
-      </ScrollView>
+      </GHScrollView>
       <View
         style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: 'silver', fontSize: 13 }}>
@@ -563,6 +636,81 @@ Whether you're into superheroes, sci-fi, fantasy, manga, or Manga, InkNest has s
           }
         }}
       />
+
+      {/* Background Color Picker Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showColorPicker}
+        onRequestClose={() => setShowColorPicker(false)}>
+        <View style={styles.colorPickerOverlay}>
+          <View style={styles.colorPickerContainer}>
+            <View style={styles.colorPickerHeader}>
+              <Text style={styles.colorPickerTitle}>Background Color</Text>
+              <TouchableOpacity onPress={() => setShowColorPicker(false)}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.colorPickerSubtitle}>
+              Choose your reading background
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.colorOptionsContainer}>
+              {BACKGROUND_COLORS.map(colorOption => {
+                const isSelected = savedBackgroundColor === colorOption.color;
+                const isLightColor = colorOption.color === '#FFFFFF' || colorOption.color === '#F5E6D3' || colorOption.color === '#FFFDD0';
+                return (
+                  <TouchableOpacity
+                    key={colorOption.id}
+                    style={[
+                      styles.colorOption,
+                      {backgroundColor: colorOption.color},
+                      isSelected && styles.colorOptionSelected,
+                    ]}
+                    onPress={() => {
+                      dispatch(setComicBackgroundColor(colorOption.color));
+                      analytics().logEvent('comic_background_color_changed', {
+                        color: colorOption.name,
+                        colorCode: colorOption.color,
+                        source: 'settings',
+                      });
+                      setShowColorPicker(false);
+                    }}>
+                    <MaterialCommunityIcons
+                      name={colorOption.icon}
+                      size={24}
+                      color={isLightColor ? '#333' : '#fff'}
+                    />
+                    <Text
+                      style={[
+                        styles.colorOptionText,
+                        {color: isLightColor ? '#333' : '#fff'},
+                      ]}>
+                      {colorOption.name}
+                    </Text>
+                    {isSelected && (
+                      <View style={styles.checkmark}>
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color="#4CAF50"
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.colorPickerCloseBtn}
+              onPress={() => setShowColorPicker(false)}>
+              <Text style={styles.colorPickerCloseText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView >
   );
 }
@@ -574,5 +722,75 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     flexWrap: 'wrap',
     maxWidth: widthPercentageToDP('70%'),
+  },
+  // Color Picker Modal Styles
+  colorPickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  colorPickerContainer: {
+    backgroundColor: '#1E1E38',
+    borderRadius: 20,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+  },
+  colorPickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  colorPickerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  colorPickerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: 20,
+  },
+  colorOptionsContainer: {
+    paddingVertical: 10,
+    gap: 12,
+  },
+  colorOption: {
+    width: 90,
+    height: 100,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    position: 'relative',
+  },
+  colorOptionSelected: {
+    borderWidth: 3,
+    borderColor: '#4CAF50',
+  },
+  colorOptionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  checkmark: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  colorPickerCloseBtn: {
+    backgroundColor: '#667EEA',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  colorPickerCloseText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

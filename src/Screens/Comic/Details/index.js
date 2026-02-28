@@ -68,7 +68,7 @@ export function ComicDetails({route, navigation}) {
 
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
 
   const [sort, setSort] = useState(false);

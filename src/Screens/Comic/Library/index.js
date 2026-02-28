@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -25,26 +25,30 @@ import {useFeatureFlag} from 'configcat-react';
 import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
+import {getMangaHome} from '../../../InkNest-Externals/Screens/Manga/APIs';
 import HistoryCard from './Components/HistoryCard';
+import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
-import {clearHistory} from '../../../Redux/Reducers';
+import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
-
-// Generate colors for sections
-const getSectionColor = (index) => {
-  const colors = [
-    '#FF6B6B', '#4ECDC4', '#667EEA', '#F093FB', 
-    '#4FACFE', '#43E97B', '#FA709A', '#FEE140'
-  ];
-  return colors[index % colors.length];
-};
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
+  const [mangaData, setMangaData] = useState({latest: null, manga: null, newest: null});
   const [loading, setLoading] = useState(false);
+  const [mangaLoading, setMangaLoading] = useState(false);
   const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
+  const [activeTab, setActiveTab] = useState('comic');
   const History = useSelector(state => state.data.history);
+  const MangaHistory = useSelector(state => state.data.MangaHistory || {});
+  const comicBookmarkCount = useSelector(
+    state => Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
+  );
+  const mangaBookmarkCount = useSelector(
+    state => Object.keys(state.data.MangaBookMarks || {}).length,
+  );
+  const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount;
   const notifications = useSelector(state => state.data?.notifications || []);
   const hasUnreadNotifications = notifications.some(
     notification => !notification?.read,
@@ -52,7 +56,7 @@ export function Library({navigation}) {
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
-    'Default',
+    getVersion(),
   );
 
   useEffect(() => {
@@ -102,40 +106,77 @@ export function Library({navigation}) {
     } else {
       if (forIosLoading === false) {
         getComicsHome(type, setComicsData, setLoading);
+        getMangaHome(setMangaData, setMangaLoading);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forIosValue, forIosLoading]);
 
   const allSections = Object.entries(comicsData);
+  const isSpecialBuild =
+    getVersion() === forIosValue && forIosLoading === false;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {getVersion() === forIosValue &&
-        forIosLoading === false ? null : forIosLoading === false ? (
-          <>
-            <View style={styles.headerRow}>
+      {/* Top Header - always visible */}
+      {isSpecialBuild ? null : forIosLoading === false ? (
+        <>
+          {/* Header: Tabs + Actions in one row */}
+          <View style={styles.headerRow}>
+            <View style={styles.tabBar}>
               <TouchableOpacity
-                onPress={() => {
-                  setChangeType(!changeType);
-                  crashlytics().log('Comic Host Name Clicked');
-                  analytics().logEvent('comic_host_name_clicked', {
-                    hostName: type.toString(),
-                  });
-                }}
-                style={styles.hostSelector}>
-                <Text style={styles.hostText}>{type}</Text>
-                <AntDesign name="down" size={20} color="#fff" />
+                style={[styles.tab, activeTab === 'comic' && styles.activeTab]}
+                onPress={() => setActiveTab('comic')}>
+                <MaterialIcons
+                  name="menu-book"
+                  size={15}
+                  color={activeTab === 'comic' ? '#667EEA' : 'rgba(255,255,255,0.35)'}
+                />
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'comic' && styles.activeTabText,
+                  ]}>
+                  Comics
+                </Text>
               </TouchableOpacity>
-              
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'manga' && styles.activeTab]}
+                onPress={() => setActiveTab('manga')}>
+                <MaterialIcons
+                  name="auto-stories"
+                  size={15}
+                  color={activeTab === 'manga' ? '#007AFF' : 'rgba(255,255,255,0.35)'}
+                />
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'manga' && styles.activeTabMangaText,
+                  ]}>
+                  Manga
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => {
                   crashlytics().log('Bookmarks button clicked');
                   navigation.navigate(NAVIGATION.bookmarks);
                 }}>
-                <FontAwesome6 name="book-bookmark" size={20} color="#fff" />
+                <FontAwesome6
+                  name="book-bookmark"
+                  size={16}
+                  color="rgba(255,255,255,0.6)"
+                />
+                {totalBookmarkCount > 0 && (
+                  <View style={styles.bookmarkBadge}>
+                    <Text style={styles.bookmarkBadgeText}>
+                      {totalBookmarkCount}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
@@ -143,130 +184,381 @@ export function Library({navigation}) {
                   crashlytics().log('Notifications button clicked');
                   navigation.navigate(NAVIGATION.notifications);
                 }}>
-                <Ionicons name="notifications-outline" size={20} color="#fff" />
+                <Ionicons
+                  name="notifications-outline"
+                  size={18}
+                  color="rgba(255,255,255,0.6)"
+                />
                 {hasUnreadNotifications && (
-                  <View style={styles.notificationBadge} />
+                  <View style={styles.notificationDot} />
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => {
                   crashlytics().log('Home Search button clicked');
-                  navigation.navigate(NAVIGATION.search);
-                }}>
-                <AntDesign name="search1" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
-            <AnimeAdbanner />
-          </>
-        ) : null}
-        
-        {changeType ? (
-          <View style={styles.dropdownMenu}>
-            {Object.keys(ComicHostName).map((key, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.dropdownItem}
-                onPress={() => {
-                  crashlytics().log('Comic Host Name Clicked');
-                  analytics().logEvent('comic_host_name_clicked', {
-                    hostName: key,
+                  navigation.navigate(NAVIGATION.search, {
+                    initialTab: activeTab,
                   });
-                  setType(key);
-                  getComicsHome(key, setComicsData, setLoading);
-                  setChangeType(false);
                 }}>
-                {type == key ? (
-                  <AntDesign name="checkcircle" size={20} color="#fff" />
-                ) : (
-                  <MaterialIcons name="radio-button-unchecked" size={20} color="#fff" />
-                )}
-                <View>
-                  <Text style={styles.dropdownItemTitle}>{key}</Text>
-                  <Text style={styles.dropdownItemSubtitle}>{ComicHostName[key]}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : null}
-
-        {/* Continue Reading */}
-        {!Object.values(History).length ? null : (
-          <View style={styles.historySection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Continue Reading</Text>
-              <TouchableOpacity onPress={() => {
-                Alert.alert(
-                  'Clear History',
-                  'Are you sure you want to clear your reading history?',
-                  [
-                    {text: 'Cancel', style: 'cancel'},
-                    {text: 'Clear', onPress: () => dispatch(clearHistory())},
-                  ],
-                  {cancelable: false},
-                );
-              }}>
-                <Text style={styles.clearText}>Clear</Text>
+                <Ionicons
+                  name="search"
+                  size={18}
+                  color="rgba(255,255,255,0.6)"
+                />
               </TouchableOpacity>
             </View>
-            <FlatList
-              data={Object.values(History).sort(
-                (a, b) => b.lastOpenAt - a.lastOpenAt,
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({item, index}) => (
-                <HistoryCard item={item} index={index} key={index} />
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
           </View>
-        )}
 
-        {/* Stacked List Sections */}
-        {!loading && allSections.map(([key, section], sectionIndex) => (
-          <View key={key} style={styles.stackedSection}>
-            <View style={styles.stackedHeader}>
-              <View style={[styles.stackedIndicator, {backgroundColor: getSectionColor(sectionIndex)}]} />
-              <Text style={styles.stackedTitle}>{section.title}</Text>
-            </View>
-            {section.data?.slice(0, 5).map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.stackedItem}
-                onPress={() => {
-                  crashlytics().log('Comic Details button clicked');
-                  analytics().logEvent('comic_details_button_clicked', {
-                    link: item?.link?.toString(),
-                    title: item?.title?.toString(),
-                  });
-                  type === 'readallcomics' || type == 'comicbookplus'
-                    ? navigation.navigate(NAVIGATION.comicBook, {
-                        comicBookLink: item?.link,
-                      })
-                    : navigation.navigate(NAVIGATION.comicDetails, {
-                        ...item,
-                        isComicBookLink: key === 'readallcomics',
+          <AnimeAdbanner />
+        </>
+      ) : null}
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* ===== COMIC TAB ===== */}
+        {activeTab === 'comic' && (
+          <>
+            {/* Comic Host Selector */}
+            {!isSpecialBuild && forIosLoading === false && (
+              <View style={styles.hostRow}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setChangeType(!changeType);
+                    crashlytics().log('Comic Host Name Clicked');
+                    analytics().logEvent('comic_host_name_clicked', {
+                      hostName: type.toString(),
+                    });
+                  }}
+                  style={styles.hostSelector}>
+                  <Text style={styles.hostText} numberOfLines={1}>
+                    {type}
+                  </Text>
+                  <AntDesign
+                    name={changeType ? 'up' : 'down'}
+                    size={14}
+                    color="rgba(255,255,255,0.4)"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Host dropdown */}
+            {changeType && (
+              <View style={styles.dropdown}>
+                {Object.keys(ComicHostName).map((key, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      crashlytics().log('Comic Host Name Clicked');
+                      analytics().logEvent('comic_host_name_clicked', {
+                        hostName: key,
                       });
-                }}>
-                <Image source={{uri: item.image}} style={styles.stackedImage} />
-                <View style={styles.stackedInfo}>
-                  <Text style={styles.stackedItemTitle} numberOfLines={1}>{item.title}</Text>
-                  <Text style={styles.stackedItemDate}>{item.publishDate}</Text>
+                      setType(key);
+                      getComicsHome(key, setComicsData, setLoading);
+                      setChangeType(false);
+                    }}>
+                    {type === key ? (
+                      <Ionicons name="checkmark-circle" size={18} color="#667EEA" />
+                    ) : (
+                      <View style={styles.radioEmpty} />
+                    )}
+                    <View style={styles.dropdownItemInfo}>
+                      <Text style={styles.dropdownItemTitle}>{key}</Text>
+                      <Text style={styles.dropdownItemSub}>
+                        {ComicHostName[key]}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Continue Reading */}
+            {Object.values(History).length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Continue Reading</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        'Clear History',
+                        'Are you sure you want to clear your reading history?',
+                        [
+                          {text: 'Cancel', style: 'cancel'},
+                          {
+                            text: 'Clear',
+                            onPress: () => dispatch(clearHistory()),
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }}>
+                    <Text style={styles.clearText}>Clear</Text>
+                  </TouchableOpacity>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.3)" />
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-        
-        {/* Loading indicator */}
-        {loading && (
-          <View style={{paddingVertical: 40, alignItems: 'center'}}>
-            <ActivityIndicator size="large" color="#667EEA" />
-          </View>
+                <FlatList
+                  data={Object.values(History).sort(
+                    (a, b) => b.lastOpenAt - a.lastOpenAt,
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({item, index}) => (
+                    <HistoryCard item={item} index={index} key={index} />
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+
+            {/* Comic sections */}
+            {!loading &&
+              allSections.map(([key, section]) => (
+                <View key={key} style={styles.section}>
+                  <Text style={styles.sectionTitle}>{section.title}</Text>
+                  <FlatList
+                    data={section.data}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalList}
+                    renderItem={({item}) => (
+                      <TouchableOpacity
+                        style={styles.comicCard}
+                        activeOpacity={0.7}
+                        onPress={() => {
+                          crashlytics().log('Comic Details button clicked');
+                          analytics().logEvent('comic_details_button_clicked', {
+                            link: item?.link?.toString(),
+                            title: item?.title?.toString(),
+                          });
+                          type === 'readallcomics' || type === 'comicbookplus'
+                            ? navigation.navigate(NAVIGATION.comicBook, {
+                                comicBookLink: item?.link,
+                              })
+                            : navigation.navigate(NAVIGATION.comicDetails, {
+                                ...item,
+                                isComicBookLink: key === 'readallcomics',
+                              });
+                        }}>
+                        <Image
+                          source={{uri: item.image}}
+                          style={styles.comicCardImage}
+                        />
+                        <Text style={styles.comicCardTitle} numberOfLines={2}>
+                          {item.title}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              ))}
+
+            {/* Loading */}
+            {loading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#667EEA" />
+              </View>
+            )}
+          </>
         )}
+
+        {/* ===== MANGA TAB ===== */}
+        {activeTab === 'manga' && (
+          <>
+            {/* Manga Continue Reading */}
+            {Object.values(MangaHistory).length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Continue Reading</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        'Clear Manga History',
+                        'Are you sure you want to clear your manga reading history?',
+                        [
+                          {text: 'Cancel', style: 'cancel'},
+                          {
+                            text: 'Clear',
+                            onPress: () => dispatch(clearMangaHistory()),
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }}>
+                    <Text style={styles.clearText}>Clear</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={Object.values(MangaHistory).sort(
+                    (a, b) => b.lastOpenAt - a.lastOpenAt,
+                  )}
+                  keyExtractor={(item, index) => `manga-history-${index}`}
+                  renderItem={({item}) => <MangaHistoryCard item={item} />}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+
+            {/* Manga sections */}
+            {!mangaLoading && mangaData.latest?.mangaList?.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Latest Manga</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate(NAVIGATION.mangaViewAll, {
+                        title: 'Latest',
+                        LoadedData: mangaData.latest,
+                        type: 'latest',
+                      });
+                    }}>
+                    <Text style={styles.clearText}>See All</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={mangaData.latest.mangaList.slice(0, 10)}
+                  keyExtractor={(item, index) => `manga-latest-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.comicCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        crashlytics().log('Manga card clicked from Library');
+                        analytics().logEvent('manga_library_card_clicked', {
+                          link: item?.link?.toString(),
+                          title: item?.title?.toString(),
+                        });
+                        navigation.navigate(NAVIGATION.mangaDetails, {
+                          link: item.link,
+                          title: item.title,
+                        });
+                      }}>
+                      <Image
+                        source={{uri: item.image}}
+                        style={styles.comicCardImage}
+                      />
+                      <Text style={styles.comicCardTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {!mangaLoading && mangaData.manga?.mangaList?.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Popular Manga</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate(NAVIGATION.mangaViewAll, {
+                        title: 'Manga',
+                        LoadedData: mangaData.manga,
+                        type: 'manga',
+                      });
+                    }}>
+                    <Text style={styles.clearText}>See All</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={mangaData.manga.mangaList.slice(0, 10)}
+                  keyExtractor={(item, index) => `manga-manga-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.comicCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        crashlytics().log('Manga card clicked from Library');
+                        analytics().logEvent('manga_library_card_clicked', {
+                          link: item?.link?.toString(),
+                          title: item?.title?.toString(),
+                        });
+                        navigation.navigate(NAVIGATION.mangaDetails, {
+                          link: item.link,
+                          title: item.title,
+                        });
+                      }}>
+                      <Image
+                        source={{uri: item.image}}
+                        style={styles.comicCardImage}
+                      />
+                      <Text style={styles.comicCardTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {!mangaLoading && mangaData.newest?.mangaList?.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Newest Manga</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate(NAVIGATION.mangaViewAll, {
+                        title: 'Newest',
+                        LoadedData: mangaData.newest,
+                        type: 'newest',
+                      });
+                    }}>
+                    <Text style={styles.clearText}>See All</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={mangaData.newest.mangaList.slice(0, 10)}
+                  keyExtractor={(item, index) => `manga-newest-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.comicCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        crashlytics().log('Manga card clicked from Library');
+                        analytics().logEvent('manga_library_card_clicked', {
+                          link: item?.link?.toString(),
+                          title: item?.title?.toString(),
+                        });
+                        navigation.navigate(NAVIGATION.mangaDetails, {
+                          link: item.link,
+                          title: item.title,
+                        });
+                      }}>
+                      <Image
+                        source={{uri: item.image}}
+                        style={styles.comicCardImage}
+                      />
+                      <Text style={styles.comicCardTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Manga Loading */}
+            {mangaLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#007AFF" />
+              </View>
+            )}
+          </>
+        )}
+
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -276,152 +568,209 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#14142A',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 20 : 0,
   },
+
+  // Header
   headerRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
-  },
-  hostSelector: {
-    flex: 1,
-    borderRadius: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    height: 44,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 16 : 4,
+    paddingBottom: 8,
+    gap: 10,
   },
-  hostText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
+  headerActions: {
+    flexDirection: 'row',
+    gap: 4,
   },
   iconButton: {
-    borderRadius: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#1E1E38',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  notificationBadge: {
+  notificationDot: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#F74B78',
-    borderWidth: 1,
-    borderColor: '#14142A',
+    top: 8,
+    right: 8,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FF2D55',
   },
-  dropdownMenu: {
-    position: 'absolute',
-    top: 60,
-    left: 16,
-    right: 16,
-    backgroundColor: '#1A1A2E',
-    borderRadius: 16,
-    padding: 12,
-    zIndex: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+
+  // Tab Bar (inline in header)
+  tabBar: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#1E1E38',
+    borderRadius: 10,
+    padding: 3,
   },
-  dropdownItem: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    padding: 12,
+  tab: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginVertical: 4,
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 5,
+  },
+  activeTab: {
+    backgroundColor: 'rgba(102, 126, 234, 0.15)',
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.35)',
+  },
+  activeTabText: {
+    color: '#667EEA',
+  },
+  activeTabMangaText: {
+    color: '#007AFF',
+  },
+  bookmarkBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#667EEA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  bookmarkBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+
+
+  // Host selector (comic tab)
+  hostRow: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  hostSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E1E38',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 8,
+  },
+  hostText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFF',
+    flex: 1,
+  },
+
+  // Dropdown
+  dropdown: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    backgroundColor: '#1E1E38',
+    borderRadius: 12,
+    paddingVertical: 4,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  radioEmpty: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  dropdownItemInfo: {
+    flex: 1,
   },
   dropdownItemTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFF',
   },
-  dropdownItemSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
+  dropdownItemSub: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.35)',
+    marginTop: 1,
   },
-  
-  // Section styles
+
+  // Sections
+  section: {
+    paddingLeft: 20,
+    marginTop: 20,
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
+    paddingRight: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 10,
   },
   clearText: {
-    fontSize: 14,
-    color: '#2767f2',
-  },
-  
-  // Continue Reading
-  historySection: {
-    marginBottom: 24,
-  },
-  gameDetailsParent: {
-    marginBottom: 24,
-  },
-  
-  // Stacked List Sections
-  stackedSection: {
-    marginBottom: 20,
-  },
-  stackedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  stackedIndicator: {
-    width: 4,
-    height: 20,
-    borderRadius: 2,
-    marginRight: 10,
-  },
-  stackedTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#fff',
-  },
-  stackedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  stackedImage: {
-    width: 50,
-    height: 70,
-    borderRadius: 8,
-  },
-  stackedInfo: {
-    flex: 1,
-    marginLeft: 12,
-    marginRight: 8,
-  },
-  stackedItemTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  stackedItemDate: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '600',
+    color: '#667EEA',
+    marginBottom: 10,
+  },
+
+  // Horizontal comic cards
+  horizontalList: {
+    gap: 10,
+  },
+  comicCard: {
+    width: 120,
+    backgroundColor: '#1E1E38',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  comicCardImage: {
+    width: 120,
+    height: 165,
+    backgroundColor: '#2A2A48',
+  },
+  comicCardTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.8)',
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 10,
+    lineHeight: 16,
+  },
+  listItemSub: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.3)',
+    marginTop: 2,
+  },
+
+  // Loading
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+
+  bottomSpacer: {
+    height: 32,
   },
 });

@@ -89,15 +89,49 @@ export const parseComicHubFreeResults = (responseData, baseUrl) => {
 export const parseReadAllComicsResults = ($, baseUrl) => {
   const results = [];
 
-  $('ul.list-story.categories li a').each((_, element) => {
-    const title = $(element).text().trim();
-    const href = $(element).attr('href');
+  $('ul.list-story.categories > li').each((_, element) => {
+    const $li = $(element);
 
-    results.push({
-      title,
-      data: href.split('/').filter(Boolean).pop(), // get last part of URL
-      link: href.startsWith('http') ? href : `${baseUrl}${href}`,
-    });
+    // Get the main link (from book-link or cat-title)
+    const bookLink = $li.find('a.book-link');
+    const catTitleLink = $li.find('a.cat-title');
+
+    // Use book-link href as primary, fallback to cat-title href
+    const href = bookLink.attr('href') || catTitleLink.attr('href') || '';
+    const title = catTitleLink.text().trim();
+
+    // Get the comic image
+    const imgSrc = $li.find('img.book-cover').attr('src') || '';
+
+    // Get publisher
+    const publisher = $li.find('.cat-publisher').text().trim();
+
+    // Get total issues
+    const totalIssuesText = $li.find('.cat-total-issues').text().trim();
+    const totalIssues = totalIssuesText.match(/\d+/)?.[0] || '';
+
+    // Get last updated date
+    const lastUpdated = $li.find('.latest-date').text().trim();
+
+    // Get latest chapter link and title
+    const latestChapterLink = $li.find('a.latest-chapter').attr('href') || '';
+    const latestChapterTitle = $li.find('a.latest-chapter').text().trim();
+
+    if (title && href) {
+      results.push({
+        title,
+        data: href.split('/').filter(Boolean).pop(),
+        link: href.startsWith('http') ? href : `${baseUrl}${href}`,
+        image: imgSrc,
+        publisher: publisher.replace(/^Publisher:\s*/i, ''),
+        totalIssues,
+        lastUpdated: lastUpdated.replace(/^Updated:\s*/i, ''),
+        latestChapter: {
+          title: latestChapterTitle.replace(/^Latest:\s*/i, ''),
+          link: latestChapterLink,
+        },
+      });
+    }
   });
 
   return results;

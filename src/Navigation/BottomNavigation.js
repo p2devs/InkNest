@@ -53,7 +53,7 @@ const TabBarIcon = ({name, tintColor, size = 24}) => {
 const EMPTY_NOTIFICATIONS = [];
 
 export function BottomNavigation() {
-  const {value: forIosValue} = useFeatureFlag('forIos', 'Default');
+  const {value: forIosValue} = useFeatureFlag('forIos', getVersion());
   const notifications = useSelector(state => state.data?.notifications ?? EMPTY_NOTIFICATIONS);
   const hasUnreadNotifications = useMemo(
     () => notifications.some(notification => !notification?.read),
