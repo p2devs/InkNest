@@ -27,11 +27,11 @@ const Image = ({
           resizeMode: resizeMode ?? 'fill',
           cachePolicy: 'discWithCacheControl',
           showActivityIndicator: true,
-          url: source.uri,
+          url: (source.uri || '').replace(/[\r\n]/g, '').trim(),
           progressiveLoadingEnabled: true,
           allowHardware: true,
           headers: {
-            Referer: source.uri,
+            Referer: (source.uri || '').replace(/[\r\n]/g, '').trim(),
           },
         }}
         onSuccess={event => {

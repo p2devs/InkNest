@@ -85,11 +85,11 @@ const defaultRenderImage = ({
         resizeMode: 'contain',
         cachePolicy: 'discWithCacheControl',
         showActivityIndicator: true,
-        url: item,
+        url: (item || '').replace(/[\r\n]/g, '').trim(),
         progressiveLoadingEnabled: true,
         allowHardware: true,
         headers: {
-          Referer: item,
+          Referer: (item || '').replace(/[\r\n]/g, '').trim(),
         },
       }}
       style={StyleSheet.absoluteFillObject}
