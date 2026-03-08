@@ -73,6 +73,53 @@ export const parseStandardComicBook = ($, config) => {
 };
 
 /**
+ * Parses ReadAllComics reading pages.
+ *
+ * The site now renders comic pages inside `.index-wrapper center p img` and
+ * often keeps the real image URL in `data-jh-lazy-img` while `src` points to a
+ * preloader gif. The older inline-style container selector no longer matches.
+ *
+ * @param {Object} $ - Cheerio instance
+ * @param {Object} config - Parser configuration
+ * @returns {Object} - Parsed comic book data
+ */
+export const parseReadAllComicsBook = ($, config) => {
+  const imgSources = [];
+  const seen = new Set();
+  const {
+    titleSelector,
+    detailsLinkSelector,
+    detailsLinkAttr = 'href',
+  } = config;
+
+  $('.index-wrapper center p img').each((_, el) => {
+    const lazySrc = $(el).attr('data-jh-lazy-img')?.trim();
+    const dataSrc = $(el).attr('data-src')?.trim();
+    const directSrc = $(el).attr('src')?.trim();
+    const src = lazySrc || dataSrc || directSrc;
+
+    if (!src || /preloader\.gif$/i.test(src) || seen.has(src)) {
+      return;
+    }
+
+    seen.add(src);
+    imgSources.push(src);
+  });
+
+  const title = $(titleSelector).first().text().trim();
+  const detailAnchor = $(detailsLinkSelector).first();
+  const detailsLink = detailAnchor.attr(detailsLinkAttr)?.trim() || '';
+  const detailPageTitle = detailAnchor.text().trim() || '';
+
+  return {
+    images: imgSources,
+    title,
+    detailsLink,
+    detailPageTitle,
+  };
+};
+
+/**
  * Parses ComicBookPlus pages that use JavaScript variables
  *
  * @param {string} html - Raw HTML content

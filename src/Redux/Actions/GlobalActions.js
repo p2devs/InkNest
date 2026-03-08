@@ -79,7 +79,7 @@ export const fetchComicDetails =
   (link, refresh = false) =>
   async (dispatch, getState) => {
     dispatch(fetchDataStart());
-    
+
     try {
       // Check if we can use cached data
       const state = getState();
@@ -103,7 +103,7 @@ export const fetchComicDetails =
       // Get configuration for this host
       const hostkey = getHostKeyFromUrl(link, ComicDetailPageClasses);
       const config = ComicDetailPageClasses[hostkey];
-      
+
       if (!config) {
         throw new Error(`No config found for source: ${hostkey}`);
       }
@@ -192,10 +192,12 @@ export const fetchComicBook =
       const $ = cheerio.load(html);
 
       const config = ComicBookPageClasses[hostkey];
-      
+
       // Parse comic book based on configuration
       let parsedData;
-      if (config.useJsVars) {
+      if (config.customParser) {
+        parsedData = config.customParser($, config);
+      } else if (config.useJsVars) {
         parsedData = parseComicBookPlusPage(html, $);
       } else {
         parsedData = parseStandardComicBook($, config);
@@ -259,9 +261,9 @@ export const clearAllData = () => async dispatch => {
  */
 export const getAdvancedSearchFilters = (source = 'readcomicsonline') => async dispatch => {
   dispatch(fetchDataStart());
-  
+
   const config = getAdvancedSearchConfig(source);
-  
+
   if (!config) {
     console.error(`No advanced search config found for source: ${source}`);
     dispatch(fetchDataFailure(`Unsupported source: ${source}`));
@@ -299,7 +301,7 @@ export const searchComic =
     try {
       const url = buildSearchUrl(source, queryValue);
       const response = await APICaller.get(url);
-      
+
       // Parse results based on source type
       let formatted;
       if (source === 'readallcomics') {

@@ -1,4 +1,5 @@
 import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
+import {parseReadAllComicsBook} from '../../../Redux/Actions/parsers/comicBookParser';
 
 export const HomePageCardClasses = {
   azcomic: {
@@ -59,14 +60,14 @@ export const HomePageCardClasses = {
   },
   readallcomics: {
     'all-comic': {
-      cardClass: '.post',
-      cardTitleClass: '.front-link',
+      cardClass: 'article, .post',
+      cardTitleClass: 'h2 a, .front-link',
       imageClass: 'img',
       genresClass: null, // Not applicable for readallcomics
       statusClass: null, // Not applicable for readallcomics
-      dateClass: '.pinbin-copy span', // Date is inside this span tag
+      dateClass: 'time, .pinbin-copy span',
       lastPageClass: '.pagenavi span.page-numbers.dots',
-      cardLinkClass: '.front-link',
+      cardLinkClass: 'h2 a, .front-link',
     },
   },
   comichubfree: {
@@ -201,6 +202,7 @@ export const ComicBookPageClasses = {
     titleSelector: 'h3[style*="color: #0363df"] strong',
     titleAttr: 'textContent',
     detailsLinkSelector: 'a[rel="category tag"]',
+    customParser: parseReadAllComicsBook,
   },
   comicbookplus: {
     useJsVars: true,
