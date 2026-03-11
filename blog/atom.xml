@@ -2,11 +2,45 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://p2devs.github.io/InkNest/blog</id>
     <title>InkNest Blog</title>
-    <updated>2026-02-28T00:00:00.000Z</updated>
+    <updated>2026-03-12T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://p2devs.github.io/InkNest/blog"/>
     <subtitle>InkNest Blog</subtitle>
     <icon>https://p2devs.github.io/InkNest/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[InkNest v1.4.7 Release]]></title>
+        <id>https://p2devs.github.io/InkNest/blog/release-v1.4.7</id>
+        <link href="https://p2devs.github.io/InkNest/blog/release-v1.4.7"/>
+        <updated>2026-03-12T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.7 is now available!]]></summary>
+        <content type="html"><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.7</strong> is now available!</p>
+<p>This release focuses on reading continuity and source reliability. We've improved manga resume handling, refreshed ReadAllComics compatibility, and fixed image loading edge cases.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.7#-whats-new">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="smarter-manga-resume-experience">Smarter Manga Resume Experience<a class="hash-link" aria-label="Direct link to Smarter Manga Resume Experience" title="Direct link to Smarter Manga Resume Experience" href="https://p2devs.github.io/InkNest/blog/release-v1.4.7#smarter-manga-resume-experience">​</a></h4>
+<ul>
+<li><strong>Continue from your last read chapter</strong> directly from Manga Details</li>
+<li><strong>Saved progress indicators</strong> now appear in the chapter list so you can quickly spot partially read chapters</li>
+<li><strong>Resume from the saved page</strong> when reopening a manga chapter instead of starting over</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-improvements">🔧 Improvements<a class="hash-link" aria-label="Direct link to 🔧 Improvements" title="Direct link to 🔧 Improvements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.7#-improvements">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="readallcomics-compatibility-refresh">ReadAllComics Compatibility Refresh<a class="hash-link" aria-label="Direct link to ReadAllComics Compatibility Refresh" title="Direct link to ReadAllComics Compatibility Refresh" href="https://p2devs.github.io/InkNest/blog/release-v1.4.7#readallcomics-compatibility-refresh">​</a></h4>
+<ul>
+<li>Repaired the <strong>ReadAllComics library feed</strong> so content loads correctly again</li>
+<li>Fixed the <strong>empty reader issue</strong> affecting some ReadAllComics chapters</li>
+<li>Updated parsing to better handle the latest ReadAllComics page structure</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes">🐛 Bug Fixes<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes" title="Direct link to 🐛 Bug Fixes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.7#-bug-fixes">​</a></h2>
+<ul>
+<li>Sanitized image URLs and <code>Referer</code> headers to prevent loading issues caused by stray whitespace or newline characters</li>
+</ul>
+<p><strong>Update now</strong> to enjoy a smoother manga resume experience and more reliable ReadAllComics browsing! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content>
+        <author>
+            <name>P2Devs</name>
+            <uri>https://github.com/p2devs</uri>
+        </author>
+        <category label="Release" term="Release"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[InkNest v1.4.6 Release]]></title>
         <id>https://p2devs.github.io/InkNest/blog/release-v1.4.6</id>
