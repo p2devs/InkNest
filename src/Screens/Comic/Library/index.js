@@ -34,7 +34,11 @@ import {ComicHostName} from '../../../Utils/APIs';
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
-  const [mangaData, setMangaData] = useState({latest: null, manga: null, newest: null});
+  const [mangaData, setMangaData] = useState({
+    latest: null,
+    manga: null,
+    newest: null,
+  });
   const [loading, setLoading] = useState(false);
   const [mangaLoading, setMangaLoading] = useState(false);
   const [type, setType] = useState('readcomicsonline');
@@ -43,7 +47,8 @@ export function Library({navigation}) {
   const History = useSelector(state => state.data.history);
   const MangaHistory = useSelector(state => state.data.MangaHistory || {});
   const comicBookmarkCount = useSelector(
-    state => Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
+    state =>
+      Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
   );
   const mangaBookmarkCount = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,
@@ -130,7 +135,9 @@ export function Library({navigation}) {
                 <MaterialIcons
                   name="menu-book"
                   size={15}
-                  color={activeTab === 'comic' ? '#667EEA' : 'rgba(255,255,255,0.35)'}
+                  color={
+                    activeTab === 'comic' ? '#667EEA' : 'rgba(255,255,255,0.35)'
+                  }
                 />
                 <Text
                   style={[
@@ -146,7 +153,9 @@ export function Library({navigation}) {
                 <MaterialIcons
                   name="auto-stories"
                   size={15}
-                  color={activeTab === 'manga' ? '#007AFF' : 'rgba(255,255,255,0.35)'}
+                  color={
+                    activeTab === 'manga' ? '#007AFF' : 'rgba(255,255,255,0.35)'
+                  }
                 />
                 <Text
                   style={[
@@ -259,7 +268,11 @@ export function Library({navigation}) {
                       setChangeType(false);
                     }}>
                     {type === key ? (
-                      <Ionicons name="checkmark-circle" size={18} color="#667EEA" />
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#667EEA"
+                      />
                     ) : (
                       <View style={styles.radioEmpty} />
                     )}
@@ -332,13 +345,13 @@ export function Library({navigation}) {
                             link: item?.link?.toString(),
                             title: item?.title?.toString(),
                           });
-                          type === 'readallcomics' || type === 'comicbookplus'
+                          type === 'comicbookplus'
                             ? navigation.navigate(NAVIGATION.comicBook, {
                                 comicBookLink: item?.link,
                               })
                             : navigation.navigate(NAVIGATION.comicDetails, {
                                 ...item,
-                                isComicBookLink: key === 'readallcomics',
+                                comicBookLink: item?.link,
                               });
                         }}>
                         <Image
@@ -650,7 +663,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFF',
   },
-
 
   // Host selector (comic tab)
   hostRow: {

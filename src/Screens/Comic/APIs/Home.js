@@ -2,6 +2,11 @@ import APICaller from '../../../Redux/Controller/Interceptor';
 import cheerio from 'cheerio';
 import {ComicHostName} from '../../../Utils/APIs';
 import {HomePageCardClasses} from './constance';
+import {
+  buildComicsRequestParams,
+  extractLastPage,
+  parseHomePageCards,
+} from './homeParser';
 
 export const getComics = async (hostName, page, type = null) => {
   try {
@@ -9,20 +14,7 @@ export const getComics = async (hostName, page, type = null) => {
       key => ComicHostName[key] === hostName,
     );
 
-    // Construct the URL and parameters based on the host, type, and page
-    let params = `${type ?? ''}?page=${page}`;
-    if (
-      (page === 1 || page == null) &&
-      hostName === ComicHostName.readcomicsonline
-    ) {
-      params = '';
-    }
-
-    // Special handling for comicbookplus
-    if (hostName === ComicHostName.comicbookplus) {
-      params = `?cbplus=latestuploads_l_s_${page}`;
-    }
-
+    const params = buildComicsRequestParams(hostName, page, type);
     const requestUrl = `${hostName}${params}`;
 
     const response = await APICaller.get(requestUrl);
@@ -35,73 +27,10 @@ export const getComics = async (hostName, page, type = null) => {
     const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
 
     if (tagConfig) {
-      $(tagConfig.cardClass).each((index, element) => {
-        const title =
-          type === 'hot-comic-updates'
-            ? $(tagConfig.cardTitleClass).eq(index).text().trim()
-            : $(element).find(tagConfig.cardTitleClass).text().trim();
-        let link = $(element).find(tagConfig.cardLinkClass).attr('href');
-        if (link) {
-          link = link.replace(/\/\d+$/, '');
-          // For comicbookplus, construct full URL
-          if (hostName === ComicHostName.comicbookplus && link.startsWith('/?')) {
-            link = hostName + link.substring(1);
-          }
-        }
-        let image = $(element)
-          .find(tagConfig.imageClass)
-          .attr(tagConfig.imageAttr ?? 'src');
+      comicsData = parseHomePageCards($, tagConfig, {hostName, type});
 
-        // For latest-release or most-viewed type, ensure the image URL has https: prefix.
-        if (
-          (type === 'latest-release' || type === 'most-viewed') &&
-          image &&
-          image.startsWith('//')
-        ) {
-          image = 'https:' + image;
-        }
-
-        const genres = [];
-        if (tagConfig.genresClass) {
-          $(element)
-            .find(tagConfig.genresClass)
-            .each((i, genreElem) => {
-              genres.push($(genreElem).text().trim());
-            });
-        }
-
-        const status = tagConfig.statusClass
-          ? $(element).find(tagConfig.statusClass).text().trim()
-          : null;
-
-        // Updated publishDate extraction:
-        let publishDate = null;
-        if (tagConfig.dateClass) {
-          let dateText = $(element).find(tagConfig.dateClass).text().trim();
-          // For latest-release, split by newline and take the first part
-          if (type === 'latest-release') {
-            publishDate = dateText.split('\n')[0].trim();
-          } else {
-            publishDate = dateText;
-          }
-        }
-
-        comicsData.push({
-          title,
-          link,
-          image,
-          genres: genres.length > 0 ? genres[0] : null,
-          status,
-          publishDate,
-        });
-      });
-
-      if (tagConfig.lastPageClass && page === 1) {
-        lastPage = $(tagConfig.lastPageClass)
-          .next()
-          .text()
-          .trim()
-          .replaceAll(',', '');
+      if ((tagConfig.lastPageClass || tagConfig.paginationLinkClass) && page === 1) {
+        lastPage = extractLastPage($, tagConfig);
       }
     }
 

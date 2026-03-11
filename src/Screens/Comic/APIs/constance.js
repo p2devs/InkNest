@@ -60,14 +60,14 @@ export const HomePageCardClasses = {
   },
   readallcomics: {
     'all-comic': {
-      cardClass: 'article, .post',
-      cardTitleClass: 'h2 a, .front-link',
-      imageClass: 'img',
+      cardClass: 'ul.list-story > li',
+      cardTitleClass: '.cat-title',
+      imageClass: 'img.book-cover, img',
       genresClass: null, // Not applicable for readallcomics
       statusClass: null, // Not applicable for readallcomics
-      dateClass: 'time, .pinbin-copy span',
-      lastPageClass: '.pagenavi span.page-numbers.dots',
-      cardLinkClass: 'h2 a, .front-link',
+      dateClass: '.latest-date',
+      cardLinkClass: '.book-link, .cat-title',
+      paginationLinkClass: 'a[href*="paged="]',
     },
   },
   comichubfree: {
