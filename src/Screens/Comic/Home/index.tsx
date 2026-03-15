@@ -281,6 +281,18 @@ export function Home() {
 
       const pickerResult = await pick({
         allowMultiSelection: false,
+        type: [
+          'application/vnd.comicbook+rar',
+          'application/vnd.rar',
+          'public.zip-archive',
+          'application/zip',
+          'application/x-rar-compressed',
+          'com.rarlab.cbr-archive', // CBR files
+          'com.rarlab.cbz-archive', // CBZ files
+          'application/x-cbz', // CBZ MIME type
+          'application/x-cbr', // CBR MIME type
+          'application/vnd.comicbook+zip', // CBZ alternative
+        ],
       });
 
       if (pickerResult && pickerResult.length > 0) {
