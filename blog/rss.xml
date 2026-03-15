@@ -4,10 +4,32 @@
         <title>InkNest Blog</title>
         <link>https://p2devs.github.io/InkNest/blog</link>
         <description>InkNest Blog</description>
-        <lastBuildDate>Thu, 12 Mar 2026 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 15 Mar 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[InkNest v1.4.8 Release]]></title>
+            <link>https://p2devs.github.io/InkNest/blog/release-v1.4.8</link>
+            <guid>https://p2devs.github.io/InkNest/blog/release-v1.4.8</guid>
+            <pubDate>Sun, 15 Mar 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone! 🎉 We're excited to announce InkNest v1.4.8 is now available!]]></description>
+            <content:encoded><![CDATA[<p>Hey everyone! 🎉 We're excited to announce <strong>InkNest v1.4.8</strong> is now available!</p>
+<p>This release improves local comic file handling and fixes cache-related issues for a smoother reading experience.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.8#-whats-new">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="cbrcbz-file-type-filters">CBR/CBZ File Type Filters<a class="hash-link" aria-label="Direct link to CBR/CBZ File Type Filters" title="Direct link to CBR/CBZ File Type Filters" href="https://p2devs.github.io/InkNest/blog/release-v1.4.8#cbrcbz-file-type-filters">​</a></h4>
+<ul>
+<li><strong>File type filters in file picker</strong> — Now you can easily filter and browse CBR and CBZ comic archive files when importing local comics</li>
+<li>Improved file discovery makes it easier to find and open your comic archives</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes">🐛 Bug Fixes<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes" title="Direct link to 🐛 Bug Fixes" href="https://p2devs.github.io/InkNest/blog/release-v1.4.8#-bug-fixes">​</a></h2>
+<ul>
+<li><strong>Fixed stale cache issues</strong> caused by parser updates — Content now refreshes properly when parsers are updated</li>
+</ul>
+<p><strong>Update now</strong> to enjoy better local comic file support and more reliable content loading! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
+            <category>Release</category>
+        </item>
         <item>
             <title><![CDATA[InkNest v1.4.7 Release]]></title>
             <link>https://p2devs.github.io/InkNest/blog/release-v1.4.7</link>
