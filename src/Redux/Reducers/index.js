@@ -261,6 +261,20 @@ const Reducers = createSlice({
     clearHistory: state => {
       state.history = {};
     },
+    clearComicChapterCache: (state, action) => {
+      const comicDetailLink = action.payload;
+      const comicDetail = state.dataByUrl[comicDetailLink];
+
+      // Clear cached chapter images for this comic
+      if (comicDetail?.chapters) {
+        comicDetail.chapters.forEach(chapter => {
+          if (chapter?.link && state.dataByUrl[chapter.link]) {
+            // Only clear the images array, keep other data if any
+            delete state.dataByUrl[chapter.link];
+          }
+        });
+      }
+    },
     DownTime: (state, action) => {
       state.loading = false;
       state.error = action.payload
@@ -623,6 +637,7 @@ export const {
   updateDownloadedComicBook,
   clearHistory,
   clearSearch,
+  clearComicChapterCache,
   setScrollPreference,
   setComicBackgroundColor,
   rewardAdsShown,

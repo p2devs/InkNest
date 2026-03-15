@@ -22,7 +22,7 @@ import {
 } from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
-import {updateData} from '../../../Redux/Reducers';
+import {updateData, clearComicChapterCache} from '../../../Redux/Reducers';
 import ChaptersView from '../../../Components/UIComp/ChaptersView';
 import DescriptionView from '../../../Components/UIComp/DescriptionView';
 import {
@@ -164,13 +164,9 @@ export function ComicDetails({navigation, route}) {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
+                // Clear cached chapter images for this comic (keeps reading progress)
+                dispatch(clearComicChapterCache(search ? PageUrl : PageLink));
                 dispatch(fetchComicDetails(search ? PageUrl : PageLink, true));
-                // dispatch(
-                //   updateData({
-                //     url: search ? PageUrl : PageLink,
-                //     data: { Bookmark: !ComicDetail?.Bookmark },
-                //   }),
-                // );
               }}>
               <Ionicons
                 name="refresh-outline"

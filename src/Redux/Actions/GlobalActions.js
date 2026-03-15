@@ -175,7 +175,13 @@ export const fetchComicBook =
       // Check for existing data
       const existingData = getState().data.dataByUrl[originalComicBook];
 
-      if (existingData) {
+      // Validate cached data has usable images (fixes stale cache from parser updates)
+      const hasValidImages =
+        existingData &&
+        Array.isArray(existingData.images) &&
+        existingData.images.length > 0;
+
+      if (hasValidImages) {
         if (isfetchComicDetails && existingData.detailsLink) {
           dispatch(fetchComicDetails(existingData?.detailsLink));
         }
