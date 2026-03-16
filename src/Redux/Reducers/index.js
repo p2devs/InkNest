@@ -41,6 +41,14 @@ const initialState = {
   hasSeenOfflineMovedAlert: false,
   hasSeenV146Walkthrough: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
+  // Novel state
+  NovelBookMarks: {}, // {novelLink: {title, coverImage, link, author, ...}}
+  NovelHistory: {}, // {novelLink: {title, coverImage, link, lastChapter, lastReadAt, ...}}
+  novelReaderMode: 'text', // 'text' | 'webview'
+  novelReaderTheme: 'dark', // 'light' | 'dark' | 'sepia'
+  novelFontSize: 18,
+  novelLineHeight: 1.6,
+  novelFontFamily: 'serif', // 'serif' | 'sans-serif' | 'monospace'
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
@@ -362,6 +370,95 @@ const Reducers = createSlice({
         totalPages,
       };
     },
+    // Novel reducers
+    AddNovelBookMark: (state, action) => {
+      state.NovelBookMarks[action?.payload?.link] = action?.payload;
+    },
+    RemoveNovelBookMark: (state, action) => {
+      delete state.NovelBookMarks[action?.payload?.link];
+    },
+    clearNovelBookmarks: state => {
+      state.NovelBookMarks = {};
+    },
+    pushNovelHistory: (state, action) => {
+      const link = action.payload.link;
+      state.NovelHistory[link] = {
+        ...state.NovelHistory[link],
+        ...action.payload,
+      };
+    },
+    updateNovelHistory: (state, action) => {
+      const { novelLink, chapterLink, chapterNumber, chapterTitle, scrollProgress } = action.payload;
+      if (!novelLink || !chapterLink) return;
+
+      const now = Date.now();
+      const isCompleted = typeof scrollProgress === 'number' && scrollProgress >= 95;
+
+      // Initialize chapterProgress if not exists
+      const existingProgress = state.NovelHistory[novelLink]?.chapterProgress || {};
+
+      state.NovelHistory[novelLink] = {
+        ...state.NovelHistory[novelLink],
+        lastChapter: chapterNumber,
+        lastChapterLink: chapterLink,
+        lastChapterTitle: chapterTitle,
+        lastReadAt: now,
+        // Per-chapter progress tracking
+        chapterProgress: {
+          ...existingProgress,
+          [chapterLink]: {
+            scrollProgress: scrollProgress ?? existingProgress[chapterLink]?.scrollProgress ?? 0,
+            completed: isCompleted || existingProgress[chapterLink]?.completed || false,
+            lastReadAt: now,
+          },
+        },
+      };
+    },
+    updateNovelChapterProgress: (state, action) => {
+      const { novelLink, chapterLink, scrollProgress } = action.payload;
+      if (!novelLink || !chapterLink) return;
+
+      const now = Date.now();
+      const isCompleted = typeof scrollProgress === 'number' && scrollProgress >= 95;
+
+      // Initialize if novel not in history
+      if (!state.NovelHistory[novelLink]) {
+        state.NovelHistory[novelLink] = {
+          chapterProgress: {},
+        };
+      }
+
+      // Initialize chapterProgress if not exists
+      if (!state.NovelHistory[novelLink].chapterProgress) {
+        state.NovelHistory[novelLink].chapterProgress = {};
+      }
+
+      const existingProgress = state.NovelHistory[novelLink].chapterProgress[chapterLink] || {};
+
+      state.NovelHistory[novelLink].chapterProgress[chapterLink] = {
+        scrollProgress: scrollProgress ?? existingProgress.scrollProgress ?? 0,
+        completed: isCompleted || existingProgress.completed || false,
+        lastReadAt: now,
+      };
+    },
+    clearNovelHistory: state => {
+      state.NovelHistory = {};
+    },
+    setNovelReaderMode: (state, action) => {
+      state.novelReaderMode = action.payload;
+    },
+    setNovelReaderTheme: (state, action) => {
+      state.novelReaderTheme = action.payload;
+    },
+    setNovelFontSize: (state, action) => {
+      state.novelFontSize = action.payload;
+    },
+    setNovelLineHeight: (state, action) => {
+      state.novelLineHeight = action.payload;
+    },
+    setNovelFontFamily: (state, action) => {
+      state.novelFontFamily = action.payload;
+    },
     // Community & Auth reducers
     setUser: (state, action) => {
       state.user = action.payload;
@@ -645,6 +742,19 @@ export const {
   markV146WalkthroughSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
+  // Novel actions
+  AddNovelBookMark,
+  RemoveNovelBookMark,
+  clearNovelBookmarks,
+  pushNovelHistory,
+  updateNovelHistory,
+  updateNovelChapterProgress,
+  clearNovelHistory,
+  setNovelReaderMode,
+  setNovelReaderTheme,
+  setNovelFontSize,
+  setNovelLineHeight,
+  setNovelFontFamily,
   // Community & Auth actions
   setUser,
   clearUser,

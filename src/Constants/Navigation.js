@@ -30,4 +30,11 @@ export const NAVIGATION = {
   Library: 'Library',
   CreatePost: 'CreatePost',
   PostDetail: 'PostDetail',
+  // Novel Navigation
+  novelHome: 'NovelHome',
+  novelDetails: 'NovelDetails',
+  novelReader: 'NovelReader',
+  novelSearch: 'NovelSearch',
+  novelLibrary: 'NovelLibrary',
+  novelViewAll: 'NovelViewAll',
 };

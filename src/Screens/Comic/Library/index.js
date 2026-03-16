@@ -26,11 +26,13 @@ import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
 import {getMangaHome} from '../../../InkNest-Externals/Screens/Manga/APIs';
+import {getNovelHome} from '../../Novel/APIs';
 import HistoryCard from './Components/HistoryCard';
 import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
 import {ComicHostName} from '../../../Utils/APIs';
+import {NovelSectionList} from '../../Novel/Components/NovelList';
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
@@ -39,13 +41,16 @@ export function Library({navigation}) {
     manga: null,
     newest: null,
   });
+  const [novelSections, setNovelSections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mangaLoading, setMangaLoading] = useState(false);
+  const [novelLoading, setNovelLoading] = useState(false);
   const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
   const [activeTab, setActiveTab] = useState('comic');
   const History = useSelector(state => state.data.history);
   const MangaHistory = useSelector(state => state.data.MangaHistory || {});
+  const NovelHistory = useSelector(state => state.data.NovelHistory || {});
   const comicBookmarkCount = useSelector(
     state =>
       Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
@@ -53,7 +58,10 @@ export function Library({navigation}) {
   const mangaBookmarkCount = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,
   );
-  const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount;
+  const novelBookmarkCount = useSelector(
+    state => Object.keys(state.data.NovelBookMarks || {}).length,
+  );
+  const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount + novelBookmarkCount;
   const notifications = useSelector(state => state.data?.notifications || []);
   const hasUnreadNotifications = notifications.some(
     notification => !notification?.read,
@@ -112,6 +120,13 @@ export function Library({navigation}) {
       if (forIosLoading === false) {
         getComicsHome(type, setComicsData, setLoading);
         getMangaHome(setMangaData, setMangaLoading);
+        getNovelHome().then(data => {
+          setNovelSections(data || []);
+          setNovelLoading(false);
+        }).catch(err => {
+          console.error('Error fetching novel home:', err);
+          setNovelLoading(false);
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,6 +178,24 @@ export function Library({navigation}) {
                     activeTab === 'manga' && styles.activeTabMangaText,
                   ]}>
                   Manga
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'novel' && styles.activeTab]}
+                onPress={() => setActiveTab('novel')}>
+                <Ionicons
+                  name="book"
+                  size={15}
+                  color={
+                    activeTab === 'novel' ? '#9C27B0' : 'rgba(255,255,255,0.35)'
+                  }
+                />
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'novel' && styles.activeTabNovelText,
+                  ]}>
+                  Novels
                 </Text>
               </TouchableOpacity>
             </View>
@@ -571,6 +604,95 @@ export function Library({navigation}) {
           </>
         )}
 
+        {/* ===== NOVEL TAB ===== */}
+        {activeTab === 'novel' && (
+          <>
+            {/* Novel Continue Reading */}
+            {Object.values(NovelHistory).length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Continue Reading</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        'Clear Novel History',
+                        'Are you sure you want to clear your novel reading history?',
+                        [
+                          {text: 'Cancel', style: 'cancel'},
+                          {
+                            text: 'Clear',
+                            onPress: () => dispatch({type: 'data/clearNovelHistory'}),
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }}>
+                    <Text style={styles.clearText}>Clear</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={Object.values(NovelHistory).sort(
+                    (a, b) => (b.lastReadAt || 0) - (a.lastReadAt || 0),
+                  )}
+                  keyExtractor={(item, index) => `novel-history-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.comicCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        crashlytics().log('Novel history card clicked');
+                        navigation.navigate(NAVIGATION.novelDetails, {
+                          novel: item,
+                        });
+                      }}>
+                      <Image
+                        source={{uri: item.coverImage}}
+                        style={styles.comicCardImage}
+                      />
+                      <Text style={styles.comicCardTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                      {item.lastChapter && (
+                        <Text style={styles.novelChapterText}>
+                          Ch. {item.lastChapter}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Novel sections */}
+            {!novelLoading && novelSections.length > 0 && (
+              <NovelSectionList
+                sections={novelSections}
+                onItemPress={(novel) => {
+                  crashlytics().log('Novel card clicked from Library');
+                  navigation.navigate(NAVIGATION.novelDetails, {novel});
+                }}
+                onSeeAllPress={(sectionName, novels) => {
+                  navigation.navigate(NAVIGATION.novelViewAll, {
+                    title: sectionName,
+                    novels,
+                  });
+                }}
+                style={styles.novelListContent}
+              />
+            )}
+
+            {/* Novel Loading */}
+            {novelLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#9C27B0" />
+              </View>
+            )}
+          </>
+        )}
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
@@ -645,6 +767,9 @@ const styles = StyleSheet.create({
   },
   activeTabMangaText: {
     color: '#007AFF',
+  },
+  activeTabNovelText: {
+    color: '#9C27B0',
   },
   bookmarkBadge: {
     position: 'absolute',
@@ -774,6 +899,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(255,255,255,0.3)',
     marginTop: 2,
+  },
+
+  // Novel specific styles
+  novelChapterText: {
+    fontSize: 10,
+    color: '#9C27B0',
+    paddingHorizontal: 8,
+    paddingBottom: 6,
+  },
+  novelListContent: {
+    paddingTop: 16,
   },
 
   // Loading
