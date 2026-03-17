@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -63,9 +63,16 @@ export function Library({navigation}) {
   );
   const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount + novelBookmarkCount;
   const notifications = useSelector(state => state.data?.notifications || []);
-  const hasUnreadNotifications = notifications.some(
-    notification => !notification?.read,
+  const sourceStatusNotifications = useSelector(
+    state => state.data?.sourceStatusNotifications || [],
   );
+  const hasUnreadNotifications = useMemo(() => {
+    const hasUnreadRegular = notifications.some(notification => !notification?.read);
+    const hasUnreadSourceStatus = sourceStatusNotifications.some(
+      notification => !notification?.read,
+    );
+    return hasUnreadRegular || hasUnreadSourceStatus;
+  }, [notifications, sourceStatusNotifications]);
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
@@ -118,8 +125,8 @@ export function Library({navigation}) {
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(type, setComicsData, setLoading);
-        getMangaHome(setMangaData, setMangaLoading);
+        getComicsHome(type, setComicsData, setLoading, dispatch);
+        getMangaHome(setMangaData, setMangaLoading, dispatch);
         getNovelHome().then(data => {
           setNovelSections(data || []);
           setNovelLoading(false);
@@ -297,7 +304,7 @@ export function Library({navigation}) {
                         hostName: key,
                       });
                       setType(key);
-                      getComicsHome(key, setComicsData, setLoading);
+                      getComicsHome(key, setComicsData, setLoading, dispatch);
                       setChangeType(false);
                     }}>
                     {type === key ? (

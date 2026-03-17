@@ -57,6 +57,8 @@ const initialState = {
   userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
   notifications: [], // [{id,title,body,data,receivedAt,read}]
   notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
+  // Source status notifications
+  sourceStatusNotifications: [], // [{id, sourceKey, sourceName, status, statusCode, timestamp, read}]
 };
 
 /**
@@ -705,6 +707,66 @@ const Reducers = createSlice({
         );
       }
     },
+    // Source status notification reducers
+    setSourceStatusNotification: (state, action) => {
+      const { sourceKey, status, statusCode, sourceName } = action.payload || {};
+      if (!sourceKey || !status) {
+        return;
+      }
+      const now = Date.now();
+      const notificationId = `source-${sourceKey}-${now}`;
+
+      // Check if we already have a recent notification for this source (within 5 minutes)
+      const fiveMinutesAgo = now - 300000;
+      const recentNotification = state.sourceStatusNotifications.find(
+        n => n.sourceKey === sourceKey && n.timestamp > fiveMinutesAgo
+      );
+
+      if (recentNotification) {
+        // Update existing notification instead of creating new one
+        recentNotification.status = status;
+        recentNotification.statusCode = statusCode;
+        recentNotification.timestamp = now;
+        recentNotification.read = false;
+        return;
+      }
+
+      // Add new notification
+      state.sourceStatusNotifications.unshift({
+        id: notificationId,
+        sourceKey,
+        sourceName,
+        status,
+        statusCode,
+        timestamp: now,
+        read: false,
+      });
+
+      // Keep only last 20 notifications
+      state.sourceStatusNotifications = state.sourceStatusNotifications.slice(0, 20);
+    },
+    markSourceStatusNotificationRead: (state, action) => {
+      const notificationId = action.payload;
+      if (!notificationId) {
+        return;
+      }
+      const notification = state.sourceStatusNotifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.read = true;
+      }
+    },
+    clearSourceStatusNotifications: state => {
+      state.sourceStatusNotifications = [];
+    },
+    removeSourceStatusNotification: (state, action) => {
+      const notificationId = action.payload;
+      if (!notificationId) {
+        return;
+      }
+      state.sourceStatusNotifications = state.sourceStatusNotifications.filter(
+        n => n.id !== notificationId
+      );
+    },
   },
 });
 
@@ -770,5 +832,10 @@ export const {
   clearNotifications,
   setNotificationSubscriptionCache,
   updateNotificationSubscriptionList,
+  // Source status notification actions
+  setSourceStatusNotification,
+  markSourceStatusNotificationRead,
+  clearSourceStatusNotifications,
+  removeSourceStatusNotification,
 } = Reducers.actions;
 export default Reducers.reducer;

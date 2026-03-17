@@ -22,9 +22,9 @@ const DownTime = () => {
                     title="Retry"
                     onPress={() => {
                         if (animeActive) {
-                            checkServerDown(AnimeHostName[baseUrl], dispatch)
+                            checkServerDown(AnimeHostName[baseUrl], dispatch, baseUrl)
                         } else {
-                            checkServerDown(ComicHostName[baseUrl], dispatch)
+                            checkServerDown(ComicHostName[baseUrl], dispatch, baseUrl)
                         }
                     }}
                     textSize={20}

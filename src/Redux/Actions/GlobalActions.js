@@ -133,7 +133,8 @@ export const fetchComicDetails =
       dispatch(WatchedData(watchedData));
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails');
+      const hostkey = getHostKeyFromUrl(link, ComicDetailPageClasses);
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails', hostkey);
       dispatch(ClearError());
       dispatch(fetchDataFailure('Not Found'));
       goBack();
@@ -223,7 +224,7 @@ export const fetchComicBook =
         return {url: originalComicBook, data};
       }
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook');
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook', hostkey);
       dispatch(fetchDataFailure(error.message));
     }
   };
@@ -282,11 +283,11 @@ export const getAdvancedSearchFilters = (source = 'readcomicsonline') => async d
 
     const filters = parseAdvancedSearchFilters($, config);
 
-    dispatch(checkDownTime({filters}));
+    dispatch(checkDownTime({filters}, source));
 
     return filters;
   } catch (error) {
-    handleAPIError(error, dispatch, crashlytics, 'getAdvancedSearchFilters');
+    handleAPIError(error, dispatch, crashlytics, 'getAdvancedSearchFilters', source);
     dispatch(fetchDataFailure(error.message));
     return null;
   }
@@ -320,10 +321,10 @@ export const searchComic =
       dispatch(fetchDataSuccess({url, data: formatted}));
       dispatch(StopLoading());
       dispatch(ClearError());
-      dispatch(checkDownTime());
+      dispatch(checkDownTime(null, source));
       return formatted;
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'searchComic');
+      handleAPIError(error, dispatch, crashlytics, 'searchComic', source);
       dispatch(fetchDataFailure(error.message));
       return null;
     }
