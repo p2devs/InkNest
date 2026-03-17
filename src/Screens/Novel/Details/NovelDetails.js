@@ -12,9 +12,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
-import {
-  heightPercentageToDP,
-} from 'react-native-responsive-screen';
+import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 import {NovelInfo} from './Components/NovelInfo';
 import {getNovelDetails, getChapterList} from '../APIs';
@@ -77,7 +75,7 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
           onPress={() => onPageChange(currentPage - 1)}
           disabled={loading}>
           <Ionicons name="chevron-back" size={16} color="#667EEA" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
@@ -90,10 +88,14 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
           onPress={() => onPageChange(1)}
           disabled={loading}>
           <Text style={styles.pageButtonText}>1</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
       if (startPage > 2) {
-        buttons.push(<Text key="ellipsis1" style={styles.ellipsis}>...</Text>);
+        buttons.push(
+          <Text key="ellipsis1" style={styles.ellipsis}>
+            ...
+          </Text>,
+        );
       }
     }
 
@@ -102,20 +104,31 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
       buttons.push(
         <TouchableOpacity
           key={i}
-          style={[styles.pageButton, currentPage === i && styles.activePageButton]}
+          style={[
+            styles.pageButton,
+            currentPage === i && styles.activePageButton,
+          ]}
           onPress={() => onPageChange(i)}
           disabled={loading || currentPage === i}>
-          <Text style={[styles.pageButtonText, currentPage === i && styles.activePageText]}>
+          <Text
+            style={[
+              styles.pageButtonText,
+              currentPage === i && styles.activePageText,
+            ]}>
             {i}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
     // Last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        buttons.push(<Text key="ellipsis2" style={styles.ellipsis}>...</Text>);
+        buttons.push(
+          <Text key="ellipsis2" style={styles.ellipsis}>
+            ...
+          </Text>,
+        );
       }
       buttons.push(
         <TouchableOpacity
@@ -124,7 +137,7 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
           onPress={() => onPageChange(totalPages)}
           disabled={loading}>
           <Text style={styles.pageButtonText}>{totalPages}</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
@@ -137,7 +150,7 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
           onPress={() => onPageChange(currentPage + 1)}
           disabled={loading}>
           <Ionicons name="chevron-forward" size={16} color="#667EEA" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
@@ -146,10 +159,14 @@ function ChapterPagination({currentPage, totalPages, onPageChange, loading}) {
 
   return (
     <View style={styles.paginationContainer}>
-      {loading && <ActivityIndicator size="small" color="#667EEA" style={styles.paginationLoader} />}
-      <View style={styles.paginationButtons}>
-        {renderPageButtons()}
-      </View>
+      {loading && (
+        <ActivityIndicator
+          size="small"
+          color="#667EEA"
+          style={styles.paginationLoader}
+        />
+      )}
+      <View style={styles.paginationButtons}>{renderPageButtons()}</View>
       <Text style={styles.paginationInfo}>
         Page {currentPage} of {totalPages}
       </Text>
@@ -196,13 +213,15 @@ export function NovelDetails() {
         }
 
         // Add to history
-        dispatch(pushNovelHistory({
-          link: novelLink,
-          title: details.title,
-          coverImage: details.coverImage,
-          author: details.author,
-          lastReadAt: Date.now(),
-        }));
+        dispatch(
+          pushNovelHistory({
+            link: novelLink,
+            title: details.title,
+            coverImage: details.coverImage,
+            author: details.author,
+            lastReadAt: Date.now(),
+          }),
+        );
       } catch (err) {
         console.error('Error fetching novel details:', err);
         crashlytics().recordError(err);
@@ -217,37 +236,45 @@ export function NovelDetails() {
     }
   }, [novelLink, initialNovel, dispatch]);
 
-  const handleChapterPress = useCallback((chapter) => {
-    crashlytics().log(`Chapter pressed: ${chapter.number}`);
-    navigation.navigate(NAVIGATION.novelReader, {
-      novel,
-      chapter,
-      chapterLink: chapter.link,
-    });
-  }, [navigation, novel]);
+  const handleChapterPress = useCallback(
+    chapter => {
+      crashlytics().log(`Chapter pressed: ${chapter.number}`);
+      navigation.navigate(NAVIGATION.novelReader, {
+        novel,
+        chapter,
+        chapterLink: chapter.link,
+      });
+    },
+    [navigation, novel],
+  );
 
   const handleBookmarkToggle = useCallback(() => {
     if (isBookmarked) {
       dispatch(RemoveNovelBookMark({link: novelLink}));
     } else {
-      dispatch(AddNovelBookMark({
-        link: novelLink,
-        title: novel?.title,
-        coverImage: novel?.coverImage,
-        author: novel?.author,
-        chapters: novel?.chapters,
-        status: novel?.status,
-      }));
+      dispatch(
+        AddNovelBookMark({
+          link: novelLink,
+          title: novel?.title,
+          coverImage: novel?.coverImage,
+          author: novel?.author,
+          chapters: novel?.chapters,
+          status: novel?.status,
+        }),
+      );
     }
   }, [dispatch, isBookmarked, novelLink, novel]);
 
-  const handleGenrePress = useCallback((genre) => {
-    crashlytics().log(`Genre pressed: ${genre}`);
-    navigation.navigate(NAVIGATION.novelViewAll, {
-      title: genre,
-      genre,
-    });
-  }, [navigation]);
+  const handleGenrePress = useCallback(
+    genre => {
+      crashlytics().log(`Genre pressed: ${genre}`);
+      navigation.navigate(NAVIGATION.novelViewAll, {
+        title: genre,
+        genre,
+      });
+    },
+    [navigation],
+  );
 
   const handleStartReading = useCallback(() => {
     const chapters = novel?.chapterList || [];
@@ -256,14 +283,16 @@ export function NovelDetails() {
       if (readingProgress?.lastChapterLink) {
         // Find the last read chapter
         const lastReadChapter = chapters.find(
-          ch => ch.link === readingProgress.lastChapterLink || ch.number === readingProgress.lastChapter
+          ch =>
+            ch.link === readingProgress.lastChapterLink ||
+            ch.number === readingProgress.lastChapter,
         );
         if (lastReadChapter) {
           handleChapterPress(lastReadChapter);
           return;
         }
       }
-      
+
       // Otherwise, get first chapter based on current sort order
       const sortedList = [...chapters].sort((a, b) => {
         if (sortOrder === 'asc') {
@@ -276,36 +305,39 @@ export function NovelDetails() {
   }, [novel, handleChapterPress, sortOrder, readingProgress]);
 
   const handleSortToggle = useCallback(() => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
   }, []);
 
-  const handlePageChange = useCallback(async (page) => {
-    if (!novelLink || chaptersLoading) {
-      return;
-    }
-
-    try {
-      setChaptersLoading(true);
-      const result = await getChapterList(novelLink, page);
-
-      if (result?.chapters) {
-        setNovel(prev => ({
-          ...prev,
-          chapterList: result.chapters,
-        }));
-        setCurrentPage(page);
-
-        if (result?.pagination) {
-          setTotalPages(result.pagination.totalPages || 1);
-        }
+  const handlePageChange = useCallback(
+    async page => {
+      if (!novelLink || chaptersLoading) {
+        return;
       }
-    } catch (err) {
-      console.error('Error fetching chapters:', err);
-      crashlytics().recordError(err);
-    } finally {
-      setChaptersLoading(false);
-    }
-  }, [novelLink, chaptersLoading]);
+
+      try {
+        setChaptersLoading(true);
+        const result = await getChapterList(novelLink, page);
+
+        if (result?.chapters) {
+          setNovel(prev => ({
+            ...prev,
+            chapterList: result.chapters,
+          }));
+          setCurrentPage(page);
+
+          if (result?.pagination) {
+            setTotalPages(result.pagination.totalPages || 1);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching chapters:', err);
+        crashlytics().recordError(err);
+      } finally {
+        setChaptersLoading(false);
+      }
+    },
+    [novelLink, chaptersLoading],
+  );
 
   const sortedChapters = useMemo(() => {
     return [...(novel?.chapterList || [])].sort((a, b) => {
@@ -316,82 +348,99 @@ export function NovelDetails() {
     });
   }, [novel?.chapterList, sortOrder]);
 
-  const renderChapter = useCallback(({item}) => {
-    const isLastRead = readingProgress?.lastChapterLink === item.link || 
-                       readingProgress?.lastChapter === item.number;
-    
-    // Get chapter progress
-    const chapterProgress = readingProgress?.chapterProgress?.[item.link];
-    const isCompleted = chapterProgress?.completed;
-    const scrollProgress = chapterProgress?.scrollProgress || 0;
-    
-    return (
-      <TouchableOpacity
-        style={[styles.chapterItem, isLastRead && styles.lastReadChapter]}
-        onPress={() => handleChapterPress(item)}
-        activeOpacity={0.7}>
-        <View style={styles.chapterInfo}>
-          <View style={styles.chapterTitleRow}>
-            <Text style={[styles.chapterNumber, isLastRead && styles.lastReadText]}>
-              Chapter {item.number}
-            </Text>
-            {isCompleted && (
-              <Ionicons name="checkmark-circle" size={16} color="#4CAF50" style={styles.completedIcon} />
+  const renderChapter = useCallback(
+    ({item}) => {
+      const isLastRead =
+        readingProgress?.lastChapterLink === item.link ||
+        readingProgress?.lastChapter === item.number;
+
+      // Get chapter progress
+      const chapterProgress = readingProgress?.chapterProgress?.[item.link];
+      const isCompleted = chapterProgress?.completed;
+      const scrollProgress = chapterProgress?.scrollProgress || 0;
+
+      return (
+        <TouchableOpacity
+          style={[styles.chapterItem, isLastRead && styles.lastReadChapter]}
+          onPress={() => handleChapterPress(item)}
+          activeOpacity={0.7}>
+          <View style={styles.chapterInfo}>
+            <View style={styles.chapterTitleRow}>
+              <Text
+                style={[
+                  styles.chapterNumber,
+                  isLastRead && styles.lastReadText,
+                ]}>
+                Chapter {item.number}
+              </Text>
+              {isCompleted && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color="#4CAF50"
+                  style={styles.completedIcon}
+                />
+              )}
+            </View>
+            {item.title && (
+              <Text
+                style={[styles.chapterTitle, isLastRead && styles.lastReadText]}
+                numberOfLines={1}>
+                {item.title}
+              </Text>
+            )}
+            {/* Progress bar */}
+            {!isCompleted && scrollProgress > 0 && (
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBackground}>
+                  <View
+                    style={[styles.progressFill, {width: `${scrollProgress}%`}]}
+                  />
+                </View>
+                <Text style={styles.progressText}>
+                  {Math.round(scrollProgress)}%
+                </Text>
+              </View>
+            )}
+            {isLastRead && (
+              <View style={styles.lastReadBadge}>
+                <Ionicons name="bookmark" size={12} color="#9C27B0" />
+                <Text style={styles.lastReadBadgeText}>Last Read</Text>
+              </View>
             )}
           </View>
-          {item.title && (
-            <Text style={[styles.chapterTitle, isLastRead && styles.lastReadText]} numberOfLines={1}>
-              {item.title}
-            </Text>
-          )}
-          {/* Progress bar */}
-          {!isCompleted && scrollProgress > 0 && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBackground}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { width: `${scrollProgress}%` }
-                  ]} 
-                />
-              </View>
-              <Text style={styles.progressText}>{Math.round(scrollProgress)}%</Text>
-            </View>
-          )}
-          {isLastRead && (
-            <View style={styles.lastReadBadge}>
-              <Ionicons name="bookmark" size={12} color="#9C27B0" />
-              <Text style={styles.lastReadBadgeText}>Last Read</Text>
-            </View>
-          )}
-        </View>
-        <Ionicons
-          name="chevron-forward"
-          size={16}
-          color={isLastRead ? '#9C27B0' : 'rgba(255,255,255,0.4)'}
-        />
-      </TouchableOpacity>
-    );
-  }, [handleChapterPress, readingProgress]);
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={isLastRead ? '#9C27B0' : 'rgba(255,255,255,0.4)'}
+          />
+        </TouchableOpacity>
+      );
+    },
+    [handleChapterPress, readingProgress],
+  );
 
   const keyExtractor = useCallback((item, index) => {
     return `${item.number || index}`;
   }, []);
 
-  const getItemLayout = useCallback((data, index) => ({
-    length: 56,
-    offset: 56 * index,
-    index,
-  }), []);
+  const getItemLayout = useCallback(
+    (data, index) => ({
+      length: 56,
+      offset: 56 * index,
+      index,
+    }),
+    [],
+  );
 
   const ListHeaderComponent = useCallback(() => {
     const firstChapter = sortedChapters?.[0];
     const hasChapters = sortedChapters?.length > 0;
-    
+
     // Determine button label based on reading progress
     let chapterLabel = 'Start Reading';
     let buttonIcon = 'book';
-    
+
     if (readingProgress?.lastChapter) {
       chapterLabel = `Continue: Chapter ${readingProgress.lastChapter}`;
       buttonIcon = 'book-outline';
@@ -400,44 +449,49 @@ export function NovelDetails() {
     }
 
     return (
-    <>
-      <NovelInfo
-        novel={novel}
-        onGenrePress={handleGenrePress}
-      />
+      <>
+        <NovelInfo novel={novel} onGenrePress={handleGenrePress} />
 
-      {hasChapters && (
-        <View style={styles.actionContainer}>
+        {hasChapters && (
+          <View style={styles.actionContainer}>
+            <TouchableOpacity
+              style={styles.readButton}
+              onPress={handleStartReading}
+              activeOpacity={0.7}>
+              <Ionicons name={buttonIcon} size={18} color="#fff" />
+              <Text style={styles.readButtonText}>{chapterLabel}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.chapterHeader}>
+          <Text style={styles.chapterHeaderTitle}>
+            {novel?.chapterList?.length || 0} Chapters
+          </Text>
           <TouchableOpacity
-            style={styles.readButton}
-            onPress={handleStartReading}
-            activeOpacity={0.7}>
-            <Ionicons name={buttonIcon} size={18} color="#fff" />
-            <Text style={styles.readButtonText}>{chapterLabel}</Text>
+            style={styles.sortButton}
+            onPress={handleSortToggle}>
+            <Ionicons
+              name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+              size={16}
+              color="#667EEA"
+            />
+            <Text style={styles.sortText}>
+              {sortOrder === 'asc' ? 'Oldest' : 'Newest'}
+            </Text>
           </TouchableOpacity>
         </View>
-      )}
-
-      <View style={styles.chapterHeader}>
-        <Text style={styles.chapterHeaderTitle}>
-          {novel?.chapterList?.length || 0} Chapters
-        </Text>
-        <TouchableOpacity
-          style={styles.sortButton}
-          onPress={handleSortToggle}>
-          <Ionicons
-            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-            size={16}
-            color="#667EEA"
-          />
-          <Text style={styles.sortText}>
-            {sortOrder === 'asc' ? 'Oldest' : 'Newest'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </>
-  );
-  }, [novel, sortedChapters, readingProgress, handleGenrePress, handleStartReading, handleSortToggle, sortOrder]);
+      </>
+    );
+  }, [
+    novel,
+    sortedChapters,
+    readingProgress,
+    handleGenrePress,
+    handleStartReading,
+    handleSortToggle,
+    sortOrder,
+  ]);
 
   const ListFooterComponent = useCallback(() => {
     if (totalPages <= 1) {
@@ -481,6 +535,9 @@ export function NovelDetails() {
         onBookmark={handleBookmarkToggle}
         isBookmarked={isBookmarked}
       />
+
+      <View style={{marginVertical: 8}} />
+
       <FlatList
         data={sortedChapters}
         keyExtractor={keyExtractor}
@@ -501,7 +558,11 @@ export function NovelDetails() {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Ionicons name="book-outline" size={48} color="rgba(255,255,255,0.3)" />
+              <Ionicons
+                name="book-outline"
+                size={48}
+                color="rgba(255,255,255,0.3)"
+              />
               <Text style={styles.emptyText}>No chapters available</Text>
             </View>
           )
