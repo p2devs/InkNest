@@ -32,7 +32,7 @@ import {searchNovels} from '../Novel/APIs';
 import Image from '../../Components/UIComp/Image';
 
 // Generate a consistent gradient color based on string
-const getGradientColors = (str) => {
+const getGradientColors = str => {
   const colors = [
     ['#FF6B6B', '#EE5A6F'],
     ['#4ECDC4', '#44A08D'],
@@ -53,7 +53,7 @@ const getGradientColors = (str) => {
 };
 
 // Get initials from title
-const getInitials = (title) => {
+const getInitials = title => {
   if (!title) return '?';
   const words = title.trim().split(/\s+/);
   if (words.length === 1) {
@@ -75,9 +75,13 @@ export function Search({navigation, route}) {
   const [searchTerm, setSearchTerm] = useState('');
   const initialCategoryFromRoute = route?.params?.initialTab;
   const [activeCategory, setActiveCategory] = useState(
-    initialCategoryFromRoute === 'manga' ? 'Manga' : 
-    initialCategoryFromRoute === 'novel' ? 'Novels' : 
-    initialCategoryFromRoute === 'comic' ? 'Comics' : 'All'
+    initialCategoryFromRoute === 'manga'
+      ? 'Manga'
+      : initialCategoryFromRoute === 'novel'
+      ? 'Novels'
+      : initialCategoryFromRoute === 'comic'
+      ? 'Comics'
+      : 'All',
   );
   const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState({
@@ -94,29 +98,74 @@ export function Search({navigation, route}) {
 
   // Category definitions (shown before search)
   const CATEGORIES = [
-    { id: 'All', label: 'All', icon: 'globe-outline', color: '#667EEA' },
-    { id: 'Comics', label: 'Comics', icon: 'images-outline', color: '#FF6B6B' },
-    { id: 'Manga', label: 'Manga', icon: 'book-outline', color: '#007AFF' },
-    { id: 'Novels', label: 'Novels', icon: 'document-text-outline', color: '#9C27B0' },
+    {id: 'All', label: 'All', icon: 'globe-outline', color: '#667EEA'},
+    {id: 'Comics', label: 'Comics', icon: 'images-outline', color: '#FF6B6B'},
+    {id: 'Manga', label: 'Manga', icon: 'book-outline', color: '#007AFF'},
+    {
+      id: 'Novels',
+      label: 'Novels',
+      icon: 'document-text-outline',
+      color: '#9C27B0',
+    },
   ];
 
   // Base source definitions
   const BASE_SOURCES = {
-    All: { id: 'All', label: 'All Sources', icon: 'globe-outline', color: '#667EEA', category: 'All' },
+    All: {
+      id: 'All',
+      label: 'All Sources',
+      icon: 'globe-outline',
+      color: '#667EEA',
+      category: 'All',
+    },
     // Comic sources
-    ReadAllComic: { id: 'ReadAllComic', label: 'ReadAllComic', icon: 'images', color: '#FF6B6B', category: 'Comics' },
-    ComicHub: { id: 'ComicHub', label: 'ComicHub', icon: 'images', color: '#FF8E53', category: 'Comics' },
-    ComicOnline: { id: 'ComicOnline', label: 'ComicOnline', icon: 'images', color: '#FFA726', category: 'Comics' },
+    ReadAllComic: {
+      id: 'ReadAllComic',
+      label: 'ReadAllComic',
+      icon: 'images',
+      color: '#FF6B6B',
+      category: 'Comics',
+    },
+    ComicHub: {
+      id: 'ComicHub',
+      label: 'ComicHub',
+      icon: 'images',
+      color: '#FF8E53',
+      category: 'Comics',
+    },
+    ComicOnline: {
+      id: 'ComicOnline',
+      label: 'ComicOnline',
+      icon: 'images',
+      color: '#FFA726',
+      category: 'Comics',
+    },
     // Manga source
-    Manga: { id: 'Manga', label: 'Manga', icon: 'book', color: '#007AFF', category: 'Manga' },
+    Manga: {
+      id: 'Manga',
+      label: 'Manga',
+      icon: 'book',
+      color: '#007AFF',
+      category: 'Manga',
+    },
     // Novel source
-    Novel: { id: 'Novel', label: 'Novel', icon: 'document-text', color: '#9C27B0', category: 'Novels' },
+    Novel: {
+      id: 'Novel',
+      label: 'Novel',
+      icon: 'document-text',
+      color: '#9C27B0',
+      category: 'Novels',
+    },
   };
 
   // Get ordered sources based on active category (selected category's sources come first)
   const getOrderedSources = () => {
     const allSources = [BASE_SOURCES.All];
-    const comicSources = [BASE_SOURCES.ReadAllComic, BASE_SOURCES.ComicHub, BASE_SOURCES.ComicOnline];
+    const comicSources = [
+      BASE_SOURCES.ReadAllComic,
+      BASE_SOURCES.ComicHub,
+      BASE_SOURCES.ComicOnline,
+    ];
     const mangaSources = [BASE_SOURCES.Manga];
     const novelSources = [BASE_SOURCES.Novel];
 
@@ -140,73 +189,87 @@ export function Search({navigation, route}) {
   // Get combined results based on active category or selected source
   const getCombinedResults = () => {
     const allResults = [];
-    
+
     // If showing sources (after search), filter by selected source
     if (showSources) {
       if (activeSource === 'All') {
         // Add all results
         searchData.ReadAllComic?.forEach(item => {
-          allResults.push({ ...item, sourceType: 'ReadAllComic', type: 'Comic' });
+          allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
         });
         searchData.ComicHub?.forEach(item => {
-          allResults.push({ ...item, sourceType: 'ComicHub', type: 'Comic' });
+          allResults.push({...item, sourceType: 'ComicHub', type: 'Comic'});
         });
         searchData.ComicOnline?.forEach(item => {
-          allResults.push({ ...item, sourceType: 'ComicOnline', type: 'Comic' });
+          allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
         });
         searchData.Manga?.forEach(item => {
-          allResults.push({ ...item, sourceType: 'Manga', type: 'Manga' });
+          allResults.push({...item, sourceType: 'Manga', type: 'Manga'});
         });
         searchData.Novel?.forEach(item => {
-          allResults.push({ ...item, sourceType: 'Novel', type: 'Novel' });
+          allResults.push({...item, sourceType: 'Novel', type: 'Novel'});
         });
       } else {
         // Filter by specific source
-        const sourceType = activeSource === 'Manga' ? 'Manga' : activeSource === 'Novel' ? 'Novel' : 'Comic';
+        const sourceType =
+          activeSource === 'Manga'
+            ? 'Manga'
+            : activeSource === 'Novel'
+            ? 'Novel'
+            : 'Comic';
         searchData[activeSource]?.forEach(item => {
-          allResults.push({ ...item, sourceType: activeSource, type: sourceType });
+          allResults.push({
+            ...item,
+            sourceType: activeSource,
+            type: sourceType,
+          });
         });
       }
       return allResults;
     }
-    
+
     // Otherwise, filter by category (before search)
     if (activeCategory === 'All' || activeCategory === 'Comics') {
       searchData.ReadAllComic?.forEach(item => {
-        allResults.push({ ...item, sourceType: 'ReadAllComic', type: 'Comic' });
+        allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
       });
       searchData.ComicHub?.forEach(item => {
-        allResults.push({ ...item, sourceType: 'ComicHub', type: 'Comic' });
+        allResults.push({...item, sourceType: 'ComicHub', type: 'Comic'});
       });
       searchData.ComicOnline?.forEach(item => {
-        allResults.push({ ...item, sourceType: 'ComicOnline', type: 'Comic' });
+        allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
       });
     }
-    
+
     if (activeCategory === 'All' || activeCategory === 'Manga') {
       searchData.Manga?.forEach(item => {
-        allResults.push({ ...item, sourceType: 'Manga', type: 'Manga' });
+        allResults.push({...item, sourceType: 'Manga', type: 'Manga'});
       });
     }
-    
+
     if (activeCategory === 'All' || activeCategory === 'Novels') {
       searchData.Novel?.forEach(item => {
-        allResults.push({ ...item, sourceType: 'Novel', type: 'Novel' });
+        allResults.push({...item, sourceType: 'Novel', type: 'Novel'});
       });
     }
-    
+
     return allResults;
   };
 
   // Get total count for category badge
-  const getCategoryCount = (categoryId) => {
+  const getCategoryCount = categoryId => {
     if (categoryId === 'All') {
-      return Object.values(searchData).reduce((sum, arr) => sum + (arr?.length || 0), 0);
+      return Object.values(searchData).reduce(
+        (sum, arr) => sum + (arr?.length || 0),
+        0,
+      );
     }
     if (categoryId === 'Comics') {
-      return (searchData.ReadAllComic?.length || 0) + 
-             (searchData.ComicHub?.length || 0) + 
-             (searchData.ComicOnline?.length || 0);
+      return (
+        (searchData.ReadAllComic?.length || 0) +
+        (searchData.ComicHub?.length || 0) +
+        (searchData.ComicOnline?.length || 0)
+      );
     }
     if (categoryId === 'Manga') {
       return searchData.Manga?.length || 0;
@@ -218,7 +281,7 @@ export function Search({navigation, route}) {
   };
 
   // Get count for specific source
-  const getSourceCount = (sourceId) => {
+  const getSourceCount = sourceId => {
     if (sourceId === 'All') {
       return getCategoryCount('All');
     }
@@ -226,7 +289,8 @@ export function Search({navigation, route}) {
   };
 
   // Determine if we should show categories or sources (after search with results)
-  const showSources = searchTerm.trim().length > 0 && getCategoryCount('All') > 0;
+  const showSources =
+    searchTerm.trim().length > 0 && getCategoryCount('All') > 0;
 
   const fetchData = async () => {
     if (isSearching) return;
@@ -328,7 +392,7 @@ export function Search({navigation, route}) {
       }
 
       await Promise.all(searchPromises);
-      
+
       // Auto-select the first source with results based on active category
       if (activeCategory === 'Manga' && newData.Manga?.length > 0) {
         setActiveSource('Manga');
@@ -338,12 +402,13 @@ export function Search({navigation, route}) {
         // Select first comic source with results
         if (newData.ReadAllComic?.length > 0) setActiveSource('ReadAllComic');
         else if (newData.ComicHub?.length > 0) setActiveSource('ComicHub');
-        else if (newData.ComicOnline?.length > 0) setActiveSource('ComicOnline');
+        else if (newData.ComicOnline?.length > 0)
+          setActiveSource('ComicOnline');
         else setActiveSource('All');
       } else {
         setActiveSource('All');
       }
-      
+
       setIsSearching(false);
       return;
     }
@@ -362,9 +427,9 @@ export function Search({navigation, route}) {
 
     // Get type-specific colors and icons
     const getTypeStyle = () => {
-      if (isManga) return { color: '#007AFF', bgColor: 'rgba(0,122,255,0.15)' };
-      if (isNovel) return { color: '#9C27B0', bgColor: 'rgba(156,39,176,0.15)' };
-      return { color: '#667EEA', bgColor: 'rgba(102,126,234,0.15)' };
+      if (isManga) return {color: '#007AFF', bgColor: 'rgba(0,122,255,0.15)'};
+      if (isNovel) return {color: '#9C27B0', bgColor: 'rgba(156,39,176,0.15)'};
+      return {color: '#667EEA', bgColor: 'rgba(102,126,234,0.15)'};
     };
     const typeStyle = getTypeStyle();
 
@@ -374,11 +439,17 @@ export function Search({navigation, route}) {
     // Handle press based on type
     const handlePress = () => {
       if (isManga) {
-        navigation.navigate(NAVIGATION.mangaDetails, { link: item?.link, title: item?.title });
+        navigation.navigate(NAVIGATION.mangaDetails, {
+          link: item?.link,
+          title: item?.title,
+        });
       } else if (isNovel) {
-        navigation.navigate(NAVIGATION.novelDetails, { novel: item });
+        navigation.navigate(NAVIGATION.novelDetails, {novel: item});
       } else {
-        navigation.navigate(NAVIGATION.comicDetails, { link: item?.link || item?.href, title: item?.title });
+        navigation.navigate(NAVIGATION.comicDetails, {
+          link: item?.link || item?.href,
+          title: item?.title,
+        });
       }
     };
 
@@ -391,42 +462,55 @@ export function Search({navigation, route}) {
           <Image source={{uri: imageUri}} style={styles.mangaCover} />
         ) : (
           <View style={[styles.mangaCover, styles.mangaCoverPlaceholder]}>
-            <MaterialCommunityIcons 
-              name={isNovel ? 'book-open-page-variant' : 'book-open-variant'} 
-              size={24} 
-              color="rgba(255,255,255,0.3)" 
+            <MaterialCommunityIcons
+              name={isNovel ? 'book-open-page-variant' : 'book-open-variant'}
+              size={24}
+              color="rgba(255,255,255,0.3)"
             />
           </View>
         )}
         <View style={styles.mangaContent}>
           <View style={styles.mangaHeader}>
             <Text style={styles.mangaNumber}>#{index + 1}</Text>
-            <View style={[styles.mangaSourceBadge, {backgroundColor: typeStyle.bgColor}]}>
-              <Text style={[styles.mangaSourceBadgeText, {color: typeStyle.color}]}>
+            <View
+              style={[
+                styles.mangaSourceBadge,
+                {backgroundColor: typeStyle.bgColor},
+              ]}>
+              <Text
+                style={[styles.mangaSourceBadgeText, {color: typeStyle.color}]}>
                 {type?.toUpperCase()}
               </Text>
             </View>
           </View>
-          <Text style={styles.mangaTitle} numberOfLines={2}>{item?.title}</Text>
-          
+          <Text style={styles.mangaTitle} numberOfLines={2}>
+            {item?.title}
+          </Text>
+
           {/* Type-specific metadata */}
           <View style={styles.mangaFooter}>
             {isNovel && item?.rank && (
               <Text style={[styles.mangaStatus, {color: '#FFD700'}]}>
-                Rank {item.rank}
+                Rank {item.rank}{' '}
               </Text>
             )}
             {isNovel && item?.chapters && (
               <Text style={[styles.mangaStatus, {color: '#4CAF50'}]}>
-                {item.chapters} Ch
+                {item.chapters} Ch{' '}
               </Text>
             )}
             {isManga && item?.status && (
-              <Text style={[
-                styles.mangaStatus,
-                {color: item.status.toLowerCase() === 'ongoing' ? '#4CAF50' : '#FF9800'},
-              ]}>
-                {item.status}
+              <Text
+                style={[
+                  styles.mangaStatus,
+                  {
+                    color:
+                      item.status.toLowerCase() === 'ongoing'
+                        ? '#4CAF50'
+                        : '#FF9800',
+                  },
+                ]}>
+                {item.status}{' '}
               </Text>
             )}
             {isComic && item?.sourceType && (
@@ -437,8 +521,13 @@ export function Search({navigation, route}) {
           </View>
         </View>
         <View style={styles.arrowContainer}>
-          <View style={[styles.arrowCircle, {backgroundColor: typeStyle.bgColor}]}>
-            <Ionicons name="chevron-forward" size={20} color={typeStyle.color} />
+          <View
+            style={[styles.arrowCircle, {backgroundColor: typeStyle.bgColor}]}>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={typeStyle.color}
+            />
           </View>
         </View>
       </TouchableOpacity>
@@ -514,9 +603,13 @@ export function Search({navigation, route}) {
             showsHorizontalScrollIndicator={false}
             data={showSources ? SOURCES : CATEGORIES}
             renderItem={({item}) => {
-              const count = showSources ? getSourceCount(item.id) : getCategoryCount(item.id);
-              const isActive = showSources ? activeSource === item.id : activeCategory === item.id;
-              
+              const count = showSources
+                ? getSourceCount(item.id)
+                : getCategoryCount(item.id);
+              const isActive = showSources
+                ? activeSource === item.id
+                : activeCategory === item.id;
+
               const handlePress = () => {
                 if (showSources) {
                   setActiveSource(item.id);
@@ -528,13 +621,16 @@ export function Search({navigation, route}) {
                   setActiveCategory(item.id);
                 }
               };
-              
+
               return (
                 <TouchableOpacity
                   onPress={handlePress}
                   style={[
                     styles.categoryTab,
-                    isActive && {backgroundColor: item.color + '20', borderColor: item.color},
+                    isActive && {
+                      backgroundColor: item.color + '20',
+                      borderColor: item.color,
+                    },
                   ]}>
                   <Ionicons
                     name={item.icon}
@@ -549,8 +645,13 @@ export function Search({navigation, route}) {
                     {item.label}
                   </Text>
                   {count > 0 && (
-                    <View style={[styles.categoryBadge, {backgroundColor: item.color + '30'}]}>
-                      <Text style={[styles.categoryBadgeText, {color: item.color}]}>
+                    <View
+                      style={[
+                        styles.categoryBadge,
+                        {backgroundColor: item.color + '30'},
+                      ]}>
+                      <Text
+                        style={[styles.categoryBadgeText, {color: item.color}]}>
                         {count}
                       </Text>
                     </View>
@@ -558,7 +659,7 @@ export function Search({navigation, route}) {
                 </TouchableOpacity>
               );
             }}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             contentContainerStyle={styles.tabsContent}
           />
         </View>
@@ -571,38 +672,52 @@ export function Search({navigation, route}) {
           ListEmptyComponent={() => {
             const totalResults = getCategoryCount('All');
             const hasResultsElsewhere = totalResults > 0;
-            const currentSelection = showSources ? activeSource : activeCategory;
-            const currentCount = showSources ? getSourceCount(activeSource) : getCategoryCount(activeCategory);
-            
+            const currentSelection = showSources
+              ? activeSource
+              : activeCategory;
+            const currentCount = showSources
+              ? getSourceCount(activeSource)
+              : getCategoryCount(activeCategory);
+
             return (
               <View style={styles.emptyContainer}>
                 <View style={styles.emptyIconContainer}>
                   <MaterialCommunityIcons
-                    name={hasResultsElsewhere ? "book-off" : "book-search"}
+                    name={hasResultsElsewhere ? 'book-off' : 'book-search'}
                     size={heightPercentageToDP('8%')}
-                    color={hasResultsElsewhere ? "#FF6B6B" : "#667EEA"}
+                    color={hasResultsElsewhere ? '#FF6B6B' : '#667EEA'}
                   />
                 </View>
                 <Text style={styles.emptyTitle}>
                   {isSearching
                     ? 'Searching...'
-                    : hasResultsElsewhere 
-                      ? `No results in ${currentSelection}` 
-                      : 'Ready to explore?'}
+                    : hasResultsElsewhere
+                    ? `No results in ${currentSelection}`
+                    : 'Ready to explore?'}
                 </Text>
                 <Text style={styles.emptySubtitle}>
                   {isSearching
-                    ? `Searching ${currentSelection === 'All' ? (showSources ? 'all sources' : 'all categories') : currentSelection + ' sources'}...`
-                    : hasResultsElsewhere 
-                      ? 'This selection has no results. Try a different one!' 
-                      : 'Search for your favorite comics, manga, and novels across multiple sources'}
+                    ? `Searching ${
+                        currentSelection === 'All'
+                          ? showSources
+                            ? 'all sources'
+                            : 'all categories'
+                          : currentSelection + ' sources'
+                      }...`
+                    : hasResultsElsewhere
+                    ? 'This selection has no results. Try a different one!'
+                    : 'Search for your favorite comics, manga, and novels across multiple sources'}
                 </Text>
               </View>
             );
           }}
           data={getCombinedResults()}
           renderItem={renderCombinedItem}
-          keyExtractor={(item, index) => `${item?.sourceType || item?.type}-${item?.link || item?.href || index}-${index}`}
+          keyExtractor={(item, index) =>
+            `${item?.sourceType || item?.type}-${
+              item?.link || item?.href || index
+            }-${index}`
+          }
           contentContainerStyle={styles.resultsContent}
           ListFooterComponent={<View style={styles.footerSpace} />}
           maxToRenderPerBatch={15}
@@ -620,10 +735,7 @@ export function Search({navigation, route}) {
             activeOpacity={1}
             style={styles.modalOverlay}
           />
-          <Tag
-            intensity={10}
-            tint="light"
-            style={styles.modalContainer}>
+          <Tag intensity={10} tint="light" style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>All Results</Text>
@@ -667,9 +779,7 @@ export function Search({navigation, route}) {
                     </TouchableOpacity>
                   );
                 }}
-                ListFooterComponent={
-                  <View style={styles.footerSpace} />
-                }
+                ListFooterComponent={<View style={styles.footerSpace} />}
               />
             </View>
           </Tag>
@@ -687,7 +797,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  
+
   // Header
   header: {
     width: '100%',
@@ -717,7 +827,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#667EEA',
   },
-  
+
   // Search Input
   searchContainer: {
     paddingHorizontal: widthPercentageToDP('4%'),
@@ -750,7 +860,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   // Tabs
   tabsContainer: {
     paddingVertical: 8,
@@ -789,7 +899,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
-  
+
   // Results List
   resultsList: {
     flex: 1,
@@ -803,7 +913,7 @@ const styles = StyleSheet.create({
   footerSpace: {
     height: heightPercentageToDP('4%'),
   },
-  
+
   // Result Card
   resultCard: {
     flexDirection: 'row',
@@ -892,7 +1002,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
     opacity: 0.8,
   },
-  
+
   // Empty State
   emptyContainer: {
     flex: 1,
@@ -922,7 +1032,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
-  
+
   // User/Error Messages
   userMessageContainer: {
     flex: 1,
@@ -965,7 +1075,7 @@ const styles = StyleSheet.create({
     color: '#FF004F',
     fontSize: 14,
   },
-  
+
   // Modal
   modalOverlay: {
     width: '100%',
