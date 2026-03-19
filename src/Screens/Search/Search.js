@@ -792,7 +792,7 @@ export function Search({navigation, route}) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F0F1A',
+    backgroundColor: '#14142A',
   },
   container: {
     flex: 1,
@@ -802,7 +802,7 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     height: heightPercentageToDP('5%'),
-    backgroundColor: '#0F0F1A',
+    backgroundColor: '#14142A',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -811,7 +811,10 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   headerTitleContainer: {
-    flexDirection: 'row',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: heightPercentageToDP('2.2%'),
@@ -832,7 +835,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: widthPercentageToDP('4%'),
     paddingVertical: heightPercentageToDP('2%'),
-    backgroundColor: '#0F0F1A',
+    backgroundColor: '#14142A',
   },
   searchInputWrapper: {
     flexDirection: 'row',
@@ -864,7 +867,7 @@ const styles = StyleSheet.create({
   // Tabs
   tabsContainer: {
     paddingVertical: 8,
-    backgroundColor: '#0F0F1A',
+    backgroundColor: '#14142A',
   },
   tabsContent: {
     paddingHorizontal: 16,
@@ -903,7 +906,7 @@ const styles = StyleSheet.create({
   // Results List
   resultsList: {
     flex: 1,
-    backgroundColor: '#0F0F1A',
+    backgroundColor: '#14142A',
   },
   resultsContent: {
     paddingHorizontal: 16,
