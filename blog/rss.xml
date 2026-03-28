@@ -4,10 +4,40 @@
         <title>InkNest Blog</title>
         <link>https://p2devs.github.io/InkNest/blog</link>
         <description>InkNest Blog</description>
-        <lastBuildDate>Sun, 15 Mar 2026 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 28 Mar 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[InkNest v1.4.9 Release]]></title>
+            <link>https://p2devs.github.io/InkNest/blog/release-v1.4.9</link>
+            <guid>https://p2devs.github.io/InkNest/blog/release-v1.4.9</guid>
+            <pubDate>Sat, 28 Mar 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone! 🎉 We're thrilled to announce InkNest v1.4.9 is officially here!]]></description>
+            <content:encoded><![CDATA[<p>Hey everyone! 🎉 We're thrilled to announce <strong>InkNest v1.4.9</strong> is officially here!</p>
+<p>This is a massive update introducing a highly anticipated new feature: the <strong>Novel Reading Module</strong>, along with multi-source tracking, offline support, and various quality-of-life improvements.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-whats-new">✨ What's New<a class="hash-link" aria-label="Direct link to ✨ What's New" title="Direct link to ✨ What's New" href="https://p2devs.github.io/InkNest/blog/release-v1.4.9#-whats-new">​</a></h2>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="-all-new-novel-reading-module">📚 All-New Novel Reading Module<a class="hash-link" aria-label="Direct link to 📚 All-New Novel Reading Module" title="Direct link to 📚 All-New Novel Reading Module" href="https://p2devs.github.io/InkNest/blog/release-v1.4.9#-all-new-novel-reading-module">​</a></h4>
+<ul>
+<li><strong>Novel Reading Experience</strong> — Dive into your favorite novels with a dedicated, brand-new reading module.</li>
+<li><strong>Offline Reading Foundation</strong> — We've laid the groundwork for offline support. <em>(Note: Full offline downloading for novels is currently in development and not yet available for users).</em></li>
+<li><strong>Multi-Source Integration</strong> — Access content from multiple sources effortlessly. <em>(Note: WTR-Lab integration is included, but the source is currently disabled due to Cloudflare protection).</em></li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="-source-status-tracking--notifications">🔔 Source Status Tracking &amp; Notifications<a class="hash-link" aria-label="Direct link to 🔔 Source Status Tracking &amp; Notifications" title="Direct link to 🔔 Source Status Tracking &amp; Notifications" href="https://p2devs.github.io/InkNest/blog/release-v1.4.9#-source-status-tracking--notifications">​</a></h4>
+<ul>
+<li><strong>Source Status Tracking</strong> — Stay updated on the status of your favorite content sources and get notifications when there are changes or issues.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-bug-fixes--improvements">🐛 Bug Fixes &amp; Improvements<a class="hash-link" aria-label="Direct link to 🐛 Bug Fixes &amp; Improvements" title="Direct link to 🐛 Bug Fixes &amp; Improvements" href="https://p2devs.github.io/InkNest/blog/release-v1.4.9#-bug-fixes--improvements">​</a></h2>
+<ul>
+<li><strong>Search UI Refinements</strong> — Updated the background color and centered the header title for a cleaner looking Search interface.</li>
+<li><strong>Code Optimization</strong> — Refactored both the Search and NovelDetails components for improved performance and readability.</li>
+<li><strong>Bug Fixes</strong> — Removed unnecessary error handling on synchronous notification persistence.</li>
+<li><strong>Contact Info</strong> — Updated our official contact email to <code>inknest@capacity.rocks</code>.</li>
+</ul>
+<p><strong>Update now</strong> to explore the brand new Novel Reading Module and all the other improvements! 📚✨</p>
+<p>As always, if you encounter any issues, please report them in our issues channel. Happy reading! 🦋</p>]]></content:encoded>
+            <category>Release</category>
+        </item>
         <item>
             <title><![CDATA[InkNest v1.4.8 Release]]></title>
             <link>https://p2devs.github.io/InkNest/blog/release-v1.4.8</link>
