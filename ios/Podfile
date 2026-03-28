@@ -64,5 +64,20 @@ target 'InkNest' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Patch fmt base.h for Apple Clang 21+ (Xcode 26) consteval compatibility.
+    # Apple Clang 21 (__apple_build_version__ >= 21000000) has stricter consteval
+    # enforcement that breaks fmt 11.x. fmt only excludes < 14000029 (Clang < 14).
+    fmt_base_h = File.join(installer.sandbox.root, 'fmt/include/fmt/base.h')
+    if File.exist?(fmt_base_h)
+      content = File.read(fmt_base_h)
+      old_check = '#elif defined(__apple_build_version__) && __apple_build_version__ < 14000029L'
+      new_check = '#elif defined(__apple_build_version__) && (__apple_build_version__ < 14000029L || __apple_build_version__ >= 21000000L)'
+      if content.include?(old_check) && !content.include?(new_check)
+        File.chmod(0644, fmt_base_h)
+        File.write(fmt_base_h, content.gsub(old_check, new_check))
+        puts '[Fix] Patched fmt/base.h for Apple Clang 21+ consteval compatibility'
+      end
+    end
   end
 end

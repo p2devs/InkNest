@@ -240,7 +240,7 @@ export function RootNavigation() {
       // We still persist to storage for background/offline safety, 
       // but we don't rely on it as the source of truth for the UI anymore.
       // The 'consumeStoredNotifications' will pick this up if the app restarts.
-      persistNotificationList(deduped).catch(() => { });
+      persistNotificationList(deduped);
 
       dispatch(appendNotification(parsedPayload));
 

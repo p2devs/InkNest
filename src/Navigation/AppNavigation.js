@@ -25,6 +25,14 @@ import {
 import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 import WebSearchScreen from '../InkNest-Externals/Screens/Webview/WebSearchScreen';
 import NotificationsScreen from '../Screens/Notifications/NotificationsScreen';
+import {
+  NovelHome,
+  NovelDetails,
+  NovelReader,
+  NovelSearch,
+  NovelLibrary,
+  NovelViewAll,
+} from '../Screens/Novel';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +87,13 @@ export function AppNavigation() {
         name={NAVIGATION.notifications}
         component={NotificationsScreen}
       />
+      {/* Novel Screens */}
+      <Stack.Screen name={NAVIGATION.novelHome} component={NovelHome} />
+      <Stack.Screen name={NAVIGATION.novelDetails} component={NovelDetails} />
+      <Stack.Screen name={NAVIGATION.novelReader} component={NovelReader} />
+      <Stack.Screen name={NAVIGATION.novelSearch} component={NovelSearch} />
+      <Stack.Screen name={NAVIGATION.novelLibrary} component={NovelLibrary} />
+      <Stack.Screen name={NAVIGATION.novelViewAll} component={NovelViewAll} />
     </Stack.Navigator>
   );
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -26,11 +26,14 @@ import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
 import {getComicsHome} from '../APIs/Home';
 import {getMangaHome} from '../../../InkNest-Externals/Screens/Manga/APIs';
+import {getNovelHome} from '../../Novel/APIs';
 import HistoryCard from './Components/HistoryCard';
 import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
-import {ComicHostName} from '../../../Utils/APIs';
+import {ComicHostName, NovelHostName} from '../../../Utils/APIs';
+import {NovelSectionList} from '../../Novel/Components/NovelList';
+import {getSourceLabel} from '../../../Utils/sourceStatus';
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
@@ -39,13 +42,19 @@ export function Library({navigation}) {
     manga: null,
     newest: null,
   });
+  const [novelSections, setNovelSections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mangaLoading, setMangaLoading] = useState(false);
+  const [novelLoading, setNovelLoading] = useState(false);
   const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
   const [activeTab, setActiveTab] = useState('comic');
+  const [changeNovelSource, setChangeNovelSource] = useState(false);
   const History = useSelector(state => state.data.history);
   const MangaHistory = useSelector(state => state.data.MangaHistory || {});
+  const NovelHistory = useSelector(state => state.data.NovelHistory || {});
+  const novelBaseUrl = useSelector(state => state.data.novelBaseUrl || 'novelfire');
+  const novelSources = useSelector(state => state.data.novelSources || {});
   const comicBookmarkCount = useSelector(
     state =>
       Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
@@ -53,11 +62,21 @@ export function Library({navigation}) {
   const mangaBookmarkCount = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,
   );
-  const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount;
-  const notifications = useSelector(state => state.data?.notifications || []);
-  const hasUnreadNotifications = notifications.some(
-    notification => !notification?.read,
+  const novelBookmarkCount = useSelector(
+    state => Object.keys(state.data.NovelBookMarks || {}).length,
   );
+  const totalBookmarkCount = comicBookmarkCount + mangaBookmarkCount + novelBookmarkCount;
+  const notifications = useSelector(state => state.data?.notifications || []);
+  const sourceStatusNotifications = useSelector(
+    state => state.data?.sourceStatusNotifications || [],
+  );
+  const hasUnreadNotifications = useMemo(() => {
+    const hasUnreadRegular = notifications.some(notification => !notification?.read);
+    const hasUnreadSourceStatus = sourceStatusNotifications.some(
+      notification => !notification?.read,
+    );
+    return hasUnreadRegular || hasUnreadSourceStatus;
+  }, [notifications, sourceStatusNotifications]);
   const dispatch = useDispatch();
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
@@ -110,12 +129,19 @@ export function Library({navigation}) {
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(type, setComicsData, setLoading);
-        getMangaHome(setMangaData, setMangaLoading);
+        getComicsHome(type, setComicsData, setLoading, dispatch);
+        getMangaHome(setMangaData, setMangaLoading, dispatch);
+        getNovelHome(novelBaseUrl).then(data => {
+          setNovelSections(data || []);
+          setNovelLoading(false);
+        }).catch(err => {
+          console.error('Error fetching novel home:', err);
+          setNovelLoading(false);
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forIosValue, forIosLoading]);
+  }, [forIosValue, forIosLoading, novelBaseUrl]);
 
   const allSections = Object.entries(comicsData);
   const isSpecialBuild =
@@ -163,6 +189,24 @@ export function Library({navigation}) {
                     activeTab === 'manga' && styles.activeTabMangaText,
                   ]}>
                   Manga
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'novel' && styles.activeTab]}
+                onPress={() => setActiveTab('novel')}>
+                <Ionicons
+                  name="book"
+                  size={15}
+                  color={
+                    activeTab === 'novel' ? '#9C27B0' : 'rgba(255,255,255,0.35)'
+                  }
+                />
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'novel' && styles.activeTabNovelText,
+                  ]}>
+                  Novels
                 </Text>
               </TouchableOpacity>
             </View>
@@ -264,7 +308,7 @@ export function Library({navigation}) {
                         hostName: key,
                       });
                       setType(key);
-                      getComicsHome(key, setComicsData, setLoading);
+                      getComicsHome(key, setComicsData, setLoading, dispatch);
                       setChangeType(false);
                     }}>
                     {type === key ? (
@@ -571,6 +615,156 @@ export function Library({navigation}) {
           </>
         )}
 
+        {/* ===== NOVEL TAB ===== */}
+        {activeTab === 'novel' && (
+          <>
+            {/* Novel Source Selector */}
+            {!isSpecialBuild && forIosLoading === false && (
+              <View style={styles.hostRow}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setChangeNovelSource(!changeNovelSource);
+                    crashlytics().log('Novel Source Name Clicked');
+                    analytics().logEvent('novel_source_name_clicked', {
+                      source: novelBaseUrl.toString(),
+                    });
+                  }}
+                  style={styles.hostSelector}>
+                  <Text style={styles.hostText} numberOfLines={1}>
+                    {getSourceLabel(novelBaseUrl)}
+                  </Text>
+                  <AntDesign
+                    name={changeNovelSource ? 'up' : 'down'}
+                    size={14}
+                    color="rgba(255,255,255,0.4)"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Novel Source dropdown */}
+            {changeNovelSource && (
+              <View style={styles.dropdown}>
+                {Object.keys(NovelHostName).map((key, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      crashlytics().log('Novel Source Selected');
+                      analytics().logEvent('novel_source_selected', {
+                        source: key,
+                      });
+                      setNovelSections([]); // Clear old sections
+                      setNovelLoading(true); // Show loading when switching sources
+                      dispatch({type: 'data/switchNovelSource', payload: key});
+                      setChangeNovelSource(false);
+                    }}>
+                    {novelBaseUrl === key ? (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#667EEA"
+                      />
+                    ) : (
+                      <View style={styles.radioEmpty} />
+                    )}
+                    <View style={styles.dropdownItemInfo}>
+                      <Text style={styles.dropdownItemTitle}>{getSourceLabel(key)}</Text>
+                      <Text style={styles.dropdownItemSub}>
+                        {NovelHostName[key]}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Novel Continue Reading */}
+            {Object.values(NovelHistory).length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Continue Reading</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        'Clear Novel History',
+                        'Are you sure you want to clear your novel reading history?',
+                        [
+                          {text: 'Cancel', style: 'cancel'},
+                          {
+                            text: 'Clear',
+                            onPress: () => dispatch({type: 'data/clearNovelHistory'}),
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }}>
+                    <Text style={styles.clearText}>Clear</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={Object.values(NovelHistory).sort(
+                    (a, b) => (b.lastReadAt || 0) - (a.lastReadAt || 0),
+                  )}
+                  keyExtractor={(item, index) => `novel-history-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.comicCard}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        crashlytics().log('Novel history card clicked');
+                        navigation.navigate(NAVIGATION.novelDetails, {
+                          novel: item,
+                        });
+                      }}>
+                      <Image
+                        source={{uri: item.coverImage}}
+                        style={styles.comicCardImage}
+                      />
+                      <Text style={styles.comicCardTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                      {item.lastChapter && (
+                        <Text style={styles.novelChapterText}>
+                          Ch. {item.lastChapter}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Novel sections */}
+            {!novelLoading && novelSections.length > 0 && (
+              <NovelSectionList
+                sections={novelSections}
+                onItemPress={(novel) => {
+                  crashlytics().log('Novel card clicked from Library');
+                  navigation.navigate(NAVIGATION.novelDetails, {novel});
+                }}
+                onSeeAllPress={(sectionName, novels) => {
+                  navigation.navigate(NAVIGATION.novelViewAll, {
+                    title: sectionName,
+                    novels,
+                  });
+                }}
+                style={styles.novelListContent}
+              />
+            )}
+
+            {/* Novel Loading */}
+            {novelLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#9C27B0" />
+              </View>
+            )}
+          </>
+        )}
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
@@ -645,6 +839,9 @@ const styles = StyleSheet.create({
   },
   activeTabMangaText: {
     color: '#007AFF',
+  },
+  activeTabNovelText: {
+    color: '#9C27B0',
   },
   bookmarkBadge: {
     position: 'absolute',
@@ -774,6 +971,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(255,255,255,0.3)',
     marginTop: 2,
+  },
+
+  // Novel specific styles
+  novelChapterText: {
+    fontSize: 10,
+    color: '#9C27B0',
+    paddingHorizontal: 8,
+    paddingBottom: 6,
+  },
+  novelListContent: {
+    paddingTop: 16,
   },
 
   // Loading

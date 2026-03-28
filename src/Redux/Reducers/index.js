@@ -41,6 +41,22 @@ const initialState = {
   hasSeenOfflineMovedAlert: false,
   hasSeenV146Walkthrough: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
+  // Novel state
+  NovelBookMarks: {}, // {novelLink: {title, coverImage, link, author, ...}}
+  NovelHistory: {}, // {novelLink: {title, coverImage, link, lastChapter, lastReadAt, ...}}
+  novelReaderMode: 'text', // 'text' | 'webview'
+  novelReaderTheme: 'dark', // 'light' | 'dark' | 'sepia'
+  novelFontSize: 18,
+  novelLineHeight: 1.6,
+  novelFontFamily: 'serif', // 'serif' | 'sans-serif' | 'monospace'
+  // Novel source management
+  novelBaseUrl: 'novelfire',
+  novelSources: {
+    novelfire: { id: 'novelfire', name: 'NovelFire', enabled: true },
+    wtrlab: { id: 'wtrlab', name: 'WTR-Lab', enabled: true },
+  },
+  // WTR-Lab reading mode preference
+  wtrlabReadingMode: 'web', // 'web' | 'webplus' | 'ai'
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
@@ -49,6 +65,8 @@ const initialState = {
   userActivity: {}, // {postsToday: 0, repliesToday: 0, lastReset: date}
   notifications: [], // [{id,title,body,data,receivedAt,read}]
   notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
+  // Source status notifications
+  sourceStatusNotifications: [], // [{id, sourceKey, sourceName, status, statusCode, timestamp, read}]
 };
 
 /**
@@ -286,6 +304,9 @@ const Reducers = createSlice({
       state.baseUrl = action.payload;
       state.downTime = false;
     },
+    switchNovelSource: (state, action) => {
+      state.novelBaseUrl = action.payload;
+    },
     SwtichToAnime: state => {
       state.Anime = !state.Anime;
       state.downTime = false;
@@ -361,6 +382,98 @@ const Reducers = createSlice({
         lastReadPage,
         totalPages,
       };
+    },
+    // Novel reducers
+    AddNovelBookMark: (state, action) => {
+      state.NovelBookMarks[action?.payload?.link] = action?.payload;
+    },
+    RemoveNovelBookMark: (state, action) => {
+      delete state.NovelBookMarks[action?.payload?.link];
+    },
+    clearNovelBookmarks: state => {
+      state.NovelBookMarks = {};
+    },
+    pushNovelHistory: (state, action) => {
+      const link = action.payload.link;
+      state.NovelHistory[link] = {
+        ...state.NovelHistory[link],
+        ...action.payload,
+      };
+    },
+    updateNovelHistory: (state, action) => {
+      const { novelLink, chapterLink, chapterNumber, chapterTitle, scrollProgress } = action.payload;
+      if (!novelLink || !chapterLink) return;
+
+      const now = Date.now();
+      const isCompleted = typeof scrollProgress === 'number' && scrollProgress >= 95;
+
+      // Initialize chapterProgress if not exists
+      const existingProgress = state.NovelHistory[novelLink]?.chapterProgress || {};
+
+      state.NovelHistory[novelLink] = {
+        ...state.NovelHistory[novelLink],
+        lastChapter: chapterNumber,
+        lastChapterLink: chapterLink,
+        lastChapterTitle: chapterTitle,
+        lastReadAt: now,
+        // Per-chapter progress tracking
+        chapterProgress: {
+          ...existingProgress,
+          [chapterLink]: {
+            scrollProgress: scrollProgress ?? existingProgress[chapterLink]?.scrollProgress ?? 0,
+            completed: isCompleted || existingProgress[chapterLink]?.completed || false,
+            lastReadAt: now,
+          },
+        },
+      };
+    },
+    updateNovelChapterProgress: (state, action) => {
+      const { novelLink, chapterLink, scrollProgress } = action.payload;
+      if (!novelLink || !chapterLink) return;
+
+      const now = Date.now();
+      const isCompleted = typeof scrollProgress === 'number' && scrollProgress >= 95;
+
+      // Initialize if novel not in history
+      if (!state.NovelHistory[novelLink]) {
+        state.NovelHistory[novelLink] = {
+          chapterProgress: {},
+        };
+      }
+
+      // Initialize chapterProgress if not exists
+      if (!state.NovelHistory[novelLink].chapterProgress) {
+        state.NovelHistory[novelLink].chapterProgress = {};
+      }
+
+      const existingProgress = state.NovelHistory[novelLink].chapterProgress[chapterLink] || {};
+
+      state.NovelHistory[novelLink].chapterProgress[chapterLink] = {
+        scrollProgress: scrollProgress ?? existingProgress.scrollProgress ?? 0,
+        completed: isCompleted || existingProgress.completed || false,
+        lastReadAt: now,
+      };
+    },
+    clearNovelHistory: state => {
+      state.NovelHistory = {};
+    },
+    setNovelReaderMode: (state, action) => {
+      state.novelReaderMode = action.payload;
+    },
+    setNovelReaderTheme: (state, action) => {
+      state.novelReaderTheme = action.payload;
+    },
+    setNovelFontSize: (state, action) => {
+      state.novelFontSize = action.payload;
+    },
+    setNovelLineHeight: (state, action) => {
+      state.novelLineHeight = action.payload;
+    },
+    setNovelFontFamily: (state, action) => {
+      state.novelFontFamily = action.payload;
+    },
+    setWtrlabReadingMode: (state, action) => {
+      state.wtrlabReadingMode = action.payload;
     },
     // Community & Auth reducers
     setUser: (state, action) => {
@@ -608,6 +721,66 @@ const Reducers = createSlice({
         );
       }
     },
+    // Source status notification reducers
+    setSourceStatusNotification: (state, action) => {
+      const { sourceKey, status, statusCode, sourceName } = action.payload || {};
+      if (!sourceKey || !status) {
+        return;
+      }
+      const now = Date.now();
+      const notificationId = `source-${sourceKey}-${now}`;
+
+      // Check if we already have a recent notification for this source (within 5 minutes)
+      const fiveMinutesAgo = now - 300000;
+      const recentNotification = state.sourceStatusNotifications.find(
+        n => n.sourceKey === sourceKey && n.timestamp > fiveMinutesAgo
+      );
+
+      if (recentNotification) {
+        // Update existing notification instead of creating new one
+        recentNotification.status = status;
+        recentNotification.statusCode = statusCode;
+        recentNotification.timestamp = now;
+        recentNotification.read = false;
+        return;
+      }
+
+      // Add new notification
+      state.sourceStatusNotifications.unshift({
+        id: notificationId,
+        sourceKey,
+        sourceName,
+        status,
+        statusCode,
+        timestamp: now,
+        read: false,
+      });
+
+      // Keep only last 20 notifications
+      state.sourceStatusNotifications = state.sourceStatusNotifications.slice(0, 20);
+    },
+    markSourceStatusNotificationRead: (state, action) => {
+      const notificationId = action.payload;
+      if (!notificationId) {
+        return;
+      }
+      const notification = state.sourceStatusNotifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.read = true;
+      }
+    },
+    clearSourceStatusNotifications: state => {
+      state.sourceStatusNotifications = [];
+    },
+    removeSourceStatusNotification: (state, action) => {
+      const notificationId = action.payload;
+      if (!notificationId) {
+        return;
+      }
+      state.sourceStatusNotifications = state.sourceStatusNotifications.filter(
+        n => n.id !== notificationId
+      );
+    },
   },
 });
 
@@ -623,6 +796,7 @@ export const {
   UpdateSearch,
   DownTime,
   SwtichBaseUrl,
+  switchNovelSource,
   SwtichToAnime,
   AnimeWatched,
   AddAnimeBookMark,
@@ -645,6 +819,20 @@ export const {
   markV146WalkthroughSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
+  // Novel actions
+  AddNovelBookMark,
+  RemoveNovelBookMark,
+  clearNovelBookmarks,
+  pushNovelHistory,
+  updateNovelHistory,
+  updateNovelChapterProgress,
+  clearNovelHistory,
+  setNovelReaderMode,
+  setNovelReaderTheme,
+  setWtrlabReadingMode,
+  setNovelFontSize,
+  setNovelLineHeight,
+  setNovelFontFamily,
   // Community & Auth actions
   setUser,
   clearUser,
@@ -660,5 +848,10 @@ export const {
   clearNotifications,
   setNotificationSubscriptionCache,
   updateNotificationSubscriptionList,
+  // Source status notification actions
+  setSourceStatusNotification,
+  markSourceStatusNotificationRead,
+  clearSourceStatusNotifications,
+  removeSourceStatusNotification,
 } = Reducers.actions;
 export default Reducers.reducer;

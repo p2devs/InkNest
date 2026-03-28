@@ -9,9 +9,11 @@ import {
 import {useSelector} from 'react-redux';
 import {Bookmarks} from './Bookmarks';
 import {MangaBookmarks} from './MangaBookmarks';
+import {NovelBookmarks} from './NovelBookmarks';
 import Header from '../../../Components/UIComp/Header';
 import {goBack} from '../../../Navigation/NavigationService';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 export function ComicBookmarks({navigation}) {
@@ -23,7 +25,10 @@ export function ComicBookmarks({navigation}) {
   const mangaBookMarksLength = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,
   );
-  const totalCount = bookMarksLength + mangaBookMarksLength;
+  const novelBookMarksLength = useSelector(
+    state => Object.keys(state.data.NovelBookMarks || {}).length,
+  );
+  const totalCount = bookMarksLength + mangaBookMarksLength + novelBookMarksLength;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -66,6 +71,11 @@ export function ComicBookmarks({navigation}) {
         <TouchableOpacity
           style={[styles.tab, activeTab === 'comic' && styles.activeTab]}
           onPress={() => setActiveTab('comic')}>
+          <MaterialIcons
+            name="menu-book"
+            size={14}
+            color={activeTab === 'comic' ? '#667EEA' : 'rgba(255,255,255,0.4)'}
+          />
           <Text
             style={[
               styles.tabText,
@@ -82,19 +92,47 @@ export function ComicBookmarks({navigation}) {
           )}
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'manga' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'manga' && styles.activeTabManga]}
           onPress={() => setActiveTab('manga')}>
+          <MaterialIcons
+            name="auto-stories"
+            size={14}
+            color={activeTab === 'manga' ? '#007AFF' : 'rgba(255,255,255,0.4)'}
+          />
           <Text
             style={[
               styles.tabText,
-              activeTab === 'manga' && styles.activeTabText,
+              activeTab === 'manga' && styles.activeTabMangaText,
             ]}>
             Manga
           </Text>
           {mangaBookMarksLength > 0 && (
-            <View style={[styles.tabBadge, activeTab === 'manga' && styles.tabBadgeActive]}>
-              <Text style={[styles.tabBadgeText, activeTab === 'manga' && styles.tabBadgeTextActive]}>
+            <View style={[styles.tabBadge, activeTab === 'manga' && styles.tabBadgeMangaActive]}>
+              <Text style={[styles.tabBadgeText, activeTab === 'manga' && styles.tabBadgeMangaTextActive]}>
                 {mangaBookMarksLength}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'novel' && styles.activeTabNovel]}
+          onPress={() => setActiveTab('novel')}>
+          <Ionicons
+            name="book"
+            size={14}
+            color={activeTab === 'novel' ? '#9C27B0' : 'rgba(255,255,255,0.4)'}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'novel' && styles.activeTabNovelText,
+            ]}>
+            Novels
+          </Text>
+          {novelBookMarksLength > 0 && (
+            <View style={[styles.tabBadge, activeTab === 'novel' && styles.tabBadgeNovelActive]}>
+              <Text style={[styles.tabBadgeText, activeTab === 'novel' && styles.tabBadgeNovelTextActive]}>
+                {novelBookMarksLength}
               </Text>
             </View>
           )}
@@ -106,8 +144,12 @@ export function ComicBookmarks({navigation}) {
           <Bookmarks
             navigation={navigation}
           />
-        ) : (
+        ) : activeTab === 'manga' ? (
           <MangaBookmarks
+            navigation={navigation}
+          />
+        ) : (
+          <NovelBookmarks
             navigation={navigation}
           />
         )}
@@ -142,13 +184,25 @@ const styles = StyleSheet.create({
   activeTab: {
     backgroundColor: 'rgba(102, 126, 234, 0.2)',
   },
+  activeTabManga: {
+    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+  },
+  activeTabNovel: {
+    backgroundColor: 'rgba(156, 39, 176, 0.2)',
+  },
   tabText: {
     fontWeight: '600',
-    fontSize: 13,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.4)',
   },
   activeTabText: {
     color: '#667EEA',
+  },
+  activeTabMangaText: {
+    color: '#007AFF',
+  },
+  activeTabNovelText: {
+    color: '#9C27B0',
   },
   countBadge: {
     minWidth: 28,
@@ -175,6 +229,12 @@ const styles = StyleSheet.create({
   tabBadgeActive: {
     backgroundColor: 'rgba(102, 126, 234, 0.3)',
   },
+  tabBadgeMangaActive: {
+    backgroundColor: 'rgba(0, 122, 255, 0.3)',
+  },
+  tabBadgeNovelActive: {
+    backgroundColor: 'rgba(156, 39, 176, 0.3)',
+  },
   tabBadgeText: {
     fontSize: 11,
     fontWeight: '700',
@@ -182,5 +242,11 @@ const styles = StyleSheet.create({
   },
   tabBadgeTextActive: {
     color: '#667EEA',
+  },
+  tabBadgeMangaTextActive: {
+    color: '#007AFF',
+  },
+  tabBadgeNovelTextActive: {
+    color: '#9C27B0',
   },
 });

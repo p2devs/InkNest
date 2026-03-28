@@ -203,7 +203,7 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 
 For any inquiries, feel free to reach out through one of the following channels:
 
-- **Email**: [inknest@mail.p2devs.engineer](mailto:inknest@mail.p2devs.engineer)
+- **Email**: [inknest@capacity.rocks](mailto:inknest@capacity.rocks)
 - **Discord**: Join our community on [Discord](https://discord.gg/WYwJefvWNT) for real-time support and discussion.
 - **GitHub Discussions**: Visit our [GitHub Discussions board](https://github.com/p2devs/InkNest/discussions) to engage with our community, ask questions, and find answers to common issues.
 

@@ -239,8 +239,8 @@ function ContactSection() {
         <div className={styles.contactGrid}>
           <div className={styles.contactCard}>
             <h4>📧 Email</h4>
-            <a href="mailto:inknest@mail.p2devs.engineer">
-              inknest@mail.p2devs.engineer
+            <a href="mailto:inknest@capacity.rocks">
+              inknest@capacity.rocks
             </a>
           </div>
           <div className={styles.contactCard}>

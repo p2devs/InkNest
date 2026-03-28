@@ -7,8 +7,16 @@ import {
   extractLastPage,
   parseHomePageCards,
 } from './homeParser';
+import {checkDownTime} from '../../../Redux/Actions/GlobalActions';
+import {
+  recordSourceError,
+  recordSourceSuccess,
+  getStatusFromCode,
+  SOURCE_STATUS,
+  getSourceLabel,
+} from '../../../Utils/sourceStatus';
 
-export const getComics = async (hostName, page, type = null) => {
+export const getComics = async (hostName, page, type = null, dispatch = null) => {
   try {
     const hostKey = Object.keys(ComicHostName).find(
       key => ComicHostName[key] === hostName,
@@ -34,55 +42,92 @@ export const getComics = async (hostName, page, type = null) => {
       }
     }
 
+    // Record successful request
+    if (hostKey) {
+      recordSourceSuccess(hostKey);
+    }
+
     return {comicsData, lastPage};
   } catch (error) {
     console.error('Error fetching comics data:', error);
     console.log('Request URL:', hostName, page, type);
 
+    // Track source-specific errors
+    const hostKey = Object.keys(ComicHostName).find(
+      key => ComicHostName[key] === hostName,
+    );
+    const statusCode = error?.response?.status;
+
+    if (hostKey && statusCode) {
+      recordSourceError(hostKey, statusCode);
+
+      // Dispatch notification for 403 or 500+ errors
+      const sourceStatus = getStatusFromCode(statusCode);
+      if ((sourceStatus === SOURCE_STATUS.CLOUDFLARE_PROTECTED || 
+           sourceStatus === SOURCE_STATUS.SERVER_DOWN) && dispatch) {
+        const {setSourceStatusNotification} = require('../../../Redux/Reducers');
+        dispatch(setSourceStatusNotification({
+          sourceKey: hostKey,
+          status: sourceStatus,
+          statusCode,
+          sourceName: getSourceLabel(hostKey),
+        }));
+      }
+    }
+
+    // Also dispatch checkDownTime for general error handling
+    if (dispatch) {
+      dispatch(checkDownTime(error, hostKey));
+    }
+
     return null;
   }
 };
 
-const HomeType = {
+const getHomeRequests = (type, dispatch) => ({
   readcomicsonline: {
     hot_comic_updates: getComics(
       ComicHostName.readcomicsonline,
       1,
       'hot-comic-updates',
+      dispatch,
     ),
     latest_release: getComics(
       ComicHostName.readcomicsonline,
       1,
       'latest-release',
+      dispatch,
     ),
-    most_viewed: getComics(ComicHostName.readcomicsonline, 1, 'most-viewed'),
+    most_viewed: getComics(ComicHostName.readcomicsonline, 1, 'most-viewed', dispatch),
   },
   comichubfree: {
-    hot_comic_updates: getComics(ComicHostName.comichubfree, 1, 'hot-comic'),
-    latest_release: getComics(ComicHostName.comichubfree, 1, 'new-comic'),
-    most_viewed: getComics(ComicHostName.comichubfree, 1, 'popular-comic'),
-    all_comic: getComics(ComicHostName.comichubfree, 1),
+    hot_comic_updates: getComics(ComicHostName.comichubfree, 1, 'hot-comic', dispatch),
+    latest_release: getComics(ComicHostName.comichubfree, 1, 'new-comic', dispatch),
+    most_viewed: getComics(ComicHostName.comichubfree, 1, 'popular-comic', dispatch),
+    all_comic: getComics(ComicHostName.comichubfree, 1, null, dispatch),
   },
   readallcomics: {
-    all_comic: getComics(ComicHostName.readallcomics, 1),
+    all_comic: getComics(ComicHostName.readallcomics, 1, null, dispatch),
   },
   comicbookplus: {
     latest_release: getComics(
       ComicHostName.comicbookplus,
       0,
       'latest-uploads',
+      dispatch,
     ),
   },
-};
+});
 
 export const getComicsHome = async (
   type = 'comichubfree',
   setComics,
   setLoading,
+  dispatch = null,
 ) => {
   setLoading(true);
   try {
-    const requests = HomeType[type] || {};
+    const requests = getHomeRequests(type, dispatch)[type] || {};
     const entries = await Promise.all(
       Object.entries(requests).map(async ([key, promise]) => [key, await promise]),
     );

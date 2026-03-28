@@ -108,7 +108,7 @@ const faqData = [
 
 • **GitHub Issues** - Create a detailed bug report on our [Issues page](https://github.com/p2devs/InkNest/issues)
 • **Discord** - Report issues in our [Discord server](https://discord.gg/WYwJefvWNT)
-• **Email** - Contact us at [inknest@mail.p2devs.engineer](mailto:inknest@mail.p2devs.engineer)
+• **Email** - Contact us at [inknest@capacity.rocks](mailto:inknest@capacity.rocks)
 • **TestFlight** - iOS users can send feedback directly through TestFlight
 
 *Please include device info, app version, and steps to reproduce the issue!*`,
@@ -157,7 +157,7 @@ const faqData = [
         q: 'How can I contact the InkNest team?',
         a: `Reach out through any of these channels:
 
-• **Email** - [inknest@mail.p2devs.engineer](mailto:inknest@mail.p2devs.engineer)
+• **Email** - [inknest@capacity.rocks](mailto:inknest@capacity.rocks)
 • **Discord** - Join our [Discord server](https://discord.gg/WYwJefvWNT) for real-time chat
 • **GitHub Discussions** - [Ask questions](https://github.com/p2devs/InkNest/discussions) and share ideas
 • **GitHub Issues** - For bug reports and feature requests
@@ -289,7 +289,7 @@ export default function FAQ() {
                 💡 GitHub Discussions
               </a>
               <a
-                href="mailto:inknest@mail.p2devs.engineer"
+                href="mailto:inknest@capacity.rocks"
                 className={styles.helpButton}>
                 📧 Email Us
               </a>

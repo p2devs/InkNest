@@ -11,15 +11,24 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import crashlytics from '@react-native-firebase/crashlytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
 import {NAVIGATION} from '../../Constants';
-import {markNotificationAsRead} from '../../Redux/Reducers';
+import {
+  markNotificationAsRead,
+  markSourceStatusNotificationRead,
+  removeSourceStatusNotification,
+} from '../../Redux/Reducers';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {fetchComicDetails} from '../../Redux/Actions/GlobalActions';
+import {
+  SOURCE_STATUS,
+  formatLastChecked,
+} from '../../Utils/sourceStatus';
 
 const formatTimestamp = ts => {
   if (!ts) {
@@ -54,6 +63,103 @@ const formatRelativeTime = ts => {
 };
 
 const normalizeLink = link => (link ? link.split('?')[0] : '');
+
+const SourceStatusCard = ({item, onDismiss}) => {
+  const getStatusConfig = () => {
+    switch (item.status) {
+      case SOURCE_STATUS.CLOUDFLARE_PROTECTED:
+        return {
+          icon: 'shield-alert',
+          color: '#FF9500',
+          bgColor: 'rgba(255, 149, 0, 0.15)',
+          borderColor: 'rgba(255, 149, 0, 0.4)',
+          title: 'Cloudflare Protection',
+          description: `${item.sourceName} is blocking requests due to cloudflare bot protection.`,
+        };
+      case SOURCE_STATUS.SERVER_DOWN:
+        return {
+          icon: 'server-off',
+          color: '#FF3B30',
+          bgColor: 'rgba(255, 59, 48, 0.15)',
+          borderColor: 'rgba(255, 59, 48, 0.4)',
+          title: 'Server Down',
+          description: `${item.sourceName} server is not responding.`,
+        };
+      default:
+        return {
+          icon: 'alert-circle',
+          color: '#8E8E93',
+          bgColor: 'rgba(142, 142, 147, 0.15)',
+          borderColor: 'rgba(142, 142, 147, 0.4)',
+          title: 'Source Error',
+          description: `${item.sourceName} is experiencing issues.`,
+        };
+    }
+  };
+
+  const config = getStatusConfig();
+
+  return (
+    <View
+      style={[
+        styles.sourceStatusCard,
+        {
+          backgroundColor: config.bgColor,
+          borderColor: config.borderColor,
+        },
+        !item.read && styles.sourceStatusCardUnread,
+      ]}>
+      <View style={styles.sourceStatusHeader}>
+        <View style={styles.sourceStatusIconContainer}>
+          <MaterialCommunityIcons
+            name={config.icon}
+            size={24}
+            color={config.color}
+          />
+        </View>
+        <View style={styles.sourceStatusTitleGroup}>
+          <Text style={[styles.sourceStatusTitle, {color: config.color}]}>
+            {config.title}
+          </Text>
+          <Text style={styles.sourceStatusSourceName}>{item.sourceName}</Text>
+        </View>
+        {!item.read ? (
+          <View style={styles.newBadge}>
+            <Text style={styles.newBadgeText}>NEW</Text>
+          </View>
+        ) : null}
+        <TouchableOpacity
+          style={styles.dismissButton}
+          onPress={() => onDismiss(item.id)}>
+          <Ionicons name="close" size={18} color="rgba(255,255,255,0.5)" />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.sourceStatusDescription}>{config.description}</Text>
+
+      <View style={styles.sourceStatusFooter}>
+        <View style={styles.sourceStatusMeta}>
+          <Ionicons name="time-outline" size={13} color="rgba(255,255,255,0.5)" />
+          <Text style={styles.sourceStatusMetaText}>
+            {formatLastChecked(item.timestamp)}
+          </Text>
+        </View>
+        {item.statusCode && (
+          <View style={styles.sourceStatusMeta}>
+            <MaterialCommunityIcons
+              name="alert-circle-outline"
+              size={13}
+              color={config.color}
+            />
+            <Text style={[styles.sourceStatusMetaText, {color: config.color}]}>
+              Error {item.statusCode}
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
 
 const NotificationCard = ({item, comicMeta, onPress}) => {
   const showComicMeta = Boolean(comicMeta?.title || comicMeta?.imgSrc);
@@ -135,6 +241,9 @@ const NotificationCard = ({item, comicMeta, onPress}) => {
 const NotificationsScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const notifications = useSelector(state => state.data.notifications || []);
+  const sourceStatusNotifications = useSelector(
+    state => state.data.sourceStatusNotifications || [],
+  );
   const dataByUrl = useSelector(state => state.data.dataByUrl || {});
 
   const enhancedNotifications = useMemo(() => {
@@ -151,13 +260,32 @@ const NotificationsScreen = ({navigation}) => {
       return {
         ...notification,
         comicMeta,
+        type: 'community',
       };
     });
   }, [dataByUrl, notifications]);
 
+  // Combine regular notifications with source status notifications
+  const allNotifications = useMemo(() => {
+    const sourceNotifications = sourceStatusNotifications.map(item => ({
+      ...item,
+      type: 'source_status',
+    }));
+
+    // Sort by timestamp (newest first)
+    const combined = [...enhancedNotifications, ...sourceNotifications];
+    combined.sort((a, b) => (b.timestamp || b.receivedAt) - (a.timestamp || a.receivedAt));
+
+    return combined;
+  }, [enhancedNotifications, sourceStatusNotifications]);
+
   const unreadCount = useMemo(() => {
-    return enhancedNotifications.filter(item => !item.read).length;
-  }, [enhancedNotifications]);
+    return allNotifications.filter(item => !item.read).length;
+  }, [allNotifications]);
+
+  const sourceStatusUnreadCount = useMemo(() => {
+    return sourceStatusNotifications.filter(item => !item.read).length;
+  }, [sourceStatusNotifications]);
 
   const handleNavigationForNotification = useCallback(item => {
     if (!item?.data) {
@@ -237,28 +365,49 @@ const NotificationsScreen = ({navigation}) => {
   );
 
   const handleMarkAllRead = useCallback(() => {
-    enhancedNotifications.forEach(notification => {
+    allNotifications.forEach(notification => {
       if (!notification.read) {
-        dispatch(markNotificationAsRead(notification.id));
+        if (notification.type === 'source_status') {
+          dispatch(markSourceStatusNotificationRead(notification.id));
+        } else {
+          dispatch(markNotificationAsRead(notification.id));
+        }
       }
     });
-  }, [dispatch, enhancedNotifications]);
+  }, [dispatch, allNotifications]);
+
+  const handleDismissSourceStatus = useCallback(
+    notificationId => {
+      dispatch(removeSourceStatusNotification(notificationId));
+    },
+    [dispatch],
+  );
 
   const renderItem = useCallback(
-    ({item}) => (
-      <NotificationCard
-        item={item}
-        comicMeta={item.comicMeta}
-        onPress={() => handlePress(item)}
-      />
-    ),
-    [handlePress],
+    ({item}) => {
+      if (item.type === 'source_status') {
+        return (
+          <SourceStatusCard
+            item={item}
+            onDismiss={handleDismissSourceStatus}
+          />
+        );
+      }
+      return (
+        <NotificationCard
+          item={item}
+          comicMeta={item.comicMeta}
+          onPress={() => handlePress(item)}
+        />
+      );
+    },
+    [handlePress, handleDismissSourceStatus],
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={enhancedNotifications}
+        data={allNotifications}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListHeaderComponent={
@@ -279,6 +428,11 @@ const NotificationsScreen = ({navigation}) => {
                 <Text style={styles.headerSubtitle}>
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
                 </Text>
+                {sourceStatusUnreadCount > 0 && (
+                  <Text style={styles.sourceStatusHint}>
+                    {sourceStatusUnreadCount} source issue{sourceStatusUnreadCount > 1 ? 's' : ''} need attention
+                  </Text>
+                )}
               </View>
               <View style={styles.headerRow}>
                 {unreadCount > 0 ? (
@@ -488,5 +642,76 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: hp('1.8%'),
     marginTop: hp('1%'),
+  },
+  // Source status styles
+  sourceStatusHint: {
+    color: '#FF9500',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  sourceStatusCard: {
+    borderRadius: 14,
+    padding: wp('4%'),
+    marginHorizontal: wp('6%'),
+    marginVertical: hp('1%'),
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: {width: 0, height: 4},
+    elevation: 4,
+  },
+  sourceStatusCardUnread: {
+    borderWidth: 2,
+  },
+  sourceStatusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp('1%'),
+  },
+  sourceStatusIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  sourceStatusTitleGroup: {
+    flex: 1,
+  },
+  sourceStatusTitle: {
+    fontSize: hp('1.8%'),
+    fontWeight: '700',
+  },
+  sourceStatusSourceName: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: hp('1.5%'),
+    marginTop: 2,
+  },
+  dismissButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  sourceStatusDescription: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: hp('1.7%'),
+    lineHeight: hp('2.4%'),
+    marginBottom: hp('1.2%'),
+  },
+  sourceStatusFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sourceStatusMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  sourceStatusMetaText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: hp('1.4%'),
   },
 });

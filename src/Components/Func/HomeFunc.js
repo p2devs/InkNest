@@ -77,12 +77,12 @@ export const fetchComicsData = async (link, dispatch, baseUrl) => {
           .replaceAll(',', '');
       }
     }
-    dispatch(checkDownTime(response));
+    dispatch(checkDownTime(response, baseUrl));
     return {data: comicsData, lastPage};
   } catch (error) {
     // console.log(link, 'link');
     console.log('Error fetching or parsing data Home:', error);
-    if (dispatch) dispatch(checkDownTime(error));
+    if (dispatch) dispatch(checkDownTime(error, baseUrl));
     return [];
   }
 };
@@ -155,27 +155,27 @@ export const FetchAnimeData = async (link, dispatch, baseUrl) => {
       // console.log(AnimaData, 'videos');
     }
 
-    dispatch(checkDownTime(response));
+    dispatch(checkDownTime(response, baseUrl));
     return AnimaData;
   } catch (error) {
     console.log('Error fetching or parsing data Anime Home page: ', error);
-    if (dispatch) dispatch(checkDownTime(error));
+    if (dispatch) dispatch(checkDownTime(error, baseUrl));
     return [];
   }
 };
 
-export const checkServerDown = async (url, dispatch) => {
+export const checkServerDown = async (url, dispatch, sourceKey = null) => {
   dispatch(fetchDataStart());
   try {
     const response = await APICaller.get(url);
     //set DownTime to false
     console.log(response.status, 'response');
-    dispatch(checkDownTime(response));
+    dispatch(checkDownTime(response, sourceKey));
     return false;
   } catch (error) {
     //set DownTime to true
     console.log('Error checking server down:', error.message);
-    dispatch(checkDownTime(error));
+    dispatch(checkDownTime(error, sourceKey));
     return true;
   }
 };
