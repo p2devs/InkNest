@@ -13,11 +13,18 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import crashlytics from '@react-native-firebase/crashlytics';
+import {WebView} from 'react-native-webview';
 
 import {TextReader} from './Components/TextReader';
-import {WebReader} from './Components/WebReader';
+import {
+  WebReader,
+  buildNovelReaderUrl,
+  NOVEL_WEBVIEW_ORIGIN_WHITELIST,
+  shouldAllowNovelWebViewRequest,
+} from './Components/WebReader';
 import {ReaderSettings} from './Components/ReaderSettings';
-import {getNovelChapter} from '../APIs';
+import {WTRLabModeSelector} from './Components/WTRLabModeSelector';
+import {getNovelChapter, getNovelHostKeyFromLink} from '../APIs';
 import {NAVIGATION} from '../../../Constants';
 import {
   updateNovelHistory,
@@ -35,6 +42,174 @@ const extractChapterNumber = link => {
   return match ? parseInt(match[1], 10) : null;
 };
 
+const normalizeChapterLink = link => {
+  if (typeof link !== 'string') {
+    return null;
+  }
+
+  return link.trim().replace(/[?#].*$/, '').replace(/\/+$/, '');
+};
+
+const replaceChapterNumberInLink = (link, chapterNumber) => {
+  if (!link || !chapterNumber || chapterNumber < 1) {
+    return null;
+  }
+
+  return link.replace(/chapter-\d+/i, `chapter-${chapterNumber}`);
+};
+
+const getNovelChapterEntries = novel => {
+  const chapters = novel?.chapterList || novel?.chapters || [];
+  return Array.isArray(chapters) ? chapters : [];
+};
+
+export const buildWTRLabTextFallbackContent = ({novel, chapter, chapterLink}) => {
+  const currentNumber = chapter?.number || extractChapterNumber(chapterLink);
+  const chapterEntries = getNovelChapterEntries(novel);
+  const normalizedCurrentLink = normalizeChapterLink(chapterLink);
+
+  let matchedChapter = null;
+  let prevChapter = null;
+  let nextChapter = null;
+
+  if (chapterEntries.length > 0) {
+    const currentIndex = chapterEntries.findIndex(entry => {
+      const entryLink = normalizeChapterLink(entry?.link);
+
+      if (entryLink && normalizedCurrentLink && entryLink === normalizedCurrentLink) {
+        return true;
+      }
+
+      if (currentNumber && Number(entry?.number) === Number(currentNumber)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (currentIndex >= 0) {
+      matchedChapter = chapterEntries[currentIndex];
+      prevChapter = chapterEntries[currentIndex - 1]?.link || null;
+      nextChapter = chapterEntries[currentIndex + 1]?.link || null;
+    }
+  }
+
+  const totalChapters =
+    chapterEntries.length ||
+    Number(novel?.chapters) ||
+    Number(novel?.chapterCount) ||
+    null;
+
+  if (!prevChapter && currentNumber && currentNumber > 1) {
+    prevChapter = replaceChapterNumberInLink(chapterLink, currentNumber - 1);
+  }
+
+  if (!nextChapter && currentNumber) {
+    if (!totalChapters || currentNumber < totalChapters) {
+      nextChapter = replaceChapterNumberInLink(chapterLink, currentNumber + 1);
+    }
+  }
+
+  return {
+    title:
+      chapter?.title ||
+      matchedChapter?.title ||
+      (currentNumber ? `Chapter ${currentNumber}` : 'Chapter'),
+    paragraphs: [],
+    text: '',
+    prevChapter,
+    nextChapter,
+    link: chapterLink,
+    hostKey: 'wtrlab',
+    requestedReadingMode: null,
+    activeReadingMode: null,
+  };
+};
+
+const WTR_LAB_TEXT_EXTRACTION_SCRIPT = `
+  (function() {
+    function send(type, payload) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: type,
+        ...payload,
+      }));
+    }
+
+    function getCurrentChapterContainer() {
+      var match = window.location.pathname.match(/chapter-(\\d+)/i);
+      var chapterNumber = match ? match[1] : null;
+
+      if (chapterNumber) {
+        var scopedContainer = document.querySelector('#chapter-' + chapterNumber);
+        if (scopedContainer) {
+          return scopedContainer;
+        }
+      }
+
+      return document.querySelector('.chapter-container');
+    }
+
+    function getParagraphs() {
+      var container = getCurrentChapterContainer();
+      if (!container) {
+        return [];
+      }
+
+      return Array.from(container.querySelectorAll('.chapter-body .pr-line-text'))
+        .map(node => (node.innerText || '').trim())
+        .filter(Boolean);
+    }
+
+    function extract() {
+      var bodyText = document.body ? (document.body.innerText || '') : '';
+
+      if (
+        bodyText.includes('undefined - Error') ||
+        bodyText.includes('An error occurred')
+      ) {
+        send('wtrlab_text_error', {
+          message: 'WTR-Lab returned an error page for this reading mode.',
+        });
+        return true;
+      }
+
+      var paragraphs = getParagraphs();
+      if (paragraphs.length >= 5) {
+        var title = paragraphs[0] || '';
+        var contentParagraphs = paragraphs.slice();
+
+        while (title && contentParagraphs[0] === title) {
+          contentParagraphs = contentParagraphs.slice(1);
+        }
+
+        send('wtrlab_text_content', {
+          title: title,
+          paragraphs: contentParagraphs,
+          text: contentParagraphs.join('\\n\\n'),
+        });
+        return true;
+      }
+
+      return false;
+    }
+
+    var attempts = 0;
+    var interval = setInterval(function() {
+      attempts += 1;
+      if (extract() || attempts >= 40) {
+        clearInterval(interval);
+        if (attempts >= 40) {
+          send('wtrlab_text_timeout', {
+            message: 'Timed out waiting for rendered WTR-Lab text.',
+          });
+        }
+      }
+    }, 500);
+
+    true;
+  })();
+`;
+
 export function NovelReader() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -43,6 +218,7 @@ export function NovelReader() {
   const contentHeightRef = useRef(0);
   const scrollProgressRef = useRef(0);
   const isRestoringScrollRef = useRef(false);
+  const restoredContentKeyRef = useRef(null);
 
   const {novel, chapter, chapterLink} = route.params || {};
 
@@ -52,6 +228,9 @@ export function NovelReader() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [restoringProgress, setRestoringProgress] = useState(false);
+  const [showModeSelector, setShowModeSelector] = useState(false);
+  const [extractedWTRLabText, setExtractedWTRLabText] = useState(null);
+  const [wtrLabExtractionError, setWtrLabExtractionError] = useState(null);
 
   const readerMode = useSelector(state => state.data.novelReaderMode || 'text');
   const readerTheme = useSelector(
@@ -62,6 +241,18 @@ export function NovelReader() {
   const fontFamily = useSelector(
     state => state.data.novelFontFamily || 'serif',
   );
+  const wtrlabReadingMode = useSelector(
+    state => state.data.wtrlabReadingMode || 'web',
+  );
+
+  // Detect if this is a WTR-Lab chapter
+  const hostKey = getNovelHostKeyFromLink(chapterLink);
+  const isWTRLab = hostKey === 'wtrlab';
+  const shouldUseWebReader = readerMode === 'webview';
+  const shouldUseWTRLabFallbackMetadata =
+    isWTRLab && wtrlabReadingMode !== 'ai';
+  const shouldExtractWTRLabText =
+    shouldUseWTRLabFallbackMetadata && !shouldUseWebReader;
 
   // Get saved chapter progress from Redux
   const novelHistory = useSelector(
@@ -82,7 +273,15 @@ export function NovelReader() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getNovelChapter(chapterLink);
+        setExtractedWTRLabText(null);
+        setWtrLabExtractionError(null);
+        const data = shouldUseWTRLabFallbackMetadata
+          ? buildWTRLabTextFallbackContent({novel, chapter, chapterLink})
+          : await getNovelChapter(
+              chapterLink,
+              hostKey,
+              isWTRLab ? wtrlabReadingMode : undefined,
+            );
         setContent(data);
 
         // Extract chapter number from link if not provided
@@ -114,12 +313,95 @@ export function NovelReader() {
     };
 
     fetchChapter();
-  }, [chapterLink, novel, chapter, dispatch]);
+  }, [
+    chapterLink,
+    novel,
+    chapter,
+    dispatch,
+    hostKey,
+    isWTRLab,
+    shouldUseWTRLabFallbackMetadata,
+    wtrlabReadingMode,
+  ]);
+
+  const handleWTRLabTextMessage = useCallback(
+    event => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+
+        if (data.type === 'wtrlab_text_content') {
+          setExtractedWTRLabText({
+            title: data.title,
+            paragraphs: Array.isArray(data.paragraphs) ? data.paragraphs : [],
+            text: typeof data.text === 'string' ? data.text : '',
+          });
+          setWtrLabExtractionError(null);
+          return;
+        }
+
+        if (
+          data.type === 'wtrlab_text_error' ||
+          data.type === 'wtrlab_text_timeout'
+        ) {
+          setWtrLabExtractionError(
+            data.message ||
+              'Failed to load the selected WTR-Lab mode in text view.',
+          );
+        }
+      } catch (parseError) {
+        console.log('[NovelReader] Failed to parse WTR-Lab text message');
+      }
+    },
+    [],
+  );
+
+  const resolvedContent =
+    shouldExtractWTRLabText && extractedWTRLabText?.text
+      ? {
+          ...(content || {}),
+          title: extractedWTRLabText.title || content?.title,
+          paragraphs: extractedWTRLabText.paragraphs,
+          text: extractedWTRLabText.text,
+        }
+      : shouldExtractWTRLabText
+      ? {
+          ...(content || {}),
+          paragraphs: [],
+          text: '',
+        }
+      : content;
+
+  const isWaitingForWTRLabText =
+    shouldExtractWTRLabText &&
+    !extractedWTRLabText?.text &&
+    !wtrLabExtractionError;
+
+  const resolvedTextContent = resolvedContent?.text || resolvedContent?.content || '';
+  const restorationContentKey = [
+    chapterLink || '',
+    readerMode,
+    shouldExtractWTRLabText ? wtrlabReadingMode : 'default',
+    resolvedContent?.title || '',
+    resolvedTextContent.length,
+  ].join('|');
+
+  useEffect(() => {
+    restoredContentKeyRef.current = null;
+    isRestoringScrollRef.current = false;
+    setRestoringProgress(false);
+    contentHeightRef.current = 0;
+  }, [chapterLink, readerMode, wtrlabReadingMode]);
 
   // Restore scroll position after content loads
   useEffect(() => {
     const progress = savedProgressRef.current?.scrollProgress;
-    if (loading || !content || !progress || readerMode !== 'text') {
+    if (
+      loading ||
+      isWaitingForWTRLabText ||
+      !resolvedContent ||
+      !progress ||
+      shouldUseWebReader
+    ) {
       return;
     }
 
@@ -127,6 +409,12 @@ export function NovelReader() {
     if (progress <= 0 || progress >= SCROLL_PROGRESS_THRESHOLD) {
       return;
     }
+
+    if (restoredContentKeyRef.current === restorationContentKey) {
+      return;
+    }
+
+    restoredContentKeyRef.current = restorationContentKey;
 
     isRestoringScrollRef.current = true;
     setRestoringProgress(true);
@@ -157,12 +445,18 @@ export function NovelReader() {
     };
 
     attemptScroll();
-  }, [loading, content, readerMode]);
+  }, [
+    loading,
+    isWaitingForWTRLabText,
+    resolvedContent,
+    restorationContentKey,
+    shouldUseWebReader,
+  ]);
 
   // Handle scroll events to track progress
   const handleScroll = useCallback(
     event => {
-      if (isRestoringScrollRef.current || readerMode !== 'text') {
+      if (isRestoringScrollRef.current || shouldUseWebReader) {
         return;
       }
 
@@ -195,7 +489,7 @@ export function NovelReader() {
         );
       }
     },
-    [dispatch, novel, chapterLink, readerMode],
+    [dispatch, novel, chapterLink, shouldUseWebReader],
   );
 
   const handlePrevChapter = useCallback(() => {
@@ -271,11 +565,11 @@ export function NovelReader() {
     );
   }
 
-  if (error) {
+  if (error || wtrLabExtractionError) {
     return (
       <View style={[styles.errorContainer, {backgroundColor: themeColors.bg}]}>
         <Text style={[styles.errorText, {color: themeColors.text}]}>
-          {error}
+          {error || wtrLabExtractionError}
         </Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -323,8 +617,28 @@ export function NovelReader() {
                 color={themeColors.text}
               />
             </TouchableOpacity>
+            {isWTRLab && (
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => setShowModeSelector(true)}>
+                <Ionicons
+                  name="language-outline"
+                  size={22}
+                  color={themeColors.text}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         </SafeAreaView>
+      )}
+
+      {isWaitingForWTRLabText && (
+        <View style={styles.extractionOverlay} pointerEvents="none">
+          <ActivityIndicator size="large" color="#667EEA" />
+          <Text style={[styles.loadingText, {color: themeColors.text}]}>
+            Loading chapter...
+          </Text>
+        </View>
       )}
 
       {/* Restoring progress overlay */}
@@ -337,7 +651,7 @@ export function NovelReader() {
         </View>
       )}
 
-      {readerMode === 'text' ? (
+      {!shouldUseWebReader ? (
         <ScrollView
           ref={scrollViewRef}
           style={styles.content}
@@ -349,8 +663,8 @@ export function NovelReader() {
             contentHeightRef.current = height;
           }}>
           <TextReader
-            content={content?.content}
-            title={content?.title}
+            content={resolvedContent?.text || resolvedContent?.content}
+            title={resolvedContent?.title}
             fontSize={fontSize}
             lineHeight={lineHeight}
             fontFamily={fontFamily}
@@ -359,7 +673,12 @@ export function NovelReader() {
           />
         </ScrollView>
       ) : (
-        <WebReader chapterLink={chapterLink} theme={readerTheme} />
+        <WebReader
+          chapterLink={chapterLink}
+          theme={readerTheme}
+          hostKey={hostKey}
+          service={isWTRLab ? wtrlabReadingMode : undefined}
+        />
       )}
 
       {showHeader && (
@@ -426,6 +745,50 @@ export function NovelReader() {
           onClose={() => setShowSettings(false)}
         />
       )}
+      {showModeSelector && isWTRLab && (
+        <WTRLabModeSelector
+          visible={showModeSelector}
+          onClose={() => setShowModeSelector(false)}
+          onSelect={() => {
+            // Chapter will reload automatically due to wtrlabReadingMode dependency
+          }}
+        />
+      )}
+      {shouldExtractWTRLabText &&
+        !extractedWTRLabText?.text &&
+        !wtrLabExtractionError && (
+        <WebView
+          source={{
+            uri: buildNovelReaderUrl({
+              chapterLink,
+              hostKey,
+              service: wtrlabReadingMode,
+            }),
+          }}
+          originWhitelist={NOVEL_WEBVIEW_ORIGIN_WHITELIST}
+          onShouldStartLoadWithRequest={shouldAllowNovelWebViewRequest}
+          injectedJavaScript={WTR_LAB_TEXT_EXTRACTION_SCRIPT}
+          onMessage={handleWTRLabTextMessage}
+          onLoadStart={() => {
+            console.log('[NovelReader] WTR-Lab hidden extractor load started');
+          }}
+          onLoadEnd={() => {
+            console.log('[NovelReader] WTR-Lab hidden extractor load ended');
+          }}
+          onError={event => {
+            console.log(
+              '[NovelReader] WTR-Lab hidden extractor error:',
+              event?.nativeEvent,
+            );
+          }}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          cacheEnabled={true}
+          setSupportMultipleWindows={false}
+          javaScriptCanOpenWindowsAutomatically={false}
+          style={styles.hiddenWebView}
+        />
+      )}
     </View>
   );
 }
@@ -438,6 +801,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  hiddenWebView: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+  },
+  extractionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(10, 10, 20, 0.92)',
+    zIndex: 999,
   },
   loadingText: {
     fontSize: 14,

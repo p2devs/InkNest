@@ -49,6 +49,14 @@ const initialState = {
   novelFontSize: 18,
   novelLineHeight: 1.6,
   novelFontFamily: 'serif', // 'serif' | 'sans-serif' | 'monospace'
+  // Novel source management
+  novelBaseUrl: 'novelfire',
+  novelSources: {
+    novelfire: { id: 'novelfire', name: 'NovelFire', enabled: true },
+    wtrlab: { id: 'wtrlab', name: 'WTR-Lab', enabled: true },
+  },
+  // WTR-Lab reading mode preference
+  wtrlabReadingMode: 'web', // 'web' | 'webplus' | 'ai'
   // Community & Auth state
   user: null, // {uid, displayName, photoURL, email, subscriptionTier}
   communityPosts: {}, // {comicLink: {posts: [], lastFetch: timestamp}}
@@ -296,6 +304,9 @@ const Reducers = createSlice({
       state.baseUrl = action.payload;
       state.downTime = false;
     },
+    switchNovelSource: (state, action) => {
+      state.novelBaseUrl = action.payload;
+    },
     SwtichToAnime: state => {
       state.Anime = !state.Anime;
       state.downTime = false;
@@ -460,6 +471,9 @@ const Reducers = createSlice({
     },
     setNovelFontFamily: (state, action) => {
       state.novelFontFamily = action.payload;
+    },
+    setWtrlabReadingMode: (state, action) => {
+      state.wtrlabReadingMode = action.payload;
     },
     // Community & Auth reducers
     setUser: (state, action) => {
@@ -782,6 +796,7 @@ export const {
   UpdateSearch,
   DownTime,
   SwtichBaseUrl,
+  switchNovelSource,
   SwtichToAnime,
   AnimeWatched,
   AddAnimeBookMark,
@@ -814,6 +829,7 @@ export const {
   clearNovelHistory,
   setNovelReaderMode,
   setNovelReaderTheme,
+  setWtrlabReadingMode,
   setNovelFontSize,
   setNovelLineHeight,
   setNovelFontFamily,

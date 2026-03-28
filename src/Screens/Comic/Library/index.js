@@ -31,8 +31,9 @@ import HistoryCard from './Components/HistoryCard';
 import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
-import {ComicHostName} from '../../../Utils/APIs';
+import {ComicHostName, NovelHostName} from '../../../Utils/APIs';
 import {NovelSectionList} from '../../Novel/Components/NovelList';
+import {getSourceLabel} from '../../../Utils/sourceStatus';
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
@@ -48,9 +49,12 @@ export function Library({navigation}) {
   const [type, setType] = useState('readcomicsonline');
   const [changeType, setChangeType] = useState(false);
   const [activeTab, setActiveTab] = useState('comic');
+  const [changeNovelSource, setChangeNovelSource] = useState(false);
   const History = useSelector(state => state.data.history);
   const MangaHistory = useSelector(state => state.data.MangaHistory || {});
   const NovelHistory = useSelector(state => state.data.NovelHistory || {});
+  const novelBaseUrl = useSelector(state => state.data.novelBaseUrl || 'novelfire');
+  const novelSources = useSelector(state => state.data.novelSources || {});
   const comicBookmarkCount = useSelector(
     state =>
       Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
@@ -127,7 +131,7 @@ export function Library({navigation}) {
       if (forIosLoading === false) {
         getComicsHome(type, setComicsData, setLoading, dispatch);
         getMangaHome(setMangaData, setMangaLoading, dispatch);
-        getNovelHome().then(data => {
+        getNovelHome(novelBaseUrl).then(data => {
           setNovelSections(data || []);
           setNovelLoading(false);
         }).catch(err => {
@@ -137,7 +141,7 @@ export function Library({navigation}) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forIosValue, forIosLoading]);
+  }, [forIosValue, forIosLoading, novelBaseUrl]);
 
   const allSections = Object.entries(comicsData);
   const isSpecialBuild =
@@ -614,6 +618,67 @@ export function Library({navigation}) {
         {/* ===== NOVEL TAB ===== */}
         {activeTab === 'novel' && (
           <>
+            {/* Novel Source Selector */}
+            {!isSpecialBuild && forIosLoading === false && (
+              <View style={styles.hostRow}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setChangeNovelSource(!changeNovelSource);
+                    crashlytics().log('Novel Source Name Clicked');
+                    analytics().logEvent('novel_source_name_clicked', {
+                      source: novelBaseUrl.toString(),
+                    });
+                  }}
+                  style={styles.hostSelector}>
+                  <Text style={styles.hostText} numberOfLines={1}>
+                    {getSourceLabel(novelBaseUrl)}
+                  </Text>
+                  <AntDesign
+                    name={changeNovelSource ? 'up' : 'down'}
+                    size={14}
+                    color="rgba(255,255,255,0.4)"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Novel Source dropdown */}
+            {changeNovelSource && (
+              <View style={styles.dropdown}>
+                {Object.keys(NovelHostName).map((key, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      crashlytics().log('Novel Source Selected');
+                      analytics().logEvent('novel_source_selected', {
+                        source: key,
+                      });
+                      setNovelSections([]); // Clear old sections
+                      setNovelLoading(true); // Show loading when switching sources
+                      dispatch({type: 'data/switchNovelSource', payload: key});
+                      setChangeNovelSource(false);
+                    }}>
+                    {novelBaseUrl === key ? (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#667EEA"
+                      />
+                    ) : (
+                      <View style={styles.radioEmpty} />
+                    )}
+                    <View style={styles.dropdownItemInfo}>
+                      <Text style={styles.dropdownItemTitle}>{getSourceLabel(key)}</Text>
+                      <Text style={styles.dropdownItemSub}>
+                        {NovelHostName[key]}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
             {/* Novel Continue Reading */}
             {Object.values(NovelHistory).length > 0 && (
               <View style={styles.section}>

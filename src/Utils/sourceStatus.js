@@ -36,7 +36,13 @@ export const SOURCE_LABELS = {
   s3taku: 'S3 Taku',
   // Manga sources
   mangakatana: 'Manga Katana',
+  // Novel sources
+  novelfire: 'Novel Fire',
+  wtrlab: 'WTR-Lab',
 };
+
+// Novel sources list
+export const NOVEL_SOURCES = ['novelfire', 'wtrlab'];
 
 // Content type for sources
 export const SOURCE_CONTENT_TYPE = {
@@ -48,6 +54,8 @@ export const SOURCE_CONTENT_TYPE = {
   gogoanimes: 'anime',
   s3taku: 'anime',
   mangakatana: 'manga',
+  novelfire: 'novel',
+  wtrlab: 'novel',
 };
 
 /**
@@ -55,6 +63,16 @@ export const SOURCE_CONTENT_TYPE = {
  */
 export const getSourceLabel = sourceKey => {
   return SOURCE_LABELS[sourceKey] || sourceKey;
+};
+
+/**
+ * Get display label for a novel source key
+ */
+export const getNovelSourceLabel = sourceKey => {
+  if (NOVEL_SOURCES.includes(sourceKey)) {
+    return SOURCE_LABELS[sourceKey] || sourceKey;
+  }
+  return sourceKey;
 };
 
 /**

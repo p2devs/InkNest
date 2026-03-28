@@ -188,7 +188,7 @@ export function NovelDetails() {
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialNovel?.chapterPagination?.totalPages || 1);
 
   const bookmarks = useSelector(state => state.data.NovelBookMarks || {});
   const isBookmarked = !!bookmarks[novelLink];
@@ -217,7 +217,7 @@ export function NovelDetails() {
           pushNovelHistory({
             link: novelLink,
             title: details.title,
-            coverImage: details.coverImage,
+            coverImage: details.imgSrc || details.coverImage,
             author: details.author,
             lastReadAt: Date.now(),
           }),
@@ -231,7 +231,7 @@ export function NovelDetails() {
       }
     };
 
-    if (!initialNovel?.chapterList?.length) {
+    if (!initialNovel?.chapterList?.length || !initialNovel?.chapterPagination) {
       fetchDetails();
     }
   }, [novelLink, initialNovel, dispatch]);

@@ -35,6 +35,9 @@ export function NovelInfo({
     genres,
     summary,
   } = novel;
+  
+  // Debug log for cover image
+  console.log('[NovelInfo] coverImage:', coverImage ? coverImage.substring(0, 80) + '...' : null);
 
   // Check if summary is long enough to need truncation (more than ~150 chars or 3 lines)
   const shouldTruncate = summary && summary.length > 150;

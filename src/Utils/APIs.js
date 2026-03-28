@@ -11,3 +11,7 @@ export const AnimeHostName = {
 export const MangaHostName = {
   mangakatana: 'https://mangakatana.com/',
 };
+export const NovelHostName = {
+  novelfire: 'https://novelfire.net',
+  // wtrlab: 'https://wtr-lab.com',
+};

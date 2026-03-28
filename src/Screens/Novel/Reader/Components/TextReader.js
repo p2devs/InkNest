@@ -19,6 +19,11 @@ export function TextReader({
   theme = 'dark',
   onPress,
 }) {
+  const paragraphs = String(content || '')
+    .split(/\n\s*\n/)
+    .map(paragraph => paragraph.trim())
+    .filter(Boolean);
+
   const getThemeStyles = () => {
     switch (theme) {
       case 'light':
@@ -53,17 +58,26 @@ export function TextReader({
           {title}
         </Text>
       )}
-      <Text style={[
-        styles.content,
-        {
-          color: themeStyles.color,
-          fontSize,
-          lineHeight: fontSize * lineHeight,
-          fontFamily: getFontFamily(),
-        },
-      ]}>
-        {content}
-      </Text>
+      <View>
+        {(paragraphs.length > 0 ? paragraphs : [String(content || '')]).map(
+          (paragraph, index) => (
+            <Text
+              key={`${index}-${paragraph.slice(0, 24)}`}
+              style={[
+                styles.content,
+                {
+                  color: themeStyles.color,
+                  fontSize,
+                  lineHeight: fontSize * lineHeight,
+                  fontFamily: getFontFamily(),
+                },
+                index < paragraphs.length - 1 && styles.paragraphSpacing,
+              ]}>
+              {paragraph}
+            </Text>
+          ),
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -75,7 +89,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   content: {
-    textAlign: 'justify',
+    textAlign: 'left',
+  },
+  paragraphSpacing: {
+    marginBottom: 20,
   },
 });
 
