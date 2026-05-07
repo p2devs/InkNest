@@ -86,12 +86,8 @@ yarn-error.log
 **/OfflineComic/index.js
 **/ForceUpdate/Func.js
 
-#ignore app.json file
-app.json
-
 #ignore .env file
 .env
-
 
 ## InkNest Some Files
 **/InkNest-Externals/*
