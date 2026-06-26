@@ -4117,7 +4117,7 @@ __metadata:
     react-native-google-mobile-ads: ^14.5.0
     react-native-linear-gradient: ^2.8.3
     react-native-mmkv: 3.2.0
-    react-native-nitro-modules: ^0.33.5
+    react-native-nitro-modules: 0.30.2
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.12.5
     react-native-permissions: ^5.2.1
@@ -9907,13 +9907,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.33.5":
-  version: 0.33.5
-  resolution: "react-native-nitro-modules@npm:0.33.5"
+"react-native-nitro-modules@npm:0.30.2":
+  version: 0.30.2
+  resolution: "react-native-nitro-modules@npm:0.30.2"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 07435b309efacef43d3d7ec0320740f1c4c06124aaab715fe552e70b153d55565f445804e87cbf1ca893fae95c84016388661c4ee9d295b35f09c59f528add0d
+  checksum: da06b99c7f2def27c43da39a9eef2535b36bef48ef4cd45f49c0180fa735a0407a6f2feb6a30d39c4645a849230827e391ebc23e74236bde98a6f6176c6b291a
   languageName: node
   linkType: hard
 
