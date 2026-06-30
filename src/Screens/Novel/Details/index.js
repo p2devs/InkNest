@@ -1,0 +1,1 @@
+export {NovelDetails} from './NovelDetails';

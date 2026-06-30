@@ -91,8 +91,6 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3157479752055629~8049473571</string>
 	<key>GIDClientID</key>
 	<string>1021954829778-d4c6hcqa2iudbospgkhq4ng7dg1e5c1q.apps.googleusercontent.com</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

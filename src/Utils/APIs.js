@@ -1,0 +1,17 @@
+export const ComicHostName = {
+  readcomicsonline: 'https://readcomicsonline.ru/',
+  comichubfree: 'https://comichubfree.com/',
+  readallcomics: 'https://readallcomics.com/',
+  comicbookplus: 'https://comicbookplus.com/',
+};
+export const AnimeHostName = {
+  gogoanimes: 'https://ww12.gogoanimes.fi/',
+  s3taku: 'https://s3taku.com/',
+};
+export const MangaHostName = {
+  mangakatana: 'https://mangakatana.com/',
+};
+export const NovelHostName = {
+  novelfire: 'https://novelfire.net',
+  // wtrlab: 'https://wtr-lab.com',
+};

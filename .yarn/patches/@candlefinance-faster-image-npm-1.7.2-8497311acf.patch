@@ -1,0 +1,12 @@
+diff --git a/FasterImage.podspec b/FasterImage.podspec
+index db9d4f0f236b583a5039838511e3b621709cabe0..893d82f741197764a1b79ed9376b242db7941b57 100644
+--- a/FasterImage.podspec
++++ b/FasterImage.podspec
+@@ -39,7 +39,6 @@ Pod::Spec.new do |s|
+     }
+     s.dependency "React-RCTFabric"
+     s.dependency "React-Codegen"
+-    s.dependency "RCT-Folly"
+     s.dependency "RCTRequired"
+     s.dependency "RCTTypeSafety"
+     s.dependency "ReactCommon/turbomodule/core"
