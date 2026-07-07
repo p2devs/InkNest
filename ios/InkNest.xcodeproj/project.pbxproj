@@ -12,6 +12,7 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		7FF822973E73FEF3709DA936 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		F9BC903A2FFD53CE00349AA0 /* Empty.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9BC90392FFD53CE00349AA0 /* Empty.swift */; };
 		F9C58EED2FF42A6700C53E4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9C58EEC2FF42A6700C53E4C /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +28,7 @@
 		B7928DE05717ADFD9BFE75DA /* Pods_InkNest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InkNest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F970BC7C2F4B925500BBEB22 /* InkNest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = InkNest.entitlements; path = InkNest/InkNest.entitlements; sourceTree = "<group>"; };
+		F9BC90392FFD53CE00349AA0 /* Empty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Empty.swift; sourceTree = "<group>"; };
 		F9C58EEC2FF42A6700C53E4C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,6 +77,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				F9BC90392FFD53CE00349AA0 /* Empty.swift */,
 				13B07FAE1A68108700A75B9A /* InkNest */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -282,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				F9BC903A2FFD53CE00349AA0 /* Empty.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
