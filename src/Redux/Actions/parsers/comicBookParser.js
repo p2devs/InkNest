@@ -20,6 +20,40 @@ export const transformComicBookUrl = (url, hostKey) => {
 };
 
 /**
+ * Custom reading-page parser for readcomicsonline.ru (2026 redesign).
+ *
+ * Page images are <img src=".../uploads/manga/<slug>/chapters/<n>/<page>.webp">
+ * on the open cdn.readcomicsonline.ru (real `src`, not data-src). The first page
+ * is duplicated (once as #reader-img, once in the lazy list) so we dedupe while
+ * preserving order. Title comes from #reader-img alt ("... page N" suffix removed).
+ *
+ * @param {Object} $ - Cheerio instance
+ * @returns {Object} - Parsed comic book data
+ */
+export const parseReadComicsOnlineBook = ($) => {
+  const images = [];
+  const seen = new Set();
+
+  $('img[src*="/chapters/"]').each((_, el) => {
+    const src = $(el).attr('src')?.trim();
+    if (src && !seen.has(src)) {
+      seen.add(src);
+      images.push(src);
+    }
+  });
+
+  const rawTitle = $('#reader-img').attr('alt') || '';
+  const title = rawTitle.replace(/\s*page\s*\d+\s*$/i, '').trim();
+
+  return {
+    images,
+    title,
+    detailsLink: '',
+    detailPageTitle: '',
+  };
+};
+
+/**
  * Parses comic book images using standard configuration
  *
  * @param {Object} $ - Cheerio instance

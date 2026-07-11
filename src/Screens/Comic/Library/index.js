@@ -33,7 +33,11 @@ import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanne
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
 import {ComicHostName, NovelHostName} from '../../../Utils/APIs';
 import {NovelSectionList} from '../../Novel/Components/NovelList';
-import {getSourceLabel} from '../../../Utils/sourceStatus';
+import {
+  getSourceLabel,
+  getSourceStatus,
+  SOURCE_STATUS,
+} from '../../../Utils/sourceStatus';
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
@@ -55,6 +59,8 @@ export function Library({navigation}) {
   const NovelHistory = useSelector(state => state.data.NovelHistory || {});
   const novelBaseUrl = useSelector(state => state.data.novelBaseUrl || 'novelfire');
   const novelSources = useSelector(state => state.data.novelSources || {});
+  // Bumped after the user passes a Cloudflare verification — triggers a refetch.
+  const clearanceNonce = useSelector(state => state.data.clearanceNonce || 0);
   const comicBookmarkCount = useSelector(
     state =>
       Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
@@ -142,6 +148,19 @@ export function Library({navigation}) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forIosValue, forIosLoading, novelBaseUrl]);
+
+  // After a successful Cloudflare verification, refetch the comic home so the
+  // sections that failed with 403 populate without a manual refresh.
+  useEffect(() => {
+    if (
+      clearanceNonce > 0 &&
+      forIosLoading === false &&
+      getVersion() !== forIosValue
+    ) {
+      getComicsHome(type, setComicsData, setLoading, dispatch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearanceNonce]);
 
   const allSections = Object.entries(comicsData);
   const isSpecialBuild =
@@ -411,10 +430,50 @@ export function Library({navigation}) {
                 </View>
               ))}
 
+            {/* Empty / error state with retry */}
+            {!loading && !forIosLoading && allSections.length === 0 && (
+              <View style={styles.comicEmptyState}>
+                <MaterialIcons
+                  name={
+                    getSourceStatus(type)?.status ===
+                    SOURCE_STATUS.CLOUDFLARE_PROTECTED
+                      ? 'verified-user'
+                      : 'cloud-off'
+                  }
+                  size={44}
+                  color="rgba(255,255,255,0.25)"
+                />
+                <Text style={styles.comicEmptyTitle}>
+                  {getSourceStatus(type)?.status ===
+                  SOURCE_STATUS.CLOUDFLARE_PROTECTED
+                    ? `${getSourceLabel(type)} needs verification`
+                    : `Couldn't load ${getSourceLabel(type)}`}
+                </Text>
+                <Text style={styles.comicEmptySubtitle}>
+                  {getSourceStatus(type)?.status ===
+                  SOURCE_STATUS.CLOUDFLARE_PROTECTED
+                    ? 'This source is protected by Cloudflare. Tap Retry — you’ll be asked to complete a quick one-time check.'
+                    : 'Something went wrong. Check your connection and try again.'}
+                </Text>
+                <TouchableOpacity
+                  style={styles.comicRetryButton}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    getComicsHome(type, setComicsData, setLoading, dispatch)
+                  }>
+                  <MaterialIcons name="refresh" size={18} color="#fff" />
+                  <Text style={styles.comicRetryText}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* Loading */}
             {loading && (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#667EEA" />
+                <Text style={styles.loadingText}>
+                  Loading {getSourceLabel(type)}…
+                </Text>
               </View>
             )}
           </>
@@ -988,6 +1047,48 @@ const styles = StyleSheet.create({
   loadingContainer: {
     paddingVertical: 40,
     alignItems: 'center',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginTop: 10,
+  },
+
+  // Comic empty / error state
+  comicEmptyState: {
+    marginHorizontal: 20,
+    marginTop: 48,
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  comicEmptyTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 14,
+    textAlign: 'center',
+  },
+  comicEmptySubtitle: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  comicRetryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#667EEA',
+    paddingVertical: 11,
+    paddingHorizontal: 26,
+    borderRadius: 12,
+  },
+  comicRetryText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   bottomSpacer: {

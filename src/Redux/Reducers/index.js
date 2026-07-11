@@ -66,6 +66,9 @@ const initialState = {
   notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
   // Source status notifications
   sourceStatusNotifications: [], // [{id, sourceKey, sourceName, status, statusCode, timestamp, read}]
+  // Cloudflare clearance prompt: set when a protected source returns 403 and needs a WebView verify
+  cloudflareVerify: null, // {host, sourceKey, sourceName, ts} | null
+  clearanceNonce: 0, // bumped after a successful verification so screens can refetch
 };
 
 /**
@@ -776,6 +779,25 @@ const Reducers = createSlice({
         n => n.id !== notificationId
       );
     },
+    // Cloudflare clearance prompt reducers
+    requestCloudflareVerify: (state, action) => {
+      const {host, sourceKey, sourceName} = action.payload || {};
+      if (!host) {
+        return;
+      }
+      // Don't stack prompts — keep the first one until resolved/dismissed.
+      if (state.cloudflareVerify) {
+        return;
+      }
+      state.cloudflareVerify = {host, sourceKey, sourceName, ts: Date.now()};
+    },
+    dismissCloudflareVerify: state => {
+      state.cloudflareVerify = null;
+    },
+    cloudflareVerified: state => {
+      state.cloudflareVerify = null;
+      state.clearanceNonce = (state.clearanceNonce || 0) + 1;
+    },
   },
 });
 
@@ -847,5 +869,9 @@ export const {
   markSourceStatusNotificationRead,
   clearSourceStatusNotifications,
   removeSourceStatusNotification,
+  // Cloudflare clearance prompt actions
+  requestCloudflareVerify,
+  dismissCloudflareVerify,
+  cloudflareVerified,
 } = Reducers.actions;
 export default Reducers.reducer;

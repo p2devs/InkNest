@@ -20,6 +20,58 @@ export const buildComicsRequestParams = (hostName, page, type = null) => {
   return params;
 };
 
+/**
+ * Custom home parser for readcomicsonline.ru.
+ *
+ * The site was redesigned to a modern Tailwind layout (2026), so the old
+ * Bootstrap/jQuery selectors no longer match. New structure:
+ *   - hot-comic-updates: each card is an <a class="hot-item"> (link on itself),
+ *     cover <img src>, title in <img alt>.
+ *   - latest-release: <div class="release-card"> with an inner <a href*="/comic/">
+ *     and cover <img src>/<img alt>.
+ *   - most-viewed: a ranked <ul> list of <li><a><span>title</span> (no cover).
+ * Covers are served from cdn.readcomicsonline.ru (not Cloudflare-challenged).
+ */
+export const parseReadComicsOnlineHome = ($, {type} = {}) => {
+  const comicsData = [];
+  const push = (title, link, image) => {
+    if (title && link) {
+      comicsData.push({
+        title: title.trim(),
+        link,
+        image: image || null,
+        genres: null,
+        status: null,
+        publishDate: null,
+      });
+    }
+  };
+
+  if (type === 'hot-comic-updates') {
+    $('a.hot-item').each((_, el) => {
+      const $el = $(el);
+      const img = $el.find('img').first();
+      push(img.attr('alt'), $el.attr('href'), img.attr('src'));
+    });
+  } else if (type === 'most-viewed') {
+    $('ul.divide-y li a[href*="/comic/"]').each((_, el) => {
+      const $el = $(el);
+      push($el.find('span').first().text(), $el.attr('href'), null);
+    });
+  } else {
+    // latest-release (default)
+    $('.release-card').each((_, el) => {
+      const $el = $(el);
+      const img = $el.find('img').first();
+      const link = $el.find('a[href*="/comic/"]').first().attr('href');
+      const title = img.attr('alt') || $el.find('.line-clamp-2').first().text();
+      push(title, link, img.attr('src'));
+    });
+  }
+
+  return comicsData;
+};
+
 export const parseHomePageCards = ($, tagConfig, {hostName, type} = {}) => {
   const comicsData = [];
 

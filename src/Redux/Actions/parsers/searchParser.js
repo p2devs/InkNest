@@ -64,6 +64,36 @@ export const parseReadComicsOnlineResults = (responseData, baseUrl) => {
 };
 
 /**
+ * Parses readcomicsonline advanced-search results (2026 Tailwind redesign).
+ *
+ * The full search is a Laravel POST form (/advanced-search, field `name`) that
+ * server-renders result cards: <a class="group" href="/comic/…"><img alt src>
+ * <p>title</p></a>. Covers are on the open cdn.readcomicsonline.ru.
+ *
+ * @param {Object} $ - Cheerio instance of the POST response
+ * @returns {Array} - Formatted search results
+ */
+export const parseAdvancedSearchResults = $ => {
+  const results = [];
+  $('a.group[href*="/comic/"]').each((_, a) => {
+    const $a = $(a);
+    const img = $a.find('img').first();
+    const link = $a.attr('href');
+    const title = (img.attr('alt') || $a.find('p').first().text() || '').trim();
+    if (!title || !link) {
+      return;
+    }
+    results.push({
+      title,
+      link,
+      data: link.split('/').filter(Boolean).pop(),
+      image: img.attr('src') || null,
+    });
+  });
+  return results;
+};
+
+/**
  * Parses ComicHubFree search results
  *
  * @param {Object} responseData - API response data

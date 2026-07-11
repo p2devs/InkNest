@@ -5,6 +5,99 @@
 import {normalizeImageUrl} from '../utils/dataHelpers';
 
 /**
+ * Custom detail parser for readcomicsonline.ru (2026 redesign — Tailwind layout).
+ *
+ * Returns the full comic-details object INCLUDING chapters (called via the
+ * config.customParser hook, so it must be self-contained and synchronous).
+ * New structure:
+ *   - title: <h1>, cover: <meta og:image>, summary: .leading-relaxed
+ *   - metadata: <dl class="space-y-2"> rows of <span.text-slate-500>Label:</span> value
+ *   - views: .rc-chip containing 👁
+ *   - chapters: <a> rows inside <div class="divide-y">, title in span.font-medium,
+ *     date in span.text-xs (the <a> itself is the row/link).
+ */
+export const parseReadComicsOnlineDetails = ($, config, link) => {
+  const title = $('h1').first().text().trim();
+  const imgSrc = $('meta[property="og:image"]').attr('content') || '';
+  const summary = $('.leading-relaxed').first().text().trim();
+
+  const genres = [];
+  const meta = {};
+  $('dl.space-y-2 > div').each((_, div) => {
+    const $d = $(div);
+    const label = $d
+      .find('span.text-slate-500')
+      .first()
+      .text()
+      .trim()
+      .replace(/:$/, '')
+      .toLowerCase();
+    if (!label) {
+      return;
+    }
+    const links = $d.find('a');
+    const value = links.length
+      ? links.map((i, a) => $(a).text().trim()).get()
+      : $d.text().replace($d.find('span').first().text(), '').trim();
+    if (label.includes('genre')) {
+      genres.push(...[].concat(value));
+    } else {
+      meta[label] = value;
+    }
+  });
+
+  let views = null;
+  $('.rc-chip').each((_, c) => {
+    const t = $(c).text().trim();
+    if (/\d/.test(t) && /👁|view/i.test(t)) {
+      views = t.replace(/[^0-9]/g, '');
+    }
+  });
+
+  const chapters = [];
+  $('div.divide-y a').each((_, a) => {
+    const $a = $(a);
+    const chapterTitle = $a.find('span.font-medium').first().text().trim();
+    const chapterLink = $a.attr('href');
+    if (chapterTitle && chapterLink) {
+      chapters.push({
+        title: chapterTitle,
+        link: chapterLink,
+        date: $a.find('span.text-xs').first().text().trim(),
+      });
+    }
+  });
+
+  const pick = (...keys) => {
+    for (const k of keys) {
+      if (meta[k]) {
+        return Array.isArray(meta[k]) ? meta[k].join(', ') : meta[k];
+      }
+    }
+    return null;
+  };
+
+  return {
+    title,
+    imgSrc,
+    type: pick('type'),
+    status: pick('status'),
+    releaseDate: pick('release', 'released', 'date of release', 'year'),
+    categories: pick('category', 'categories'),
+    tags: [],
+    genres,
+    author: pick('author', 'artist', 'writer'),
+    alternativeName: pick('alternative', 'alternative name', 'alternate name'),
+    views,
+    rating: pick('rating'),
+    summary,
+    link,
+    chapters,
+    pagination: [],
+  };
+};
+
+/**
  * Parses comic details using standard configuration
  *
  * @param {Object} $ - Cheerio instance

@@ -1,5 +1,9 @@
 import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
-import {parseReadAllComicsBook} from '../../../Redux/Actions/parsers/comicBookParser';
+import {
+  parseReadAllComicsBook,
+  parseReadComicsOnlineBook,
+} from '../../../Redux/Actions/parsers/comicBookParser';
+import {parseReadComicsOnlineDetails} from '../../../Redux/Actions/parsers/comicDetailParser';
 
 export const HomePageCardClasses = {
   azcomic: {
@@ -122,17 +126,8 @@ export const HomePageCardClasses = {
 
 export const ComicDetailPageClasses = {
   readcomicsonline: {
-    detailsContainer: '.list-container',
-    title: '.listmanga-header',
-    imgSrc: '.boxed img.img-responsive',
-    getImageAttr: 'src',
-    summary: 'div.manga.well p',
-    chaptersList: 'ul.chapters li',
-    chapterTitle: 'h5.chapter-title-rtl a',
-    chapterLink: 'h5.chapter-title-rtl a',
-    chapterDate: 'div.date-chapter-title-rtl',
-    detailsDL: 'dl.dl-horizontal dt',
-    pagination: 'ul.pagination li a',
+    // Site redesigned (2026) — handled by a dedicated parser.
+    customParser: parseReadComicsOnlineDetails,
   },
   comichubfree: {
     detailsContainer: '.movie-info',
@@ -182,11 +177,8 @@ export const ComicDetailPageClasses = {
 
 export const ComicBookPageClasses = {
   readcomicsonline: {
-    imageContainer: '.imagecnt',
-    imageSelector: 'img.img-responsive[data-src]',
-    imageAttr: 'data-src',
-    titleSelector: 'img.img-responsive',
-    titleAttr: 'alt',
+    // Site redesigned (2026) — handled by a dedicated parser.
+    customParser: parseReadComicsOnlineBook,
   },
   comichubfree: {
     imageContainer: '.chapter-container.chapter-all',

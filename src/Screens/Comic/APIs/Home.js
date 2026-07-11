@@ -6,6 +6,7 @@ import {
   buildComicsRequestParams,
   extractLastPage,
   parseHomePageCards,
+  parseReadComicsOnlineHome,
 } from './homeParser';
 import {checkDownTime} from '../../../Redux/Actions/GlobalActions';
 import {
@@ -32,13 +33,21 @@ export const getComics = async (hostName, page, type = null, dispatch = null) =>
     let comicsData = [];
     let lastPage = null;
 
-    const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
+    if (hostKey === 'readcomicsonline') {
+      // Site redesigned (2026) — uses a dedicated parser instead of the config.
+      comicsData = parseReadComicsOnlineHome($, {type});
+    } else {
+      const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
 
-    if (tagConfig) {
-      comicsData = parseHomePageCards($, tagConfig, {hostName, type});
+      if (tagConfig) {
+        comicsData = parseHomePageCards($, tagConfig, {hostName, type});
 
-      if ((tagConfig.lastPageClass || tagConfig.paginationLinkClass) && page === 1) {
-        lastPage = extractLastPage($, tagConfig);
+        if (
+          (tagConfig.lastPageClass || tagConfig.paginationLinkClass) &&
+          page === 1
+        ) {
+          lastPage = extractLastPage($, tagConfig);
+        }
       }
     }
 
@@ -164,15 +173,6 @@ export const getComicsHome = async (
         data: hot_comic_updates?.comicsData,
         hostName: ComicHostName[type],
         lastPage: hot_comic_updates?.lastPage,
-      };
-    }
-
-    if (most_viewed) {
-      ComicHomeList['most-viewed'] = {
-        title: 'Most Viewed',
-        data: most_viewed?.comicsData,
-        hostName: ComicHostName[type],
-        lastPage: most_viewed?.lastPage,
       };
     }
 

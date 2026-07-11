@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import {FasterImageView} from '@candlefinance/faster-image';
 
+import {getClearanceHeaders} from '../../Utils/cloudflareClearance';
+
 const Image = ({
   source,
   style,
@@ -16,6 +18,10 @@ const Image = ({
   onSuccess = null,
   ...rest
 }) => {
+  const cleanUrl = (source.uri || '').replace(/[\r\n]/g, '').trim();
+  // Attach Cloudflare clearance (User-Agent [+ cf_clearance] on protected hosts)
+  // so challenged image URLs (e.g. readcomicsonline main domain) load.
+  const clearanceHeaders = getClearanceHeaders(cleanUrl);
   return (
     <View style={[style]}>
       <FasterImageView
@@ -27,11 +33,12 @@ const Image = ({
           resizeMode: resizeMode ?? 'fill',
           cachePolicy: 'discWithCacheControl',
           showActivityIndicator: true,
-          url: (source.uri || '').replace(/[\r\n]/g, '').trim(),
+          url: cleanUrl,
           progressiveLoadingEnabled: true,
           allowHardware: true,
           headers: {
-            Referer: (source.uri || '').replace(/[\r\n]/g, '').trim(),
+            Referer: cleanUrl,
+            ...(clearanceHeaders || {}),
           },
         }}
         onSuccess={event => {

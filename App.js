@@ -23,6 +23,8 @@ import {
   listenToAuthChanges,
 } from './src/InkNest-Externals/Community/Logic/CommunityActions';
 import NotificationSubscriptionBootstrapper from './src/InkNest-Externals/Notifications/components/NotificationSubscriptionBootstrapper';
+import CloudflareVerifyGate from './src/Components/UIComp/CloudflareVerifyGate';
+import CloudflareProxy from './src/Components/CloudflareProxy';
 import V146Walkthrough from './src/Components/Walkthrough/V146Walkthrough';
 import { markV146WalkthroughSeen } from './src/Redux/Reducers';
 
@@ -105,6 +107,8 @@ function AppContent() {
           <BannerProvider>
             <NotificationSubscriptionBootstrapper />
             <RootNavigation />
+            <CloudflareProxy />
+            <CloudflareVerifyGate />
             <Toast />
             <ForceUpdate />
             <WalkthroughHandler />

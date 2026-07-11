@@ -13,7 +13,15 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: storage,
-  blacklist: ['error', 'status', 'loading', 'downTime', 'Search'],
+  blacklist: [
+    'error',
+    'status',
+    'loading',
+    'downTime',
+    'Search',
+    'cloudflareVerify',
+    'clearanceNonce',
+  ],
   // Important: Don't write until rehydration is complete
   writeDelayed: true,
 };

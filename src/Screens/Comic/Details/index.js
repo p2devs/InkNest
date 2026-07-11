@@ -220,7 +220,8 @@ export function ComicDetails({route, navigation}) {
   const listData = useMemo(() => {
     if (forIosLoading) return [];
     if (isRecentTab) return filteredRecentChapters;
-  }, [filteredRecentChapters, forIosLoading, isRecentTab]);
+    return filteredChapters;
+  }, [filteredChapters, filteredRecentChapters, forIosLoading, isRecentTab]);
 
   const comicMeta = useMemo(() => {
     const resolvedGenres = Array.isArray(ComicDetail?.genres)

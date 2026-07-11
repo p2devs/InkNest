@@ -2639,6 +2639,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@preeternal/react-native-cookie-manager@npm:^6.3.3":
+  version: 6.3.3
+  resolution: "@preeternal/react-native-cookie-manager@npm:6.3.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/080e405b7d7bf93d47370d134e4c2da65fe57e9cd967ab2f4d9ebd62d2dd218ddd837caf73b426b10d29d5e6c0bae81b35690806bd0e6fce60d13c6d7385c978
+  languageName: node
+  linkType: hard
+
 "@protobufjs/aspromise@npm:^1.1.1, @protobufjs/aspromise@npm:^1.1.2":
   version: 1.1.2
   resolution: "@protobufjs/aspromise@npm:1.1.2"
@@ -3846,6 +3856,7 @@ __metadata:
     "@candlefinance/faster-image": "patch:@candlefinance/faster-image@npm%3A1.7.2#~/.yarn/patches/@candlefinance-faster-image-npm-1.7.2-8497311acf.patch"
     "@dr.pogodin/react-native-fs": "npm:2.39.1"
     "@invertase/react-native-apple-authentication": "npm:2.5.1"
+    "@preeternal/react-native-cookie-manager": "npm:^6.3.3"
     "@react-native-community/cli": "npm:20.1.0"
     "@react-native-community/cli-platform-android": "npm:20.1.0"
     "@react-native-community/cli-platform-ios": "npm:20.1.0"
@@ -3890,13 +3901,13 @@ __metadata:
     react-native-nitro-modules: "npm:0.36.1"
     react-native-orientation-locker: "npm:1.7.0"
     react-native-paper: "npm:5.15.3"
-    react-native-permissions: "npm:5.2.1"
+    react-native-permissions: "npm:^5.6.0"
     react-native-reanimated: "npm:4.5.0"
     react-native-redash: "npm:18.1.3"
     react-native-responsive-screen: "npm:1.4.2"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.25.2"
-    react-native-sensors: "npm:^7.3.6"
+    react-native-sensors: "patch:react-native-sensors@npm%3A7.3.6#~/.yarn/patches/react-native-sensors-npm-7.3.6-ed34263610.patch"
     react-native-svg: "npm:^15.8.0"
     react-native-toast-message: "npm:^2.2.1"
     react-native-unarchive: "npm:^1.1.0"
@@ -9169,17 +9180,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-permissions@npm:5.2.1":
-  version: 5.2.1
-  resolution: "react-native-permissions@npm:5.2.1"
+"react-native-permissions@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "react-native-permissions@npm:5.6.0"
   peerDependencies:
-    react: ">=18.1.0"
-    react-native: ">=0.70.0"
-    react-native-windows: ">=0.70.0"
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
   peerDependenciesMeta:
     react-native-windows:
       optional: true
-  checksum: 10c0/36e2ce5c349a359b0dc18b2ec435f5af66ba4fc43bf905be5582d14e4c9544064e56cbe4a6a5781672cfa7879ac44e93c9250388fd0e2b0b069419572e11bbbb
+  checksum: 10c0/9f72a2ccec761dfe1c3064a2694f5c03bd51f216d9c2bcd358aa152b7219f93561bd48271f9323e204e670f1bb7fa3e260d0715167358a0ed7360a5f278e0dce
   languageName: node
   linkType: hard
 
@@ -9245,7 +9256,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-sensors@npm:^7.3.6":
+"react-native-sensors@npm:7.3.6":
   version: 7.3.6
   resolution: "react-native-sensors@npm:7.3.6"
   dependencies:
@@ -9254,6 +9265,18 @@ __metadata:
     prop-types: ^15.6.0
     react-native: ">=0.39.0"
   checksum: 10c0/efa08b7f27b97b4d334afba51b564dac9ded6f7b684bb774a17f5c02a8f22cc7b72afa8338cb66fef2bf85f0fd96cfe89cd7d5a1ad280cef9e86f32d3c483b52
+  languageName: node
+  linkType: hard
+
+"react-native-sensors@patch:react-native-sensors@npm%3A7.3.6#~/.yarn/patches/react-native-sensors-npm-7.3.6-ed34263610.patch":
+  version: 7.3.6
+  resolution: "react-native-sensors@patch:react-native-sensors@npm%3A7.3.6#~/.yarn/patches/react-native-sensors-npm-7.3.6-ed34263610.patch::version=7.3.6&hash=38f373"
+  dependencies:
+    rxjs: "npm:>= 6"
+  peerDependencies:
+    prop-types: ^15.6.0
+    react-native: ">=0.39.0"
+  checksum: 10c0/e3a8186fd72aaa32586d77fbd25b41971467c634306022f5c81f28c89bf6edbc3b5db633653f8611d8cc5bd6a005cd2f1a71813bf25ebf6490b58d033b114ea2
   languageName: node
   linkType: hard
 

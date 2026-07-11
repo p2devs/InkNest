@@ -1208,6 +1208,28 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.37)
   - BVLinearGradient (2.8.3):
     - React-Core
+  - CookieManager (6.3.3):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - FasterImage (1.7.2):
     - FasterImage/Nuke (= 1.7.2)
     - FasterImage/NukeUI (= 1.7.2)
@@ -4192,6 +4214,7 @@ PODS:
 
 DEPENDENCIES:
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
+  - "CookieManager (from `../node_modules/@preeternal/react-native-cookie-manager`)"
   - "FasterImage (from `../node_modules/@candlefinance/faster-image`)"
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
@@ -4345,6 +4368,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
+  CookieManager:
+    :path: "../node_modules/@preeternal/react-native-cookie-manager"
   FasterImage:
     :path: "../node_modules/@candlefinance/faster-image"
   FBLazyVector:
@@ -4561,6 +4586,7 @@ SPEC CHECKSUMS:
   AppCheckCore: 214137f5c378d1dec88a68425c467fe65aaff637
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
+  CookieManager: fc60f717861014546393a9b554f04374101a890e
   FasterImage: a42cb019ff9e5ed36ac296e538974d81f34a9c16
   FBLazyVector: 92658a0d136dd31434e95537a396bb3574f84d16
   Firebase: 99f203d3a114c6ba591f3b32263a9626e450af65
@@ -4705,4 +4731,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: e3ae4f74e42736cda45339f3f64a157472e1d552
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

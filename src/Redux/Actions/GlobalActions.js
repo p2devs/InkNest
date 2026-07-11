@@ -49,6 +49,7 @@ import {
 import {
   buildSearchUrl,
   parseSearchResults,
+  parseAdvancedSearchResults,
 } from './parsers/searchParser';
 import {
   getAdvancedSearchConfig,
@@ -300,22 +301,50 @@ export const getAdvancedSearchFilters = (source = 'readcomicsonline') => async d
  * @param {string} [source='readcomicsonline'] - The source to search on.
  * @returns {Promise<Array|null>} Array of search results, or null on error.
  */
+/**
+ * Full search for readcomicsonline via its advanced-search (2026 redesign).
+ * The lightweight /search?query= endpoint is a hard-capped 8-item autocomplete;
+ * the real catalog search is a Laravel POST form. We GET the page for the CSRF
+ * `_token`, POST the `name` query, and parse the server-rendered result cards.
+ */
+const searchReadComicsOnlineAdvanced = async queryValue => {
+  const ADV_URL = 'https://readcomicsonline.ru/advanced-search';
+  const getRes = await APICaller.get(ADV_URL);
+  const token =
+    (String(getRes.data).match(/name="_token"\s+value="([^"]+)"/) || [])[1] ||
+    '';
+  const form = `_token=${encodeURIComponent(token)}&name=${encodeURIComponent(
+    queryValue,
+  )}`;
+  const postRes = await APICaller.post(ADV_URL, form, {
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+  });
+  return parseAdvancedSearchResults(cheerio.load(postRes.data));
+};
+
 export const searchComic =
   (queryValue, source = 'readcomicsonline') =>
   async dispatch => {
     dispatch(fetchDataStart());
 
     try {
-      const url = buildSearchUrl(source, queryValue);
-      const response = await APICaller.get(url);
-
       // Parse results based on source type
+      let url;
       let formatted;
-      if (source === 'readallcomics') {
-        const $ = cheerio.load(response.data);
-        formatted = parseSearchResults(source, $);
+      if (source === 'readcomicsonline') {
+        url = `https://readcomicsonline.ru/advanced-search?name=${encodeURIComponent(
+          queryValue,
+        )}`;
+        formatted = await searchReadComicsOnlineAdvanced(queryValue);
       } else {
-        formatted = parseSearchResults(source, response.data);
+        url = buildSearchUrl(source, queryValue);
+        const response = await APICaller.get(url);
+        if (source === 'readallcomics') {
+          const $ = cheerio.load(response.data);
+          formatted = parseSearchResults(source, $);
+        } else {
+          formatted = parseSearchResults(source, response.data);
+        }
       }
 
       dispatch(fetchDataSuccess({url, data: formatted}));

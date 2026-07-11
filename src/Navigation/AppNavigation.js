@@ -25,6 +25,7 @@ import {
 import WebViewScreen from '../InkNest-Externals/Screens/Webview/WebViewScreen';
 import WebSearchScreen from '../InkNest-Externals/Screens/Webview/WebSearchScreen';
 import NotificationsScreen from '../Screens/Notifications/NotificationsScreen';
+import CloudflareVerify from '../Screens/CloudflareVerify';
 import {
   NovelHome,
   NovelDetails,
@@ -86,6 +87,11 @@ export function AppNavigation() {
       <Stack.Screen
         name={NAVIGATION.notifications}
         component={NotificationsScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.cloudflareVerify}
+        component={CloudflareVerify}
+        options={{gestureEnabled: false, presentation: 'modal'}}
       />
       {/* Novel Screens */}
       <Stack.Screen name={NAVIGATION.novelHome} component={NovelHome} />
