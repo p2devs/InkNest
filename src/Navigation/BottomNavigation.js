@@ -123,27 +123,6 @@ export function BottomNavigation() {
           />
         )}
 
-        <BottomTab.Screen
-          name={NAVIGATION.communityBoard}
-          component={CommunityBoardScreen}
-          options={{
-            tabBarLabel: 'Community',
-            tabBarIcon: ({focused, color}) => (
-              <TabBarIcon
-                focused={focused}
-                tintColor={color}
-                name="community"
-              />
-            ),
-            tabBarBadge: hasUnreadNotifications ? 1 : undefined,
-            tabBarBadgeStyle: {
-              maxWidth: heightPercentageToDP('.86%'),
-              maxHeight: heightPercentageToDP('0.9%'),
-              fontSize: 1,
-            },
-          }}
-        />
-
         {getVersion() !== forIosValue && (
           <BottomTab.Screen
             name={NAVIGATION.settings}

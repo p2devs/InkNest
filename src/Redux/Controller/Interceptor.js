@@ -5,7 +5,9 @@ import {isCloudflareProtectedUrl} from '../../Utils/cloudflareClearance';
 import {isProxyReady, webviewRequest} from '../../Utils/webviewProxy';
 
 // Create an Axios instance
-const APICaller = axios.create();
+// Without a timeout a hung request keeps the global loading flag on forever,
+// leaving the details screens stuck on their loading overlay.
+const APICaller = axios.create({timeout: 30000});
 
 const CHALLENGE_RE = /just a moment|challenge-platform|_cf_chl_opt|attention required/i;
 const nativeAdapter = axios.getAdapter(axios.defaults.adapter);

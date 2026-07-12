@@ -105,7 +105,7 @@ export function AboutUs({navigation}) {
                 style={{flexDirection: 'row', gap: 12}}
                 onPress={() => {
                   //open email app with pre-filled email
-                  Linking.openURL('mailto:inknest@2hub.live');
+                  Linking.openURL('mailto:inknest@capacity.rocks');
                 }}>
                 <Entypo name="email" size={20} color="#007AFF" />
               </TouchableOpacity>

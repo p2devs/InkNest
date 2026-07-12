@@ -1,5 +1,5 @@
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {documentId} from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import appleAuth from '@invertase/react-native-apple-authentication';
@@ -672,7 +672,7 @@ const fetchParticipantPreviewProfiles = async participantIds => {
   try {
     const snapshot = await firestore()
       .collection('users')
-      .where(firestore.FieldPath.documentId(), 'in', limitedIds)
+      .where(documentId(), 'in', limitedIds)
       .get();
 
     const profileMap = new Map();

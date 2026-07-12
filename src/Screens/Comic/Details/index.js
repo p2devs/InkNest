@@ -288,8 +288,6 @@ export function ComicDetails({route, navigation}) {
     }
   }, []);
 
-  console.log(PageLink, PageLink.includes('comicbookplus'));
-
   useEffect(() => {
     if (readingHistory?.readComics) {
       setTabBar(prev => [
