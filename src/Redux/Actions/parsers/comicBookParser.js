@@ -3,9 +3,7 @@
  */
 
 // Host-specific URL transformations
-const URL_TRANSFORMATIONS = {
-  comichubfree: (url) => `${url}/all`,
-};
+const URL_TRANSFORMATIONS = {};
 
 /**
  * Applies host-specific URL transformations

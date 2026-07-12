@@ -27,7 +27,6 @@ export const ERROR_CODES = {
 export const SOURCE_LABELS = {
   // Comic sources
   readcomicsonline: 'Read Comics Online',
-  comichubfree: 'Comic Hub Free',
   readallcomics: 'Read All Comics',
   comicbookplus: 'Comic Book Plus',
   azcomic: 'AZ Comic',
@@ -47,7 +46,6 @@ export const NOVEL_SOURCES = ['novelfire', 'wtrlab'];
 // Content type for sources
 export const SOURCE_CONTENT_TYPE = {
   readcomicsonline: 'comic',
-  comichubfree: 'comic',
   readallcomics: 'comic',
   comicbookplus: 'comic',
   azcomic: 'comic',

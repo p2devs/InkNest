@@ -109,12 +109,6 @@ const getHomeRequests = (type, dispatch) => ({
     ),
     most_viewed: getComics(ComicHostName.readcomicsonline, 1, 'most-viewed', dispatch),
   },
-  comichubfree: {
-    hot_comic_updates: getComics(ComicHostName.comichubfree, 1, 'hot-comic', dispatch),
-    latest_release: getComics(ComicHostName.comichubfree, 1, 'new-comic', dispatch),
-    most_viewed: getComics(ComicHostName.comichubfree, 1, 'popular-comic', dispatch),
-    all_comic: getComics(ComicHostName.comichubfree, 1, null, dispatch),
-  },
   readallcomics: {
     all_comic: getComics(ComicHostName.readallcomics, 1, null, dispatch),
   },
@@ -129,7 +123,7 @@ const getHomeRequests = (type, dispatch) => ({
 });
 
 export const getComicsHome = async (
-  type = 'comichubfree',
+  type = 'readcomicsonline',
   setComics,
   setLoading,
   dispatch = null,
@@ -160,7 +154,7 @@ export const getComicsHome = async (
 
     if (latest_release) {
       ComicHomeList['latest-release'] = {
-        title: type === 'comichubfree' ? 'New Comic' : 'Latest Release',
+        title: 'Latest Release',
         data: latest_release?.comicsData,
         hostName: ComicHostName[type],
         lastPage: latest_release?.lastPage,

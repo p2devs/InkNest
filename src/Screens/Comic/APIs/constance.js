@@ -74,42 +74,6 @@ export const HomePageCardClasses = {
       paginationLinkClass: 'a[href*="paged="]',
     },
   },
-  comichubfree: {
-    'all-comic': {
-      cardClass: '.episode-details.box-content',
-      cardTitleClass: '.box-info h3.series-title',
-      cardLinkClass: '.box-info h3.series-title a',
-      imageClass: '.box-image a img',
-      genresClass: '.box-info a.genre',
-      chapterInfo: '.box-info a.chapter-title',
-      imageAttr: 'data-src',
-    },
-    'hot-comic': {
-      cardClass: '.cartoon-box',
-      cardTitleClass: '.mb-right h3 a',
-      cardLinkClass: '.mb-right h3 a',
-      imageClass: '.lazyload',
-      chapterInfo: '.mb-right .detail a',
-      statusClass: '.mb-right .detail',
-      imageAttr: 'data-src',
-    },
-    'new-comic': {
-      cardClass: '.cartoon-box',
-      cardTitleClass: '.mb-right h3 a',
-      cardLinkClass: '.mb-right h3 a',
-      imageClass: '.lazyload',
-      statusClass: '.mb-right .detail',
-      imageAttr: 'data-src',
-    },
-    'popular-comic': {
-      cardClass: '.cartoon-box',
-      cardTitleClass: '.mb-right h3 a',
-      cardLinkClass: '.mb-right h3 a',
-      imageClass: '.lazyload',
-      statusClass: '.mb-right .detail',
-      imageAttr: 'data-src',
-    },
-  },
   comicbookplus: {
     'latest-uploads': {
       cardClass: '.cbpLtableleft, .cbpLtable, .cbpLtableright',
@@ -128,19 +92,6 @@ export const ComicDetailPageClasses = {
   readcomicsonline: {
     // Site redesigned (2026) — handled by a dedicated parser.
     customParser: parseReadComicsOnlineDetails,
-  },
-  comichubfree: {
-    detailsContainer: '.movie-info',
-    title: '.movie-dl dt:contains("Alternate name:") + dd',
-    imgSrc: '.movie-image img',
-    getImageAttr: 'data-src',
-    summary: '#film-content',
-    chaptersList: '#list tr',
-    chapterTitle: 'td:first-child a',
-    chapterLink: 'td:first-child a',
-    chapterDate: 'td:last-child',
-    detailsDL: '.movie-dl dt',
-    pagination: '.pagination li a',
   },
   readallcomics: {
     container: '.description-archive',
@@ -179,13 +130,6 @@ export const ComicBookPageClasses = {
   readcomicsonline: {
     // Site redesigned (2026) — handled by a dedicated parser.
     customParser: parseReadComicsOnlineBook,
-  },
-  comichubfree: {
-    imageContainer: '.chapter-container.chapter-all',
-    imageSelector: 'img.chapter_img[data-src]',
-    imageAttr: 'data-src',
-    titleSelector: 'img.chapter_img',
-    titleAttr: 'alt',
   },
   readallcomics: {
     imageContainer: 'div[style*="margin:0px auto"]',

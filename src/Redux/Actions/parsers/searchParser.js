@@ -10,12 +10,6 @@ export const SEARCH_SOURCES = {
     searchPath: '/search',
     queryParam: 'query',
   },
-  comichubfree: {
-    id: 'comichubfree',
-    baseUrl: 'https://comichubfree.com',
-    searchPath: '/ajax/search',
-    queryParam: 'key',
-  },
   readallcomics: {
     id: 'readallcomics',
     baseUrl: 'https://readallcomics.com',
@@ -94,22 +88,6 @@ export const parseAdvancedSearchResults = $ => {
 };
 
 /**
- * Parses ComicHubFree search results
- *
- * @param {Object} responseData - API response data
- * @param {string} baseUrl - Base URL for the source
- * @returns {Array} - Formatted search results
- */
-export const parseComicHubFreeResults = (responseData, baseUrl) => {
-  const json = responseData || [];
-  return json.map(item => ({
-    title: item.title,
-    data: item.slug,
-    link: `${baseUrl}/comic/${item.slug}`,
-  }));
-};
-
-/**
  * Parses ReadAllComics search results from HTML
  *
  * @param {Object} $ - Cheerio instance
@@ -185,8 +163,6 @@ export const parseSearchResults = (sourceId, data) => {
   switch (sourceId) {
     case 'readcomicsonline':
       return parseReadComicsOnlineResults(data, baseUrl);
-    case 'comichubfree':
-      return parseComicHubFreeResults(data, baseUrl);
     case 'readallcomics':
       return parseReadAllComicsResults(data, baseUrl);
     default:

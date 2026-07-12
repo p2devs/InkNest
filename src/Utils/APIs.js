@@ -1,6 +1,5 @@
 export const ComicHostName = {
   readcomicsonline: 'https://readcomicsonline.ru/',
-  comichubfree: 'https://comichubfree.com/',
   readallcomics: 'https://readallcomics.com/',
   comicbookplus: 'https://comicbookplus.com/',
 };

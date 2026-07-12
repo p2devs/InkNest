@@ -86,7 +86,6 @@ export function Search({navigation, route}) {
   const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState({
     ReadAllComic: [],
-    ComicHub: [],
     ComicOnline: [],
     Manga: [],
     Novel: [],
@@ -126,13 +125,6 @@ export function Search({navigation, route}) {
       color: '#FF6B6B',
       category: 'Comics',
     },
-    ComicHub: {
-      id: 'ComicHub',
-      label: 'ComicHub',
-      icon: 'images',
-      color: '#FF8E53',
-      category: 'Comics',
-    },
     ComicOnline: {
       id: 'ComicOnline',
       label: 'ComicOnline',
@@ -163,7 +155,6 @@ export function Search({navigation, route}) {
     const allSources = [BASE_SOURCES.All];
     const comicSources = [
       BASE_SOURCES.ReadAllComic,
-      BASE_SOURCES.ComicHub,
       BASE_SOURCES.ComicOnline,
     ];
     const mangaSources = [BASE_SOURCES.Manga];
@@ -196,9 +187,6 @@ export function Search({navigation, route}) {
         // Add all results
         searchData.ReadAllComic?.forEach(item => {
           allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
-        });
-        searchData.ComicHub?.forEach(item => {
-          allResults.push({...item, sourceType: 'ComicHub', type: 'Comic'});
         });
         searchData.ComicOnline?.forEach(item => {
           allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
@@ -233,9 +221,6 @@ export function Search({navigation, route}) {
       searchData.ReadAllComic?.forEach(item => {
         allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
       });
-      searchData.ComicHub?.forEach(item => {
-        allResults.push({...item, sourceType: 'ComicHub', type: 'Comic'});
-      });
       searchData.ComicOnline?.forEach(item => {
         allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
       });
@@ -267,7 +252,6 @@ export function Search({navigation, route}) {
     if (categoryId === 'Comics') {
       return (
         (searchData.ReadAllComic?.length || 0) +
-        (searchData.ComicHub?.length || 0) +
         (searchData.ComicOnline?.length || 0)
       );
     }
@@ -301,7 +285,6 @@ export function Search({navigation, route}) {
     // Clear previous results and reset source selection when starting new search
     setSearchData({
       ReadAllComic: [],
-      ComicHub: [],
       ComicOnline: [],
       Manga: [],
       Novel: [],
@@ -315,8 +298,7 @@ export function Search({navigation, route}) {
 
     let link = searchTerm.trim();
     if (
-      (!link.startsWith('https://comichubfree.com/comic/') &&
-        !link.startsWith('https://readcomicsonline.ru/comic/') &&
+      (!link.startsWith('https://readcomicsonline.ru/comic/') &&
         !link.startsWith('https://readallcomics.com/category/')) ||
       (!link.includes('comic/') && !link.includes('category/'))
     ) {
@@ -329,7 +311,6 @@ export function Search({navigation, route}) {
       // Reset search data
       const newData = {
         ReadAllComic: [],
-        ComicHub: [],
         ComicOnline: [],
         Manga: [],
         Novel: [],
@@ -351,12 +332,6 @@ export function Search({navigation, route}) {
             .catch(e => {
               console.error('ComicOnline search error:', e);
               updateResults('ComicOnline', []);
-            }),
-          dispatch(searchComic(link, 'comichubfree'))
-            .then(r => updateResults('ComicHub', r ?? []))
-            .catch(e => {
-              console.error('ComicHub search error:', e);
-              updateResults('ComicHub', []);
             }),
           dispatch(searchComic(link, 'readallcomics'))
             .then(r => updateResults('ReadAllComic', r ?? []))
@@ -401,7 +376,6 @@ export function Search({navigation, route}) {
       } else if (activeCategory === 'Comics') {
         // Select first comic source with results
         if (newData.ReadAllComic?.length > 0) setActiveSource('ReadAllComic');
-        else if (newData.ComicHub?.length > 0) setActiveSource('ComicHub');
         else if (newData.ComicOnline?.length > 0)
           setActiveSource('ComicOnline');
         else setActiveSource('All');
