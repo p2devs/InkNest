@@ -1,97 +1,236 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<p align="center">
+  <img src="./.github/readme-images/icon.png" align="center" width="128" />
+<p>
+  
+<h1 align="center">
+  InkNest
+</h1>
 
-# Getting Started
+<div align="center">
+  <a href="https://discord.gg/WYwJefvWNT" style={{ marginRight: '10px', marginBottom: '10px' }}>
+    <img alt="Discord Chat" src="https://img.shields.io/discord/1281938822275403817.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48">
+  </a>
+  <a href="https://p2devs.github.io/InkNest/" style={{ marginRight: '10px', marginBottom: '10px' }}>
+    <img alt="Website" src="https://img.shields.io/badge/Website-000000?style=flat&logo=googlechrome&logoColor=white" >
+  </a>
+  <a href="https://github.com/p2devs/InkNest/releases/latest" style={{ marginRight: '10px', marginBottom: '10px' }}>
+    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/p2devs/InkNest">
+  </a>
+  <a href="https://github.com/p2devs/InkNest/blob/main/LICENSE" style={{ marginRight: '10px', marginBottom: '10px' }}>
+    <img alt="GitHub" src="https://img.shields.io/github/license/p2devs/InkNest">
+  </a>
+</div>
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+<p align="left">
+  InkNest is a free mobile app offering a vast collection of comics and manga across genres like superheroes, sci-fi, fantasy, and manga. Enjoy a seamless experience with user-friendly navigation and customizable settings. Stay updated with the latest releases and classics. With InkNest, your favorite stories and characters are always at your fingertips.
+</p>
 
-## Step 1: Start Metro
+> **🌟 Star this repository to support the developer and encourage further development of the application**
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+> **⚠️ Warning**
+> Please do not attempt to upload InkNest or any of its forks to the Play Store, App Store, or any other stores on the internet. Doing so may infringe their terms and conditions, potentially resulting in legal action or immediate takedown of the app.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 📑 Table of Contents
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Required Files](#required-files)
+  - [Setup Instructions](#steps)
+- [Running the App](#running-the-app)
+  - [Android](#running-on-android)
+  - [iOS](#running-on-ios)
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer)
+- [Contact](#contact)
+- [Download](#download)
+- [License](#license)
+- [InkNest Sources](#inknest-sources)
+- [Acknowledgements](#acknowledgements)
 
-```sh
-# Using npm
-npm start
+## Features
 
-# OR using Yarn
-yarn start
+- **Comic & Manga Read History**: Track your reading history for easy access to previously read comics.
+- **Bookmark Comic & Manga**: Bookmark your favorite comics & manga for quick access.
+- **Vast Comic & Manga Library**: Access a wide range of comic & manga books across various genres including superheroes, sci-fi, fantasy.
+- **User-Friendly Interface**: Intuitive and easy-to-use navigation ensures a seamless reading experience.
+- **Releases updates**: Stay up-to-date with new releases.
+- **Search and Discover**: Easily find comics & manga with search functionality and explore curated collections.
+- **Push Notifications**: We have implemented push notifications to inform users about new releases, updates.
+- **Offline Reading**: Download comics & manga for offline reading.
+- **Multi-Platform Support**: Available on both Android and iOS devices.
+- **Open Source**: InkNest is open source, allowing users to contribute and improve the app.
+- **Community Support**: Join our community on Discord for real-time support and discussion.
+
+## Screenshots
+<!-- Add some screenshots here to visually showcase your application -->
+<p align="center">
+  <!-- Example: -->
+  <img src="./.github/readme-images/screenshot.png" width="200" />
+  <!-- <img src="./.github/readme-images/screenshot2.png" width="200" /> -->
+  <!-- <img src="./.github/readme-images/screenshot3.png" width="200" /> -->
+</p>
+
+## Tech Stack
+- [React Native](https://reactnative.dev/) - Cross-platform mobile framework
+- [Redux](https://redux.js.org/) - State management
+- [Firebase](https://firebase.google.com/) - Backend services
+- [Docusaurus](https://docusaurus.io/) - Documentation
+
+## Installation
+
+### Prerequisites
+
+- Node.js (>= 18.0)
+- Yarn (recommended)
+- Xcode
+- Android Studio
+- Vs Code (IDE)
+- JAVA 18+
+
+### Required Files
+
+Before running the project, make sure to add the following files:
+
+1. `google-services.json` (for Android) in the `android/app` directory.
+2. `GoogleService-Info.plist` (for iOS) in the `ios` directory.
+
+### Steps
+
+1. Clone the repository:
+
+   ```sh
+   git clone https://github.com/p2devs/InkNest.git
+   cd InkNest
+   ```
+
+2. Install dependencies:
+
+   ```sh
+   yarn install
+   ```
+
+3. Start the development server:
+
+   ```sh
+   yarn start
+   ```
+
+## Running the App
+
+### Running on Android
+
+1. Start the Android emulator or connect an Android device.
+2. Run the following command:
+
+   ```sh
+   yarn android
+   ```
+
+### Running on iOS
+
+1. Install CocoaPods dependencies:
+
+   ```sh
+   cd ios
+   pod install
+   cd ..
+   ```
+
+2. Start the iOS simulator or connect an iOS device.
+3. Run the following command:
+
+   ```sh
+   yarn ios
+   ```
+
+## Documentation
+
+The documentation is managed using Docusaurus. To view the documentation locally:
+
+1. Navigate to the `docs` directory:
+
+   ```sh
+   cd docs
+   ```
+
+2. Install dependencies:
+
+   ```sh
+   yarn install
+   ```
+
+3. Start the documentation server:
+
+   ```sh
+   yarn start
+   ```
+
+## Project Structure
+```
+InkNest/
+├── android/                # Android-specific code
+├── ios/                    # iOS-specific code
+├── src/                    # Source code
+│   ├── Components/         # Reusable UI components
+│   ├── Constants/          # App constants and configurations
+│   ├── Navigation/         # Navigation setup
+│   ├── Redux/              # State management
+│   ├── Screens/            # App screens
+│   └── Utils/              # Utility functions
+├── docs/                   # Documentation using Docusaurus
+├── __tests__/              # Tests
+└── ...                     # Configuration files
 ```
 
-## Step 2: Build and run your app
+## Contributing
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
-### Android
+## DISCLAIMER
 
-```sh
-# Using npm
-npm run android
+- InkNest only scrapes links from various websites, making it easier for users to find manga and comics.
+- Neither InkNest nor its developers/staff host any of the content found within the app. All images and manga/comic information in the app are sourced from various public APIs.
+- Additionally, all manga/comic links in InkNest are obtained from various third-party manga hosting websites.
+- InkNest and its owners aren't liable for any misuse of the content found inside or outside the app and cannot be held accountable for the distribution of any content found within the app.
+- By using InkNest, you agree that the developers are not responsible for any content found in the app; this content may or may not come from legitimate sources.
+- If internet infringement issues arise, please contact the source website. The developer does not assume any legal responsibility.
 
-# OR using Yarn
-yarn android
-```
+## Contact
 
-### iOS
+For any inquiries, feel free to reach out through one of the following channels:
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- **Email**: [inknest@capacity.rocks](mailto:inknest@capacity.rocks)
+- **Discord**: Join our community on [Discord](https://discord.gg/WYwJefvWNT) for real-time support and discussion.
+- **GitHub Discussions**: Visit our [GitHub Discussions board](https://github.com/p2devs/InkNest/discussions) to engage with our community, ask questions, and find answers to common issues.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+We're here to help!
 
-```sh
-bundle install
-```
+## Download
 
-Then, and every time you update your native dependencies, run:
+Get the app from our [releases page](https://github.com/p2devs/InkNest/releases).
 
-```sh
-bundle exec pod install
-```
+## License
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE) file for more details.
 
-```sh
-# Using npm
-npm run ios
+## InkNest Sources
 
-# OR using Yarn
-yarn ios
-```
+InkNest uses the following sources to provide you with the best experience:
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+- [readcomiconline](https://readcomiconline.li/)
+- [GlobalComix](https://globalcomix.com/browse/en/comics)
+- [Bato](https://bato.to/)
+- [MangaDex](https://mangadex.org/)
+- [ColaManga](https://www.colamanga.com)
+- [WebToon](https://webtoons.com)
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Acknowledgements
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- [React Native](https://reactnative.dev/)
+- [Docusaurus](https://docusaurus.io/)
+- [Redux](https://redux.js.org/)
+- [Firebase](https://firebase.google.com/)
