@@ -21,6 +21,27 @@ const resolveCacheTtlMs = (incomingTtl, previousTtl = SUBSCRIPTION_CACHE_TTL_MS)
 
   return SUBSCRIPTION_CACHE_TTL_MS;
 };
+const normalizeLink = value => value?.split('?')[0] ?? '';
+
+/**
+ * Manga history is keyed by the raw link the screen was opened with, but the
+ * same manga/chapter can be reached through links that only differ by their
+ * query string. Reuse the key that is already stored so a second entry for the
+ * same title (or chapter) is never created.
+ */
+const findMatchingKey = (record, link) => {
+  if (!record || !link) return null;
+  if (record[link]) return link;
+
+  const normalizedLink = normalizeLink(link);
+  if (record[normalizedLink]) return normalizedLink;
+
+  return (
+    Object.keys(record).find(key => normalizeLink(key) === normalizedLink) ??
+    null
+  );
+};
+
 const initialState = {
   dataByUrl: {},
   loading: false,
@@ -338,21 +359,80 @@ const Reducers = createSlice({
     updateMangaHistory: (state, action) => {
       const {detailLink, chapterLink, totalPages, lastReadPage} = action.payload;
       if (!detailLink || !chapterLink) return;
+
+      const existing =
+        state.MangaHistory[detailLink]?.readChapters?.[chapterLink];
+      const reachedLastPage =
+        typeof totalPages === 'number' &&
+        totalPages > 0 &&
+        lastReadPage >= totalPages - 1;
+
       state.MangaHistory[detailLink] = {
         ...state.MangaHistory[detailLink],
         lastOpenAt: Date.now(),
         readChapters: {
           ...state.MangaHistory[detailLink]?.readChapters,
           [chapterLink]: {
+            ...existing,
             totalPages,
             lastReadPage,
             readAt: Date.now(),
+            // Re-opening a chapter that was marked read must not silently
+            // un-mark it; only an explicit "mark unread" clears the flag.
+            completed: existing?.completed === true || reachedLastPage,
           },
         },
       };
     },
     clearMangaHistory: state => {
       state.MangaHistory = {};
+    },
+    /**
+     * Bulk mark manga chapters as read/unread without opening them, so chapters
+     * followed elsewhere (e.g. watched as anime) still count towards progress.
+     * `readAt` is deliberately left untouched: it drives the "Continue from"
+     * hint, which should keep pointing at the last chapter actually opened.
+     */
+    setMangaChaptersReadState: (state, action) => {
+      const {detailLink, chapterLinks = [], read = true} = action.payload ?? {};
+      if (!detailLink || !chapterLinks.length) return;
+
+      const historyKey =
+        findMatchingKey(state.MangaHistory, detailLink) ?? detailLink;
+      const entry = state.MangaHistory[historyKey] ?? {};
+      const readChapters = {...(entry.readChapters ?? {})};
+      const now = Date.now();
+
+      chapterLinks.forEach(chapterLink => {
+        if (!chapterLink) return;
+
+        if (!read) {
+          // Drop every key that points at this chapter, query string or not
+          Object.keys(readChapters)
+            .filter(key => normalizeLink(key) === normalizeLink(chapterLink))
+            .forEach(key => delete readChapters[key]);
+          return;
+        }
+
+        const existingKey = findMatchingKey(readChapters, chapterLink);
+        const existing = existingKey ? readChapters[existingKey] : null;
+
+        readChapters[existingKey ?? chapterLink] = {
+          // `lastReadPage` is left as-is so tapping the chapter still resumes
+          // where the reader left off instead of jumping to the last page.
+          ...existing,
+          completed: true,
+          readAt: existing?.readAt ?? 0,
+          markedReadAt: now,
+        };
+      });
+
+      state.MangaHistory[historyKey] = {
+        ...entry,
+        link: entry.link ?? detailLink,
+        readChapters,
+        lastOpenAt: now,
+      };
     },
     setScrollPreference: (state, action) => {
       // Update user's preferred comic reading scroll mode
@@ -823,6 +903,7 @@ export const {
   pushMangaHistory,
   updateMangaHistory,
   clearMangaHistory,
+  setMangaChaptersReadState,
   DownloadComicBook,
   DeleteDownloadedComicBook,
   updateDownloadedComicBook,
