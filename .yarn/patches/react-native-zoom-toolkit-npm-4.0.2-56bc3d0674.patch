@@ -1,0 +1,68 @@
+diff --git a/lib/commonjs/commons/hooks/usePinchCommons.js b/lib/commonjs/commons/hooks/usePinchCommons.js
+index e7139548414252a788dd066341a353ed73abb975..4fb124764a15b25d541683cb100703370cf7fc4d 100644
+--- a/lib/commonjs/commons/hooks/usePinchCommons.js
++++ b/lib/commonjs/commons/hooks/usePinchCommons.js
+@@ -130,9 +130,14 @@ const usePinchCommons = options => {
+       finished && (0, _reactNativeReanimated.runOnJS)(switchGesturesState)(true);
+     });
+     gestureEnd.value = (0, _reactNativeReanimated.withTiming)(toValue, undefined, finished => {
+-      gestureEnd.value = 0;
+-      if (finished && userCallbacks.onGestureEnd !== undefined) {
+-        (0, _reactNativeReanimated.runOnJS)(userCallbacks.onGestureEnd)();
++      // Upstream fix (issue #126): only re-arm on a genuine finish, otherwise
++      // this write re-enters the callback through Reanimated 4.x's valueSetter
++      // and recurses to a stack overflow on rapid pinch in/out.
++      if (finished) {
++        gestureEnd.value = 0;
++        if (userCallbacks.onGestureEnd !== undefined) {
++          (0, _reactNativeReanimated.runOnJS)(userCallbacks.onGestureEnd)();
++        }
+       }
+     });
+   };
+diff --git a/lib/module/commons/hooks/usePinchCommons.js b/lib/module/commons/hooks/usePinchCommons.js
+index fb05a662feff7ace618474f266b8ceb0fb495c7e..7895ccea699a1c3af5aa0b668eb4afe6eb05200d 100644
+--- a/lib/module/commons/hooks/usePinchCommons.js
++++ b/lib/module/commons/hooks/usePinchCommons.js
+@@ -124,9 +124,14 @@ export const usePinchCommons = options => {
+       finished && runOnJS(switchGesturesState)(true);
+     });
+     gestureEnd.value = withTiming(toValue, undefined, finished => {
+-      gestureEnd.value = 0;
+-      if (finished && userCallbacks.onGestureEnd !== undefined) {
+-        runOnJS(userCallbacks.onGestureEnd)();
++      // Upstream fix (issue #126): only re-arm on a genuine finish, otherwise
++      // this write re-enters the callback through Reanimated 4.x's valueSetter
++      // and recurses to a stack overflow on rapid pinch in/out.
++      if (finished) {
++        gestureEnd.value = 0;
++        if (userCallbacks.onGestureEnd !== undefined) {
++          runOnJS(userCallbacks.onGestureEnd)();
++        }
+       }
+     });
+   };
+diff --git a/src/commons/hooks/usePinchCommons.ts b/src/commons/hooks/usePinchCommons.ts
+index 73de17b2c38c8e9b60ccd153e33da58d86a10a38..8da9b5d7a210c6e0daa67c0285ccdf24d7249f7d 100644
+--- a/src/commons/hooks/usePinchCommons.ts
++++ b/src/commons/hooks/usePinchCommons.ts
+@@ -175,9 +175,16 @@ export const usePinchCommons = (options: PinchOptions) => {
+     });
+ 
+     gestureEnd.value = withTiming(toValue, undefined, (finished) => {
+-      gestureEnd.value = 0;
+-      if (finished && userCallbacks.onGestureEnd !== undefined) {
+-        runOnJS(userCallbacks.onGestureEnd)();
++      // Only re-arm the gimmick on a genuine finish. Writing gestureEnd.value
++      // unconditionally here re-enters this callback via Reanimated 4.x's
++      // valueSetter (it fires a still-live animation's callback(false) before
++      // clearing _animation when the value is overwritten), recursing to a
++      // stack overflow on rapid pinch in/out. Upstream fix, see issue #126.
++      if (finished) {
++        gestureEnd.value = 0;
++        if (userCallbacks.onGestureEnd !== undefined) {
++          runOnJS(userCallbacks.onGestureEnd)();
++        }
+       }
+     });
+   };

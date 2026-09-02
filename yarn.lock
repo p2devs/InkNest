@@ -3915,7 +3915,7 @@ __metadata:
     react-native-video: "npm:^6.7.0"
     react-native-webview: "npm:^13.12.3"
     react-native-worklets: "npm:^0.10.0"
-    react-native-zoom-toolkit: "npm:^4.0.2"
+    react-native-zoom-toolkit: "patch:react-native-zoom-toolkit@npm%3A4.0.2#~/.yarn/patches/react-native-zoom-toolkit-npm-4.0.2-56bc3d0674.patch"
     react-redux: "npm:^9.1.2"
     react-test-renderer: "npm:19.2.3"
     redux: "npm:^5.0.1"
@@ -9388,7 +9388,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-zoom-toolkit@npm:^4.0.2":
+"react-native-zoom-toolkit@npm:4.0.2":
   version: 4.0.2
   resolution: "react-native-zoom-toolkit@npm:4.0.2"
   peerDependencies:
@@ -9397,6 +9397,18 @@ __metadata:
     react-native-gesture-handler: ">= 2.19.0"
     react-native-reanimated: ">= 2.x.x"
   checksum: 10c0/27bba0036fb4636d4222550cc9010076bb2e1d28a25ce383b9346ab4e5a1edafecc71b565ae72bd6356f4e9564c40e5bae929ce717cabfbd63dca52f76f11b34
+  languageName: node
+  linkType: hard
+
+"react-native-zoom-toolkit@patch:react-native-zoom-toolkit@npm%3A4.0.2#~/.yarn/patches/react-native-zoom-toolkit-npm-4.0.2-56bc3d0674.patch":
+  version: 4.0.2
+  resolution: "react-native-zoom-toolkit@patch:react-native-zoom-toolkit@npm%3A4.0.2#~/.yarn/patches/react-native-zoom-toolkit-npm-4.0.2-56bc3d0674.patch::version=4.0.2&hash=ab5c55"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: ">= 2.19.0"
+    react-native-reanimated: ">= 2.x.x"
+  checksum: 10c0/5958b1fef262ec9b51ab9e51d926b596100f5784fbed4543c90d9a78e8a9b4ec6d2cc8ce82f580b430d2087fabe08dfc391903f9fe8211dee7cd06e95ae50738
   languageName: node
   linkType: hard
 

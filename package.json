@@ -65,7 +65,7 @@
     "react-native-video": "^6.7.0",
     "react-native-webview": "^13.12.3",
     "react-native-worklets": "^0.10.0",
-    "react-native-zoom-toolkit": "^4.0.2",
+    "react-native-zoom-toolkit": "patch:react-native-zoom-toolkit@npm%3A4.0.2#~/.yarn/patches/react-native-zoom-toolkit-npm-4.0.2-56bc3d0674.patch",
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
