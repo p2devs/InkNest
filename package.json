@@ -97,5 +97,15 @@
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "codegenConfig": {
+    "name": "InkNestNarrationSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/Screens/Novel/Narration/specs",
+    "ios": {
+      "modulesProvider": {
+        "NativeInkNestNarration": "RCTInkNestNarration"
+      }
+    }
   }
 }

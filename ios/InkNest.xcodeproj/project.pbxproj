@@ -12,6 +12,10 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		7FF822973E73FEF3709DA936 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		AB1000000000000000000001 /* NarrationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1000000000000000000011 /* NarrationEngine.swift */; };
+		AB1000000000000000000002 /* NarrationSceneAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1000000000000000000012 /* NarrationSceneAnalyzer.swift */; };
+		AB1000000000000000000003 /* RCTInkNestNarration.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB1000000000000000000013 /* RCTInkNestNarration.mm */; };
+		AB1000000000000000000005 /* NarrationPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1000000000000000000015 /* NarrationPreparation.swift */; };
 		F9BC903A2FFD53CE00349AA0 /* Empty.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9BC90392FFD53CE00349AA0 /* Empty.swift */; };
 		F9C58EED2FF42A6700C53E4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9C58EEC2FF42A6700C53E4C /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -25,6 +29,11 @@
 		5709B34CF0A7D63546082F79 /* Pods-InkNest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InkNest.release.xcconfig"; path = "Target Support Files/Pods-InkNest/Pods-InkNest.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = InkNest/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = InkNest/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AB1000000000000000000011 /* NarrationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarrationEngine.swift; path = InkNest/NarrationEngine.swift; sourceTree = "<group>"; };
+		AB1000000000000000000012 /* NarrationSceneAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarrationSceneAnalyzer.swift; path = InkNest/NarrationSceneAnalyzer.swift; sourceTree = "<group>"; };
+		AB1000000000000000000013 /* RCTInkNestNarration.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = RCTInkNestNarration.mm; path = InkNest/RCTInkNestNarration.mm; sourceTree = "<group>"; };
+		AB1000000000000000000014 /* RCTInkNestNarration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTInkNestNarration.h; path = InkNest/RCTInkNestNarration.h; sourceTree = "<group>"; };
+		AB1000000000000000000015 /* NarrationPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarrationPreparation.swift; path = InkNest/NarrationPreparation.swift; sourceTree = "<group>"; };
 		B7928DE05717ADFD9BFE75DA /* Pods_InkNest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InkNest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F970BC7C2F4B925500BBEB22 /* InkNest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = InkNest.entitlements; path = InkNest/InkNest.entitlements; sourceTree = "<group>"; };
@@ -47,6 +56,11 @@
 		13B07FAE1A68108700A75B9A /* InkNest */ = {
 			isa = PBXGroup;
 			children = (
+				AB1000000000000000000011 /* NarrationEngine.swift */,
+				AB1000000000000000000012 /* NarrationSceneAnalyzer.swift */,
+				AB1000000000000000000015 /* NarrationPreparation.swift */,
+				AB1000000000000000000013 /* RCTInkNestNarration.mm */,
+				AB1000000000000000000014 /* RCTInkNestNarration.h */,
 				F9C58EEC2FF42A6700C53E4C /* GoogleService-Info.plist */,
 				F970BC7C2F4B925500BBEB22 /* InkNest.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -284,6 +298,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB1000000000000000000001 /* NarrationEngine.swift in Sources */,
+				AB1000000000000000000002 /* NarrationSceneAnalyzer.swift in Sources */,
+				AB1000000000000000000005 /* NarrationPreparation.swift in Sources */,
+				AB1000000000000000000003 /* RCTInkNestNarration.mm in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 				F9BC903A2FFD53CE00349AA0 /* Empty.swift in Sources */,
 			);
