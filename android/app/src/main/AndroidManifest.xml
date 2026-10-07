@@ -3,6 +3,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Novel narration: lock-screen playback through react-native-video. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
       android:name=".MainApplication"
@@ -25,5 +28,18 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <!-- Novel narration: prepare-for-later audio while the app is away. -->
+      <service
+        android:name=".narration.NarrationPrepareJob"
+        android:permission="android.permission.BIND_JOB_SERVICE"
+        android:exported="false" />
+      <service
+        android:name="com.brentvatne.exoplayer.VideoPlaybackService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback">
+        <intent-filter>
+          <action android:name="androidx.media3.session.MediaSessionService" />
+        </intent-filter>
+      </service>
     </application>
 </manifest>
