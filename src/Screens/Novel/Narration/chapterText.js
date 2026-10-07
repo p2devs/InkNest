@@ -29,6 +29,27 @@ function getChapterParagraphs(chapter) {
     .filter(Boolean);
 }
 
+// Spaces preserve native selection offsets, including brackets spanning paragraphs.
+function getNarrationParagraphs(chapter) {
+  let depth = 0;
+  return getChapterParagraphs(chapter).map(paragraph =>
+    paragraph
+      .split('')
+      .map(character => {
+        if (character === '[') {
+          depth += 1;
+          return ' ';
+        }
+        if (character === ']' && depth > 0) {
+          depth -= 1;
+          return ' ';
+        }
+        return depth > 0 ? ' ' : character;
+      })
+      .join(''),
+  );
+}
+
 // Keep query parameters: they can distinguish translations and chapter revisions.
 function narrationKey({
   novelLink,
@@ -80,18 +101,27 @@ function textRevision(text) {
 }
 /* eslint-enable no-bitwise */
 
-function segmentChapter(text, maxCharacters = 600) {
-  if (!Number.isInteger(maxCharacters) || maxCharacters < 32) {
+// The first segment is short so a chapter starts speaking quickly; the rest
+// are longer so there are fewer joins between audio files.
+function segmentChapter(text, maxCharacters = 600, firstMaxCharacters = 220) {
+  if (
+    ![maxCharacters, firstMaxCharacters].every(
+      limit => Number.isInteger(limit) && limit >= 32,
+    )
+  ) {
     throw new Error(
       'Segment size must be an integer of at least 32 characters.',
     );
   }
-  const paragraphs = getChapterParagraphs(text);
+  const paragraphs = getNarrationParagraphs(text);
   const segments = [];
   paragraphs.forEach((paragraph, paragraphIndex) => {
-    let remaining = paragraph.trim();
+    let remaining = paragraph.replace(/[ \t]+/g, ' ').trim();
     while (remaining) {
-      let end = Math.min(remaining.length, maxCharacters);
+      const limit = segments.length
+        ? maxCharacters
+        : Math.min(firstMaxCharacters, maxCharacters);
+      let end = Math.min(remaining.length, limit);
       if (end < remaining.length) {
         const window = remaining.slice(0, end);
         const sentenceEnds = [...window.matchAll(/[.!?。！？]["'”’]?\s+/g)];
@@ -106,21 +136,20 @@ function segmentChapter(text, maxCharacters = 600) {
         }
       }
       const segment = remaining.slice(0, end).trim();
-      segments.push({
-        paragraphIndex,
-        text: segment,
-        spoken: spokenText(segment),
-      });
+      const spoken = spokenText(segment);
+      if (spoken) {
+        segments.push({ paragraphIndex, text: segment, spoken });
+      }
       remaining = remaining.slice(end).trim();
     }
   });
   return segments;
 }
 
-// What the voice reads: display text stays untouched, but symbols common in
-// web novels are not read aloud literally ("[Skill: Blink]", "***", "!!!").
+// Display text stays untouched; bracketed notes and decorative symbols are silent.
 function spokenText(text) {
-  const spoken = text
+  const spoken = getNarrationParagraphs(text)
+    .join('\n\n')
     .replace(/https?:\/\/\S+/g, ' ')
     .replace(/[[\]【】〔〕《》<>]/g, ' ')
     .replace(/[*#_~=|]{2,}/g, ' ')
@@ -129,14 +158,14 @@ function spokenText(text) {
     .replace(/\.{3,}|…+/g, '…')
     .replace(/[ \t]+/g, ' ')
     .trim();
-  // Never send an empty utterance: fall back to the original text.
-  return /[\p{L}\p{N}]/u.test(spoken) ? spoken : text;
+  return /[\p{L}\p{N}]/u.test(spoken) ? spoken : '';
 }
 
 module.exports = {
   spokenText,
   getChapterText,
   getChapterParagraphs,
+  getNarrationParagraphs,
   createNarrationChapter,
   narrationKey,
   segmentChapter,

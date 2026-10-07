@@ -9,7 +9,7 @@ import UIKit
 final class NarrationPreparation: NSObject {
   static let identifier = "com.p2devs.inknest.narration.prepare"
 
-  private struct Item: Codable { let id: String; let text: String; let voiceID: String; var attempts: Int? }
+  private struct Item: Codable { let id: String; let text: String; let voiceID: String; let rate: Double?; var attempts: Int? }
   private struct Work: Codable { var items: [Item]; let requiresCharging: Bool }
   private struct Result: Codable { let id: String; let path: String; let bytes: Int; let duration: Double }
 
@@ -97,7 +97,7 @@ final class NarrationPreparation: NSObject {
       guard admitted(work) else {
         return finish(success: false, reschedule: work)
       }
-      NarrationEngine.shared.synthesize(item.text, voiceID: item.voiceID) { result, _ in
+      NarrationEngine.shared.synthesize(item.text, voiceID: item.voiceID, rate: item.rate ?? 1) { result, _ in
         guard token == generation else { return next() }
         guard let result, let path = result["path"] as? String else {
           // Busy engine or pressure: keep the item for the next grant. An item

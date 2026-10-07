@@ -103,9 +103,14 @@ test('prepares the next segment during playback and plays it without waiting', a
   await session.start(chapter, 'voice');
   await tick();
   assert.deepEqual(calls, ['First paragraph.', 'Second paragraph.']);
+  // The prepared file is exposed so its player can be preloaded…
+  const preloaded = session.getSnapshot().next;
+  assert.equal(preloaded.index, 1);
   session.ended(session.getSnapshot().file);
-  // Switch is synchronous: no 'preparing' gap between segments.
+  // …and the switch is one synchronous update to that same file.
   assert.equal(session.getSnapshot().status, 'playing');
+  assert.equal(session.getSnapshot().file, preloaded);
+  assert.equal(session.getSnapshot().next, null);
   assert.equal(session.getSnapshot().file.path, '/Second paragraph..caf');
 });
 
@@ -186,12 +191,12 @@ test('bookmarks resume by paragraph and are discarded when the text changes', as
   assert.equal(session.listened({ ...snapshot, revision: 'r2' }), false);
 });
 
-test('changing the narrator restarts from the paragraph being spoken', async () => {
+test('changing narrator or speed regenerates from the paragraph being spoken', async () => {
   const calls = [];
   const session = createNarrationSession({
     cancel: async () => {},
-    synthesize: async (text, voice) => {
-      calls.push(`${voice}:${text}`);
+    synthesize: async (text, voice, rate) => {
+      calls.push(`${voice}@${rate}:${text}`);
       return audio(text);
     },
   });
@@ -199,8 +204,74 @@ test('changing the narrator restarts from the paragraph being spoken', async () 
   await tick();
   session.ended(session.getSnapshot().file);
   assert.equal(session.paragraphIndex(), 1);
-  await session.changeVoice('b');
+  await session.restart({ voice: 'b' });
   assert.equal(session.getSnapshot().voiceID, 'b');
   assert.equal(session.getSnapshot().route.chapterLink, 'x');
-  assert.equal(calls.at(-1), 'b:Second paragraph.');
+  assert.equal(calls.at(-1), 'b@1:Second paragraph.');
+  // Speed is rendered by the voice, not by time-stretching the player.
+  await session.restart({ speechRate: 1.25 });
+  assert.equal(session.getSnapshot().rate, 1.25);
+  assert.equal(calls.at(-1), 'b@1.25:Second paragraph.');
+});
+
+test('selection playback stops at the range, retains its highlight, and preserves chapter bookmarks', async () => {
+  const saved = new Map([['one', { revision: 'r1', paragraphIndex: 0 }]]);
+  const calls = [];
+  const session = createNarrationSession(
+    {
+      cancel: async () => {},
+      synthesize: async text => {
+        calls.push(text);
+        return audio(text);
+      },
+    },
+    saved,
+  );
+  const snapshot = {
+    ...chapter,
+    revision: 'r1',
+    text: 'First paragraph.\n\nSecond [silent words] paragraph. Extra words.',
+    selection: { paragraphIndex: 1, start: 0, end: 32 },
+  };
+  await session.start(snapshot, 'a');
+  await tick();
+  assert.deepEqual(calls, ['Second paragraph.']);
+  assert.equal(session.paragraphIndex(), 1);
+  assert.equal(session.getSnapshot().isSelection, true);
+  await session.restart({ voice: 'b' });
+  assert.equal(calls.at(-1), 'Second paragraph.');
+  await session.ended(session.getSnapshot().file);
+  assert.equal(session.getSnapshot().status, 'finished');
+  assert.deepEqual(saved.get('one'), { revision: 'r1', paragraphIndex: 0 });
+  assert.equal(session.listened(snapshot), false);
+});
+
+test('selecting inside brackets never leaks bracket contents or interrupts existing audio', async () => {
+  const calls = [];
+  const session = createNarrationSession({
+    cancel: async () => {},
+    synthesize: async text => {
+      calls.push(text);
+      return audio(text);
+    },
+  });
+  await session.start({ ...chapter, text: 'Playing.' }, 'a');
+  const file = session.getSnapshot().file;
+  await session.start(
+    {
+      ...chapter,
+      text: 'Before [secret] after.',
+      selection: { paragraphIndex: 0, start: 8, end: 14 },
+    },
+    'a',
+  );
+  assert.deepEqual(calls, ['Playing.']);
+  assert.equal(session.getSnapshot().file, file);
+  assert.match(session.getSnapshot().message, /No spoken text/);
+  const empty = createNarrationSession({
+    cancel: async () => {},
+    synthesize: async () => assert.fail('empty audio'),
+  });
+  await empty.start({ ...chapter, text: '[Only a note]' }, 'a');
+  assert.equal(empty.getSnapshot().status, 'idle');
 });

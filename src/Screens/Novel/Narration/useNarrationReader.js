@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createNarrationChapter, narrationKey } from './chapterText';
+import {
+  createNarrationChapter,
+  getChapterParagraphs,
+  narrationKey,
+} from './chapterText';
 import { useNarration } from './NarrationProvider';
 
 const ACTIVE = ['playing', 'preparing', 'paused', 'error'];
@@ -16,12 +20,14 @@ export function useNarrationReader({
   translationMode = 'default',
   label,
   scrollViewRef,
+  onSelectParagraph,
 }) {
   const novelLink = novel?.link;
   const narration = useNarration();
   const positions = useRef([]);
   const [following, setFollowing] = useState(true);
   const [message, setMessage] = useState('');
+  const [selectedParagraph, setSelectedParagraph] = useState(null);
   const key = narrationKey({ novelLink, chapterLink, translationMode });
   const isThisChapter =
     !!narration &&
@@ -54,17 +60,23 @@ export function useNarrationReader({
       return error;
     }
   }, [novelLink, chapterLink, content, translationMode]);
-  const start = (fromParagraph = 0) => {
+  useEffect(() => {
+    setSelectedParagraph(null);
+    setMessage('');
+    positions.current = [];
+  }, [chapter]);
+  const start = (fromParagraph = 0, selection = null) => {
     if (chapter instanceof Error) {
       setMessage(chapter.message);
       return;
     }
     setMessage('');
     setFollowing(true);
-    narration.session.start(
+    return narration.session.start(
       {
         ...chapter,
-        label,
+        selection,
+        label: selection ? `${label || 'Chapter'} · selection` : label,
         // Lets the mini-player reopen this chapter and auto-advance find the next.
         route: {
           novel: novel && {
@@ -74,13 +86,14 @@ export function useNarrationReader({
           },
           chapter: chapterInfo,
           chapterLink,
-          nextChapterLink: nextChapterLink || null,
+          nextChapterLink: selection ? null : nextChapterLink || null,
           translationMode,
         },
       },
       narration.voiceID,
       narration.analyzeScenes,
       fromParagraph,
+      narration.rate,
     );
   };
   const usable = narration && !isThisChapter && !(chapter instanceof Error);
@@ -97,6 +110,18 @@ export function useNarrationReader({
     isThisChapter,
     message,
     start,
+    selectedParagraph,
+    selectedText:
+      selectedParagraph === null
+        ? ''
+        : getChapterParagraphs(content)[selectedParagraph] || '',
+    playSelection: (startOffset, endOffset) =>
+      start(0, {
+        paragraphIndex: selectedParagraph,
+        start: startOffset,
+        end: endOffset,
+      }),
+    clearSelection: () => setSelectedParagraph(null),
     bookmark,
     listened,
     advancedPast,
@@ -107,7 +132,10 @@ export function useNarrationReader({
       onParagraphLayout: (index, y) => {
         positions.current[index] = y;
       },
-      onParagraphLongPress: narration.voiceID ? start : undefined,
+      onParagraphLongPress: index => {
+        setSelectedParagraph(index);
+        onSelectParagraph?.();
+      },
     },
     // Manual scrolling stops follow-along until the listener asks for it again.
     onScrollBeginDrag: () => isThisChapter && setFollowing(false),

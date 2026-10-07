@@ -127,10 +127,7 @@ final class NarrationEngine: NSObject {
         }
         let voices = AVSpeechSynthesisVoice.speechVoices().filter {
           $0.language.lowercased().split(separator: "-").first == language.lowercased().split(separator: "-").first
-        }.filter {
-          if #available(iOS 17, *) { return !$0.voiceTraits.contains(.isPersonalVoice) }
-          return true
-        }.sorted { $0.quality.rawValue > $1.quality.rawValue }.map {
+        }.filter(NarrationEngine.isNarrator).sorted { $0.quality.rawValue > $1.quality.rawValue }.map {
           ["id": $0.identifier, "name": $0.name, "language": $0.language, "quality": $0.quality.rawValue] as [String: Any]
         }
         let files = (try? FileManager.default.contentsOfDirectory(at: self.directory,
@@ -149,16 +146,29 @@ final class NarrationEngine: NSObject {
     }
   }
 
-  @objc func synthesize(_ text: String, voiceID: String, completion: @escaping (NSDictionary?, NSError?) -> Void) {
+  // Novelty voices (Bad News, Bubbles, …) and Eloquence voices (Eddy, Flo, …)
+  // sound robotic in long narration; Personal Voice is private to the user.
+  static func isNarrator(_ voice: AVSpeechSynthesisVoice) -> Bool {
+    if voice.identifier.hasPrefix("com.apple.eloquence") { return false }
+    if #available(iOS 17, *) {
+      return !voice.voiceTraits.contains(.isNoveltyVoice) && !voice.voiceTraits.contains(.isPersonalVoice)
+    }
+    return true
+  }
+
+  @objc func synthesize(_ text: String, voiceID: String, rate: Double, completion: @escaping (NSDictionary?, NSError?) -> Void) {
     DispatchQueue.main.async {
       guard self.finish == nil, !self.isClearing, !NarrationSceneAnalyzer.isBusy else { completion(nil, self.error("Another voice or scene request is being prepared.")); return }
       guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, text.utf16.count <= 1200,
             let voice = AVSpeechSynthesisVoice(identifier: voiceID) else {
         completion(nil, self.error("The selected voice or chapter segment is unavailable.")); return
       }
-      if #available(iOS 17, *), voice.voiceTraits.contains(.isPersonalVoice) {
+      guard NarrationEngine.isNarrator(voice) else {
         completion(nil, self.error("Select an installed system voice.")); return
       }
+      // Speed is rendered by the voice itself (natural), never by time-stretching playback.
+      let speechRate = min(AVSpeechUtteranceMaximumSpeechRate,
+        max(AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * Float(min(max(rate, 0.5), 2))))
       guard ProcessInfo.processInfo.thermalState.rawValue < ProcessInfo.ThermalState.serious.rawValue,
             hasMemoryHeadroom(256 * 1024 * 1024) else {
         completion(nil, self.error("Preparation is waiting for the phone to cool down or free memory.")); return
@@ -179,7 +189,7 @@ final class NarrationEngine: NSObject {
           guard disk.free - self.maxFileBytes >= reserve, bytes + self.maxFileBytes <= self.cacheLimit else {
             throw self.error("Not enough temporary audio space. Delete prepared audio or free device storage.")
           }
-          let key = SHA256.hash(data: Data((voiceID + "\n" + ProcessInfo.processInfo.operatingSystemVersionString + "\n" + text).utf8))
+          let key = SHA256.hash(data: Data((voiceID + "\n" + String(speechRate) + "\n" + ProcessInfo.processInfo.operatingSystemVersionString + "\n" + text).utf8))
             .map { String(format: "%02x", $0) }.joined()
           // AAC keeps prepared chapters ~15x smaller than the synthesizer's float PCM.
           let finalURL = self.directory.appendingPathComponent(key + ".m4a")
@@ -201,6 +211,7 @@ final class NarrationEngine: NSObject {
             guard token == self.generation, self.finish != nil else { return }
             let utterance = AVSpeechUtterance(string: text)
             utterance.voice = voice
+            utterance.rate = speechRate
             let synth = AVSpeechSynthesizer()
             self.synthesizer = synth
             let deadline = DispatchWorkItem { [weak engine = self] in engine?.cancelWork(reason: "Voice preparation timed out. Try another installed voice.") }

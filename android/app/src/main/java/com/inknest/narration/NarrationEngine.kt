@@ -91,7 +91,7 @@ object NarrationEngine {
     waitingForTts += action
     if (tts != null) return
     lateinit var created: TextToSpeech
-    created = TextToSpeech(context) { status ->
+    created = TextToSpeech(context, { status ->
       handler.post {
         // Ignore an engine released (memory pressure) before it finished starting.
         if (tts !== created) return@post
@@ -101,8 +101,17 @@ object NarrationEngine {
         engine?.setOnUtteranceProgressListener(progress)
         waitingForTts.toList().also { waitingForTts.clear() }.forEach { it(engine) }
       }
-    }
+    }, preferredEngine())
     tts = created
+  }
+
+  // Google's engine has the most natural offline voices; other engines (some
+  // OEM defaults) can sound robotic. Falls back to the system default.
+  private fun preferredEngine(): String? = try {
+    context.packageManager.getPackageInfo(GOOGLE_TTS, 0)
+    GOOGLE_TTS
+  } catch (_: Exception) {
+    null
   }
 
   private fun releaseEngine() {
@@ -160,7 +169,9 @@ object NarrationEngine {
     }
   }
 
-  fun synthesize(text: String, voiceID: String, done: (Speech?, String?) -> Unit) {
+  // `rate` 1.0 = normal; the engine speaks faster/slower naturally instead of
+  // the player time-stretching the audio.
+  fun synthesize(text: String, voiceID: String, rate: Double, done: (Speech?, String?) -> Unit) {
     handler.post {
       if (pending != null || isClearing) {
         return@post done(null, "Another voice request is being prepared.")
@@ -185,7 +196,8 @@ object NarrationEngine {
           if (stat.availableBytes - MAX_FILE_BYTES < reserve || cacheBytes() + MAX_FILE_BYTES > CACHE_LIMIT) {
             return@withEngine done(null, "Not enough temporary audio space. Delete prepared audio or free device storage.")
           }
-          val key = sha256("$voiceID\n${engine.defaultEngine}\n${Build.VERSION.INCREMENTAL}\n$text")
+          val speechRate = rate.coerceIn(0.5, 2.0).toFloat()
+          val key = sha256("$voiceID\n$speechRate\n${preferredEngine() ?: engine.defaultEngine}\n${Build.VERSION.INCREMENTAL}\n$text")
           val target = File(directory, "$key.wav")
           if (target.length() > WAV_HEADER) {
             target.setLastModified(System.currentTimeMillis())
@@ -196,6 +208,8 @@ object NarrationEngine {
           val partial = File(directory, "$id.partial")
           pending = Pending(id, partial, target, done)
           engine.voice = voice
+          engine.setSpeechRate(speechRate)
+          engine.setPitch(1f)
           handler.postDelayed({ if (pending?.id == id) fail("Voice preparation timed out. Try another installed voice.") }, TIMEOUT_MS)
           if (engine.synthesizeToFile(text, Bundle(), partial, id) != TextToSpeech.SUCCESS) {
             fail("The voice could not start. Try another installed voice.")
@@ -306,6 +320,7 @@ object NarrationEngine {
   private fun sha256(value: String) = MessageDigest.getInstance("SHA-256")
     .digest(value.toByteArray()).joinToString("") { "%02x".format(it) }
 
+  private const val GOOGLE_TTS = "com.google.android.tts"
   private const val MAX_TEXT = 1200
   private const val MAX_FILE_BYTES = 8L * 1024 * 1024
   private const val CACHE_LIMIT = 250_000_000L

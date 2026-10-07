@@ -110,7 +110,7 @@ object NarrationPreparation {
           val requiresCharging = work.optBoolean("requiresCharging", true)
           if (!admitted(requiresCharging)) return end(true)
           val item = items.getJSONObject(0)
-          NarrationEngine.synthesize(item.getString("text"), item.getString("voiceID")) { speech, _ ->
+          NarrationEngine.synthesize(item.getString("text"), item.getString("voiceID"), item.optDouble("rate", 1.0)) { speech, _ ->
             try {
               if (token != generation) return@synthesize next()
               if (speech == null) {

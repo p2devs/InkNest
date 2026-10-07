@@ -120,6 +120,9 @@ export function NarrationProvider({ children }) {
   });
   const [capabilities, setCapabilities] = useState(null);
   const progress = useRef(0);
+  useEffect(() => {
+    progress.current = 0;
+  }, [state.file]);
 
   // Voices, scene analysis and storage; refreshed after audio is deleted.
   const refreshCapabilities = useCallback(() => {
@@ -167,11 +170,14 @@ export function NarrationProvider({ children }) {
   // A finished chapter keeps the timer only while auto-advance will continue.
   useEffect(() => {
     const continuing =
-      state.status === 'finished' && autoAdvance && sleepAt !== 'chapter';
+      state.status === 'finished' &&
+      !state.isSelection &&
+      autoAdvance &&
+      sleepAt !== 'chapter';
     if (!ACTIVE.includes(state.status) && !continuing) {
       setSleepAt(null);
     }
-  }, [state.status, autoAdvance, sleepAt]);
+  }, [state.status, state.isSelection, autoAdvance, sleepAt]);
 
   // Opt-in auto-advance: after the final sample, continue with the next
   // chapter. In the background only saved text is used, so no network or
@@ -182,6 +188,7 @@ export function NarrationProvider({ children }) {
     if (
       !session ||
       state.status !== 'finished' ||
+      state.isSelection ||
       !autoAdvance ||
       sleepAt === 'chapter' ||
       !route?.nextChapterLink ||
@@ -198,7 +205,12 @@ export function NarrationProvider({ children }) {
         if (background && !saved) {
           throw new Error('open InkNest to continue with the next chapter.');
         }
-        if (session.getSnapshot().chapterKey !== state.chapterKey) {
+        const current = session.getSnapshot();
+        if (
+          current.chapterKey !== state.chapterKey ||
+          current.status !== 'finished' ||
+          current.isSelection
+        ) {
           return; // the listener started something else meanwhile
         }
         const snapshot = createNarrationChapter({
@@ -228,6 +240,8 @@ export function NarrationProvider({ children }) {
           },
           state.voiceID,
           state.sceneAnalysis,
+          0,
+          state.rate,
         );
         track('narration_auto_advance', { platform: Platform.OS });
       })
@@ -237,10 +251,12 @@ export function NarrationProvider({ children }) {
   }, [
     session,
     state.status,
+    state.isSelection,
     state.route,
     state.chapterKey,
     state.voiceID,
     state.sceneAnalysis,
+    state.rate,
     autoAdvance,
     sleepAt,
   ]);
@@ -390,50 +406,70 @@ export function NarrationProvider({ children }) {
           gain={ambienceGain}
         />
       )}
-      {state.file && (
-        <Video
-          key={`${state.file.token}:${state.index}`}
-          source={{
-            uri: `file://${state.file.path}`,
-            metadata: { title: state.label, artist: 'InkNest narration' },
-          }}
-          style={styles.audio}
-          paused={state.status !== 'playing'}
-          rate={rate}
-          ignoreSilentSwitch="ignore"
-          playInBackground
-          playWhenInactive
-          showNotificationControls
-          preventsDisplaySleepDuringVideoPlayback={false}
-          onLoadStart={() => {
-            progress.current = 0;
-          }}
-          onProgress={event => {
-            progress.current = event.currentTime;
-            if (typeof sleepAt === 'number' && Date.now() >= sleepAt) {
-              stopForSleep();
-            }
-          }}
-          // Lock-screen play/pause drives the native player directly.
-          onPlaybackStateChanged={({ isPlaying }) => {
-            const { status, file } = session.getSnapshot();
-            if (isPlaying && status === 'paused') {
-              session.resume();
-            } else if (
-              !isPlaying &&
-              status === 'playing' &&
-              progress.current < file.duration - 0.5
-            ) {
-              session.pause();
-            }
-          }}
-          onEnd={() => {
-            markConsumed(state.file.path);
-            session.ended(state.file, AppState.currentState === 'active');
-          }}
-          onError={() => session.playbackFailed(state.file)}
-          onAudioBecomingNoisy={() => session.pause()}
-        />
+      {/* The prepared next segment is mounted paused so it starts without a
+          gap; keys follow the segment, so it becomes the playing player as-is. */}
+      {[state.file, state.next].map(
+        (file, slot) =>
+          file && (
+            <Video
+              key={`${file.token}:${file.index}`}
+              source={{
+                uri: `file://${file.path}`,
+                metadata: { title: state.label, artist: 'InkNest narration' },
+              }}
+              style={styles.audio}
+              paused={slot === 1 || state.status !== 'playing'}
+              ignoreSilentSwitch="ignore"
+              playInBackground
+              playWhenInactive
+              showNotificationControls={slot === 0}
+              preventsDisplaySleepDuringVideoPlayback={false}
+              onProgress={
+                slot === 0
+                  ? event => {
+                      progress.current = event.currentTime;
+                      if (
+                        typeof sleepAt === 'number' &&
+                        Date.now() >= sleepAt
+                      ) {
+                        stopForSleep();
+                      }
+                    }
+                  : undefined
+              }
+              // Lock-screen play/pause drives the native player directly.
+              onPlaybackStateChanged={
+                slot === 0
+                  ? ({ isPlaying }) => {
+                      const snapshot = session.getSnapshot();
+                      if (isPlaying && snapshot.status === 'paused') {
+                        session.resume();
+                      } else if (
+                        !isPlaying &&
+                        snapshot.status === 'playing' &&
+                        progress.current < snapshot.file.duration - 0.5
+                      ) {
+                        session.pause();
+                      }
+                    }
+                  : undefined
+              }
+              onEnd={
+                slot === 0
+                  ? () => {
+                      markConsumed(file.path);
+                      session.ended(file, AppState.currentState === 'active');
+                    }
+                  : undefined
+              }
+              onError={
+                slot === 0 ? () => session.playbackFailed(file) : undefined
+              }
+              onAudioBecomingNoisy={
+                slot === 0 ? () => session.pause() : undefined
+              }
+            />
+          ),
       )}
     </NarrationContext.Provider>
   );

@@ -1,5 +1,27 @@
 # Novel narration plan
 
+## Reader settings update — 2026-10-07
+
+- Confirmed: move narration into the reader settings panel, improve its layout,
+  play a selected paragraph or text range, and skip content inside `[]`.
+- Reuse `ReaderSettings`, `NarrationControls`, `useNarrationReader`, and the
+  existing session and text segmentation modules. Preserve current reader styling,
+  full-chapter playback, native engines, and unrelated working changes.
+- Add Reading / Listen tabs in the scrollable settings sheet. Long-press opens
+  the selected paragraph in Listen; native text selection narrows playback.
+- Keep selection playback isolated from chapter bookmarks and auto-advance.
+  Filter bracket contents before segmentation, retaining paragraph/selection
+  offsets; apply the same filter to live and prepared narration.
+- Files: reader/settings components, narration controls/hook/session/text helpers,
+  provider completion guard, and their existing tests. No new dependencies.
+- Validate with `corepack yarn test:narration`, focused ESLint, and formatting.
+  Native selection gestures and visual layout need a device/simulator check.
+- One proposed commit: `feat(reader): move listening into settings and play selected text`.
+- Implemented: selection preserves chapter bookmarks and stops without advancing;
+  old preparation jobs are invalidated because their segment offsets changed.
+  Validation: 38 Node tests and 7 Jest tests pass. No connected Android device or
+  booted iOS simulator was available for native gesture or visual verification.
+
 Status: implementation started on 2026-10-05; the first iOS foreground preview is behind a default-off feature flag. Release gates remain open.
 
 ## Outcome

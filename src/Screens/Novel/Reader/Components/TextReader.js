@@ -82,7 +82,7 @@ export function TextReader({
               }
               accessibilityHint={
                 onParagraphLongPress
-                  ? 'Long press to listen from this paragraph'
+                  ? 'Long press to select this paragraph for listening'
                   : undefined
               }
               style={[

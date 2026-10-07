@@ -66,7 +66,7 @@ function setup(overrides = {}) {
       if (!texts[chapter.link]) {
         throw new Error('offline');
       }
-      return texts[chapter.link];
+      return overrides.text ?? texts[chapter.link];
     },
     fileExists: overrides.fileExists || (async () => true),
     resourceSnapshot: snapshotOf,
@@ -296,4 +296,41 @@ test('a blocked fetch waits with its reason instead of failing the chapter', asy
   queue.resume(job.id);
   await queue.run();
   assert.equal(queue.getSnapshot()[0].state, 'ready');
+});
+
+test('preparation skips bracketed content and reports chapters with no spoken text', async () => {
+  const prepared = setup({ text: 'Before [silent note] after.' });
+  prepared.queue.add({ novel, chapters: chapters.slice(0, 1), voiceID: 'v' });
+  await prepared.queue.run();
+  assert.deepEqual(prepared.synthesized, ['Before after.']);
+  const empty = setup({ text: '[Only a note]' });
+  empty.queue.add({ novel, chapters: chapters.slice(0, 1), voiceID: 'v' });
+  await empty.queue.run();
+  assert.deepEqual(empty.synthesized, []);
+  assert.equal(readyChapters(empty.queue.getSnapshot()[0]).length, 0);
+  assert.match(
+    empty.queue.getSnapshot()[0].chapters[0].error,
+    /No spoken text/,
+  );
+});
+
+test('old preparation segment offsets are invalidated and stale native results ignored', async () => {
+  const first = setup();
+  first.queue.add({ novel, chapters: chapters.slice(0, 1), voiceID: 'v' });
+  await first.queue.run();
+  const persisted = first.saved.jobs;
+  delete persisted[0].speechFormat;
+  const oldID = persisted[0].id;
+  const second = setup({ initial: persisted, text: 'Before [silent] after.' });
+  const migrated = second.queue.getSnapshot()[0];
+  assert.equal(migrated.state, 'expired');
+  assert.equal(readyChapters(migrated).length, 0);
+  second.queue.applyResults([
+    { id: `${oldID}:0:0`, path: '/old.caf', bytes: 10, duration: 1 },
+  ]);
+  assert.equal(second.queue.getSnapshot()[0].chapters[0].files, null);
+  second.queue.resume(migrated.id);
+  await second.queue.run();
+  assert.deepEqual(second.synthesized, ['Before after.']);
+  assert.equal(readyChapters(second.queue.getSnapshot()[0]).length, 1);
 });

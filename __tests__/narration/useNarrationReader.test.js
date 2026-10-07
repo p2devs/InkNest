@@ -42,8 +42,8 @@ test('highlights and follows the spoken paragraph, then resumes from its bookmar
       </NarrationProvider>,
     );
   });
-  // Without a voice, long-press is not offered.
-  expect(reader.readerProps.onParagraphLongPress).toBeUndefined();
+  // Selection is available before a voice is chosen.
+  expect(reader.readerProps.onParagraphLongPress).toEqual(expect.any(Function));
   reader.readerProps.onParagraphLayout(1, 400);
   await act(async () => reader.start(1));
   await act(async () => {});
@@ -65,5 +65,41 @@ test('highlights and follows the spoken paragraph, then resumes from its bookmar
   });
   expect(reader.isThisChapter).toBe(false);
   expect(reader.bookmark).toBe(1);
+  await act(async () => renderer.unmount());
+});
+
+test('long press selects a passage without starting audio; playing a range keeps its paragraph', async () => {
+  mockEngine.synthesize.mockClear();
+  mockEngine.getCapabilities.mockResolvedValueOnce({
+    voices: [{ id: 'v', language: 'en-US' }],
+  });
+  const onSelectParagraph = jest.fn();
+  let reader;
+  function Reader() {
+    reader = useNarrationReader({
+      content: 'One.\n\nTwo words. [Silent note]',
+      novel: { link: 'https://source/selection' },
+      chapterLink: 'https://source/selection/1',
+      nextChapterLink: 'https://source/selection/2',
+      scrollViewRef: { current: null },
+      onSelectParagraph,
+    });
+    return null;
+  }
+  let renderer;
+  await act(async () => {
+    renderer = ReactTestRenderer.create(
+      <NarrationProvider>
+        <Reader />
+      </NarrationProvider>,
+    );
+  });
+  await act(async () => reader.readerProps.onParagraphLongPress(1));
+  expect(onSelectParagraph).toHaveBeenCalledTimes(1);
+  expect(reader.selectedText).toBe('Two words. [Silent note]');
+  expect(mockEngine.synthesize).not.toHaveBeenCalled();
+  await act(async () => reader.playSelection(4, 10));
+  expect(mockEngine.synthesize).toHaveBeenCalledWith('words.', 'v', 1);
+  expect(reader.readerProps.activeParagraph).toBe(1);
   await act(async () => renderer.unmount());
 });

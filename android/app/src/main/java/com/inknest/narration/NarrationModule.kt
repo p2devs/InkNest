@@ -41,8 +41,8 @@ class NarrationModule(context: ReactApplicationContext) : NativeInkNestNarration
     }
   }
 
-  override fun synthesize(text: String, voiceID: String, promise: Promise) {
-    NarrationEngine.synthesize(text, voiceID) { speech, error ->
+  override fun synthesize(text: String, voiceID: String, rate: Double, promise: Promise) {
+    NarrationEngine.synthesize(text, voiceID, rate) { speech, error ->
       if (speech == null) {
         promise.reject("narration_synthesis", error ?: "Unable to prepare this voice.")
       } else {

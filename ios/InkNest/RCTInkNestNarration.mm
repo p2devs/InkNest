@@ -22,8 +22,8 @@ RCT_EXPORT_MODULE(NativeInkNestNarration)
   }];
 }
 
-- (void)synthesize:(NSString *)text voiceID:(NSString *)voiceID resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-  [_engine synthesize:text voiceID:voiceID completion:^(NSDictionary *result, NSError *error) {
+- (void)synthesize:(NSString *)text voiceID:(NSString *)voiceID rate:(double)rate resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [_engine synthesize:text voiceID:voiceID rate:rate completion:^(NSDictionary *result, NSError *error) {
     if (error) { reject(@"narration_synthesis", error.localizedDescription, error); }
     else { resolve(result); }
   }];

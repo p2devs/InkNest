@@ -23,7 +23,9 @@ export type SpeechFile = { path: string; bytes: number; duration: number };
 
 export interface Spec extends TurboModule {
   getCapabilities(language: string): Promise<Capabilities>;
-  synthesize(text: string, voiceID: string): Promise<SpeechFile>;
+  // `rate` 1 = normal speed; the engine speaks faster/slower naturally
+  // instead of the player time-stretching the audio.
+  synthesize(text: string, voiceID: string, rate: number): Promise<SpeechFile>;
   cancel(): Promise<boolean>;
   clearAudio(): Promise<boolean>;
   sceneCue(text: string, language: string): Promise<string>;

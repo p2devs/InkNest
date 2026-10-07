@@ -56,7 +56,7 @@ export default function PrepareForLater(props) {
 // Prepare-for-later on novel details: choose how many chapters from
 // `chapters` (in reading order), then follow progress, pause, delete or play.
 function Card({ narration, novel, chapters, onOpenChapter }) {
-  const { preparation, voiceID, capabilities, deleteAudio } = narration;
+  const { preparation, voiceID, rate, capabilities, deleteAudio } = narration;
   const { queue, jobs } = preparation;
   const [range, setRange] = useState(RANGES[1]);
   const [chargingOnly, setChargingOnly] = useState(true);
@@ -142,6 +142,7 @@ function Card({ narration, novel, chapters, onOpenChapter }) {
               novel,
               chapters: selection,
               voiceID,
+              rate,
               requiresCharging: chargingOnly,
               wifiOnly,
             }),

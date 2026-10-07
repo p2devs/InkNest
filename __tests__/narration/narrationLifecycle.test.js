@@ -91,7 +91,16 @@ test('sleep timer stops, played audio is marked consumed, preparation is handed 
       'v',
     );
   });
-  const audio = () => renderer.root.findByType('NarrationAudio');
+  // The playing segment owns the lock-screen controls; the next one is
+  // preloaded and paused so the switch has no gap.
+  const players = () => renderer.root.findAllByType('NarrationAudio');
+  const audio = () =>
+    players().find(player => player.props.showNotificationControls);
+  await tick();
+  expect(players()).toHaveLength(2);
+  expect(
+    players().find(p => !p.props.showNotificationControls).props.paused,
+  ).toBe(true);
   const firstPath = audio().props.source.uri.replace('file://', '');
   await act(async () => audio().props.onEnd());
   const [path, mtime] = RNFS.touch.mock.calls[0];
@@ -99,8 +108,11 @@ test('sleep timer stops, played audio is marked consumed, preparation is handed 
   expect(Date.now() - mtime.getTime()).toBeGreaterThan(5.9 * 24 * 3600e3);
 
   // Sleep timer: an expired deadline stops at the next progress event.
-  await act(async () => narration.setSleepAt(Date.now() - 1));
+  const now = Date.now();
+  await act(async () => narration.setSleepAt(now + 60000));
+  const clock = jest.spyOn(Date, 'now').mockReturnValue(now + 60001);
   await act(async () => audio().props.onProgress({ currentTime: 0.2 }));
+  clock.mockRestore();
   expect(narration.session.getSnapshot().status).toBe('idle');
   expect(narration.sleepAt).toBeNull();
 
@@ -173,6 +185,29 @@ test('sleep timer stops, played audio is marked consumed, preparation is handed 
   expect(advanced.route.chapterLink).toBe('https://source/novel/2');
   expect(advanced.route.previousChapterLink).toBe('https://source/novel/1');
   expect(advanced.route.chapter.number).toBe(2);
+
+  // A selection stops locally even when automatic chapter advance is enabled.
+  await act(async () => {
+    await narration.session.start(
+      {
+        key: 'selection',
+        revision: 'r',
+        text: 'Only these words.',
+        language: 'en',
+        route,
+        selection: { paragraphIndex: 0, start: 0, end: 4 },
+      },
+      'v',
+    );
+    narration.setSleepAt(Date.now() + 60000);
+  });
+  await act(async () => audio().props.onEnd());
+  await tick();
+  expect(narration.session.getSnapshot().status).toBe('finished');
+  expect(narration.session.getSnapshot().route.chapterLink).toBe(
+    route.chapterLink,
+  );
+  expect(narration.sleepAt).toBeNull();
 
   // In the background, unsaved next chapters are not fetched: stop with a reason.
   await act(async () => narration.session.stop());

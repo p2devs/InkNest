@@ -1,9 +1,23 @@
 import React from 'react';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { AppState } from 'react-native';
+import { AppState, TextInput } from 'react-native';
 import { NarrationProvider } from '../../src/Screens/Novel/Narration/NarrationProvider';
 import NarrationControls from '../../src/Screens/Novel/Narration/NarrationControls';
+import ReaderSettings from '../../src/Screens/Novel/Reader/Components/ReaderSettings';
 import PrepareForLater from '../../src/Screens/Novel/Narration/PrepareForLater';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  useSelector: selector => selector({ data: {} }),
+  useDispatch: () => mockDispatch,
+}));
+jest.mock('../../src/Redux/Reducers', () => ({
+  setNovelFontSize: value => ({ type: 'font-size', payload: value }),
+  setNovelReaderMode: jest.fn(),
+  setNovelReaderTheme: jest.fn(),
+  setNovelLineHeight: jest.fn(),
+  setNovelFontFamily: jest.fn(),
+}));
 
 const mockEngine = {
   cancel: jest.fn(async () => true),
@@ -108,19 +122,18 @@ test('reader controls and prepare-for-later card drive the real session and queu
   // Reader controls: voice cycling, bookmark resume, storage, text-rule scenes.
   expect(labels(renderer)).toEqual(
     expect.arrayContaining([
-      'Ava · en-US',
+      'Ava · en-US · Enhanced',
       'Resume at paragraph 3',
       'Delete audio (2048 B)',
     ]),
   );
-  await press(renderer, 'Ava · en-US');
-  expect(labels(renderer)).toContain('Ben · en-GB');
+  await press(renderer, 'Ava · en-US · Enhanced');
+  expect(labels(renderer)).toContain('Ben · en-GB · Standard');
   await press(renderer, 'Resume at paragraph 3');
   expect(reader.start).toHaveBeenCalledWith(2);
   expect(
-    renderer.root.findAll(
-      node => node.props.children === 'Scene tags (text rules)',
-    ).length,
+    renderer.root.findAll(node => node.props.children === 'Show scene tags')
+      .length,
   ).toBeGreaterThan(0);
 
   // Prepare the next 3 chapters (only 2 exist) while charging.
@@ -131,6 +144,7 @@ test('reader controls and prepare-for-later card drive the real session and queu
   expect(mockEngine.synthesize).toHaveBeenCalledWith(
     'Rain fell. Rain kept falling.',
     'b',
+    1, // prepared at the listening speed
   );
   await press(renderer, 'Play chapter 4');
   expect(onOpenChapter).toHaveBeenCalledWith(
@@ -141,4 +155,72 @@ test('reader controls and prepare-for-later card drive the real session and queu
 
   await act(async () => renderer.unmount());
   AppState.currentState = originalState;
+});
+
+test('selection controls play a paragraph or just the chosen range', async () => {
+  const reader = {
+    start: jest.fn(),
+    playSelection: jest.fn(),
+    clearSelection: jest.fn(),
+    selectedParagraph: 2,
+    selectedText: 'First words. Last words.',
+    bookmark: null,
+  };
+  let renderer;
+  await act(async () => {
+    renderer = ReactTestRenderer.create(
+      <NarrationProvider>
+        <NarrationControls reader={reader} colors={{ text: '#fff' }} />
+      </NarrationProvider>,
+    );
+  });
+  const selectedButton = () =>
+    renderer.root.find(
+      node =>
+        node.props.accessibilityLabel === 'Play selected text' &&
+        node.props.onPress,
+    );
+  expect(selectedButton().props.disabled).toBe(true);
+  await press(renderer, 'Play paragraph');
+  expect(reader.playSelection).toHaveBeenLastCalledWith(
+    0,
+    reader.selectedText.length,
+  );
+  await act(async () =>
+    renderer.root.findByType(TextInput).props.onSelectionChange({
+      nativeEvent: { selection: { start: 13, end: 23 } },
+    }),
+  );
+  expect(selectedButton().props.disabled).toBe(false);
+  await press(renderer, 'Play selected text');
+  expect(reader.playSelection).toHaveBeenLastCalledWith(13, 23);
+  await press(renderer, 'Listen from here');
+  expect(reader.start).toHaveBeenLastCalledWith(2);
+  await act(async () => renderer.unmount());
+});
+
+test('reader settings switches between reading preferences and narration', async () => {
+  const reader = { enabled: true, start: jest.fn(), bookmark: null };
+  const onClose = jest.fn();
+  let renderer;
+  await act(async () => {
+    renderer = ReactTestRenderer.create(
+      <NarrationProvider>
+        <ReaderSettings visible onClose={onClose} narrationReader={reader} />
+      </NarrationProvider>,
+    );
+  });
+  expect(labels(renderer)).not.toContain('Listen from start');
+  await press(renderer, 'Listen settings');
+  expect(labels(renderer)).toContain('Listen from start');
+  await press(renderer, 'Listen from start');
+  expect(reader.start).toHaveBeenCalledWith(0);
+  await press(renderer, 'Reading settings');
+  expect(labels(renderer)).not.toContain('Listen from start');
+  expect(
+    renderer.root.findAll(node => node.props.children === 'Font Size').length,
+  ).toBeGreaterThan(0);
+  await press(renderer, 'Close reader settings');
+  expect(onClose).toHaveBeenCalledTimes(1);
+  await act(async () => renderer.unmount());
 });

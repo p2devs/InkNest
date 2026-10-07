@@ -68,19 +68,43 @@ test('text revision changes when wording changes and is stable otherwise', () =>
   assert.notEqual(make('Story one.'), make('Story two.'));
 });
 
-test('spoken text drops web-novel symbols but keeps the words', () => {
+test('spoken text skips bracketed content and decorative symbols', () => {
   const {
     spokenText,
   } = require('../../src/Screens/Novel/Narration/chapterText');
-  assert.equal(
-    spokenText('[Skill: Blink] acquired!!!'),
-    'Skill: Blink acquired!',
-  );
+  assert.equal(spokenText('[Skill: Blink] acquired!!!'), 'acquired!');
   assert.equal(spokenText('*** Scene break ***'), 'Scene break');
   assert.equal(spokenText('Wait..... what?!?'), 'Wait… what?');
   assert.equal(spokenText('See https://example.com now'), 'See now');
-  assert.equal(spokenText('***'), '***', 'never empty');
+  assert.equal(spokenText('***'), '');
+  assert.equal(spokenText('[Only a note]'), '');
   const [segment] = segmentChapter('【System】 Level up!!');
   assert.equal(segment.text, '【System】 Level up!!');
   assert.equal(segment.spoken, 'System Level up!');
+});
+
+test('the first segment is short so narration starts quickly', () => {
+  const sentence = 'The carriage rocked gently as the train moved on. ';
+  const segments = segmentChapter(sentence.repeat(30));
+  assert.ok(segments[0].text.length <= 220);
+  assert.ok(segments[1].text.length > 220);
+  assert.ok(segments.every(segment => segment.text.length <= 600));
+});
+
+test('brackets spanning segments and paragraphs are silent without shifting paragraph identity', () => {
+  const text =
+    'Before [' +
+    'hidden '.repeat(100) +
+    '\n\n[nested] hidden] After.\n\n[Only a note]\n\nLast.';
+  const segments = segmentChapter(text, 40);
+  assert.deepEqual(
+    segments.map(segment => segment.spoken),
+    ['Before', 'After.', 'Last.'],
+  );
+  assert.deepEqual(
+    segments.map(segment => segment.paragraphIndex),
+    [0, 1, 3],
+  );
+  assert.deepEqual(segmentChapter('[Only a note]\n\n***'), []);
+  assert.equal(getChapterText(text), text, 'display text remains unchanged');
 });

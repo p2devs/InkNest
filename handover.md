@@ -10,6 +10,16 @@ The user asked for realistic light-novel TTS using a loaded model and optional s
 
 Latest preference: use Apple Intelligence when the device supports it. Prefer Foundation Models for bounded scene understanding and evaluate Apple system speech separately for narration; these are distinct capabilities. Preserve a downloadable local voice fallback. Exact voice and public-API behavior must pass the same device/background gates.
 
+## Update — 2026-10-07: voice quality and Yarn
+
+The user reported the voice breaking, sounding robotic and having mechanical artifacts. I can't listen on the device, so I fixed the likely causes in code:
+- **Speed is rendered by the voice, not the player.** `synthesize(text, voiceID, rate)` sets `AVSpeechUtterance.rate` / `TextToSpeech.setSpeechRate`, and the player always runs at 1×. Time-stretched playback was a source of robotic, metallic sound. Rate is part of the cache key; prepared jobs keep their speed. Changing speed mid-chapter restarts from the current paragraph (`session.restart`).
+- **Gapless joins:** the session publishes the prepared next segment (`state.next`). The provider mounts its player paused, keyed by segment, so it becomes the playing player without remounting. Only the playing player owns the lock-screen controls.
+- **Fewer slow starts:** the first segment is at most 220 characters; the rest stay at 600.
+- **Voices:** iOS excludes novelty and Eloquence voices. Android prefers Google's engine (`com.google.android.tts`) and declares the required `TTS_SERVICE` `<queries>`. The voice button shows quality (iOS Standard/Enhanced/Premium, Android High quality/Standard). The panel explains how to install a better voice when only basic ones exist.
+- **Limit:** system voices cannot match neural voices. The real step up is the downloadable neural voice (T05; sherpa-onnx + Kokoro/Piper), which needs package approval.
+- **Yarn:** the repo is Yarn 4 (v8 lockfile) but `package.json` didn't declare it, so a global Yarn 1 offered to "choose a version" for packages. It now declares `"packageManager": "yarn@4.12.0"`. Run `corepack enable` once, or use `corepack yarn`.
+
 ## Update — 2026-10-07: narration always on
 
 At the user's request the ConfigCat gate was removed. `NarrationProvider` creates the engine whenever the native module exists on iOS or Android, and the reader's narration panel is shown in Text mode whether or not the top bar is visible. Earlier notes about a "default-off flag" no longer apply.

@@ -1,4 +1,4 @@
-const { segmentChapter } = require('./chapterText');
+const { segmentChapter, getNarrationParagraphs } = require('./chapterText');
 const { ruleCue } = require('./sceneRules');
 
 const noBookmarks = { get: () => null, set: () => {}, delete: () => {} };
@@ -12,6 +12,7 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
   let chapter;
   let segments = [];
   let voiceID;
+  let rate = 1;
   let sceneAnalysis = false;
   let ready = null; // prepared file for a segment that has not started yet
   let inFlight = -1; // segment index being synthesized
@@ -23,6 +24,7 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
   const cancel = () => {
     generation += 1;
     ready = null;
+    state = { ...state, next: null };
     inFlight = -1;
     const cancelled = engine.cancel().catch(() => {});
     queue = Promise.all([queue, cancelled]).then(() => {});
@@ -45,15 +47,19 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
   const play = file => {
     publish({
       status: 'playing',
+      // One update: the preloaded player becomes the playing one without remounting.
+      next: null,
       file,
       index: file.index,
       cue: file.cue,
       message: '',
     });
-    bookmarks.set(chapter.key, {
-      revision: chapter.revision,
-      paragraphIndex: segments[file.index].paragraphIndex,
-    });
+    if (!chapter.selection) {
+      bookmarks.set(chapter.key, {
+        revision: chapter.revision,
+        paragraphIndex: segments[file.index].paragraphIndex,
+      });
+    }
     if (file.index + 1 < segments.length) {
       fetchSegment(file.token, file.index + 1);
     }
@@ -77,7 +83,7 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
         if (token !== generation) {
           return;
         }
-        const file = await engine.synthesize(segment.spoken, voiceID);
+        const file = await engine.synthesize(segment.spoken, voiceID, rate);
         if (token !== generation) {
           return;
         }
@@ -98,6 +104,7 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
           play(prepared);
         } else {
           ready = prepared;
+          publish({ next: prepared });
         }
       },
       error => {
@@ -151,27 +158,51 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
       const saved = bookmarks.get(snapshot.key);
       return !!saved?.completed && saved.revision === snapshot.revision;
     },
-    start(snapshot, voice, analyzeScenes = false, fromParagraph = 0) {
-      stop();
-      chapter = snapshot;
-      segments = segmentChapter(snapshot.text);
-      voiceID = voice;
-      sceneAnalysis = analyzeScenes;
-      const first = Math.max(
-        0,
-        segments.findIndex(segment => segment.paragraphIndex >= fromParagraph),
+    start(
+      snapshot,
+      voice,
+      analyzeScenes = false,
+      fromParagraph = 0,
+      speechRate = 1,
+    ) {
+      const selection = snapshot.selection;
+      const selectedText =
+        selection &&
+        getNarrationParagraphs(snapshot.text)[selection.paragraphIndex]?.slice(
+          selection.start,
+          selection.end,
+        );
+      const nextSegments = selection
+        ? segmentChapter(selectedText || '').map(segment => ({
+            ...segment,
+            paragraphIndex: selection.paragraphIndex,
+          }))
+        : segmentChapter(snapshot.text);
+      const first = nextSegments.findIndex(
+        segment => segment.paragraphIndex >= fromParagraph,
       );
-      if (!segments.length) {
+      if (first < 0) {
+        publish({
+          message: 'No spoken text here. Text inside [brackets] is skipped.',
+        });
         return Promise.resolve();
       }
+      stop();
+      chapter = snapshot;
+      segments = nextSegments;
+      voiceID = voice;
+      rate = speechRate;
+      sceneAnalysis = analyzeScenes;
       publish({
         status: 'preparing',
         file: null,
         chapterKey: snapshot.key,
+        isSelection: !!selection,
         // Where the reader for this chapter lives (mini-player, auto-advance).
         route: snapshot.route || null,
         label: snapshot.label || 'Novel narration',
         voiceID: voice,
+        rate: speechRate,
         sceneAnalysis: analyzeScenes,
         index: first,
         count: segments.length,
@@ -184,8 +215,8 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
     // Shows a message without changing playback (e.g. auto-advance failed).
     notify: message => publish({ message }),
     paragraphIndex: () => segments[state.index]?.paragraphIndex ?? -1,
-    // New narrator: restart from the paragraph being spoken.
-    changeVoice(voice) {
+    // New narrator or speed: regenerate from the paragraph being spoken.
+    restart({ voice = voiceID, speechRate = rate } = {}) {
       if (!['playing', 'preparing', 'paused', 'error'].includes(state.status)) {
         return queue;
       }
@@ -194,6 +225,7 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
         voice,
         sceneAnalysis,
         segments[state.index].paragraphIndex,
+        speechRate,
       );
     },
     pause() {
@@ -225,11 +257,13 @@ function createNarrationSession(engine, bookmarks = noBookmarks) {
       const next = state.index + 1;
       if (next >= segments.length) {
         // Listening is complete only after the final sample played.
-        bookmarks.set(chapter.key, {
-          revision: chapter.revision,
-          paragraphIndex: 0,
-          completed: true,
-        });
+        if (!chapter.selection) {
+          bookmarks.set(chapter.key, {
+            revision: chapter.revision,
+            paragraphIndex: 0,
+            completed: true,
+          });
+        }
         publish({ status: 'finished', file: null });
         return queue;
       }

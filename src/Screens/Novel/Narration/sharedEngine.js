@@ -25,13 +25,13 @@ function createSharedEngine(engine) {
     schedulePreparation: (itemsJSON, requiresCharging) =>
       engine.schedulePreparation(itemsJSON, requiresCharging),
     collectPreparation: () => engine.collectPreparation(),
-    synthesize: (text, voiceID) =>
-      withPermit(live, () => engine.synthesize(text, voiceID)),
+    synthesize: (text, voiceID, rate = 1) =>
+      withPermit(live, () => engine.synthesize(text, voiceID, rate)),
     sceneCue: (text, language) =>
       withPermit(live, () => engine.sceneCue(text, language)),
     clearAudio: () => withPermit(live, () => engine.clearAudio()),
-    synthesizeForLater: (text, voiceID) =>
-      withPermit(background, () => engine.synthesize(text, voiceID)),
+    synthesizeForLater: (text, voiceID, rate = 1) =>
+      withPermit(background, () => engine.synthesize(text, voiceID, rate)),
     hasLiveDemand: () => live.length > 0,
   };
 }

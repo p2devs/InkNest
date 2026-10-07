@@ -27,7 +27,6 @@ import {WTRLabModeSelector} from './Components/WTRLabModeSelector';
 import {getNovelChapter, getNovelHostKeyFromLink} from '../APIs';
 import {loadVerifiedChapter} from '../Utils/OfflineStorage';
 import {getChapterText} from '../Narration/chapterText';
-import NarrationControls from '../Narration/NarrationControls';
 import {useNarrationReader} from '../Narration/useNarrationReader';
 import {NAVIGATION} from '../../../Constants';
 import {
@@ -230,6 +229,7 @@ export function NovelReader() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('reading');
   const [showHeader, setShowHeader] = useState(true);
   const [restoringProgress, setRestoringProgress] = useState(false);
   const [showModeSelector, setShowModeSelector] = useState(false);
@@ -397,6 +397,10 @@ export function NovelReader() {
     translationMode: shouldExtractWTRLabText ? wtrlabReadingMode : 'default',
     label: [novel?.title, resolvedContent?.title].filter(Boolean).join(' · '),
     scrollViewRef,
+    onSelectParagraph: () => {
+      setSettingsTab('listen');
+      setShowSettings(true);
+    },
   });
   const restorationContentKey = [
     chapterLink || '',
@@ -664,10 +668,6 @@ export function NovelReader() {
         </SafeAreaView>
       )}
 
-      {!shouldUseWebReader && (
-        <NarrationControls reader={narrationReader} colors={themeColors} />
-      )}
-
       {isWaitingForWTRLabText && (
         <View style={styles.extractionOverlay} pointerEvents="none">
           <ActivityIndicator size="large" color="#667EEA" />
@@ -780,6 +780,8 @@ export function NovelReader() {
       {showSettings && (
         <ReaderSettings
           visible={showSettings}
+          initialTab={settingsTab}
+          narrationReader={!shouldUseWebReader ? narrationReader : null}
           onClose={() => setShowSettings(false)}
         />
       )}

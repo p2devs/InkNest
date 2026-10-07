@@ -6,6 +6,7 @@ const RECHECK_MS = 30000;
 const MAX_ATTEMPTS = 3;
 const SPOKEN_CHARS_PER_SECOND = 15; // ~180 words per minute
 const ACTIVE = ['queued', 'fetching', 'preparing', 'waiting'];
+const SPEECH_FORMAT = 2; // Bracketed notes and symbol-only segments are silent.
 
 // Durable prepare-for-later jobs. Text is fetched first, then segments are
 // synthesized one at a time through the shared engine; every verified segment
@@ -22,12 +23,33 @@ function createPreparationQueue({
   schedule = setTimeout,
   unschedule = clearTimeout,
 }) {
-  let jobs = store.load().map(job =>
+  let jobs = store.load().map(job => {
+    if (job.speechFormat !== SPEECH_FORMAT) {
+      // Segment offsets from the previous speech format cannot be reused. A new
+      // ID also prevents an old native worker's results from filling new slots.
+      return {
+        ...job,
+        id: `${job.id}-speech${SPEECH_FORMAT}`,
+        speechFormat: SPEECH_FORMAT,
+        state: ACTIVE.includes(job.state)
+          ? 'queued'
+          : job.state === 'ready'
+          ? 'expired'
+          : job.state,
+        reason: 'needs-preparation',
+        chapters: job.chapters.map(chapter => ({
+          ...chapter,
+          text: null,
+          files: null,
+          error: null,
+        })),
+      };
+    }
     // A process that died mid-step left no live worker behind.
-    ['fetching', 'preparing'].includes(job.state)
+    return ['fetching', 'preparing'].includes(job.state)
       ? { ...job, state: 'queued' }
-      : job,
-  );
+      : job;
+  });
   let running = null; // the in-flight run loop, shared by concurrent run() calls
   let stopped = true;
   let recheck = null;
@@ -105,6 +127,11 @@ function createPreparationQueue({
         content,
       });
       const count = segmentChapter(snapshot.text).length;
+      if (!count) {
+        throw new Error(
+          'No spoken text here. Text inside [brackets] is skipped.',
+        );
+      }
       job = updateChapter(job, index, {
         text: snapshot.text,
         revision: snapshot.revision,
@@ -150,7 +177,11 @@ function createPreparationQueue({
     try {
       // Same spoken text as live listening, so prepared audio is a cache hit.
       const { spoken } = segmentChapter(chapter.text)[segment];
-      const file = await engine.synthesizeForLater(spoken, job.voiceID);
+      const file = await engine.synthesizeForLater(
+        spoken,
+        job.voiceID,
+        job.rate ?? 1,
+      );
       if (!file?.path || !(file.duration > 0) || !(file.bytes > 0)) {
         throw new Error('The voice returned invalid audio.');
       }
@@ -271,6 +302,7 @@ function createPreparationQueue({
       novel,
       chapters,
       voiceID,
+      rate = 1,
       requiresCharging = true,
       wifiOnly = true,
     }) {
@@ -279,6 +311,7 @@ function createPreparationQueue({
       }
       const job = {
         id: `${now()}-${Math.random().toString(36).slice(2, 8)}`,
+        speechFormat: SPEECH_FORMAT,
         novelLink: novel.link,
         novelTitle: novel.title || '',
         // Small copy for saving fetched text as an ordinary offline download.
@@ -291,6 +324,8 @@ function createPreparationQueue({
           chapters: novel.chapters,
         },
         voiceID,
+        // Same speed as listening, so prepared audio is reused as-is.
+        rate,
         requiresCharging,
         wifiOnly,
         state: 'queued',
@@ -349,6 +384,7 @@ function createPreparationQueue({
                     id: `${job.id}:${c}:${s}`,
                     text: segment.spoken,
                     voiceID: job.voiceID,
+                    rate: job.rate ?? 1,
                   }))
                   .filter((item, s) => !chapter.files[s])
               : [],
