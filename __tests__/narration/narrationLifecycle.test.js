@@ -28,9 +28,6 @@ const mockEngine = {
     duration: 2,
   })),
 };
-jest.mock('configcat-react', () => ({
-  useFeatureFlag: () => ({ value: true }),
-}));
 jest.mock('react-native-video', () => 'NarrationAudio');
 jest.mock('@dr.pogodin/react-native-fs', () => ({
   touch: jest.fn(async () => {}),

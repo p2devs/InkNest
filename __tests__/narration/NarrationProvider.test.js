@@ -6,8 +6,6 @@ import {
   useNarration,
 } from '../../src/Screens/Novel/Narration/NarrationProvider';
 
-let mockEnabled = false;
-let mockModuleLoads = 0;
 const mockEngine = {
   cancel: jest.fn(async () => true),
   getCapabilities: jest.fn(async () => ({ voices: [] })),
@@ -19,19 +17,13 @@ const mockEngine = {
     duration: 2,
   })),
 };
-jest.mock('configcat-react', () => ({
-  useFeatureFlag: () => ({ value: mockEnabled }),
-}));
 jest.mock('react-native-video', () => 'NarrationAudio');
 jest.mock(
   '../../src/Screens/Novel/Narration/specs/NativeInkNestNarration',
-  () => {
-    mockModuleLoads += 1;
-    return { __esModule: true, default: mockEngine };
-  },
+  () => ({ __esModule: true, default: mockEngine }),
 );
 
-test('feature gate avoids native resolution, lock-screen playback syncs, and disabling stops playback', async () => {
+test('narration is always available, lock-screen playback syncs, and unmounting stops playback', async () => {
   let onAppState;
   const remove = jest.fn();
   const observer = jest
@@ -55,16 +47,7 @@ test('feature gate avoids native resolution, lock-screen playback syncs, and dis
     await act(async () => {
       renderer = ReactTestRenderer.create(tree);
     });
-    expect(narration).toBeNull();
-    expect(mockModuleLoads).toBe(0);
-    mockEnabled = true;
-    await act(async () => {
-      renderer.update(
-        <NarrationProvider>
-          <Consumer />
-        </NarrationProvider>,
-      );
-    });
+    expect(narration).not.toBeNull();
     await act(async () => {
       await narration.session.start(
         { key: 'chapter', text: 'A quiet forest.', language: 'en' },
@@ -89,16 +72,10 @@ test('feature gate avoids native resolution, lock-screen playback syncs, and dis
     });
     expect(audio().props.paused).toBe(false);
     const cancelCount = mockEngine.cancel.mock.calls.length;
-    mockEnabled = false;
     await act(async () => {
-      renderer.update(
-        <NarrationProvider>
-          <Consumer />
-        </NarrationProvider>,
-      );
+      renderer.unmount();
     });
-    expect(narration).toBeNull();
-    expect(renderer.root.findAllByType('NarrationAudio')).toHaveLength(0);
+    renderer = null;
     expect(mockEngine.cancel.mock.calls.length).toBeGreaterThan(cancelCount);
   } finally {
     await act(async () => {

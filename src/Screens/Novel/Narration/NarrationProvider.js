@@ -19,7 +19,6 @@ import {
 import Video from 'react-native-video';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import { createMMKV } from 'react-native-mmkv';
-import { useFeatureFlag } from 'configcat-react';
 import analytics from '@react-native-firebase/analytics';
 import { navigationRef } from '../../../Navigation/NavigationService';
 import { NAVIGATION } from '../../../Constants';
@@ -79,16 +78,13 @@ const markConsumed = path =>
   ).catch(() => {});
 
 export function NarrationProvider({ children }) {
-  const { value: enabled } = useFeatureFlag('novelNarrationEnabled', false);
-  const [engine, setEngine] = useState(null);
-  useEffect(() => {
-    // Only resolve the optional TurboModule after the explicit rollout gate.
-    const native =
-      enabled && ['ios', 'android'].includes(Platform.OS)
-        ? require('./specs/NativeInkNestNarration').default
-        : null;
-    setEngine(native ? createSharedEngine(native) : null);
-  }, [enabled]);
+  // Narration is always available on iOS and Android.
+  const [engine] = useState(() => {
+    const native = ['ios', 'android'].includes(Platform.OS)
+      ? require('./specs/NativeInkNestNarration').default
+      : null;
+    return native ? createSharedEngine(native) : null;
+  });
   const session = useMemo(
     () => (engine ? createNarrationSession(engine, bookmarks) : null),
     [engine],
@@ -305,7 +301,7 @@ export function NarrationProvider({ children }) {
 
   const value = useMemo(
     () =>
-      enabled && session
+      session
         ? {
             engine,
             session,
@@ -332,7 +328,6 @@ export function NarrationProvider({ children }) {
           }
         : null,
     [
-      enabled,
       engine,
       session,
       state,
@@ -359,7 +354,7 @@ export function NarrationProvider({ children }) {
   return (
     <NarrationContext.Provider value={value}>
       {children}
-      {enabled && ACTIVE.includes(state.status) && (
+      {session && ACTIVE.includes(state.status) && (
         <View style={styles.miniPlayer}>
           <TouchableOpacity
             accessibilityRole="button"
@@ -388,14 +383,14 @@ export function NarrationProvider({ children }) {
           </TouchableOpacity>
         </View>
       )}
-      {enabled && hasAmbienceAssets && ambienceGain > 0 && (
+      {hasAmbienceAssets && ambienceGain > 0 && (
         <AmbiencePlayer
           cue={ambienceCue === 'auto' ? ambience.current : ambienceCue}
           playing={state.status === 'playing'}
           gain={ambienceGain}
         />
       )}
-      {enabled && state.file && (
+      {state.file && (
         <Video
           key={`${state.file.token}:${state.index}`}
           source={{

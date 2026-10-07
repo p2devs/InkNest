@@ -664,7 +664,7 @@ export function NovelReader() {
         </SafeAreaView>
       )}
 
-      {!shouldUseWebReader && showHeader && (
+      {!shouldUseWebReader && (
         <NarrationControls reader={narrationReader} colors={themeColors} />
       )}
 
