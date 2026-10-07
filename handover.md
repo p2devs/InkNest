@@ -10,6 +10,10 @@ The user asked for realistic light-novel TTS using a loaded model and optional s
 
 Latest preference: use Apple Intelligence when the device supports it. Prefer Foundation Models for bounded scene understanding and evaluate Apple system speech separately for narration; these are distinct capabilities. Preserve a downloadable local voice fallback. Exact voice and public-API behavior must pass the same device/background gates.
 
+## Update — 2026-10-07: narration always on
+
+At the user's request the ConfigCat gate was removed. `NarrationProvider` creates the engine whenever the native module exists on iOS or Android, and the reader's narration panel is shown in Text mode whether or not the top bar is visible. Earlier notes about a "default-off flag" no longer apply.
+
 ## Fourth session checkpoint — 2026-10-05 (latest)
 
 The user pointed out that a lot still looked pending. I audited each task's “done when” criteria against the code and implemented every gap that needs no new package. This round is JS-only; the native code is unchanged since the third-session builds. `tasks.md` is restructured: 20 of 27 tasks are code-complete, one device checklist is yours, and blocked items and decisions are listed separately.

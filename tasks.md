@@ -1,6 +1,6 @@
 # Novel narration tasks
 
-Updated 2026-10-05 (fourth session). **Coding is complete for everything that needs no new package or asset.** What remains is device testing (yours), two items blocked on new dependencies, and product decisions. The feature flag `novelNarrationEnabled` stays off and nothing is committed.
+Updated 2026-10-05 (fourth session). **Coding is complete for everything that needs no new package or asset.** What remains is device testing (yours), two items blocked on new dependencies, and product decisions. Narration is always on (the `novelNarrationEnabled` flag was removed at the user's request).
 
 Legend: `[x]` = code complete and verified in tests, builds and the simulator. `[ ]` = blocked, a decision, or device testing. A task's full “Done when” acceptance still needs the matching device check below.
 
@@ -13,7 +13,7 @@ Legend: `[x]` = code complete and verified in tests, builds and the simulator. `
 
 ## Your device checklist
 
-Run these on the phones you choose (low, mid and high end recommended). Enable `novelNarrationEnabled` in the ConfigCat test environment first.
+Run these on the phones you choose (low, mid and high end recommended), using a fresh native build of this branch.
 
 - [ ] **Listening:** audition voices (iOS Settings › Accessibility › Spoken Content; Android TTS settings). Check pronunciation of web-novel symbols, speed 0.75–1.5×, and narrator change mid-chapter.
 - [ ] **Reader:** highlight follows the voice, manual scroll stops following, **Follow text** resumes, long-press a paragraph, **Resume at paragraph N**, “You have listened to this chapter”.
@@ -24,7 +24,7 @@ Run these on the phones you choose (low, mid and high end recommended). Enable `
 - [ ] **Prepare for later:** prepare 3 chapters; check Wi-Fi-only and charging-only waits, size/time estimates, pause/resume/prepare first/delete; prepared chapter plays in airplane mode after an app restart.
 - [ ] **OS background preparation:** queue work, background the app while charging, then force the task. iOS (Xcode debugger, paused app): `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.p2devs.inknest.narration.prepare"]`. Android: `adb shell cmd jobscheduler run -f com.p2devs.inknest 6782`. Return to the app; chapters should show ready.
 - [ ] **Resources:** 60-minute session with heat/battery/memory notes; low storage (Waiting for space); Low Power Mode / Battery Saver (preparation waits); **Delete audio** frees space and prepared chapters show Needs preparation.
-- [ ] **App-wide:** UIScene startup, deep links, Google Sign-In and notifications still work on iOS; with the flag off, nothing narration-related appears.
+- [ ] **App-wide:** UIScene startup, deep links, Google Sign-In and notifications still work on iOS.
 
 ## Blocked or needing your decision
 
