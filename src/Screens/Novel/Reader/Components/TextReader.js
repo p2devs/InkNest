@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import {getChapterParagraphs} from '../../Narration/chapterText';
 
 /**
  * TextReader Component
@@ -18,11 +19,13 @@ export function TextReader({
   fontFamily = 'serif',
   theme = 'dark',
   onPress,
+  // Narration: highlighted paragraph, its scroll offsets, and listen-from-here.
+  activeParagraph = -1,
+  onParagraphLayout,
+  onParagraphLongPress,
 }) {
-  const paragraphs = String(content || '')
-    .split(/\n\s*\n/)
-    .map(paragraph => paragraph.trim())
-    .filter(Boolean);
+  const paragraphs = getChapterParagraphs(content);
+  const listTop = useRef(0);
 
   const getThemeStyles = () => {
     switch (theme) {
@@ -58,11 +61,30 @@ export function TextReader({
           {title}
         </Text>
       )}
-      <View>
+      <View
+        onLayout={event => {
+          listTop.current = event.nativeEvent.layout.y;
+        }}>
         {(paragraphs.length > 0 ? paragraphs : [String(content || '')]).map(
           (paragraph, index) => (
             <Text
               key={`${index}-${paragraph.slice(0, 24)}`}
+              onLayout={
+                onParagraphLayout &&
+                (event =>
+                  onParagraphLayout(
+                    index,
+                    listTop.current + event.nativeEvent.layout.y,
+                  ))
+              }
+              onLongPress={
+                onParagraphLongPress && (() => onParagraphLongPress(index))
+              }
+              accessibilityHint={
+                onParagraphLongPress
+                  ? 'Long press to listen from this paragraph'
+                  : undefined
+              }
               style={[
                 styles.content,
                 {
@@ -72,6 +94,7 @@ export function TextReader({
                   fontFamily: getFontFamily(),
                 },
                 index < paragraphs.length - 1 && styles.paragraphSpacing,
+                index === activeParagraph && styles.activeParagraph,
               ]}>
               {paragraph}
             </Text>
@@ -93,6 +116,10 @@ const styles = StyleSheet.create({
   },
   paragraphSpacing: {
     marginBottom: 20,
+  },
+  activeParagraph: {
+    backgroundColor: 'rgba(102, 126, 234, 0.18)',
+    borderRadius: 4,
   },
 });
 

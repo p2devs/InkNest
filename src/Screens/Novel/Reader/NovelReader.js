@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef, useEffect} from 'react';
+import React, {useState, useCallback, useRef, useEffect, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -25,6 +25,10 @@ import {
 import {ReaderSettings} from './Components/ReaderSettings';
 import {WTRLabModeSelector} from './Components/WTRLabModeSelector';
 import {getNovelChapter, getNovelHostKeyFromLink} from '../APIs';
+import {loadVerifiedChapter} from '../Utils/OfflineStorage';
+import {getChapterText} from '../Narration/chapterText';
+import NarrationControls from '../Narration/NarrationControls';
+import {useNarrationReader} from '../Narration/useNarrationReader';
 import {NAVIGATION} from '../../../Constants';
 import {
   updateNovelHistory,
@@ -265,6 +269,7 @@ export function NovelReader() {
   savedProgressRef.current = savedProgress;
 
   useEffect(() => {
+    let cancelled = false;
     const fetchChapter = async () => {
       if (!chapterLink) {
         return;
@@ -275,18 +280,22 @@ export function NovelReader() {
         setError(null);
         setExtractedWTRLabText(null);
         setWtrLabExtractionError(null);
-        const data = shouldUseWTRLabFallbackMetadata
+        const chapterNumber = chapter?.number || extractChapterNumber(chapterLink);
+        const saved = isWTRLab
+          ? null
+          : await loadVerifiedChapter(novel?.link, chapterLink, chapterNumber);
+        const offlineContent = saved && {...saved, title: saved.title || chapter?.title};
+        const data = offlineContent || (shouldUseWTRLabFallbackMetadata
           ? buildWTRLabTextFallbackContent({novel, chapter, chapterLink})
           : await getNovelChapter(
               chapterLink,
               hostKey,
               isWTRLab ? wtrlabReadingMode : undefined,
-            );
+            ));
+        if (cancelled) { return; }
         setContent(data);
 
         // Extract chapter number from link if not provided
-        const chapterNumber =
-          chapter?.number || extractChapterNumber(chapterLink);
         const chapterTitle = chapter?.title || data?.title;
 
         // Get saved scroll progress from ref to avoid dependency issues
@@ -304,15 +313,17 @@ export function NovelReader() {
           }),
         );
       } catch (err) {
+        if (cancelled) { return; }
         console.error('Error fetching chapter:', err);
         crashlytics().recordError(err);
         setError('Failed to load chapter.');
       } finally {
-        setLoading(false);
+        if (!cancelled) { setLoading(false); }
       }
     };
 
     fetchChapter();
+    return () => { cancelled = true; };
   }, [
     chapterLink,
     novel,
@@ -355,7 +366,7 @@ export function NovelReader() {
     [],
   );
 
-  const resolvedContent =
+  const resolvedContent = useMemo(() =>
     shouldExtractWTRLabText && extractedWTRLabText?.text
       ? {
           ...(content || {}),
@@ -369,14 +380,24 @@ export function NovelReader() {
           paragraphs: [],
           text: '',
         }
-      : content;
+      : content, [shouldExtractWTRLabText, extractedWTRLabText, content]);
 
   const isWaitingForWTRLabText =
     shouldExtractWTRLabText &&
     !extractedWTRLabText?.text &&
     !wtrLabExtractionError;
 
-  const resolvedTextContent = resolvedContent?.text || resolvedContent?.content || '';
+  const resolvedTextContent = getChapterText(resolvedContent);
+  const narrationReader = useNarrationReader({
+    content: resolvedTextContent,
+    novel,
+    chapter,
+    chapterLink,
+    nextChapterLink: content?.nextChapter,
+    translationMode: shouldExtractWTRLabText ? wtrlabReadingMode : 'default',
+    label: [novel?.title, resolvedContent?.title].filter(Boolean).join(' · '),
+    scrollViewRef,
+  });
   const restorationContentKey = [
     chapterLink || '',
     readerMode,
@@ -532,6 +553,17 @@ export function NovelReader() {
     }
   }, [content, novel, chapter, chapterLink, navigation]);
 
+  // Auto-advance continued narration into the next chapter: follow along.
+  useEffect(() => {
+    if (narrationReader.advancedPast && narrationReader.following) {
+      handleNextChapter();
+    }
+  }, [
+    narrationReader.advancedPast,
+    narrationReader.following,
+    handleNextChapter,
+  ]);
+
   const handleToggleHeader = useCallback(() => {
     setShowHeader(prev => !prev);
   }, []);
@@ -632,6 +664,10 @@ export function NovelReader() {
         </SafeAreaView>
       )}
 
+      {!shouldUseWebReader && showHeader && (
+        <NarrationControls reader={narrationReader} colors={themeColors} />
+      )}
+
       {isWaitingForWTRLabText && (
         <View style={styles.extractionOverlay} pointerEvents="none">
           <ActivityIndicator size="large" color="#667EEA" />
@@ -658,6 +694,7 @@ export function NovelReader() {
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
+          onScrollBeginDrag={narrationReader.onScrollBeginDrag}
           scrollEventThrottle={400}
           onContentSizeChange={(width, height) => {
             contentHeightRef.current = height;
@@ -670,6 +707,7 @@ export function NovelReader() {
             fontFamily={fontFamily}
             theme={readerTheme}
             onPress={handleToggleHeader}
+            {...narrationReader.readerProps}
           />
         </ScrollView>
       ) : (
