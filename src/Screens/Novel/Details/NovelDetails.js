@@ -15,6 +15,7 @@ import crashlytics from '@react-native-firebase/crashlytics';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 import {NovelInfo} from './Components/NovelInfo';
+import PrepareForLater from '../Narration/PrepareForLater';
 import {getNovelDetails, getChapterList} from '../APIs';
 import {NAVIGATION} from '../../../Constants';
 import {
@@ -433,6 +434,19 @@ export function NovelDetails() {
     [],
   );
 
+  // Narration preparation starts at the chapter being read, in reading order.
+  const preparationChapters = useMemo(() => {
+    const ordered = [...(novel?.chapterList || [])].sort(
+      (a, b) => (a.number || 0) - (b.number || 0),
+    );
+    const current = ordered.findIndex(
+      ch =>
+        ch.link === readingProgress?.lastChapterLink ||
+        ch.number === readingProgress?.lastChapter,
+    );
+    return ordered.slice(Math.max(0, current));
+  }, [novel?.chapterList, readingProgress]);
+
   const ListHeaderComponent = useCallback(() => {
     const firstChapter = sortedChapters?.[0];
     const hasChapters = sortedChapters?.length > 0;
@@ -464,6 +478,14 @@ export function NovelDetails() {
           </View>
         )}
 
+        {hasChapters && (
+          <PrepareForLater
+            novel={novel}
+            chapters={preparationChapters}
+            onOpenChapter={handleChapterPress}
+          />
+        )}
+
         <View style={styles.chapterHeader}>
           <Text style={styles.chapterHeaderTitle}>
             {novel?.chapterList?.length || 0} Chapters
@@ -491,6 +513,8 @@ export function NovelDetails() {
     handleStartReading,
     handleSortToggle,
     sortOrder,
+    preparationChapters,
+    handleChapterPress,
   ]);
 
   const ListFooterComponent = useCallback(() => {
