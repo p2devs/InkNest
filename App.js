@@ -30,6 +30,7 @@ import { markV146WalkthroughSeen } from './src/Redux/Reducers';
 
 import { getVersion } from 'react-native-device-info';
 import { useFeatureFlag } from 'configcat-react';
+import { NarrationProvider } from './src/Screens/Novel/Narration/NarrationProvider';
 
 /**
  * WalkthroughHandler - handles v1.4.6 walkthrough visibility
@@ -106,7 +107,9 @@ function AppContent() {
         <PaperProvider>
           <BannerProvider>
             <NotificationSubscriptionBootstrapper />
-            <RootNavigation />
+            <NarrationProvider>
+              <RootNavigation />
+            </NarrationProvider>
             <CloudflareProxy />
             <CloudflareVerifyGate />
             <Toast />
