@@ -4,6 +4,7 @@
  */
 
 import {getNovelChapter} from '../APIs';
+import {getChapterText} from '../Narration/chapterText';
 import {
   initNovelStorage,
   saveNovelMetadata,
@@ -75,14 +76,15 @@ class NovelDownloadManager {
       // Fetch chapter content
       const chapterData = await getNovelChapter(chapterLink);
 
-      if (!chapterData?.content) {
+      if (!getChapterText(chapterData)) {
         throw new Error('Failed to fetch chapter content');
       }
 
       // Save to storage
       await initNovelStorage();
       await saveNovelMetadata(novel);
-      await saveChapterContent(novel.link, chapterNumber, chapterData.content);
+      const saved = await saveChapterContent(novel.link, chapterNumber, chapterData);
+      if (!saved) { throw new Error('Could not save chapter to device storage.'); }
 
       return {success: true, alreadyExists: false};
     } catch (error) {
@@ -129,8 +131,8 @@ class NovelDownloadManager {
           // Fetch and save chapter
           const chapterData = await getNovelChapter(chapter.link);
 
-          if (chapterData?.content) {
-            await saveChapterContent(novelLink, chapter.number, chapterData.content);
+          if (getChapterText(chapterData) &&
+              await saveChapterContent(novelLink, chapter.number, chapterData)) {
             completed++;
           } else {
             failed++;

@@ -3,7 +3,8 @@
  * Manages local storage of novel chapters for offline reading
  */
 
-import RNFS from '@dr.pogodin/react-native-fs';
+import * as RNFS from '@dr.pogodin/react-native-fs';
+import {getChapterText} from '../Narration/chapterText';
 
 const NOVELS_ROOT = `${RNFS.DocumentDirectoryPath}/novels`;
 
@@ -95,6 +96,10 @@ export async function loadNovelMetadata(novelLink) {
  */
 export async function saveChapterContent(novelLink, chapterNumber, content) {
   try {
+    const text = getChapterText(content);
+    if (!text || !Number.isInteger(Number(chapterNumber)) || Number(chapterNumber) < 1) {
+      return false;
+    }
     const novelPath = getNovelPath(novelLink);
     const exists = await RNFS.exists(novelPath);
     if (!exists) {
@@ -102,9 +107,17 @@ export async function saveChapterContent(novelLink, chapterNumber, content) {
     }
 
     const chapterPath = getChapterPath(novelLink, chapterNumber);
+    const chapterMetadata = typeof content === 'object' ? {...content} : {};
+    // Keep one copy of the story; the nested object contains navigation/source metadata.
+    delete chapterMetadata.text;
+    delete chapterMetadata.content;
+    delete chapterMetadata.paragraphs;
     const chapterData = {
+      schemaVersion: 2,
+      novelLink,
       chapterNumber,
-      content,
+      content: text,
+      chapter: chapterMetadata,
       savedAt: Date.now(),
     };
 
@@ -134,6 +147,29 @@ export async function loadChapterContent(novelLink, chapterNumber) {
     console.error('Error loading chapter content:', error);
     return null;
   }
+}
+
+/**
+ * Saved chapter text, only when it belongs to this novel and chapter link.
+ * Legacy files are keyed by slug/number, so identity is verified before use.
+ */
+export async function loadVerifiedChapter(novelLink, chapterLink, chapterNumber) {
+  if (!novelLink || !chapterNumber) {
+    return null;
+  }
+  const saved = await loadChapterContent(novelLink, chapterNumber);
+  if (!saved) {
+    return null;
+  }
+  const savedNovelLink =
+    saved.novelLink || (await loadNovelMetadata(novelLink))?.link;
+  const savedChapter = saved.chapter;
+  const text = getChapterText(saved);
+  return savedNovelLink === novelLink &&
+    (!savedChapter?.link || savedChapter.link === chapterLink) &&
+    text
+    ? {...(savedChapter || {}), text}
+    : null;
 }
 
 /**
