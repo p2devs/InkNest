@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "test:narration": "node --test __tests__/narration/*.test.cjs && jest __tests__/narration --runInBand --watchman=false",
     "xcode": "xed -b ios",
     "pod": "npx pod-install",
     "ios-17": "react-native run-ios --simulator='iPhone 17'",
