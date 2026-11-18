@@ -1,8 +1,10 @@
 export const ComicHostName = {
-  readcomicsonline: 'https://readcomicsonline.ru/',
-  readallcomics: 'https://readallcomics.com/',
   comicbookplus: 'https://comicbookplus.com/',
 };
+// Online comic entries can outlive their source in bookmarks and history.
+export const isSupportedComicUrl = url =>
+  typeof url === 'string' && /^https?:\/\/(?:www\.)?comicbookplus\.com(?:[/?#]|$)/i.test(url);
+
 export const AnimeHostName = {
   gogoanimes: 'https://ww12.gogoanimes.fi/',
   s3taku: 'https://s3taku.com/',

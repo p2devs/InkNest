@@ -21,7 +21,6 @@
     "@candlefinance/faster-image": "patch:@candlefinance/faster-image@npm%3A1.7.2#~/.yarn/patches/@candlefinance-faster-image-npm-1.7.2-8497311acf.patch",
     "@dr.pogodin/react-native-fs": "2.39.1",
     "@invertase/react-native-apple-authentication": "2.5.1",
-    "@preeternal/react-native-cookie-manager": "^6.3.3",
     "@react-native-community/netinfo": "12.0.1",
     "@react-native-documents/picker": "12.0.1",
     "@react-native-firebase/analytics": "24.1.1",

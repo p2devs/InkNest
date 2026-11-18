@@ -2647,16 +2647,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@preeternal/react-native-cookie-manager@npm:^6.3.3":
-  version: 6.4.1
-  resolution: "@preeternal/react-native-cookie-manager@npm:6.4.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/06bbe0f6145baa049e55f85cb43a2f1e7422967a82b5a06f0b38c1a8f2fd095a692633fb59dc1602c7ad2c94a4f2ac604c6513c014bf6d7fa19efbf6ad958672
-  languageName: node
-  linkType: hard
-
 "@protobufjs/aspromise@npm:^1.1.1, @protobufjs/aspromise@npm:^1.1.2":
   version: 1.1.2
   resolution: "@protobufjs/aspromise@npm:1.1.2"
@@ -3880,7 +3870,6 @@ __metadata:
     "@candlefinance/faster-image": "patch:@candlefinance/faster-image@npm%3A1.7.2#~/.yarn/patches/@candlefinance-faster-image-npm-1.7.2-8497311acf.patch"
     "@dr.pogodin/react-native-fs": "npm:2.39.1"
     "@invertase/react-native-apple-authentication": "npm:2.5.1"
-    "@preeternal/react-native-cookie-manager": "npm:^6.3.3"
     "@react-native-community/cli": "npm:20.2.0"
     "@react-native-community/cli-platform-android": "npm:20.2.0"
     "@react-native-community/cli-platform-ios": "npm:20.2.0"

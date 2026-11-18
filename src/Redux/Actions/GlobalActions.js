@@ -21,17 +21,14 @@ import {goBack} from '../../Navigation/NavigationService';
 import APICaller from '../Controller/Interceptor';
 
 // Configurations
-import {
-  ComicBookPageClasses,
-  ComicDetailPageClasses,
-} from '../../Screens/Comic/APIs/constance';
+import {ComicDetailPageClasses} from '../../Screens/Comic/APIs/constance';
+import {isSupportedComicUrl} from '../../Utils/APIs';
 
 // Utilities
 import {checkDownTime, handleAPIError} from './utils/errorHandlers';
 import {
   hasLoadedChapterData,
   buildWatchedData,
-  getHostKeyFromUrl,
 } from './utils/dataHelpers';
 
 // Parsers
@@ -41,21 +38,9 @@ import {
   getChapterPagination,
 } from './parsers/chapterParser';
 import {
-  transformComicBookUrl,
-  parseStandardComicBook,
   parseComicBookPlusPage,
   createComicBookData,
 } from './parsers/comicBookParser';
-import {
-  buildSearchUrl,
-  parseSearchResults,
-  parseAdvancedSearchResults,
-} from './parsers/searchParser';
-import {
-  getAdvancedSearchConfig,
-  parseAdvancedSearchFilters,
-} from './parsers/advancedSearchParser';
-
 // Re-export checkDownTime for backward compatibility
 export {checkDownTime};
 
@@ -79,6 +64,11 @@ export const WatchedData = data => async (dispatch, getState) => {
 export const fetchComicDetails =
   (link, refresh = false) =>
   async (dispatch, getState) => {
+    if (!isSupportedComicUrl(link)) {
+      goBack();
+      Alert.alert('Source unavailable', 'This comic source is no longer supported.');
+      return;
+    }
     dispatch(fetchDataStart());
 
     try {
@@ -99,27 +89,12 @@ export const fetchComicDetails =
       // Fetch fresh data
       const response = await APICaller.get(link);
       const html = response.data;
-      let $ = cheerio.load(html);
+      const $ = cheerio.load(html);
 
-      // Get configuration for this host
-      const hostkey = getHostKeyFromUrl(link, ComicDetailPageClasses);
-      const config = ComicDetailPageClasses[hostkey];
-
-      if (!config) {
-        throw new Error(`No config found for source: ${hostkey}`);
-      }
-
-      // Parse comic details
-      let comicDetails;
-      if (config.customParser) {
-        comicDetails = config.customParser($, config, link);
-      } else {
-        comicDetails = await parseComicDetails($, config, link);
-        const chapters = await fetchChaptersWithPagination($, config, link);
-        const pagination = getChapterPagination($, config);
-        comicDetails.chapters = chapters;
-        comicDetails.pagination = pagination;
-      }
+      const config = ComicDetailPageClasses.comicbookplus;
+      const comicDetails = await parseComicDetails($, config, link);
+      comicDetails.chapters = await fetchChaptersWithPagination($, config, link);
+      comicDetails.pagination = getChapterPagination($, config);
 
       watchedData = buildWatchedData(comicDetails, link);
 
@@ -134,8 +109,7 @@ export const fetchComicDetails =
       dispatch(WatchedData(watchedData));
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
-      const hostkey = getHostKeyFromUrl(link, ComicDetailPageClasses);
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails', hostkey);
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails', 'comicbookplus');
       dispatch(ClearError());
       dispatch(fetchDataFailure('Not Found'));
       goBack();
@@ -156,18 +130,13 @@ export const fetchComicDetails =
 export const fetchComicBook =
   (comicBook, isfetchComicDetails = false, isDownloadComic = false) =>
   async (dispatch, getState) => {
-    const originalComicBook = comicBook;
-
-    // Get host configuration
-    const hostkey = getHostKeyFromUrl(comicBook, ComicBookPageClasses);
-
-    if (!hostkey) {
-      console.warn('Unknown comic host:', comicBook);
+    if (!isSupportedComicUrl(comicBook)) {
+      if (!isDownloadComic) {
+        goBack();
+        Alert.alert('Source unavailable', 'This comic source is no longer supported.');
+      }
       return;
     }
-
-    // Apply host-specific URL transformations
-    const modifiedComicBook = transformComicBookUrl(comicBook, hostkey);
 
     if (!isDownloadComic) {
       dispatch(fetchDataStart());
@@ -175,7 +144,7 @@ export const fetchComicBook =
 
     try {
       // Check for existing data
-      const existingData = getState().data.dataByUrl[originalComicBook];
+      const existingData = getState().data.dataByUrl[comicBook];
 
       // Validate cached data has usable images (fixes stale cache from parser updates)
       const hasValidImages =
@@ -195,22 +164,11 @@ export const fetchComicBook =
       }
 
       // Fetch fresh data
-      const response = await APICaller.get(modifiedComicBook);
+      const response = await APICaller.get(comicBook);
       const html = response.data;
       const $ = cheerio.load(html);
 
-      const config = ComicBookPageClasses[hostkey];
-
-      // Parse comic book based on configuration
-      let parsedData;
-      if (config.customParser) {
-        parsedData = config.customParser($, config);
-      } else if (config.useJsVars) {
-        parsedData = parseComicBookPlusPage(html, $);
-      } else {
-        parsedData = parseStandardComicBook($, config);
-      }
-
+      const parsedData = parseComicBookPlusPage(html, $);
       const data = createComicBookData(parsedData);
       console.log('Fetched data:', data);
 
@@ -219,13 +177,13 @@ export const fetchComicBook =
         dispatch(fetchComicDetails(data.detailsLink));
       }
 
-      dispatch(fetchDataSuccess({url: originalComicBook, data}));
+      dispatch(fetchDataSuccess({url: comicBook, data}));
 
       if (isDownloadComic) {
-        return {url: originalComicBook, data};
+        return {url: comicBook, data};
       }
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook', hostkey);
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook', 'comicbookplus');
       dispatch(fetchDataFailure(error.message));
     }
   };
@@ -260,101 +218,3 @@ export const clearDataByUrl = url => async dispatch => {
 export const clearAllData = () => async dispatch => {
   dispatch(clearData());
 };
-
-/**
- * Fetches available advanced search filter options.
- *
- * @param {string} [source='readcomicsonline'] - The source to fetch filters for.
- * @returns {Promise<Object|null>} An object with filter options, or null on error.
- */
-export const getAdvancedSearchFilters = (source = 'readcomicsonline') => async dispatch => {
-  dispatch(fetchDataStart());
-
-  const config = getAdvancedSearchConfig(source);
-
-  if (!config) {
-    console.error(`No advanced search config found for source: ${source}`);
-    dispatch(fetchDataFailure(`Unsupported source: ${source}`));
-    return null;
-  }
-
-  try {
-    const response = await APICaller.get(config.url);
-    const $ = cheerio.load(response.data);
-
-    const filters = parseAdvancedSearchFilters($, config);
-
-    dispatch(checkDownTime({filters}, source));
-
-    return filters;
-  } catch (error) {
-    handleAPIError(error, dispatch, crashlytics, 'getAdvancedSearchFilters', source);
-    dispatch(fetchDataFailure(error.message));
-    return null;
-  }
-};
-
-/**
- * Searches for comics on a given source.
- *
- * @param {string} queryValue - The search query.
- * @param {string} [source='readcomicsonline'] - The source to search on.
- * @returns {Promise<Array|null>} Array of search results, or null on error.
- */
-/**
- * Full search for readcomicsonline via its advanced-search (2026 redesign).
- * The lightweight /search?query= endpoint is a hard-capped 8-item autocomplete;
- * the real catalog search is a Laravel POST form. We GET the page for the CSRF
- * `_token`, POST the `name` query, and parse the server-rendered result cards.
- */
-const searchReadComicsOnlineAdvanced = async queryValue => {
-  const ADV_URL = 'https://readcomicsonline.ru/advanced-search';
-  const getRes = await APICaller.get(ADV_URL);
-  const token =
-    (String(getRes.data).match(/name="_token"\s+value="([^"]+)"/) || [])[1] ||
-    '';
-  const form = `_token=${encodeURIComponent(token)}&name=${encodeURIComponent(
-    queryValue,
-  )}`;
-  const postRes = await APICaller.post(ADV_URL, form, {
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  });
-  return parseAdvancedSearchResults(cheerio.load(postRes.data));
-};
-
-export const searchComic =
-  (queryValue, source = 'readcomicsonline') =>
-  async dispatch => {
-    dispatch(fetchDataStart());
-
-    try {
-      // Parse results based on source type
-      let url;
-      let formatted;
-      if (source === 'readcomicsonline') {
-        url = `https://readcomicsonline.ru/advanced-search?name=${encodeURIComponent(
-          queryValue,
-        )}`;
-        formatted = await searchReadComicsOnlineAdvanced(queryValue);
-      } else {
-        url = buildSearchUrl(source, queryValue);
-        const response = await APICaller.get(url);
-        if (source === 'readallcomics') {
-          const $ = cheerio.load(response.data);
-          formatted = parseSearchResults(source, $);
-        } else {
-          formatted = parseSearchResults(source, response.data);
-        }
-      }
-
-      dispatch(fetchDataSuccess({url, data: formatted}));
-      dispatch(StopLoading());
-      dispatch(ClearError());
-      dispatch(checkDownTime(null, source));
-      return formatted;
-    } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'searchComic', source);
-      dispatch(fetchDataFailure(error.message));
-      return null;
-    }
-  };

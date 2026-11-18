@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useSelector} from 'react-redux';
+import {selectComicBookmarks} from '../../../Redux/Selectors/comics';
 import {Bookmarks} from './Bookmarks';
 import {MangaBookmarks} from './MangaBookmarks';
 import {NovelBookmarks} from './NovelBookmarks';
@@ -20,7 +21,7 @@ export function ComicBookmarks({navigation}) {
   const [activeTab, setActiveTab] = useState('comic');
 
   const bookMarksLength = useSelector(
-    state => Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
+    state => selectComicBookmarks(state).length,
   );
   const mangaBookMarksLength = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,

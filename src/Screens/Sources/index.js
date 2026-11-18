@@ -38,7 +38,7 @@ export function Sources({navigation}) {
     dispatch(SwtichToAnime(!Anime));
     if (Anime) {
       crashlytics().log('Switched to Comic Mode');
-      dispatch(SwtichBaseUrl('readcomicsonline'));
+      dispatch(SwtichBaseUrl('comicbookplus'));
     }
     if (!Anime) {
       crashlytics().log('Switched to Anime Mode');

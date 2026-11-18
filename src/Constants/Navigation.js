@@ -9,7 +9,6 @@ export const NAVIGATION = {
   search: 'Search',
   bookmarks: 'Bookmarks',
   settings: 'Settings',
-  cloudflareVerify: 'CloudflareVerify',
   notifications: 'Notifications',
   communityBoard: 'Community',
   bottomNavigation: 'BottomNavigation',

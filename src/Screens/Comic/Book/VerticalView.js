@@ -15,8 +15,6 @@ import {
   useImageResolution,
 } from 'react-native-zoom-toolkit';
 
-import {withClearanceImageSource} from '../../../Utils/cloudflareClearance';
-
 const ITEM_SPACING = 20;
 
 export default function VerticalView({
@@ -57,18 +55,8 @@ export default function VerticalView({
     setInitialSyncDone(false);
   }, [data]);
 
-  // Prepare the image source, attaching Cloudflare clearance headers when the
-  // URI is a protected host (needed for readcomicsonline main-domain images).
-  const imageSource = useMemo(() => {
-    if (data?.length > 0 && imagesLinks) {
-      return withClearanceImageSource(imagesLinks);
-    }
-    return {
-      uri: '',
-    };
-  }, [imagesLinks, data]);
+  const imageSource = useMemo(() => ({uri: imagesLinks || ''}), [imagesLinks]);
 
-  // Only call useImageResolution with a valid image source
   const {isFetching, resolution} = useImageResolution(imageSource);
 
   // Calculate size only when resolution is available
@@ -215,7 +203,7 @@ export default function VerticalView({
             {/* Render placeholder or image based on size availability */}
             {size?.width && size?.height ? (
               <Image
-                source={withClearanceImageSource(item)}
+                source={{uri: item}}
                 style={{...size}}
                 resizeMethod={'scale'}
               />
@@ -255,7 +243,7 @@ export default function VerticalView({
               maxScale={6}
               pinchCenteringMode={'sync'}>
               <Image
-                source={withClearanceImageSource(imagesLinks)}
+                source={imageSource}
                 style={{...size}}
                 resizeMethod="scale"
               />

@@ -31,6 +31,7 @@ import HistoryCard from './Components/HistoryCard';
 import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
+import {selectComicBookmarks, selectComicHistory} from '../../../Redux/Selectors/comics';
 import {ComicHostName, NovelHostName} from '../../../Utils/APIs';
 import {NovelSectionList} from '../../Novel/Components/NovelList';
 import {
@@ -50,21 +51,14 @@ export function Library({navigation}) {
   const [loading, setLoading] = useState(false);
   const [mangaLoading, setMangaLoading] = useState(false);
   const [novelLoading, setNovelLoading] = useState(false);
-  const [type, setType] = useState('readcomicsonline');
-  const [changeType, setChangeType] = useState(false);
   const [activeTab, setActiveTab] = useState('comic');
   const [changeNovelSource, setChangeNovelSource] = useState(false);
-  const History = useSelector(state => state.data.history);
+  const history = useSelector(selectComicHistory);
   const MangaHistory = useSelector(state => state.data.MangaHistory || {});
   const NovelHistory = useSelector(state => state.data.NovelHistory || {});
   const novelBaseUrl = useSelector(state => state.data.novelBaseUrl || 'novelfire');
   const novelSources = useSelector(state => state.data.novelSources || {});
-  // Bumped after the user passes a Cloudflare verification — triggers a refetch.
-  const clearanceNonce = useSelector(state => state.data.clearanceNonce || 0);
-  const comicBookmarkCount = useSelector(
-    state =>
-      Object.values(state.data.dataByUrl).filter(item => item.Bookmark).length,
-  );
+  const comicBookmarkCount = useSelector(state => selectComicBookmarks(state).length);
   const mangaBookmarkCount = useSelector(
     state => Object.keys(state.data.MangaBookMarks || {}).length,
   );
@@ -128,14 +122,14 @@ export function Library({navigation}) {
               title: 'Atomic War!',
             },
           ],
-          hostName: 'https://readcomicsonline.ru/',
+          hostName: ComicHostName.comicbookplus,
           lastPage: null,
           title: 'Most Viewed',
         },
       });
     } else {
       if (forIosLoading === false) {
-        getComicsHome(type, setComicsData, setLoading, dispatch);
+        getComicsHome(setComicsData, setLoading, dispatch);
         getMangaHome(setMangaData, setMangaLoading, dispatch);
         getNovelHome(novelBaseUrl).then(data => {
           setNovelSections(data || []);
@@ -148,19 +142,6 @@ export function Library({navigation}) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forIosValue, forIosLoading, novelBaseUrl]);
-
-  // After a successful Cloudflare verification, refetch the comic home so the
-  // sections that failed with 403 populate without a manual refresh.
-  useEffect(() => {
-    if (
-      clearanceNonce > 0 &&
-      forIosLoading === false &&
-      getVersion() !== forIosValue
-    ) {
-      getComicsHome(type, setComicsData, setLoading, dispatch);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearanceNonce]);
 
   const allSections = Object.entries(comicsData);
   const isSpecialBuild =
@@ -290,68 +271,8 @@ export function Library({navigation}) {
         {/* ===== COMIC TAB ===== */}
         {activeTab === 'comic' && (
           <>
-            {/* Comic Host Selector */}
-            {!isSpecialBuild && forIosLoading === false && (
-              <View style={styles.hostRow}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setChangeType(!changeType);
-                    crashlytics().log('Comic Host Name Clicked');
-                    analytics().logEvent('comic_host_name_clicked', {
-                      hostName: type.toString(),
-                    });
-                  }}
-                  style={styles.hostSelector}>
-                  <Text style={styles.hostText} numberOfLines={1}>
-                    {type}
-                  </Text>
-                  <AntDesign
-                    name={changeType ? 'up' : 'down'}
-                    size={14}
-                    color="rgba(255,255,255,0.4)"
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Host dropdown */}
-            {changeType && (
-              <View style={styles.dropdown}>
-                {Object.keys(ComicHostName).map((key, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      crashlytics().log('Comic Host Name Clicked');
-                      analytics().logEvent('comic_host_name_clicked', {
-                        hostName: key,
-                      });
-                      setType(key);
-                      getComicsHome(key, setComicsData, setLoading, dispatch);
-                      setChangeType(false);
-                    }}>
-                    {type === key ? (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={18}
-                        color="#667EEA"
-                      />
-                    ) : (
-                      <View style={styles.radioEmpty} />
-                    )}
-                    <View style={styles.dropdownItemInfo}>
-                      <Text style={styles.dropdownItemTitle}>{key}</Text>
-                      <Text style={styles.dropdownItemSub}>
-                        {ComicHostName[key]}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
             {/* Continue Reading */}
-            {Object.values(History).length > 0 && (
+            {history.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Continue Reading</Text>
@@ -374,7 +295,7 @@ export function Library({navigation}) {
                   </TouchableOpacity>
                 </View>
                 <FlatList
-                  data={Object.values(History).sort(
+                  data={history.slice().sort(
                     (a, b) => b.lastOpenAt - a.lastOpenAt,
                   )}
                   keyExtractor={(item, index) => index.toString()}
@@ -408,14 +329,11 @@ export function Library({navigation}) {
                             link: item?.link?.toString(),
                             title: item?.title?.toString(),
                           });
-                          type === 'comicbookplus'
-                            ? navigation.navigate(NAVIGATION.comicBook, {
-                                comicBookLink: item?.link,
-                              })
-                            : navigation.navigate(NAVIGATION.comicDetails, {
-                                ...item,
-                                comicBookLink: item?.link,
-                              });
+                          if (isSpecialBuild) {
+                            navigation.navigate(NAVIGATION.comicDetails, item);
+                          } else {
+                            navigation.navigate(NAVIGATION.comicBook, {comicBookLink: item.link});
+                          }
                         }}>
                         <Image
                           source={{uri: item.image}}
@@ -434,32 +352,24 @@ export function Library({navigation}) {
             {!loading && !forIosLoading && allSections.length === 0 && (
               <View style={styles.comicEmptyState}>
                 <MaterialIcons
-                  name={
-                    getSourceStatus(type)?.status ===
-                    SOURCE_STATUS.CLOUDFLARE_PROTECTED
-                      ? 'verified-user'
-                      : 'cloud-off'
-                  }
+                  name="cloud-off"
                   size={44}
                   color="rgba(255,255,255,0.25)"
                 />
                 <Text style={styles.comicEmptyTitle}>
-                  {getSourceStatus(type)?.status ===
-                  SOURCE_STATUS.CLOUDFLARE_PROTECTED
-                    ? `${getSourceLabel(type)} needs verification`
-                    : `Couldn't load ${getSourceLabel(type)}`}
+                  {`Couldn't load ${getSourceLabel('comicbookplus')}`}
                 </Text>
                 <Text style={styles.comicEmptySubtitle}>
-                  {getSourceStatus(type)?.status ===
+                  {getSourceStatus('comicbookplus')?.status ===
                   SOURCE_STATUS.CLOUDFLARE_PROTECTED
-                    ? 'This source is protected by Cloudflare. Tap Retry — you’ll be asked to complete a quick one-time check.'
+                    ? 'Comic Book Plus is blocking requests. Try again later.'
                     : 'Something went wrong. Check your connection and try again.'}
                 </Text>
                 <TouchableOpacity
                   style={styles.comicRetryButton}
                   activeOpacity={0.8}
                   onPress={() =>
-                    getComicsHome(type, setComicsData, setLoading, dispatch)
+                    getComicsHome(setComicsData, setLoading, dispatch)
                   }>
                   <MaterialIcons name="refresh" size={18} color="#fff" />
                   <Text style={styles.comicRetryText}>Retry</Text>
@@ -472,7 +382,7 @@ export function Library({navigation}) {
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#667EEA" />
                 <Text style={styles.loadingText}>
-                  Loading {getSourceLabel(type)}…
+                  Loading {getSourceLabel('comicbookplus')}…
                 </Text>
               </View>
             )}

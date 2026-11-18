@@ -32,28 +32,6 @@ export const buildWatchedData = (data, link) => ({
 });
 
 /**
- * Gets the host key from a URL
- *
- * @param {string} url - The URL to parse
- * @param {Object} hostConfigs - Object containing host configurations
- * @returns {string|null} - The host key or null if not found
- */
-export const getHostKeyFromUrl = (url, hostConfigs) => {
-  return Object.keys(hostConfigs).find(key => url.includes(key)) || null;
-};
-
-/**
- * Validates if a URL belongs to a supported host
- *
- * @param {string} url - The URL to validate
- * @param {Object} hostConfigs - Object containing host configurations
- * @returns {boolean} - True if URL is from a supported host
- */
-export const isSupportedHost = (url, hostConfigs) => {
-  return getHostKeyFromUrl(url, hostConfigs) !== null;
-};
-
-/**
  * Normalizes image source URLs
  *
  * @param {string} imgSrc - The image source URL

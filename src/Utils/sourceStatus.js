@@ -5,6 +5,7 @@
  * and provides notifications for 403 (Cloudflare protection) and 500+ (server down) errors.
  */
 
+import {isRetiredComicSource} from './retiredComicSources';
 import {mmkvStorage} from '../Redux/Storage/Storage';
 
 export const SOURCE_STATUS_STORAGE_KEY = 'INKNEST_SOURCE_STATUS';
@@ -26,8 +27,6 @@ export const ERROR_CODES = {
 // Source type labels for display
 export const SOURCE_LABELS = {
   // Comic sources
-  readcomicsonline: 'Read Comics Online',
-  readallcomics: 'Read All Comics',
   comicbookplus: 'Comic Book Plus',
   azcomic: 'AZ Comic',
   // Anime sources
@@ -45,8 +44,6 @@ export const NOVEL_SOURCES = ['novelfire', 'wtrlab'];
 
 // Content type for sources
 export const SOURCE_CONTENT_TYPE = {
-  readcomicsonline: 'comic',
-  readallcomics: 'comic',
   comicbookplus: 'comic',
   azcomic: 'comic',
   gogoanimes: 'anime',
@@ -142,7 +139,10 @@ export const loadSourceStatuses = () => {
     if (!raw) {
       return {};
     }
-    return JSON.parse(raw);
+    const statuses = JSON.parse(raw);
+    return Object.fromEntries(
+      Object.entries(statuses).filter(([key]) => !isRetiredComicSource(key)),
+    );
   } catch (error) {
     console.error('Error loading source statuses:', error);
     return {};

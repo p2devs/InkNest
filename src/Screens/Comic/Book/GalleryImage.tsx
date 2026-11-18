@@ -9,8 +9,6 @@ import { heightPercentageToDP } from 'react-native-responsive-screen';
 
 import {fitContainer, useImageResolution} from 'react-native-zoom-toolkit';
 
-import {withClearanceImageSource} from '../../../Utils/cloudflareClearance';
-
 type GalleryImageProps = {
   asset: any;
   index: number;
@@ -24,16 +22,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
 }) => {
   const {width, height} = useWindowDimensions();
 
-  // Prepare the image source, attaching Cloudflare clearance headers when the
-  // URI is a protected host (needed for readcomicsonline main-domain images).
-  const imageSource = useMemo(() => {
-    if (asset.uri) {
-      return withClearanceImageSource(asset.uri);
-    }
-    return {
-      uri: '',
-    };
-  }, [asset.uri]);
+  const imageSource = useMemo(() => ({uri: asset.uri || ''}), [asset.uri]);
 
   const {isFetching, resolution} = useImageResolution(imageSource);
 

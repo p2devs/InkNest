@@ -26,7 +26,7 @@ import Toast from 'react-native-toast-message';
 import {NAVIGATION} from '../../../Constants';
 
 export function SeeAll({navigation, route}) {
-  const {title, data, key, hostName, lastPage} = route.params;
+  const {title, data, key, lastPage} = route.params;
   const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -37,14 +37,11 @@ export function SeeAll({navigation, route}) {
 
     setLoading(true);
 
-    const type = key === 'readallcomics' ? null : key;
-
-    const response = await getComics(hostName, page, type);
-
+    const response = await getComics(page);
+    setLoading(false);
     if (response) {
       setPage(page);
       setComicsData(response?.comicsData);
-      setLoading(false);
       return;
     }
     return Toast.show({
@@ -104,12 +101,10 @@ export function SeeAll({navigation, route}) {
                 analytics().logEvent('see_all_comics_card_clicked', {
                   key: key?.toString(),
                   title: title?.toString(),
-                  isComicBookLink: key === 'readallcomics',
                   link: item?.link?.toString(),
                 });
-                navigation.navigate(NAVIGATION.comicDetails, {
-                  ...item,
-                  isComicBookLink: key === 'readallcomics',
+                navigation.navigate(NAVIGATION.comicBook, {
+                  comicBookLink: item.link,
                 });
               }}
               containerStyle={{

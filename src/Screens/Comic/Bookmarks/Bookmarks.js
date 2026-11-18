@@ -15,6 +15,7 @@ import analytics from '@react-native-firebase/analytics';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
+import {selectComicBookmarks} from '../../../Redux/Selectors/comics';
 import {updateData} from '../../../Redux/Reducers';
 import Image from '../../../Components/UIComp/Image';
 import {NAVIGATION} from '../../../Constants';
@@ -27,12 +28,7 @@ const getBookmarkColor = (index) => {
 
 export function Bookmarks({navigation}) {
   const dispatch = useDispatch();
-  const data = useSelector(state => state.data.dataByUrl);
-  const bookmarks = Object.values(data).filter(item => item.Bookmark);
-
-  const getKey = title => {
-    return Object.keys(data).find(key => data[key].title === title);
-  };
+  const bookmarks = useSelector(selectComicBookmarks);
 
   const renderItem = ({item, index}) => {
     const color = getBookmarkColor(index);
@@ -44,12 +40,12 @@ export function Bookmarks({navigation}) {
           crashlytics().log('Comic Bookmark clicked');
           analytics().logEvent('Comic_Bookmark_clicked', {
             title: item?.title?.toString(),
-            link: getKey(item.title)?.toString(),
+            link: item.link?.toString(),
           });
           navigation.navigate(NAVIGATION.comicDetails, {
             title: item.title,
             image: item.imgSrc,
-            link: getKey(item.title),
+            link: item.link,
           });
         }}>
         {/* Color accent */}
@@ -106,11 +102,11 @@ export function Bookmarks({navigation}) {
                   onPress: () => {
                     crashlytics().log('Comic Bookmark removed');
                     analytics().logEvent('Comic_Bookmark_removed', {
-                      url: getKey(item.title)?.toString(),
+                      url: item.link?.toString(),
                     });
                     dispatch(
                       updateData({
-                        url: getKey(item.title),
+                        url: item.link,
                         data: {Bookmark: false},
                       }),
                     );

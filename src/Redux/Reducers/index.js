@@ -49,7 +49,7 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 'azcomic',
+  baseUrl: 'comicbookplus',
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},
@@ -59,7 +59,6 @@ const initialState = {
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   comicBackgroundColor: '#14142A', // Default comic reader background color
   hasSeenOfflineMovedAlert: false,
-  hasSeenV146Walkthrough: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
   // Novel state
   NovelBookMarks: {}, // {novelLink: {title, coverImage, link, author, ...}}
@@ -87,9 +86,6 @@ const initialState = {
   notificationSubscriptions: {}, // { [uid]: { lastFetched, allowed, subscribedList: [] } }
   // Source status notifications
   sourceStatusNotifications: [], // [{id, sourceKey, sourceName, status, statusCode, timestamp, read}]
-  // Cloudflare clearance prompt: set when a protected source returns 403 and needs a WebView verify
-  cloudflareVerify: null, // {host, sourceKey, sourceName, ts} | null
-  clearanceNonce: 0, // bumped after a successful verification so screens can refetch
 };
 
 /**
@@ -444,9 +440,6 @@ const Reducers = createSlice({
     },
     markOfflineMovedAlertSeen: state => {
       state.hasSeenOfflineMovedAlert = true;
-    },
-    markV146WalkthroughSeen: state => {
-      state.hasSeenV146Walkthrough = true;
     },
     clearLocalComicProgress: state => {
       // Clear any local comic reading progress when importing a new comic
@@ -859,25 +852,6 @@ const Reducers = createSlice({
         n => n.id !== notificationId
       );
     },
-    // Cloudflare clearance prompt reducers
-    requestCloudflareVerify: (state, action) => {
-      const {host, sourceKey, sourceName} = action.payload || {};
-      if (!host) {
-        return;
-      }
-      // Don't stack prompts — keep the first one until resolved/dismissed.
-      if (state.cloudflareVerify) {
-        return;
-      }
-      state.cloudflareVerify = {host, sourceKey, sourceName, ts: Date.now()};
-    },
-    dismissCloudflareVerify: state => {
-      state.cloudflareVerify = null;
-    },
-    cloudflareVerified: state => {
-      state.cloudflareVerify = null;
-      state.clearanceNonce = (state.clearanceNonce || 0) + 1;
-    },
   },
 });
 
@@ -913,7 +887,6 @@ export const {
   setScrollPreference,
   setComicBackgroundColor,
   markOfflineMovedAlertSeen,
-  markV146WalkthroughSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
   // Novel actions
@@ -950,9 +923,5 @@ export const {
   markSourceStatusNotificationRead,
   clearSourceStatusNotifications,
   removeSourceStatusNotification,
-  // Cloudflare clearance prompt actions
-  requestCloudflareVerify,
-  dismissCloudflareVerify,
-  cloudflareVerified,
 } = Reducers.actions;
 export default Reducers.reducer;

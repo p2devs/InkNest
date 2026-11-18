@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
-  Modal,
-  Platform,
   Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -23,55 +21,12 @@ import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {useDispatch, useSelector} from 'react-redux';
 import Header from '../../Components/UIComp/Header';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {searchComic} from '../../Redux/Actions/GlobalActions';
 import {getSearchManga} from '../../InkNest-Externals/Screens/Manga/APIs/Search';
 import {searchNovels} from '../Novel/APIs';
 import Image from '../../Components/UIComp/Image';
 
-// Generate a consistent gradient color based on string
-const getGradientColors = str => {
-  const colors = [
-    ['#FF6B6B', '#EE5A6F'],
-    ['#4ECDC4', '#44A08D'],
-    ['#667EEA', '#764BA2'],
-    ['#F093FB', '#F5576C'],
-    ['#4FACFE', '#00F2FE'],
-    ['#43E97B', '#38F9D7'],
-    ['#FA709A', '#FEE140'],
-    ['#A8EDEA', '#FED6E3'],
-    ['#FF9A9E', '#FECFEF'],
-    ['#FFECD2', '#FCB69F'],
-  ];
-  let hash = 0;
-  for (let i = 0; i < str?.length || 0; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
-// Get initials from title
-const getInitials = title => {
-  if (!title) return '?';
-  const words = title.trim().split(/\s+/);
-  if (words.length === 1) {
-    return title.substring(0, 2).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-};
-
-// Comic badge component
-const ComicBadge = ({text, colors}) => (
-  <View style={[styles.badge, {backgroundColor: colors[0] + '30'}]}>
-    <Text style={[styles.badgeText, {color: colors[0]}]}>{text}</Text>
-  </View>
-);
-
 export function Search({navigation, route}) {
-  const dispatch = useDispatch();
-  const loading = useSelector(state => state.data.loading);
   const [searchTerm, setSearchTerm] = useState('');
   const initialCategoryFromRoute = route?.params?.initialTab;
   const [activeCategory, setActiveCategory] = useState(
@@ -79,26 +34,19 @@ export function Search({navigation, route}) {
       ? 'Manga'
       : initialCategoryFromRoute === 'novel'
       ? 'Novels'
-      : initialCategoryFromRoute === 'comic'
-      ? 'Comics'
       : 'All',
   );
-  const [viewAll, setViewAll] = useState(null);
   const [searchData, setSearchData] = useState({
-    ReadAllComic: [],
-    ComicOnline: [],
     Manga: [],
     Novel: [],
   });
   const [isSearching, setIsSearching] = useState(false);
   const [activeSource, setActiveSource] = useState('All'); // Selected source after search
   const flatlistRef = useRef();
-  let Tag = View;
 
   // Category definitions (shown before search)
   const CATEGORIES = [
     {id: 'All', label: 'All', icon: 'globe-outline', color: '#667EEA'},
-    {id: 'Comics', label: 'Comics', icon: 'images-outline', color: '#FF6B6B'},
     {id: 'Manga', label: 'Manga', icon: 'book-outline', color: '#007AFF'},
     {
       id: 'Novels',
@@ -116,21 +64,6 @@ export function Search({navigation, route}) {
       icon: 'globe-outline',
       color: '#667EEA',
       category: 'All',
-    },
-    // Comic sources
-    ReadAllComic: {
-      id: 'ReadAllComic',
-      label: 'ReadAllComic',
-      icon: 'images',
-      color: '#FF6B6B',
-      category: 'Comics',
-    },
-    ComicOnline: {
-      id: 'ComicOnline',
-      label: 'ComicOnline',
-      icon: 'images',
-      color: '#FFA726',
-      category: 'Comics',
     },
     // Manga source
     Manga: {
@@ -150,95 +83,20 @@ export function Search({navigation, route}) {
     },
   };
 
-  // Get ordered sources based on active category (selected category's sources come first)
-  const getOrderedSources = () => {
-    const allSources = [BASE_SOURCES.All];
-    const comicSources = [
-      BASE_SOURCES.ReadAllComic,
-      BASE_SOURCES.ComicOnline,
-    ];
-    const mangaSources = [BASE_SOURCES.Manga];
-    const novelSources = [BASE_SOURCES.Novel];
+  const SOURCES = activeCategory === 'Novels'
+    ? [BASE_SOURCES.All, BASE_SOURCES.Novel, BASE_SOURCES.Manga]
+    : [BASE_SOURCES.All, BASE_SOURCES.Manga, BASE_SOURCES.Novel];
 
-    // Order based on active category
-    if (activeCategory === 'Manga') {
-      return [...allSources, ...mangaSources, ...comicSources, ...novelSources];
-    } else if (activeCategory === 'Novels') {
-      return [...allSources, ...novelSources, ...comicSources, ...mangaSources];
-    } else if (activeCategory === 'Comics') {
-      return [...allSources, ...comicSources, ...mangaSources, ...novelSources];
-    }
-    // Default (All) - current order
-    return [...allSources, ...comicSources, ...mangaSources, ...novelSources];
-  };
-
-  const SOURCES = getOrderedSources();
-
-  // Determine if we should show categories or sources
-  // (defined after getCategoryCount to avoid reference error)
-
-  // Get combined results based on active category or selected source
   const getCombinedResults = () => {
-    const allResults = [];
-
-    // If showing sources (after search), filter by selected source
-    if (showSources) {
-      if (activeSource === 'All') {
-        // Add all results
-        searchData.ReadAllComic?.forEach(item => {
-          allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
-        });
-        searchData.ComicOnline?.forEach(item => {
-          allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
-        });
-        searchData.Manga?.forEach(item => {
-          allResults.push({...item, sourceType: 'Manga', type: 'Manga'});
-        });
-        searchData.Novel?.forEach(item => {
-          allResults.push({...item, sourceType: 'Novel', type: 'Novel'});
-        });
-      } else {
-        // Filter by specific source
-        const sourceType =
-          activeSource === 'Manga'
-            ? 'Manga'
-            : activeSource === 'Novel'
-            ? 'Novel'
-            : 'Comic';
-        searchData[activeSource]?.forEach(item => {
-          allResults.push({
-            ...item,
-            sourceType: activeSource,
-            type: sourceType,
-          });
-        });
-      }
-      return allResults;
+    const results = [];
+    const selection = showSources ? activeSource : activeCategory;
+    if (selection === 'All' || selection === 'Manga') {
+      results.push(...searchData.Manga.map(item => ({...item, type: 'Manga'})));
     }
-
-    // Otherwise, filter by category (before search)
-    if (activeCategory === 'All' || activeCategory === 'Comics') {
-      searchData.ReadAllComic?.forEach(item => {
-        allResults.push({...item, sourceType: 'ReadAllComic', type: 'Comic'});
-      });
-      searchData.ComicOnline?.forEach(item => {
-        allResults.push({...item, sourceType: 'ComicOnline', type: 'Comic'});
-      });
+    if (selection === 'All' || selection === 'Novel' || selection === 'Novels') {
+      results.push(...searchData.Novel.map(item => ({...item, type: 'Novel'})));
     }
-
-    if (activeCategory === 'All' || activeCategory === 'Manga') {
-      searchData.Manga?.forEach(item => {
-        allResults.push({...item, sourceType: 'Manga', type: 'Manga'});
-      });
-    }
-
-    if (activeCategory === 'All' || activeCategory === 'Novels') {
-      searchData.Novel?.forEach(item => {
-        allResults.push({...item, sourceType: 'Novel', type: 'Novel'});
-      });
-    }
-
-    return allResults;
+    return results;
   };
 
   // Get total count for category badge
@@ -247,12 +105,6 @@ export function Search({navigation, route}) {
       return Object.values(searchData).reduce(
         (sum, arr) => sum + (arr?.length || 0),
         0,
-      );
-    }
-    if (categoryId === 'Comics') {
-      return (
-        (searchData.ReadAllComic?.length || 0) +
-        (searchData.ComicOnline?.length || 0)
       );
     }
     if (categoryId === 'Manga') {
@@ -284,8 +136,6 @@ export function Search({navigation, route}) {
 
     // Clear previous results and reset source selection when starting new search
     setSearchData({
-      ReadAllComic: [],
-      ComicOnline: [],
       Manga: [],
       Novel: [],
     });
@@ -296,98 +146,54 @@ export function Search({navigation, route}) {
       category: activeCategory,
     });
 
-    let link = searchTerm.trim();
-    if (
-      (!link.startsWith('https://readcomicsonline.ru/comic/') &&
-        !link.startsWith('https://readallcomics.com/category/')) ||
-      (!link.includes('comic/') && !link.includes('category/'))
-    ) {
-      if (link.startsWith('http://') || link.startsWith('https://')) {
-        Alert.alert('Invalid link', 'Please enter a valid comic link');
-        setIsSearching(false);
-        return;
-      }
-
-      // Reset search data
-      const newData = {
-        ReadAllComic: [],
-        ComicOnline: [],
-        Manga: [],
-        Novel: [],
-      };
-
-      const updateResults = (source, result) => {
-        newData[source] = result;
-        setSearchData({...newData});
-      };
-
-      // Build search promises based on active category
-      const searchPromises = [];
-
-      // Comics sources
-      if (activeCategory === 'All' || activeCategory === 'Comics') {
-        searchPromises.push(
-          dispatch(searchComic(link, 'readcomicsonline'))
-            .then(r => updateResults('ComicOnline', r ?? []))
-            .catch(e => {
-              console.error('ComicOnline search error:', e);
-              updateResults('ComicOnline', []);
-            }),
-          dispatch(searchComic(link, 'readallcomics'))
-            .then(r => updateResults('ReadAllComic', r ?? []))
-            .catch(e => {
-              console.error('ReadAllComic search error:', e);
-              updateResults('ReadAllComic', []);
-            }),
-        );
-      }
-
-      // Manga source
-      if (activeCategory === 'All' || activeCategory === 'Manga') {
-        searchPromises.push(
-          getSearchManga(link)
-            .then(r => updateResults('Manga', r?.mangaList ?? []))
-            .catch(e => {
-              console.error('Manga search error:', e);
-              updateResults('Manga', []);
-            }),
-        );
-      }
-
-      // Novel source
-      if (activeCategory === 'All' || activeCategory === 'Novels') {
-        searchPromises.push(
-          searchNovels(link, 1)
-            .then(r => updateResults('Novel', r ?? []))
-            .catch(e => {
-              console.error('Novel search error:', e);
-              updateResults('Novel', []);
-            }),
-        );
-      }
-
-      await Promise.all(searchPromises);
-
-      // Auto-select the first source with results based on active category
-      if (activeCategory === 'Manga' && newData.Manga?.length > 0) {
-        setActiveSource('Manga');
-      } else if (activeCategory === 'Novels' && newData.Novel?.length > 0) {
-        setActiveSource('Novel');
-      } else if (activeCategory === 'Comics') {
-        // Select first comic source with results
-        if (newData.ReadAllComic?.length > 0) setActiveSource('ReadAllComic');
-        else if (newData.ComicOnline?.length > 0)
-          setActiveSource('ComicOnline');
-        else setActiveSource('All');
-      } else {
-        setActiveSource('All');
-      }
-
+    const query = searchTerm.trim();
+    if (/^https?:\/\//i.test(query)) {
+      Alert.alert('Search by title', 'Enter a manga or novel title.');
       setIsSearching(false);
       return;
     }
-    link = link.replace(/\/\d+$/, '');
-    navigation.navigate(NAVIGATION.comicDetails, {link});
+
+    const newData = {Manga: [], Novel: []};
+    const updateResults = (source, result) => {
+      newData[source] = result;
+      setSearchData({...newData});
+    };
+    const searchPromises = [];
+
+    // Manga source
+    if (activeCategory === 'All' || activeCategory === 'Manga') {
+      searchPromises.push(
+        getSearchManga(query)
+          .then(r => updateResults('Manga', r?.mangaList ?? []))
+          .catch(e => {
+            console.error('Manga search error:', e);
+            updateResults('Manga', []);
+          }),
+      );
+    }
+
+    // Novel source
+    if (activeCategory === 'All' || activeCategory === 'Novels') {
+      searchPromises.push(
+        searchNovels(query, 1)
+          .then(r => updateResults('Novel', r ?? []))
+          .catch(e => {
+            console.error('Novel search error:', e);
+            updateResults('Novel', []);
+          }),
+      );
+    }
+
+    await Promise.all(searchPromises);
+
+    // Auto-select the first source with results based on active category
+    if (activeCategory === 'Manga' && newData.Manga?.length > 0) {
+      setActiveSource('Manga');
+    } else if (activeCategory === 'Novels' && newData.Novel?.length > 0) {
+      setActiveSource('Novel');
+    } else {
+      setActiveSource('All');
+    }
     setIsSearching(false);
   };
 
@@ -397,15 +203,11 @@ export function Search({navigation, route}) {
     const type = item?.type;
     const isManga = type === 'Manga';
     const isNovel = type === 'Novel';
-    const isComic = type === 'Comic';
 
     // Get type-specific colors and icons
-    const getTypeStyle = () => {
-      if (isManga) return {color: '#007AFF', bgColor: 'rgba(0,122,255,0.15)'};
-      if (isNovel) return {color: '#9C27B0', bgColor: 'rgba(156,39,176,0.15)'};
-      return {color: '#667EEA', bgColor: 'rgba(102,126,234,0.15)'};
-    };
-    const typeStyle = getTypeStyle();
+    const typeStyle = isManga
+      ? {color: '#007AFF', bgColor: 'rgba(0,122,255,0.15)'}
+      : {color: '#9C27B0', bgColor: 'rgba(156,39,176,0.15)'};
 
     // Get image source
     const imageUri = item?.coverImage || item?.image;
@@ -417,13 +219,8 @@ export function Search({navigation, route}) {
           link: item?.link,
           title: item?.title,
         });
-      } else if (isNovel) {
-        navigation.navigate(NAVIGATION.novelDetails, {novel: item});
       } else {
-        navigation.navigate(NAVIGATION.comicDetails, {
-          link: item?.link || item?.href,
-          title: item?.title,
-        });
+        navigation.navigate(NAVIGATION.novelDetails, {novel: item});
       }
     };
 
@@ -487,11 +284,6 @@ export function Search({navigation, route}) {
                 {item.status}{' '}
               </Text>
             )}
-            {isComic && item?.sourceType && (
-              <Text style={[styles.mangaStatus, {color: '#667EEA'}]}>
-                {item.sourceType}
-              </Text>
-            )}
           </View>
         </View>
         <View style={styles.arrowContainer}>
@@ -547,7 +339,7 @@ export function Search({navigation, route}) {
             />
             <TextInput
               style={styles.input}
-              placeholder="Find comics, manga, and novels..."
+              placeholder="Find manga and novels..."
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
@@ -680,7 +472,7 @@ export function Search({navigation, route}) {
                       }...`
                     : hasResultsElsewhere
                     ? 'This selection has no results. Try a different one!'
-                    : 'Search for your favorite comics, manga, and novels across multiple sources'}
+                    : 'Search for a manga or novel by title.'}
                 </Text>
               </View>
             );
@@ -688,7 +480,7 @@ export function Search({navigation, route}) {
           data={getCombinedResults()}
           renderItem={renderCombinedItem}
           keyExtractor={(item, index) =>
-            `${item?.sourceType || item?.type}-${
+            `${item?.type}-${
               item?.link || item?.href || index
             }-${index}`
           }
@@ -697,67 +489,6 @@ export function Search({navigation, route}) {
           maxToRenderPerBatch={15}
           initialNumToRender={10}
         />
-
-        {/* View All Modal */}
-        <Modal
-          transparent
-          animationType="slide"
-          visible={viewAll !== null}
-          onRequestClose={() => setViewAll(null)}>
-          <TouchableOpacity
-            onPress={() => setViewAll(null)}
-            activeOpacity={1}
-            style={styles.modalOverlay}
-          />
-          <Tag intensity={10} tint="light" style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>All Results</Text>
-                <TouchableOpacity
-                  style={styles.modalCloseBtn}
-                  onPress={() => setViewAll(null)}>
-                  <AntDesign name="close" size={20} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-
-              <FlatList
-                data={viewAll ?? []}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({item, index}) => {
-                  const colors = getGradientColors(item.title);
-                  return (
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate(NAVIGATION.comicDetails, {
-                          link: item.href,
-                          title: item.title,
-                        });
-                        setViewAll(null);
-                      }}
-                      style={styles.modalItem}>
-                      <View
-                        style={[
-                          styles.modalAvatar,
-                          {backgroundColor: colors[0]},
-                        ]}>
-                        <Text style={styles.modalAvatarText}>
-                          {getInitials(item.title)}
-                        </Text>
-                      </View>
-                      <Text style={styles.modalItemText}>{item.title}</Text>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="rgba(255,255,255,0.3)"
-                      />
-                    </TouchableOpacity>
-                  );
-                }}
-                ListFooterComponent={<View style={styles.footerSpace} />}
-              />
-            </View>
-          </Tag>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -1053,78 +784,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Modal
-  modalOverlay: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-  },
-  modalContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    left: 0,
-    backgroundColor: '#1A1A2E',
-    flex: 1,
-    maxHeight: heightPercentageToDP('70%'),
-    width: '100%',
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-  },
-  modalContent: {
-    flexGrow: 1,
-    zIndex: 10,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  modalTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  modalCloseBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    padding: 16,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.03)',
-  },
-  modalAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalAvatarText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  modalItemText: {
-    flex: 1,
-    fontSize: 15,
-    color: '#FFF',
-    fontWeight: '500',
-  },
-
   // Manga results
   mangaCard: {
     flexDirection: 'row',
@@ -1207,108 +866,5 @@ const styles = StyleSheet.create({
   mangaStatus: {
     fontSize: 11,
     fontWeight: '600',
-  },
-
-  // ReadAllComic results
-  readAllComicCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: 'rgba(102, 126, 234, 0.04)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(102, 126, 234, 0.1)',
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  readAllComicCardEven: {
-    backgroundColor: 'rgba(102, 126, 234, 0.07)',
-  },
-  readAllComicCover: {
-    width: 60,
-    height: 84,
-    borderRadius: 10,
-    marginRight: 14,
-  },
-  readAllComicCoverPlaceholder: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  readAllComicContent: {
-    flex: 1,
-  },
-  readAllComicHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  readAllComicNumber: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.3)',
-  },
-  readAllComicSourceBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: 'rgba(102, 126, 234, 0.2)',
-  },
-  readAllComicSourceBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
-    color: '#667EEA',
-    letterSpacing: 0.5,
-  },
-  readAllComicTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#FFF',
-    lineHeight: 20,
-    marginBottom: 6,
-  },
-  readAllComicInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  readAllComicInfoText: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
-    fontWeight: '500',
-  },
-  readAllComicMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 4,
-  },
-  readAllComicMetaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  readAllComicMetaText: {
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.6)',
-    fontWeight: '500',
-  },
-  readAllComicLatestChapter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  readAllComicLatestChapterText: {
-    fontSize: 10,
-    color: '#667EEA',
-    fontWeight: '600',
-    flex: 1,
   },
 });

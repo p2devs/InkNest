@@ -1210,29 +1210,6 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.37)
   - BVLinearGradient (2.8.3):
     - React-Core
-  - CookieManager (6.4.1):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-Core-prebuilt
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - DoubleConversion (1.1.6):
     - ReactNativeDependencies
   - fast_float (8.0.0):
@@ -4213,7 +4190,6 @@ PODS:
 DEPENDENCIES:
   - boost (from `build/rndeps-facades/boost`)
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
-  - "CookieManager (from `../node_modules/@preeternal/react-native-cookie-manager`)"
   - DoubleConversion (from `build/rndeps-facades/DoubleConversion`)
   - fast_float (from `build/rndeps-facades/fast_float`)
   - "FasterImage (from `../node_modules/@candlefinance/faster-image`)"
@@ -4381,8 +4357,6 @@ EXTERNAL SOURCES:
     :path: build/rndeps-facades/boost
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
-  CookieManager:
-    :path: "../node_modules/@preeternal/react-native-cookie-manager"
   DoubleConversion:
     :path: build/rndeps-facades/DoubleConversion
   fast_float:
@@ -4624,7 +4598,6 @@ SPEC CHECKSUMS:
   boost: 8502bfdc46e2804408af2e163049ece181009af4
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
-  CookieManager: 1433a0704f2d490a5142fa5df0884c9d31f04681
   DoubleConversion: 501a575c40c0b50c89685762dd3e415e6bb26fb0
   fast_float: 7c925d1cebf8328d4018d061f49377e9f887e3b4
   FasterImage: a42cb019ff9e5ed36ac296e538974d81f34a9c16
