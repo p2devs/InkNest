@@ -24,7 +24,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Header from '../../Components/UIComp/Header';
 import {getSearchManga} from '../../InkNest-Externals/Screens/Manga/APIs/Search';
 import {searchNovels} from '../Novel/APIs';
+import {searchableComicSources, searchComics} from '../Comic/APIs/Home';
+import {getSourceLabel} from '../../Utils/sourceStatus';
 import Image from '../../Components/UIComp/Image';
+
+const emptySearchData = {xoxocomic: [], ocecomic: [], Manga: [], Novel: []};
 
 export function Search({navigation, route}) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,12 +38,11 @@ export function Search({navigation, route}) {
       ? 'Manga'
       : initialCategoryFromRoute === 'novel'
       ? 'Novels'
+      : initialCategoryFromRoute === 'comic'
+      ? 'Comics'
       : 'All',
   );
-  const [searchData, setSearchData] = useState({
-    Manga: [],
-    Novel: [],
-  });
+  const [searchData, setSearchData] = useState(emptySearchData);
   const [isSearching, setIsSearching] = useState(false);
   const [activeSource, setActiveSource] = useState('All'); // Selected source after search
   const flatlistRef = useRef();
@@ -47,6 +50,7 @@ export function Search({navigation, route}) {
   // Category definitions (shown before search)
   const CATEGORIES = [
     {id: 'All', label: 'All', icon: 'globe-outline', color: '#667EEA'},
+    {id: 'Comics', label: 'Comics', icon: 'images-outline', color: '#FF9090'},
     {id: 'Manga', label: 'Manga', icon: 'book-outline', color: '#007AFF'},
     {
       id: 'Novels',
@@ -83,13 +87,24 @@ export function Search({navigation, route}) {
     },
   };
 
-  const SOURCES = activeCategory === 'Novels'
-    ? [BASE_SOURCES.All, BASE_SOURCES.Novel, BASE_SOURCES.Manga]
-    : [BASE_SOURCES.All, BASE_SOURCES.Manga, BASE_SOURCES.Novel];
+  const comicSources = searchableComicSources.map(id => ({
+    id, label: getSourceLabel(id), icon: 'images', color: '#FF9090', category: 'Comics',
+  }));
+  const otherSources = activeCategory === 'Novels'
+    ? [BASE_SOURCES.Novel, BASE_SOURCES.Manga]
+    : [BASE_SOURCES.Manga, BASE_SOURCES.Novel];
+  const SOURCES = activeCategory === 'Manga' || activeCategory === 'Novels'
+    ? [BASE_SOURCES.All, ...otherSources, ...comicSources]
+    : [BASE_SOURCES.All, ...comicSources, ...otherSources];
 
   const getCombinedResults = () => {
     const results = [];
     const selection = showSources ? activeSource : activeCategory;
+    for (const source of searchableComicSources) {
+      if (selection === 'All' || selection === 'Comics' || selection === source) {
+        results.push(...searchData[source].map(item => ({...item, type: source})));
+      }
+    }
     if (selection === 'All' || selection === 'Manga') {
       results.push(...searchData.Manga.map(item => ({...item, type: 'Manga'})));
     }
@@ -109,6 +124,9 @@ export function Search({navigation, route}) {
     }
     if (categoryId === 'Manga') {
       return searchData.Manga?.length || 0;
+    }
+    if (categoryId === 'Comics') {
+      return searchableComicSources.reduce((count, id) => count + searchData[id].length, 0);
     }
     if (categoryId === 'Novels') {
       return searchData.Novel?.length || 0;
@@ -135,10 +153,7 @@ export function Search({navigation, route}) {
     setIsSearching(true);
 
     // Clear previous results and reset source selection when starting new search
-    setSearchData({
-      Manga: [],
-      Novel: [],
-    });
+    setSearchData(emptySearchData);
     setActiveSource('All');
 
     await analytics().logEvent('search_comic', {
@@ -148,17 +163,27 @@ export function Search({navigation, route}) {
 
     const query = searchTerm.trim();
     if (/^https?:\/\//i.test(query)) {
-      Alert.alert('Search by title', 'Enter a manga or novel title.');
+      Alert.alert('Search by title', 'Enter a comic, manga, or novel title.');
       setIsSearching(false);
       return;
     }
 
-    const newData = {Manga: [], Novel: []};
+    const newData = {...emptySearchData};
     const updateResults = (source, result) => {
       newData[source] = result;
       setSearchData({...newData});
     };
     const searchPromises = [];
+
+    if (activeCategory === 'All' || activeCategory === 'Comics') {
+      for (const source of searchableComicSources) {
+        searchPromises.push(
+          searchComics(source, query)
+            .then(cards => updateResults(source, cards))
+            .catch(() => updateResults(source, [])),
+        );
+      }
+    }
 
     // Manga source
     if (activeCategory === 'All' || activeCategory === 'Manga') {
@@ -203,9 +228,12 @@ export function Search({navigation, route}) {
     const type = item?.type;
     const isManga = type === 'Manga';
     const isNovel = type === 'Novel';
+    const isComic = searchableComicSources.includes(type);
 
     // Get type-specific colors and icons
-    const typeStyle = isManga
+    const typeStyle = isComic
+      ? {color: '#FF9090', bgColor: 'rgba(255,144,144,0.15)'}
+      : isManga
       ? {color: '#007AFF', bgColor: 'rgba(0,122,255,0.15)'}
       : {color: '#9C27B0', bgColor: 'rgba(156,39,176,0.15)'};
 
@@ -214,7 +242,9 @@ export function Search({navigation, route}) {
 
     // Handle press based on type
     const handlePress = () => {
-      if (isManga) {
+      if (isComic) {
+        navigation.navigate(NAVIGATION.comicDetails, {link: item.link, title: item.title, image: item.image});
+      } else if (isManga) {
         navigation.navigate(NAVIGATION.mangaDetails, {
           link: item?.link,
           title: item?.title,
@@ -227,6 +257,7 @@ export function Search({navigation, route}) {
     return (
       <TouchableOpacity
         onPress={handlePress}
+        accessibilityLabel={isComic ? `${item.title}, ${getSourceLabel(type)}` : undefined}
         activeOpacity={0.7}
         style={[styles.mangaCard, isEven && styles.mangaCardEven]}>
         {imageUri ? (
@@ -250,7 +281,7 @@ export function Search({navigation, route}) {
               ]}>
               <Text
                 style={[styles.mangaSourceBadgeText, {color: typeStyle.color}]}>
-                {type?.toUpperCase()}
+                {isComic ? getSourceLabel(type) : type?.toUpperCase()}
               </Text>
             </View>
           </View>
@@ -339,7 +370,7 @@ export function Search({navigation, route}) {
             />
             <TextInput
               style={styles.input}
-              placeholder="Find manga and novels..."
+              placeholder="Find comics, manga, and novels..."
               value={searchTerm}
               onChangeText={setSearchTerm}
               onSubmitEditing={fetchData}
@@ -472,7 +503,7 @@ export function Search({navigation, route}) {
                       }...`
                     : hasResultsElsewhere
                     ? 'This selection has no results. Try a different one!'
-                    : 'Search for a manga or novel by title.'}
+                    : 'Search for a comic, manga, or novel by title.'}
                 </Text>
               </View>
             );

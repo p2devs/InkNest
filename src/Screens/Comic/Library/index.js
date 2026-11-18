@@ -24,7 +24,7 @@ import {useFeatureFlag} from 'configcat-react';
 
 import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
-import {getComicsHome} from '../APIs/Home';
+import {getComics} from '../APIs/Home';
 import {getMangaHome} from '../../../InkNest-Externals/Screens/Manga/APIs';
 import {getNovelHome} from '../../Novel/APIs';
 import HistoryCard from './Components/HistoryCard';
@@ -42,6 +42,8 @@ import {
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
+  const [comicSource, setComicSource] = useState('comicbookplus');
+  const [comicRetry, setComicRetry] = useState(0);
   const [mangaData, setMangaData] = useState({
     latest: null,
     manga: null,
@@ -127,21 +129,44 @@ export function Library({navigation}) {
           title: 'Most Viewed',
         },
       });
-    } else {
-      if (forIosLoading === false) {
-        getComicsHome(setComicsData, setLoading, dispatch);
-        getMangaHome(setMangaData, setMangaLoading, dispatch);
-        getNovelHome(novelBaseUrl).then(data => {
-          setNovelSections(data || []);
-          setNovelLoading(false);
-        }).catch(err => {
-          console.error('Error fetching novel home:', err);
-          setNovelLoading(false);
+      setLoading(false);
+      return;
+    }
+    if (forIosLoading) return;
+    let current = true;
+    setLoading(true);
+    setComicsData({});
+    getComics(comicSource, 1, dispatch).then(result => {
+      if (!current) return;
+      if (result) {
+        setComicsData({
+          'latest-release': {
+            source: comicSource,
+            title: `Latest on ${getSourceLabel(comicSource)}`,
+            data: result.comicsData,
+            lastPage: result.lastPage,
+          },
         });
       }
+      setLoading(false);
+    });
+    return () => {
+      current = false;
+    };
+  }, [comicSource, comicRetry, dispatch, forIosValue, forIosLoading]);
+
+  useEffect(() => {
+    if (getVersion() !== forIosValue && !forIosLoading) {
+      getMangaHome(setMangaData, setMangaLoading, dispatch);
+      getNovelHome(novelBaseUrl).then(data => {
+        setNovelSections(data || []);
+        setNovelLoading(false);
+      }).catch(err => {
+        console.error('Error fetching novel home:', err);
+        setNovelLoading(false);
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forIosValue, forIosLoading, novelBaseUrl]);
+  }, [dispatch, forIosValue, forIosLoading, novelBaseUrl]);
 
   const allSections = Object.entries(comicsData);
   const isSpecialBuild =
@@ -248,6 +273,7 @@ export function Library({navigation}) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
+                accessibilityLabel="Search"
                 onPress={() => {
                   crashlytics().log('Home Search button clicked');
                   navigation.navigate(NAVIGATION.search, {
@@ -271,6 +297,24 @@ export function Library({navigation}) {
         {/* ===== COMIC TAB ===== */}
         {activeTab === 'comic' && (
           <>
+            {!isSpecialBuild && !forIosLoading && (
+              <View style={styles.hostRow}>
+                <View style={styles.tabBar}>
+                  {Object.keys(ComicHostName).map(source => (
+                    <TouchableOpacity
+                      key={source}
+                      accessibilityRole="tab"
+                      accessibilityState={{selected: comicSource === source}}
+                      onPress={() => setComicSource(source)}
+                      style={[styles.tab, comicSource === source && styles.activeTab]}>
+                      <Text style={[styles.tabText, comicSource === source && styles.activeTabText]}>
+                        {getSourceLabel(source)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
             {/* Continue Reading */}
             {history.length > 0 && (
               <View style={styles.section}>
@@ -312,7 +356,21 @@ export function Library({navigation}) {
             {!loading &&
               allSections.map(([key, section]) => (
                 <View key={key} style={styles.section}>
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>{section.title}</Text>
+                    {!isSpecialBuild && (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate(NAVIGATION.seeAll, {
+                          title: section.title,
+                          data: section.data,
+                          lastPage: section.lastPage,
+                          source: section.source,
+                          key,
+                        })}>
+                        <Text style={styles.clearText}>See All</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                   <FlatList
                     data={section.data}
                     keyExtractor={(item, index) => index.toString()}
@@ -329,7 +387,7 @@ export function Library({navigation}) {
                             link: item?.link?.toString(),
                             title: item?.title?.toString(),
                           });
-                          if (isSpecialBuild) {
+                          if (isSpecialBuild || section.source !== 'comicbookplus') {
                             navigation.navigate(NAVIGATION.comicDetails, item);
                           } else {
                             navigation.navigate(NAVIGATION.comicBook, {comicBookLink: item.link});
@@ -357,20 +415,18 @@ export function Library({navigation}) {
                   color="rgba(255,255,255,0.25)"
                 />
                 <Text style={styles.comicEmptyTitle}>
-                  {`Couldn't load ${getSourceLabel('comicbookplus')}`}
+                  {`Couldn't load ${getSourceLabel(comicSource)}`}
                 </Text>
                 <Text style={styles.comicEmptySubtitle}>
-                  {getSourceStatus('comicbookplus')?.status ===
+                  {getSourceStatus(comicSource)?.status ===
                   SOURCE_STATUS.CLOUDFLARE_PROTECTED
-                    ? 'Comic Book Plus is blocking requests. Try again later.'
+                    ? `${getSourceLabel(comicSource)} is blocking requests. Try again later.`
                     : 'Something went wrong. Check your connection and try again.'}
                 </Text>
                 <TouchableOpacity
                   style={styles.comicRetryButton}
                   activeOpacity={0.8}
-                  onPress={() =>
-                    getComicsHome(setComicsData, setLoading, dispatch)
-                  }>
+                  onPress={() => setComicRetry(count => count + 1)}>
                   <MaterialIcons name="refresh" size={18} color="#fff" />
                   <Text style={styles.comicRetryText}>Retry</Text>
                 </TouchableOpacity>
@@ -382,7 +438,7 @@ export function Library({navigation}) {
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#667EEA" />
                 <Text style={styles.loadingText}>
-                  Loading {getSourceLabel('comicbookplus')}…
+                  Loading {getSourceLabel(comicSource)}…
                 </Text>
               </View>
             )}

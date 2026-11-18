@@ -1,5 +1,6 @@
 import React, {useMemo, useState} from 'react';
-import {useWindowDimensions, Image, ActivityIndicator} from 'react-native';
+import {useWindowDimensions, ActivityIndicator} from 'react-native';
+import PageImage from './PageImage';
 import {
   runOnJS,
   useAnimatedReaction,
@@ -12,12 +13,14 @@ import {fitContainer, useImageResolution} from 'react-native-zoom-toolkit';
 type GalleryImageProps = {
   asset: any;
   index: number;
+  sourceName: string;
   activeIndex: SharedValue<number>;
 };
 
 const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
   index,
+  sourceName,
   activeIndex,
 }) => {
   const {width, height} = useWindowDimensions();
@@ -26,7 +29,7 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
 
   const {isFetching, resolution} = useImageResolution(imageSource);
 
-  const size = resolution
+  const size = resolution && resolution.width > 0 && resolution.height > 0
     ? fitContainer(resolution.width / resolution.height, {
         width,
         height: height - heightPercentageToDP('4%'),
@@ -52,9 +55,11 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
   }
 
   return (
-    <Image
-      source={imageSource}
-      style={size}
+    <PageImage
+      uri={imageSource.uri}
+      index={index}
+      sourceName={sourceName}
+      style={size || {width, height}}
       allowDownscaling={downScale}
     />
   );

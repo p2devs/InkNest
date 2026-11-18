@@ -1,4 +1,16 @@
 export const HomePageCardClasses = {
+  xoxocomic: {
+    cardClass: '.items .item > figure',
+    cardTitleClass: 'figcaption h3 a',
+    imageClass: '.image img',
+    imageAttr: 'data-original',
+  },
+  ocecomic: {
+    cardClass: 'main.Comics .items > .item',
+    cardTitleClass: 'h2 a',
+    imageClass: 'figure img',
+    genresClass: '.genre a',
+  },
   azcomic: {
     'popular-comics': {
       cardClass: '.eg-box',
@@ -40,6 +52,31 @@ export const HomePageCardClasses = {
 };
 
 export const ComicDetailPageClasses = {
+  xoxocomic: {
+    detailsContainer: '#item-detail',
+    title: '.breadcrumb li:last-child [itemprop="name"]',
+    imgSrc: '.col-image img',
+    summary: '#item-detail .detail-content p',
+    detailsDL: '.list-info .name',
+    detailsValue: 'p',
+    genre: '#item-detail .kind a',
+    chaptersList: '#nt_listchapter li.row',
+    chapterLink: '.chapter a',
+    chapterDate: '.col-xs-3',
+    nextChapterPage: '#nt_listchapter .pagination a[rel="next"]',
+    newestFirst: true,
+  },
+  ocecomic: {
+    detailsContainer: '#Comic .page.home',
+    title: '#Comic .page.home h1',
+    imgSrc: 'figure img',
+    summary: '#Comic .page.home .about',
+    detailsDL: '.info ul li:first-child',
+    detailsValue: 'li',
+    genre: '#Comic .page.home .info ul:has(span:contains("Genre")) a',
+    chaptersList: '#Comic .issues li',
+    chapterLink: 'a.issue-link',
+  },
   comicbookplus: {
     detailsContainer: '.introtext',
     title: 'h1.sectionh1',

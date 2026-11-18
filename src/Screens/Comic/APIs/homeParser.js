@@ -1,25 +1,30 @@
-import {ComicHostName} from '../../../Utils/APIs';
+import {getComicSourceKey, resolveComicUrl} from '../../../Utils/APIs';
 
-export const parseHomePageCards = ($, tagConfig) => {
+export const parseHomePageCards = ($, tagConfig, pageUrl) => {
   const comicsData = [];
+  const source = getComicSourceKey(pageUrl);
+  const seen = new Set();
 
   if (!tagConfig) {
     return comicsData;
   }
 
   $(tagConfig.cardClass).each((_, element) => {
-    const title = $(element).find(tagConfig.cardTitleClass).text().trim();
-    let link = $(element).find(tagConfig.cardLinkClass).attr('href');
-    if (link) {
-      link = link.replace(/\/\d+$/, '');
-      if (link.startsWith('/?')) {
-        link = ComicHostName.comicbookplus + link.substring(1);
-      }
-    }
+    const heading = $(element).find(tagConfig.cardTitleClass).first();
+    const title = heading.attr('title')?.trim() || heading.text().trim();
+    const anchor = tagConfig.cardLinkClass
+      ? $(element).find(tagConfig.cardLinkClass)
+      : heading;
+    const link = resolveComicUrl(anchor.attr('href'), pageUrl);
+    if (!title || !link || getComicSourceKey(link) !== source || seen.has(link))
+      return;
+    seen.add(link);
 
-    const image = $(element)
-      .find(tagConfig.imageClass)
-      .attr(tagConfig.imageAttr ?? 'src');
+    const img = $(element).find(tagConfig.imageClass).first();
+    const image = resolveComicUrl(
+      img.attr(tagConfig.imageAttr || 'src') || img.attr('src'),
+      pageUrl,
+    );
 
     const genres = [];
     if (tagConfig.genresClass) {

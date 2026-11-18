@@ -22,7 +22,8 @@ import APICaller from '../Controller/Interceptor';
 
 // Configurations
 import {ComicDetailPageClasses} from '../../Screens/Comic/APIs/constance';
-import {isSupportedComicUrl} from '../../Utils/APIs';
+import {getComicSourceKey} from '../../Utils/APIs';
+import {recordSourceSuccess} from '../../Utils/sourceStatus';
 
 // Utilities
 import {checkDownTime, handleAPIError} from './utils/errorHandlers';
@@ -39,6 +40,7 @@ import {
 } from './parsers/chapterParser';
 import {
   parseComicBookPlusPage,
+  parseComicIssue,
   createComicBookData,
 } from './parsers/comicBookParser';
 // Re-export checkDownTime for backward compatibility
@@ -64,7 +66,8 @@ export const WatchedData = data => async (dispatch, getState) => {
 export const fetchComicDetails =
   (link, refresh = false) =>
   async (dispatch, getState) => {
-    if (!isSupportedComicUrl(link)) {
+    const source = getComicSourceKey(link);
+    if (!source) {
       goBack();
       Alert.alert('Source unavailable', 'This comic source is no longer supported.');
       return;
@@ -91,10 +94,14 @@ export const fetchComicDetails =
       const html = response.data;
       const $ = cheerio.load(html);
 
-      const config = ComicDetailPageClasses.comicbookplus;
+      const config = ComicDetailPageClasses[source];
       const comicDetails = await parseComicDetails($, config, link);
       comicDetails.chapters = await fetchChaptersWithPagination($, config, link);
       comicDetails.pagination = getChapterPagination($, config);
+      if (source !== 'comicbookplus' && (!comicDetails.title || !comicDetails.chapters.length)) {
+        throw new Error('Could not load the comic or its issues.');
+      }
+      recordSourceSuccess(source);
 
       watchedData = buildWatchedData(comicDetails, link);
 
@@ -109,7 +116,7 @@ export const fetchComicDetails =
       dispatch(WatchedData(watchedData));
       dispatch(fetchDataSuccess({url: link, data: comicDetails}));
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails', 'comicbookplus');
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicDetails', source);
       dispatch(ClearError());
       dispatch(fetchDataFailure('Not Found'));
       goBack();
@@ -130,7 +137,8 @@ export const fetchComicDetails =
 export const fetchComicBook =
   (comicBook, isfetchComicDetails = false, isDownloadComic = false) =>
   async (dispatch, getState) => {
-    if (!isSupportedComicUrl(comicBook)) {
+    const source = getComicSourceKey(comicBook);
+    if (!source) {
       if (!isDownloadComic) {
         goBack();
         Alert.alert('Source unavailable', 'This comic source is no longer supported.');
@@ -160,17 +168,25 @@ export const fetchComicBook =
         dispatch(StopLoading());
         dispatch(ClearError());
         dispatch(checkDownTime());
+        if (isDownloadComic) return {url: comicBook, data: existingData};
         return;
       }
 
       // Fetch fresh data
-      const response = await APICaller.get(comicBook);
+      // Keep history and downloads keyed by the issue, including when XOXO's
+      // reader needs its all-pages view to expose the complete image list.
+      const readerUrl = source === 'xoxocomic'
+        ? comicBook.split(/[?#]/)[0].replace(/(?:\/all)?\/?$/, '/all')
+        : comicBook;
+      const response = await APICaller.get(readerUrl);
       const html = response.data;
       const $ = cheerio.load(html);
 
-      const parsedData = parseComicBookPlusPage(html, $);
+      const parsedData = source === 'comicbookplus'
+        ? parseComicBookPlusPage(html, $)
+        : parseComicIssue($, source, readerUrl);
       const data = createComicBookData(parsedData);
-      console.log('Fetched data:', data);
+      recordSourceSuccess(source);
 
       // Optionally fetch details page
       if (isfetchComicDetails && data.detailsLink) {
@@ -183,7 +199,7 @@ export const fetchComicBook =
         return {url: comicBook, data};
       }
     } catch (error) {
-      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook', 'comicbookplus');
+      handleAPIError(error, dispatch, crashlytics, 'fetchComicBook', source);
       dispatch(fetchDataFailure(error.message));
     }
   };

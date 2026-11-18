@@ -2,7 +2,7 @@
  * Comic detail parsing utilities
  */
 
-import {normalizeImageUrl} from '../utils/dataHelpers';
+import {resolveComicUrl} from '../../../Utils/APIs';
 
 /**
  * Parses comic details using standard configuration
@@ -15,10 +15,10 @@ import {normalizeImageUrl} from '../utils/dataHelpers';
 export const parseComicDetails = async ($, config, link) => {
   const detailsContainer = $(config.detailsContainer);
   const title = $(config.title).first().text().trim();
-  let imgSrc = detailsContainer
-    .find(config.imgSrc)
-    .attr(config.getImageAttr);
-  imgSrc = normalizeImageUrl(imgSrc);
+  const imgSrc = resolveComicUrl(
+    detailsContainer.find(config.imgSrc).attr(config.getImageAttr || 'src'),
+    link,
+  );
 
   const genres = parseGenres($, config);
   const details = parseDetailsSection($, detailsContainer, config);
@@ -33,14 +33,14 @@ export const parseComicDetails = async ($, config, link) => {
     categories: getCategories(details),
     tags: details.Tags || [],
     genres: genres.length > 0 ? genres : details.Genres || [],
-    author: details.Author || details.Contributor || null,
-    alternativeName: details.Alternative || details['Alternative name'] || null,
+    author: details.Author || details['Author(s)'] || details.Writer || details.Contributor || null,
+    alternativeName: details.Alternative || details['Alternative name'] || details['Alternate Name'] || null,
     views: details.Views || null,
     rating: details.Rating || null,
     summary,
     link,
     // Additional comicbookplus-specific fields
-    publisher: details['Published by'] || null,
+    publisher: details['Published by'] || details.Publisher || null,
     availableBooks: details['Available Books'] || null,
     latestBook: details['Latest Book'] || null,
     externalLinks: details['External Links'] || null,

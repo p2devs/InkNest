@@ -28,6 +28,8 @@ export const ERROR_CODES = {
 export const SOURCE_LABELS = {
   // Comic sources
   comicbookplus: 'Comic Book Plus',
+  xoxocomic: 'XOXOComic',
+  ocecomic: 'OceComic',
   azcomic: 'AZ Comic',
   // Anime sources
   gogoanimes: 'GoGo Animes',
@@ -45,6 +47,8 @@ export const NOVEL_SOURCES = ['novelfire', 'wtrlab'];
 // Content type for sources
 export const SOURCE_CONTENT_TYPE = {
   comicbookplus: 'comic',
+  xoxocomic: 'comic',
+  ocecomic: 'comic',
   azcomic: 'comic',
   gogoanimes: 'anime',
   s3taku: 'anime',

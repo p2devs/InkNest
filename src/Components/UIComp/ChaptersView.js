@@ -58,9 +58,10 @@ const ChaptersView = ({ chapter, Bookmark, ComicDetail }) => {
       link: chapter?.link?.toString(),
       title: chapter?.title?.toString(),
     });
-    if (!ComicBook?.images) {
-      let data = await dispatch(fetchComicBook(chapter.link, null, true));
-      DownloadedComic(data.data);
+    if (!ComicBook?.images?.length) {
+      const result = await dispatch(fetchComicBook(chapter.link, false, true));
+      if (result?.data) DownloadedComic(result.data);
+      else setLoadingStatus(false);
       return;
     }
     DownloadedComic(ComicBook);

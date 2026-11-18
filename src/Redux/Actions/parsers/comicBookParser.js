@@ -1,6 +1,7 @@
 /**
  * Comic book page parsing utilities
  */
+import {getComicSourceKey, resolveComicUrl} from '../../../Utils/APIs';
 
 /**
  * Parses ComicBookPlus pages that use JavaScript variables
@@ -43,6 +44,45 @@ export const parseComicBookPlusPage = (html, $) => {
     title: '',
     detailsLink,
     detailPageTitle: '',
+  };
+};
+
+export const parseComicIssue = ($, source, pageUrl) => {
+  const isXoxo = source === 'xoxocomic';
+  const pageImages = isXoxo
+    ? '.reading-detail .page-chapter img'
+    : '#Comic .page.issue figure img';
+  const images = $(pageImages)
+    .map((_, el) => {
+      const img = $(el);
+      return resolveComicUrl(
+        img.attr('data-original') || img.attr('src'),
+        pageUrl,
+      );
+    })
+    .get();
+  if (!images.length) throw new Error('This issue has no readable pages.');
+
+  const series = isXoxo
+    ? $('.chapter-nav a.backward').first()
+    : $('#Comic .volume .nav a:has(.fa-home)').first();
+  const detailsLink = resolveComicUrl(series.attr('href'), pageUrl);
+  if (getComicSourceKey(detailsLink) !== source)
+    throw new Error('Could not identify the comic series.');
+  return {
+    images,
+    title: $(
+      isXoxo
+        ? '.select-chapter option[selected]'
+        : '#Comic .volume .pages > label',
+    )
+      .first()
+      .text()
+      .trim(),
+    detailPageTitle: isXoxo
+      ? series.attr('title')
+      : $('#Comic .share-box h4 b').first().text().trim(),
+    detailsLink,
   };
 };
 

@@ -84,9 +84,10 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
-    if (!ComicBook?.images) {
-      let data = await dispatch(fetchComicBook(item.link, null, true));
-      DownloadedComic(data.data);
+    if (!ComicBook?.images?.length) {
+      const result = await dispatch(fetchComicBook(item.link, false, true));
+      if (result?.data) DownloadedComic(result.data);
+      else setLoadingStatus(false);
       return;
     }
     DownloadedComic(ComicBook);

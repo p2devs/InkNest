@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -26,21 +26,22 @@ import Toast from 'react-native-toast-message';
 import {NAVIGATION} from '../../../Constants';
 
 export function SeeAll({navigation, route}) {
-  const {title, data, key, lastPage} = route.params;
+  const {title, data, key, source = 'comicbookplus'} = route.params;
+  const [lastPage, setLastPage] = useState(route.params.lastPage);
   const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  const fetchComics = async (page = 1) => {
-    if (lastPage && page > lastPage) return;
-    if (page < 1) return;
+  const fetchComics = async nextPage => {
+    if (loading || !nextPage || nextPage < 1 || (lastPage && nextPage > lastPage)) return;
 
     setLoading(true);
 
-    const response = await getComics(page);
+    const response = await getComics(source, nextPage);
     setLoading(false);
     if (response) {
-      setPage(page);
+      setPage(nextPage);
+      if (response.lastPage) setLastPage(response.lastPage);
       setComicsData(response?.comicsData);
       return;
     }
@@ -103,9 +104,11 @@ export function SeeAll({navigation, route}) {
                   title: title?.toString(),
                   link: item?.link?.toString(),
                 });
-                navigation.navigate(NAVIGATION.comicBook, {
-                  comicBookLink: item.link,
-                });
+                if (source === 'comicbookplus') {
+                  navigation.navigate(NAVIGATION.comicBook, {comicBookLink: item.link});
+                } else {
+                  navigation.navigate(NAVIGATION.comicDetails, item);
+                }
               }}
               containerStyle={{
                 width: widthPercentageToDP('44%'),
