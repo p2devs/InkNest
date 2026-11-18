@@ -19,6 +19,7 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
     dependencyProvider = RCTAppDependencyProvider()
     reactNativeFactory = RCTReactNativeFactory(delegate: self)
     window = UIWindow(windowScene: windowScene)
+    (UIApplication.shared.delegate as? AppDelegate)?.window = window
     
     #if DEBUG
     let devMenuConfiguration = RCTDevMenuConfiguration(

@@ -1,14 +1,8 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { AppNavigation } from './AppNavigation';
 import { navigationRef } from './NavigationService';
-import { Platform, StatusBar, AppState } from 'react-native';
+import { AppState } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ClearError,
@@ -48,14 +42,11 @@ import {
  * @requires useNetInfo from '@react-native-community/netinfo'
  * @requires useRef from 'react'
  * @requires useEffect from 'react'
- * @requires useLayoutEffect from 'react'
  * @requires crashlytics from '@react-native-firebase/crashlytics'
  * @requires messaging from '@react-native-firebase/messaging'
  * @requires fire from '@react-native-firebase/app'
  * @requires firebase from '@react-native-firebase/app'
  * @requires PermissionsAndroid from 'react-native'
- * @requires Platform from 'react-native'
- * @requires StatusBar from 'react-native'
  * @requires NavigationContainer from '@react-navigation/native'
  * @requires navigationRef from './path/to/navigationRef'
  * @requires AppNavigation from './path/to/AppNavigation'
@@ -357,10 +348,6 @@ export function RootNavigation() {
       toggleCrashlytics();
       AnalyticsEnabled();
     }
-  }, []);
-
-  useLayoutEffect(() => {
-    if (Platform.OS === 'android') StatusBar.setBackgroundColor('#222');
   }, []);
 
   return (

@@ -1,7 +1,6 @@
 import {View} from 'moti';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {NAVIGATION} from '../../../../Constants';
-import {Text} from 'react-native-gesture-handler';
 
 const PaginationFooter = ({pagination, pageLink, route, navigation}) => {
   if (!pagination || pagination.length === 0) {
