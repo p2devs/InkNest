@@ -2,6 +2,7 @@
  * Comic book page parsing utilities
  */
 import {getComicSourceKey, resolveComicUrl} from '../../../Utils/APIs';
+import {ComicIssuePageClasses} from '../../../Screens/Comic/APIs/constance';
 
 /**
  * Parses ComicBookPlus pages that use JavaScript variables
@@ -47,41 +48,37 @@ export const parseComicBookPlusPage = (html, $) => {
   };
 };
 
+export const getComicReaderUrl = (source, issueUrl) =>
+  ComicIssuePageClasses[source]?.allPages
+    ? issueUrl.split(/[?#]/)[0].replace(/(?:\/all)?\/?$/, '/all')
+    : issueUrl;
+
 export const parseComicIssue = ($, source, pageUrl) => {
-  const isXoxo = source === 'xoxocomic';
-  const pageImages = isXoxo
-    ? '.reading-detail .page-chapter img'
-    : '#Comic .page.issue figure img';
-  const images = $(pageImages)
+  const config = ComicIssuePageClasses[source];
+  const images = $(config.images)
     .map((_, el) => {
       const img = $(el);
       return resolveComicUrl(
-        img.attr('data-original') || img.attr('src'),
+        img.attr(config.imageAttr || 'src') || img.attr('src'),
         pageUrl,
       );
     })
     .get();
   if (!images.length) throw new Error('This issue has no readable pages.');
 
-  const series = isXoxo
-    ? $('.chapter-nav a.backward').first()
-    : $('#Comic .volume .nav a:has(.fa-home)').first();
+  const series = $(config.seriesLink).first();
+  const seriesTitle = config.seriesTitle
+    ? $(config.seriesTitle).first()
+    : series;
   const detailsLink = resolveComicUrl(series.attr('href'), pageUrl);
   if (getComicSourceKey(detailsLink) !== source)
     throw new Error('Could not identify the comic series.');
   return {
     images,
-    title: $(
-      isXoxo
-        ? '.select-chapter option[selected]'
-        : '#Comic .volume .pages > label',
-    )
-      .first()
-      .text()
-      .trim(),
-    detailPageTitle: isXoxo
-      ? series.attr('title')
-      : $('#Comic .share-box h4 b').first().text().trim(),
+    title: $(config.title).first().text().trim(),
+    detailPageTitle:
+      (config.seriesTitleAttr && seriesTitle.attr(config.seriesTitleAttr)) ||
+      seriesTitle.text().trim(),
     detailsLink,
   };
 };

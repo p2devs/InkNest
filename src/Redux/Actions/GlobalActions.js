@@ -41,6 +41,7 @@ import {
 import {
   parseComicBookPlusPage,
   parseComicIssue,
+  getComicReaderUrl,
   createComicBookData,
 } from './parsers/comicBookParser';
 // Re-export checkDownTime for backward compatibility
@@ -173,11 +174,8 @@ export const fetchComicBook =
       }
 
       // Fetch fresh data
-      // Keep history and downloads keyed by the issue, including when XOXO's
-      // reader needs its all-pages view to expose the complete image list.
-      const readerUrl = source === 'xoxocomic'
-        ? comicBook.split(/[?#]/)[0].replace(/(?:\/all)?\/?$/, '/all')
-        : comicBook;
+      // Keep history and downloads keyed by the issue's original URL.
+      const readerUrl = getComicReaderUrl(source, comicBook);
       const response = await APICaller.get(readerUrl);
       const html = response.data;
       const $ = cheerio.load(html);

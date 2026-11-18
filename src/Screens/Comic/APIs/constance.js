@@ -11,6 +11,23 @@ export const HomePageCardClasses = {
     imageClass: 'figure img',
     genresClass: '.genre a',
   },
+  comichubfree: {
+    cardClass: 'main .cartoon-box',
+    cardTitleClass: '.mb-right h3',
+    cardLinkClass: '.mb-right h3 a',
+    imageClass: 'a.image img',
+    imageAttr: 'data-src',
+  },
+  latestcomics: {
+    cardClass: '.series-card',
+    cardTitleClass: '.series-card-title',
+    cardLinkClass: 'a.series-card-link',
+    imageClass: '.series-card-thumb',
+    getImageUrl: image =>
+      image
+        .attr('style')
+        ?.match(/background-image:\s*url\(\s*(['"]?)(.*?)\1\s*\)/i)?.[2],
+  },
   azcomic: {
     'popular-comics': {
       cardClass: '.eg-box',
@@ -77,6 +94,29 @@ export const ComicDetailPageClasses = {
     chaptersList: '#Comic .issues li',
     chapterLink: 'a.issue-link',
   },
+  comichubfree: {
+    detailsContainer: '.movie-info',
+    title: '.breadcrumb li:last-child [itemprop="name"]',
+    imgSrc: '.movie-image img',
+    getImageAttr: 'data-src',
+    summary: '#film-content',
+    detailsDL: '.movie-dl dt',
+    chaptersList: '#list tr',
+    chapterLink: 'td:first-child a',
+    chapterDate: 'td:last-child',
+    nextChapterPage: '.page-single .pagination a[rel="next"]',
+    newestFirst: true,
+  },
+  latestcomics: {
+    detailsContainer: 'main .series-header',
+    title: 'main .series-title',
+    imgSrc: '.series-header-thumbnail img',
+    summary: 'main .series-description',
+    chaptersList: 'article.chapter-item',
+    chapterLink: 'a.chapter-link',
+    chapterTitle: '.chapter-title',
+    newestFirst: true,
+  },
   comicbookplus: {
     detailsContainer: '.introtext',
     title: 'h1.sectionh1',
@@ -93,5 +133,36 @@ export const ComicDetailPageClasses = {
     genre: '.introtext a[itemprop="genre"]',
     publisher: '.introtext span[itemprop="name"]',
     publisherLink: '.introtext a[itemprop="url"]',
+  },
+};
+
+export const ComicIssuePageClasses = {
+  xoxocomic: {
+    allPages: true,
+    images: '.reading-detail .page-chapter img',
+    imageAttr: 'data-original',
+    title: '.select-chapter option[selected]',
+    seriesLink: '.chapter-nav a.backward',
+    seriesTitleAttr: 'title',
+  },
+  ocecomic: {
+    images: '#Comic .page.issue figure img',
+    imageAttr: 'data-original',
+    title: '#Comic .volume .pages > label',
+    seriesLink: '#Comic .volume .nav a:has(.fa-home)',
+    seriesTitle: '#Comic .share-box h4 b',
+  },
+  comichubfree: {
+    allPages: true,
+    images: '.chapter-container.chapter-all img.chapter_img',
+    imageAttr: 'data-src',
+    title: 'select[name="chapter_select"] option[selected]',
+    seriesLink: '.breadcrumb a[href*="/comic/"]',
+  },
+  latestcomics: {
+    images: 'main .entry-content .wp-block-image img',
+    imageAttr: 'data-src',
+    title: 'main .entry-title',
+    seriesLink: 'main a.manga-series',
   },
 };

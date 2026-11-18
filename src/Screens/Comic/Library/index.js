@@ -40,6 +40,59 @@ import {
   SOURCE_STATUS,
 } from '../../../Utils/sourceStatus';
 
+function ComicSourcePicker({source, onSelect}) {
+  const [expanded, setExpanded] = useState(false);
+  const label = getSourceLabel(source);
+  return (
+    <>
+      <View style={styles.hostRow}>
+        <TouchableOpacity
+          style={[styles.hostSelector, styles.comicSourceRow]}
+          accessibilityRole="button"
+          accessibilityLabel={`Comic source, ${label}`}
+          accessibilityState={{expanded}}
+          onPress={() => setExpanded(open => !open)}>
+          <Text style={styles.comicSourceLabel}>Comic source</Text>
+          <Text style={[styles.hostText, styles.comicSourceValue]}>{label}</Text>
+          <AntDesign
+            name={expanded ? 'up' : 'down'}
+            size={14}
+            color="#B5B5CA"
+          />
+        </TouchableOpacity>
+      </View>
+      {expanded && (
+        <View
+          style={[styles.dropdown, styles.comicSourceOptions]}
+          accessibilityRole="radiogroup">
+          {Object.keys(ComicHostName).map(key => {
+            const checked = source === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.dropdownItem, styles.comicSourceRow]}
+                accessibilityRole="radio"
+                accessibilityLabel={getSourceLabel(key)}
+                accessibilityState={{checked}}
+                onPress={() => {
+                  onSelect(key);
+                  setExpanded(false);
+                }}>
+                {checked ? (
+                  <Ionicons name="checkmark-circle" size={18} color="#8295FF" />
+                ) : (
+                  <View style={styles.radioEmpty} />
+                )}
+                <Text style={styles.dropdownItemTitle}>{getSourceLabel(key)}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
+    </>
+  );
+}
+
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
   const [comicSource, setComicSource] = useState('comicbookplus');
@@ -142,7 +195,10 @@ export function Library({navigation}) {
         setComicsData({
           'latest-release': {
             source: comicSource,
-            title: `Latest on ${getSourceLabel(comicSource)}`,
+            title:
+              comicSource === 'latestcomics'
+                ? `All series on ${getSourceLabel(comicSource)}`
+                : `Latest on ${getSourceLabel(comicSource)}`,
             data: result.comicsData,
             lastPage: result.lastPage,
           },
@@ -298,22 +354,7 @@ export function Library({navigation}) {
         {activeTab === 'comic' && (
           <>
             {!isSpecialBuild && !forIosLoading && (
-              <View style={styles.hostRow}>
-                <View style={styles.tabBar}>
-                  {Object.keys(ComicHostName).map(source => (
-                    <TouchableOpacity
-                      key={source}
-                      accessibilityRole="tab"
-                      accessibilityState={{selected: comicSource === source}}
-                      onPress={() => setComicSource(source)}
-                      style={[styles.tab, comicSource === source && styles.activeTab]}>
-                      <Text style={[styles.tabText, comicSource === source && styles.activeTabText]}>
-                        {getSourceLabel(source)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+              <ComicSourcePicker source={comicSource} onSelect={setComicSource} />
             )}
             {/* Continue Reading */}
             {history.length > 0 && (
@@ -905,6 +946,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFF',
     flex: 1,
+  },
+  comicSourceRow: {
+    minHeight: 46,
+  },
+  comicSourceLabel: {
+    color: '#B5B5CA',
+    fontSize: 14,
+  },
+  comicSourceValue: {
+    textAlign: 'right',
+  },
+  comicSourceOptions: {
+    marginTop: 4,
+    marginBottom: 0,
   },
 
   // Dropdown

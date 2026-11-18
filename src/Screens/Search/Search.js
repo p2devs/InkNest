@@ -28,7 +28,9 @@ import {searchableComicSources, searchComics} from '../Comic/APIs/Home';
 import {getSourceLabel} from '../../Utils/sourceStatus';
 import Image from '../../Components/UIComp/Image';
 
-const emptySearchData = {xoxocomic: [], ocecomic: [], Manga: [], Novel: []};
+const emptySearchData = Object.fromEntries(
+  [...searchableComicSources, 'Manga', 'Novel'].map(source => [source, []]),
+);
 
 export function Search({navigation, route}) {
   const [searchTerm, setSearchTerm] = useState('');

@@ -2,16 +2,21 @@ export const ComicHostName = {
   comicbookplus: 'https://comicbookplus.com/',
   xoxocomic: 'https://xoxocomic.com/',
   ocecomic: 'https://ocecomic.com/',
+  comichubfree: 'https://comichubfree.com/',
+  latestcomics: 'https://www.latestcomics.com/en/',
 };
+
+const comicHost = url =>
+  /^https?:\/\/(?:www\.)?([a-z0-9.-]+)(?=[/?#]|$)/i
+    .exec(url)?.[1]
+    .toLowerCase();
+const comicSourcesByHost = new Map(
+  Object.entries(ComicHostName).map(([key, url]) => [comicHost(url), key]),
+);
+
 // Online comic entries can outlive their source in bookmarks and history.
-export const getComicSourceKey = url => {
-  if (typeof url !== 'string') return undefined;
-  const host = /^https?:\/\/(?:www\.)?([a-z0-9.-]+)(?=[/?#]|$)/i.exec(url)?.[1];
-  if (!host) return undefined;
-  return Object.keys(ComicHostName).find(
-    key => ComicHostName[key] === `https://${host.toLowerCase()}/`,
-  );
-};
+export const getComicSourceKey = url =>
+  typeof url === 'string' ? comicSourcesByHost.get(comicHost(url)) : undefined;
 
 export const isSupportedComicUrl = url => Boolean(getComicSourceKey(url));
 

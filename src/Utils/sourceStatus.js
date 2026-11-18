@@ -30,6 +30,8 @@ export const SOURCE_LABELS = {
   comicbookplus: 'Comic Book Plus',
   xoxocomic: 'XOXOComic',
   ocecomic: 'OceComic',
+  comichubfree: 'ComicHubFree',
+  latestcomics: 'Latest Comics',
   azcomic: 'AZ Comic',
   // Anime sources
   gogoanimes: 'GoGo Animes',
@@ -49,6 +51,8 @@ export const SOURCE_CONTENT_TYPE = {
   comicbookplus: 'comic',
   xoxocomic: 'comic',
   ocecomic: 'comic',
+  comichubfree: 'comic',
+  latestcomics: 'comic',
   azcomic: 'comic',
   gogoanimes: 'anime',
   s3taku: 'anime',

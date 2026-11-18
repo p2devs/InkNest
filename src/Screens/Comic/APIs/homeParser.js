@@ -22,7 +22,9 @@ export const parseHomePageCards = ($, tagConfig, pageUrl) => {
 
     const img = $(element).find(tagConfig.imageClass).first();
     const image = resolveComicUrl(
-      img.attr(tagConfig.imageAttr || 'src') || img.attr('src'),
+      tagConfig.getImageUrl
+        ? tagConfig.getImageUrl(img)
+        : img.attr(tagConfig.imageAttr || 'src') || img.attr('src'),
       pageUrl,
     );
 
