@@ -30,10 +30,7 @@ import {unarchive, UnarchiveResult} from 'react-native-unarchive';
 import {useSelector, useDispatch} from 'react-redux';
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
-import {
-  clearLocalComicProgress,
-  markOfflineMovedAlertSeen,
-} from '../../../Redux/Reducers';
+import {clearLocalComicProgress} from '../../../Redux/Reducers';
 
 // Utility function to convert file URI to file path
 const uriToPath = (uri: string): string => {
@@ -101,9 +98,6 @@ export function Home() {
   const dispatch = useDispatch();
   const localComicProgress = useSelector(
     (state: any) => state?.data?.localComicProgress,
-  );
-  const hasSeenOfflineMovedAlert = useSelector(
-    (state: any) => state?.data?.hasSeenOfflineMovedAlert,
   );
 
   // Handle external file opening (when user taps CBR/CBZ file in Files app)
@@ -347,31 +341,6 @@ export function Home() {
           />
         </TouchableOpacity>
       </View>
-
-      {!hasSeenOfflineMovedAlert && (
-        <View style={styles.alertBanner}>
-          <View style={styles.alertContent}>
-            <MaterialCommunityIcons
-              name="information-outline"
-              size={hp('2.4%')}
-              color="#5B67F1"
-            />
-            <Text style={styles.alertText}>
-              Offline Comics have moved here! Tap the folder icon above to access
-              your downloads.
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => dispatch(markOfflineMovedAlertSeen())}
-            style={styles.alertCloseButton}>
-            <MaterialCommunityIcons
-              name="close"
-              size={hp('2%')}
-              color="rgba(255, 255, 255, 0.6)"
-            />
-          </TouchableOpacity>
-        </View>
-      )}
 
       {hasComic ? (
         <View style={styles.libraryWrapper}>
@@ -907,31 +876,5 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
-  },
-  alertBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: 'rgba(91, 103, 241, 0.1)',
-    marginHorizontal: wp('6%'),
-    marginBottom: hp('2%'),
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(91, 103, 241, 0.3)',
-  },
-  alertContent: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 10,
-  },
-  alertText: {
-    flex: 1,
-    fontSize: hp('1.6%'),
-    color: '#FFFFFF',
-    lineHeight: hp('2.2%'),
-  },
-  alertCloseButton: {
-    padding: 4,
-    marginLeft: 8,
   },
 });

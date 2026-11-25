@@ -1,67 +1,52 @@
-// Fixed content for the version-specific iOS Library, independent of the live catalogs.
-const site = 'https://comicbookplus.com/';
-const images = 'https://box01.comicbookplus.com';
+import catalog from './iosComicCatalog.json';
 
-export const IOS_SAMPLE_COMICS = [
-  {
-    title: 'All Love',
-    link: site + '?cid=3245',
-    image: images + '/thumbs/ace/AllLove.png',
-    publishDate: 'May 1949 - May 1950',
-  },
-  {
-    title: 'All Romances',
-    link: site + '?cid=858',
-    image: images + '/thumbs/ace/AllRomances.png',
-    publishDate: 'Aug 1949 - Aug 1950',
-  },
-  {
-    title: 'Andy Comics',
-    link: site + '?cid=859',
-    image: images + '/thumbs/ace/Andy.png',
-    publishDate: 'Jun 1948 - Aug 1948',
-  },
-  {
-    title: 'Atomic War!',
-    link: site + '?cid=860',
-    image: images + '/thumbs/ace/AtomicWar.png',
-    publishDate: 'Nov 1952 - Apr 1953',
-  },
+// Library cards are also navigation params, so keep issue lists out of them.
+export const IOS_SAMPLE_COMICS = catalog.map(({issues, ...series}) => series);
+
+export const getIosSampleSeries = link =>
+  catalog.find(series => series.link === link);
+
+const sampleIssueLinks = new Set(
+  catalog.flatMap(series => series.issues.map(issue => issue.link)),
+);
+
+// Every sample issue opens these bundled pages, so reading never depends on the
+// original site being reachable.
+const SAMPLE_PAGES = [
+  require('../Assets/1.jpg'),
+  require('../Assets/2.jpg'),
+  require('../Assets/3.jpg'),
+  require('../Assets/4.jpg'),
+  require('../Assets/5.jpg'),
+  require('../Assets/6.jpg'),
+  require('../Assets/7.jpg'),
+  require('../Assets/8.jpg'),
+  require('../Assets/9.jpg'),
+  require('../Assets/10.jpg'),
+  require('../Assets/11.jpg'),
+  require('../Assets/12.jpg'),
+  require('../Assets/13.jpg'),
+  require('../Assets/14.jpg'),
+  require('../Assets/15.jpg'),
+  require('../Assets/16.jpg'),
+  require('../Assets/17.jpg'),
+  require('../Assets/18.jpg'),
+  require('../Assets/19.jpg'),
+  require('../Assets/20.jpg'),
+  require('../Assets/21.jpg'),
+  require('../Assets/22.jpg'),
+  require('../Assets/23.jpg'),
+  require('../Assets/24.jpg'),
+  require('../Assets/25.jpg'),
+  require('../Assets/26.jpg'),
+  require('../Assets/27.jpg'),
+  require('../Assets/28.jpg'),
+  require('../Assets/29.jpg'),
+  require('../Assets/30.jpg'),
+  require('../Assets/31.jpg'),
+  require('../Assets/32.jpg'),
+  require('../Assets/33.jpg'),
 ];
 
-const firstVolume = images + '/viewer/4a/4af4d2facd653c6fee0013367c681f6a';
-const secondVolume = images + '/viewer/7c/7ce6723c8f20d1ce3b78c2cda1debc50';
-
-export const IOS_SAMPLE_CHAPTERS = [
-  {
-    title: 'Issues 1',
-    link: site + '?dlid=16848',
-    date: 'December 4, 2010',
-    pages: firstVolume,
-  },
-  {
-    title: 'Issues 2',
-    link: site + '?dlid=15946',
-    date: 'November 27, 2010',
-    pages: firstVolume,
-  },
-  {
-    title: 'Issues 3',
-    link: site + '?dlid=16857',
-    date: 'December 4, 2010',
-    pages: secondVolume,
-  },
-  {
-    title: 'Issues 4',
-    link: site + '?cid=860',
-    date: 'August 7, 2015',
-    pages: secondVolume,
-  },
-];
-
-export const getIosSamplePages = link => {
-  const chapter = IOS_SAMPLE_CHAPTERS.find(item => item.link === link);
-  return chapter
-    ? Array.from({length: 35}, (_, index) => `${chapter.pages}/${index}.jpg`)
-    : [];
-};
+export const getIosSamplePages = link =>
+  sampleIssueLinks.has(link) ? SAMPLE_PAGES : [];

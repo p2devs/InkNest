@@ -2,13 +2,13 @@ import React, {useMemo, useState} from 'react';
 import {
   Dimensions,
   FlatList,
+  Image,
   SafeAreaView,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 import {getIosSamplePages} from '../../../Utils/iosComicSamples';
-import PageImage from './PageImage';
 
 export function MockBooks({route}) {
   const {comicBookLink, pageJump = 0} = route.params;
@@ -42,10 +42,8 @@ export function MockBooks({route}) {
           backgroundColor: '#333',
         }}
       >
-        <PageImage
-          thumbnail
-          uri={item}
-          index={index}
+        <Image
+          source={item}
           style={{
             width: imageSize,
             height: imageSize,
@@ -63,11 +61,10 @@ export function MockBooks({route}) {
       <View style={{flex: 1}}>
         {viewAll ? (
           <TouchableOpacity style={{flex: 1}} onPress={() => setViewAll(false)}>
-            <PageImage
-              uri={images[PageIndex]}
-              index={PageIndex}
-              sourceName="Comic Book Plus"
-              style={{flex: 1}}
+            {/* Bundled images default to their pixel width, so pin it to the screen. */}
+            <Image
+              source={images[PageIndex]}
+              style={{flex: 1, width: '100%'}}
               resizeMode="contain"
             />
           </TouchableOpacity>

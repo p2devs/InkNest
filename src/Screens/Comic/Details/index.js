@@ -17,7 +17,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
 import {updateData} from '../../../Redux/Reducers';
-import {IOS_SAMPLE_CHAPTERS, IOS_SAMPLE_COMICS} from '../../../Utils/iosComicSamples';
+import {getIosSampleSeries} from '../../../Utils/iosComicSamples';
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
@@ -35,13 +35,7 @@ import {
 } from '../../../InkNest-Externals/Community/Logic/CommunityActions';
 
 export function ComicDetails({route, navigation}) {
-  const [PageLink, setPageLink] = useState(route?.params?.link);
-  const [tabBar, setTabBar] = useState([
-    {name: 'Chapters', active: true},
-    {name: 'Community', active: false},
-    // {name: 'Bookmarks', active: false},
-  ]);
-
+  const PageLink = route?.params?.link;
   const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
     'forIos',
     getVersion(),
@@ -57,31 +51,34 @@ export function ComicDetails({route, navigation}) {
   const loading = useSelector(state => state.data.loading);
   const error = useSelector(state => state.data.error);
   const ComicDetail = useSelector(state => state.data.dataByUrl[PageLink]);
-  const historyKey = useMemo(() => PageLink?.split('?')[0] ?? '', [PageLink]);
-  const readingHistory = useSelector(state => state.data.history[historyKey]);
-
   const appVersion = getVersion();
   const isIosOverrideActive =
     !forIosLoading && appVersion === forIosValue && !!forIosValue;
 
-  const sampleSeries = isIosOverrideActive
-    ? IOS_SAMPLE_COMICS.find(series => series.link === PageLink)
-    : undefined;
+  const catalogSeries = getIosSampleSeries(PageLink);
+  const sampleSeries = isIosOverrideActive ? catalogSeries : undefined;
 
-  const availableChapters = useMemo(() => {
-    if (isIosOverrideActive) {
-      return IOS_SAMPLE_CHAPTERS;
-    }
-    return ComicDetail?.chapters ?? [];
-  }, [ComicDetail?.chapters, isIosOverrideActive]);
+  const historyKey = catalogSeries ? PageLink : PageLink?.split('?')[0] ?? '';
+  const readingHistory = useSelector(state => state.data.history[historyKey]);
 
-  const sortedChapters = useMemo(() => {
-    if (isIosOverrideActive) {
-      return IOS_SAMPLE_CHAPTERS;
-    }
-    const baseList = [...availableChapters];
-    return sort ? baseList.reverse() : baseList;
-  }, [availableChapters, sort, isIosOverrideActive]);
+  const [tabBar, setTabBar] = useState(() => {
+    const hasRecent = Boolean(readingHistory?.readComics);
+    return [
+      ...(hasRecent ? [{name: 'Recent', active: true}] : []),
+      {name: 'Chapters', active: !hasRecent},
+      {name: 'Community', active: false},
+    ];
+  });
+
+  const availableChapters = useMemo(
+    () => sampleSeries?.issues ?? ComicDetail?.chapters ?? [],
+    [sampleSeries, ComicDetail?.chapters],
+  );
+
+  const sortedChapters = useMemo(
+    () => sort ? [...availableChapters].reverse() : availableChapters,
+    [availableChapters, sort],
+  );
 
   const activeTab = useMemo(
     () => tabBar.find(tab => tab.active)?.name ?? 'Chapters',
@@ -103,7 +100,7 @@ export function ComicDetails({route, navigation}) {
     
     // Find chapter details
     const chapter = availableChapters.find(ch => 
-      ch.link === chapterLink || ch.link.split('?')[0] === chapterLink.split('?')[0]
+      ch.link === chapterLink || (!sampleSeries && ch.link.split('?')[0] === chapterLink.split('?')[0])
     );
     
     if (!chapter) return null;
@@ -119,7 +116,7 @@ export function ComicDetails({route, navigation}) {
       totalPages,
       progress,
     };
-  }, [readingHistory, availableChapters]);
+  }, [readingHistory, availableChapters, sampleSeries]);
 
   const handleContinueReading = useCallback(() => {
     if (!lastReadChapter) return;
@@ -150,7 +147,7 @@ export function ComicDetails({route, navigation}) {
       if (!chapter?.link) return;
       chapterMap.set(chapter.link, chapter);
       const normalized = chapter.link.split('?')[0];
-      chapterMap.set(normalized, chapter);
+      if (!sampleSeries) chapterMap.set(normalized, chapter);
     });
 
     return Object.entries(readingHistory.readComics)
@@ -167,7 +164,7 @@ export function ComicDetails({route, navigation}) {
       })
       .filter(Boolean)
       .sort((a, b) => (b.readAt || 0) - (a.readAt || 0));
-  }, [isRecentTab, readingHistory, availableChapters]);
+  }, [isRecentTab, readingHistory, availableChapters, sampleSeries]);
 
   const shouldShowChapterSearch =
     isChapterTab && !forIosLoading && sortedChapters.length > 10;
@@ -272,17 +269,6 @@ export function ComicDetails({route, navigation}) {
   }, []);
 
   useEffect(() => {
-    if (readingHistory?.readComics) {
-      setTabBar(prev => [
-        {name: 'Recent', active: true},
-        ...prev
-          .filter(tab => tab.name !== 'Recent')
-          .map(tab => ({...tab, active: false})),
-      ]);
-    }
-  }, []);
-
-  useEffect(() => {
     if (isIosOverrideActive) {
       return;
     }
@@ -317,7 +303,7 @@ export function ComicDetails({route, navigation}) {
     setSort(prev => !prev);
   }, []);
 
-  if (error) return <Error error={error} />;
+  if (!sampleSeries && error) return <Error error={error} />;
 
   return (
     <View style={styles.container}>
@@ -354,7 +340,7 @@ export function ComicDetails({route, navigation}) {
           />
         ) : (
           <>
-            <LoadingModal loading={loading} />
+            <LoadingModal loading={!sampleSeries && loading} />
             <FlatList
               ListHeaderComponent={
                 shouldShowSearch ? (
@@ -411,7 +397,7 @@ export function ComicDetails({route, navigation}) {
               }
               showsVerticalScrollIndicator={false}
               ListFooterComponent={
-                isChapterTab ? (
+                isChapterTab && !sampleSeries ? (
                   <PaginationFooter
                     pagination={ComicDetail?.pagination}
                     pageLink={PageLink}

@@ -59,7 +59,6 @@ const initialState = {
   DownloadComic: {},
   scrollPreference: 'horizontal', // Default scroll mode is horizontal
   comicBackgroundColor: '#14142A', // Default comic reader background color
-  hasSeenOfflineMovedAlert: false,
   localComicProgress: null, // {lastReadPage, totalPages} for locally imported comics
   // Novel state
   NovelBookMarks: {}, // {novelLink: {title, coverImage, link, author, ...}}
@@ -438,9 +437,6 @@ const Reducers = createSlice({
     setComicBackgroundColor: (state, action) => {
       // Update user's preferred comic reader background color
       state.comicBackgroundColor = action.payload;
-    },
-    markOfflineMovedAlertSeen: state => {
-      state.hasSeenOfflineMovedAlert = true;
     },
     clearLocalComicProgress: state => {
       // Clear any local comic reading progress when importing a new comic
@@ -887,7 +883,6 @@ export const {
   clearComicChapterCache,
   setScrollPreference,
   setComicBackgroundColor,
-  markOfflineMovedAlertSeen,
   clearLocalComicProgress,
   updateLocalComicProgress,
   // Novel actions
