@@ -24,9 +24,10 @@ import {
 import Button from '../../../Components/UIComp/Button';
 import Toast from 'react-native-toast-message';
 import {NAVIGATION} from '../../../Constants';
+import {DEFAULT_COMIC_SOURCE} from '../../../Utils/APIs';
 
 export function SeeAll({navigation, route}) {
-  const {title, data, key, source = 'comicbookplus'} = route.params;
+  const {title, data, key, source = DEFAULT_COMIC_SOURCE} = route.params;
   const [lastPage, setLastPage] = useState(route.params.lastPage);
   const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
@@ -104,11 +105,7 @@ export function SeeAll({navigation, route}) {
                   title: title?.toString(),
                   link: item?.link?.toString(),
                 });
-                if (source === 'comicbookplus') {
-                  navigation.navigate(NAVIGATION.comicBook, {comicBookLink: item.link});
-                } else {
-                  navigation.navigate(NAVIGATION.comicDetails, item);
-                }
+                navigation.navigate(NAVIGATION.comicDetails, item);
               }}
               containerStyle={{
                 width: widthPercentageToDP('44%'),

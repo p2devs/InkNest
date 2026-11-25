@@ -19,12 +19,7 @@ export const fetchChaptersWithPagination = async ($, config, link) => {
       )
         .text()
         .trim();
-      const href = anchor.attr('href');
-      // Saved Comic Book Plus chapters use the slashless query URL as their key.
-      const chapterUrl =
-        source === 'comicbookplus' && href?.startsWith('/?')
-          ? 'https://comicbookplus.com' + href.slice(1)
-          : resolveComicUrl(href, url)?.split('#')[0];
+      const chapterUrl = resolveComicUrl(anchor.attr('href'), url)?.split('#')[0];
       if (title && chapterUrl && getComicSourceKey(chapterUrl) === source) {
         const date = config.chapterDate
           ? row.find(config.chapterDate).text().trim()

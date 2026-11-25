@@ -1,63 +1,36 @@
-import React, {useEffect, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   SafeAreaView,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import {useFeatureFlag} from 'configcat-react';
-import {getVersion} from 'react-native-device-info';
+import {getIosSamplePages} from '../../../Utils/iosComicSamples';
+import PageImage from './PageImage';
 
 export function MockBooks({route}) {
-  const {comicBookLink} = route?.params;
-  const [viewAll, setViewAll] = useState(false);
-  const [PageIndex, setPageIndex] = useState(0);
-  const [images, setImages] = useState([]);
-  const {value: forIosValue, loading: forIosLoading} = useFeatureFlag(
-    'forIos',
-    getVersion(),
+  const {comicBookLink, pageJump = 0} = route.params;
+  const images = useMemo(
+    () => getIosSamplePages(comicBookLink),
+    [comicBookLink],
+  );
+  const [viewAll, setViewAll] = useState(pageJump > 0 && images.length > 0);
+  const [PageIndex, setPageIndex] = useState(
+    Math.max(0, Math.min(pageJump, images.length - 1)),
   );
 
   const {width} = Dimensions.get('window');
   const numColumns = 3;
   const imageSize = width / numColumns - 10;
 
-  useEffect(() => {
-    let newImages = [];
-    if (
-      comicBookLink === 'https://comicbookplus.com/?dlid=16848' ||
-      comicBookLink === 'https://comicbookplus.com/?dlid=15946'
-    ) {
-      for (let index = 0; index < 35; index++) {
-        newImages.push(
-          `https://box01.comicbookplus.com/viewer/4a/4af4d2facd653c6fee0013367c681f6a/${index}.jpg`,
-        );
-      }
-    } else if (
-      comicBookLink === 'https://comicbookplus.com/?dlid=16857' ||
-      comicBookLink === 'https://comicbookplus.com/?cid=860'
-    ) {
-      for (let index = 0; index < 35; index++) {
-        newImages.push(
-          `https://box01.comicbookplus.com/viewer/7c/7ce6723c8f20d1ce3b78c2cda1debc50/${index}.jpg`,
-        );
-      }
-    }
-
-    // Only update state if newImages differs from the current images state.
-    if (JSON.stringify(newImages) !== JSON.stringify(images)) {
-      setImages(newImages);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comicBookLink, forIosValue, forIosLoading]);
-
   const GridImageItem = ({item, index}) => {
     return (
       <TouchableOpacity
         key={index}
+        accessibilityRole="button"
+        accessibilityLabel={`Page ${index + 1}`}
         onPress={() => {
           setPageIndex(index);
           setViewAll(!viewAll);
@@ -67,9 +40,12 @@ export function MockBooks({route}) {
           borderRadius: 5,
           overflow: 'hidden',
           backgroundColor: '#333',
-        }}>
-        <Image
-          source={{uri: item}}
+        }}
+      >
+        <PageImage
+          thumbnail
+          uri={item}
+          index={index}
           style={{
             width: imageSize,
             height: imageSize,
@@ -82,12 +58,15 @@ export function MockBooks({route}) {
   return (
     <SafeAreaView
       style={{flex: 1, backgroundColor: '#14142a'}}
-      edges={['top', 'bottom']}>
+      edges={['top', 'bottom']}
+    >
       <View style={{flex: 1}}>
         {viewAll ? (
           <TouchableOpacity style={{flex: 1}} onPress={() => setViewAll(false)}>
-            <Image
-              source={{uri: images[PageIndex]}}
+            <PageImage
+              uri={images[PageIndex]}
+              index={PageIndex}
+              sourceName="Comic Book Plus"
               style={{flex: 1}}
               resizeMode="contain"
             />

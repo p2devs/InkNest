@@ -28,6 +28,7 @@ import Header from '../../Components/UIComp/Header';
 import {NAVIGATION} from '../../Constants';
 import {navigate} from '../../Navigation/NavigationService';
 import {SwtichBaseUrl, SwtichToAnime} from '../../Redux/Reducers';
+import {DEFAULT_COMIC_SOURCE} from '../../Utils/APIs';
 
 export function Sources({navigation}) {
   const dispatch = useDispatch();
@@ -38,7 +39,7 @@ export function Sources({navigation}) {
     dispatch(SwtichToAnime(!Anime));
     if (Anime) {
       crashlytics().log('Switched to Comic Mode');
-      dispatch(SwtichBaseUrl('comicbookplus'));
+      dispatch(SwtichBaseUrl(DEFAULT_COMIC_SOURCE));
     }
     if (!Anime) {
       crashlytics().log('Switched to Anime Mode');

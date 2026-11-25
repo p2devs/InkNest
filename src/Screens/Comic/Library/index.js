@@ -25,6 +25,7 @@ import {useFeatureFlag} from 'configcat-react';
 import {NAVIGATION} from '../../../Constants';
 import {useSelector, useDispatch} from 'react-redux';
 import {getComics} from '../APIs/Home';
+import {IOS_SAMPLE_COMICS} from '../../../Utils/iosComicSamples';
 import {getMangaHome} from '../../../InkNest-Externals/Screens/Manga/APIs';
 import {getNovelHome} from '../../Novel/APIs';
 import HistoryCard from './Components/HistoryCard';
@@ -32,7 +33,7 @@ import MangaHistoryCard from './Components/MangaHistoryCard';
 import AnimeAdbanner from '../../../Components/UIComp/AnimeAdBanner/AnimeAdbanner';
 import {clearHistory, clearMangaHistory} from '../../../Redux/Reducers';
 import {selectComicBookmarks, selectComicHistory} from '../../../Redux/Selectors/comics';
-import {ComicHostName, NovelHostName} from '../../../Utils/APIs';
+import {ComicHostName, DEFAULT_COMIC_SOURCE, NovelHostName} from '../../../Utils/APIs';
 import {NovelSectionList} from '../../Novel/Components/NovelList';
 import {
   getSourceLabel,
@@ -95,7 +96,7 @@ function ComicSourcePicker({source, onSelect}) {
 
 export function Library({navigation}) {
   const [comicsData, setComicsData] = useState({});
-  const [comicSource, setComicSource] = useState('comicbookplus');
+  const [comicSource, setComicSource] = useState(DEFAULT_COMIC_SOURCE);
   const [comicRetry, setComicRetry] = useState(0);
   const [mangaData, setMangaData] = useState({
     latest: null,
@@ -142,42 +143,7 @@ export function Library({navigation}) {
     if (getVersion() === forIosValue && forIosLoading === false) {
       setComicsData({
         'most-viewed': {
-          data: [
-            {
-              genres: null,
-              image: 'https://box01.comicbookplus.com/thumbs/ace/AllLove.png',
-              link: 'https://comicbookplus.com/?cid=3245',
-              publishDate: 'May 1949 - May 1950',
-              status: null,
-              title: 'All Love',
-            },
-            {
-              genres: null,
-              image:
-                'https://box01.comicbookplus.com/thumbs/ace/AllRomances.png',
-              link: 'https://comicbookplus.com/?cid=858',
-              publishDate: 'Aug 1949 - Aug 1950',
-              status: null,
-              title: 'All Romances',
-            },
-            {
-              genres: null,
-              image: 'https://box01.comicbookplus.com/thumbs/ace/Andy.png',
-              link: 'https://comicbookplus.com/?cid=859',
-              publishDate: 'Jun 1948 - Aug 1948',
-              status: null,
-              title: 'Andy Comics',
-            },
-            {
-              genres: null,
-              image: 'https://box01.comicbookplus.com/thumbs/ace/AtomicWar.png',
-              link: 'https://comicbookplus.com/?cid=860',
-              publishDate: 'Nov 1952 - Apr 1953',
-              status: null,
-              title: 'Atomic War!',
-            },
-          ],
-          hostName: ComicHostName.comicbookplus,
+          data: IOS_SAMPLE_COMICS,
           lastPage: null,
           title: 'Most Viewed',
         },
@@ -428,11 +394,7 @@ export function Library({navigation}) {
                             link: item?.link?.toString(),
                             title: item?.title?.toString(),
                           });
-                          if (isSpecialBuild || section.source !== 'comicbookplus') {
-                            navigation.navigate(NAVIGATION.comicDetails, item);
-                          } else {
-                            navigation.navigate(NAVIGATION.comicBook, {comicBookLink: item.link});
-                          }
+                          navigation.navigate(NAVIGATION.comicDetails, item);
                         }}>
                         <Image
                           source={{uri: item.image}}

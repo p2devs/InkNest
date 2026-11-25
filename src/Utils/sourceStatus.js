@@ -27,7 +27,6 @@ export const ERROR_CODES = {
 // Source type labels for display
 export const SOURCE_LABELS = {
   // Comic sources
-  comicbookplus: 'Comic Book Plus',
   xoxocomic: 'XOXOComic',
   ocecomic: 'OceComic',
   comichubfree: 'ComicHubFree',
@@ -48,7 +47,6 @@ export const NOVEL_SOURCES = ['novelfire', 'wtrlab'];
 
 // Content type for sources
 export const SOURCE_CONTENT_TYPE = {
-  comicbookplus: 'comic',
   xoxocomic: 'comic',
   ocecomic: 'comic',
   comichubfree: 'comic',

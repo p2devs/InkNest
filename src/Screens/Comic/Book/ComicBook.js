@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -21,6 +21,7 @@ import Animated, {
 import { getVersion } from 'react-native-device-info';
 import { useFeatureFlag } from 'configcat-react';
 
+import { getIosSamplePages } from '../../../Utils/iosComicSamples';
 import { fetchComicBook } from '../../../Redux/Actions/GlobalActions';
 import Loading from '../../../Components/UIComp/Loading';
 import Error from '../../../Components/UIComp/Error';
@@ -48,7 +49,7 @@ export function ComicBook({ navigation, route }) {
     'forIos',
     getVersion(),
   );
-  const [images, setImages] = useState([]);
+  const images = useMemo(() => getIosSamplePages(comicBookLink), [comicBookLink]);
   // Add scrollMode state - 'horizontal' is the default as the app currently uses
   const [scrollMode, setScrollMode] = useState('horizontal');
 
@@ -86,35 +87,6 @@ export function ComicBook({ navigation, route }) {
     StatusBar.setHidden(true);
     return () => StatusBar.setHidden(false);
   }, []);
-
-  useEffect(() => {
-    let newImages = [];
-    if (
-      comicBookLink === 'https://comicbookplus.com/?dlid=16848' ||
-      comicBookLink === 'https://comicbookplus.com/?dlid=15946'
-    ) {
-      for (let index = 0; index < 35; index++) {
-        newImages.push(
-          `https://box01.comicbookplus.com/viewer/4a/4af4d2facd653c6fee0013367c681f6a/${index}.jpg`,
-        );
-      }
-    } else if (
-      comicBookLink === 'https://comicbookplus.com/?dlid=16857' ||
-      comicBookLink === 'https://comicbookplus.com/?cid=860'
-    ) {
-      for (let index = 0; index < 35; index++) {
-        newImages.push(
-          `https://box01.comicbookplus.com/viewer/7c/7ce6723c8f20d1ce3b78c2cda1debc50/${index}.jpg`,
-        );
-      }
-    }
-
-    // Only update state if newImages differs from the current images state.
-    if (JSON.stringify(newImages) !== JSON.stringify(images)) {
-      setImages(newImages);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comicBookLink, forIosValue, forIosLoading]);
 
   // Function to hide/show controls with animation
   const toggleControls = useCallback(() => {

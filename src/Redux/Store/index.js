@@ -2,7 +2,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import {createMigrate, persistStore, persistReducer} from 'redux-persist';
 import {storage, mmkvStorage} from '../Storage/Storage';
 import Reducers from '../Reducers';
-import {isRetiredComicSource} from '../../Utils/retiredComicSources';
+import {migrateRetiredComicSources} from '../../Utils/retiredComicSources';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 // Store and persistor references
@@ -12,18 +12,8 @@ let isStoreInitialized = false;
 
 const persistConfig = {
   key: 'root',
-  version: 2,
-  migrate: createMigrate({
-    2: state => ({
-      ...state,
-      baseUrl: !state.baseUrl || state.baseUrl === 'azcomic' || isRetiredComicSource(state.baseUrl)
-        ? 'comicbookplus'
-        : state.baseUrl,
-      sourceStatusNotifications: (state.sourceStatusNotifications || []).filter(
-        item => !isRetiredComicSource(item.sourceKey),
-      ),
-    }),
-  }),
+  version: 3,
+  migrate: createMigrate({3: migrateRetiredComicSources}),
   storage: storage,
   blacklist: [
     'error',

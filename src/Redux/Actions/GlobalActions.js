@@ -39,7 +39,6 @@ import {
   getChapterPagination,
 } from './parsers/chapterParser';
 import {
-  parseComicBookPlusPage,
   parseComicIssue,
   getComicReaderUrl,
   createComicBookData,
@@ -99,7 +98,7 @@ export const fetchComicDetails =
       const comicDetails = await parseComicDetails($, config, link);
       comicDetails.chapters = await fetchChaptersWithPagination($, config, link);
       comicDetails.pagination = getChapterPagination($, config);
-      if (source !== 'comicbookplus' && (!comicDetails.title || !comicDetails.chapters.length)) {
+      if (!comicDetails.title || !comicDetails.chapters.length) {
         throw new Error('Could not load the comic or its issues.');
       }
       recordSourceSuccess(source);
@@ -180,9 +179,7 @@ export const fetchComicBook =
       const html = response.data;
       const $ = cheerio.load(html);
 
-      const parsedData = source === 'comicbookplus'
-        ? parseComicBookPlusPage(html, $)
-        : parseComicIssue($, source, readerUrl);
+      const parsedData = parseComicIssue($, source, readerUrl);
       const data = createComicBookData(parsedData);
       recordSourceSuccess(source);
 

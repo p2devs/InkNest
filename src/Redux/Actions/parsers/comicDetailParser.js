@@ -39,7 +39,6 @@ export const parseComicDetails = async ($, config, link) => {
     rating: details.Rating || null,
     summary,
     link,
-    // Additional comicbookplus-specific fields
     publisher: details['Published by'] || details.Publisher || null,
     availableBooks: details['Available Books'] || null,
     latestBook: details['Latest Book'] || null,
@@ -79,7 +78,7 @@ const parseDetailsSection = ($, detailsContainer, config) => {
     return details;
   }
 
-  // Table-based structure (e.g., comicbookplus)
+  // Table-based structure
   if (config.detailsValue) {
     detailsContainer.find(config.detailsDL).each((i, el) => {
       const key = $(el).text().trim().replace(':', '');

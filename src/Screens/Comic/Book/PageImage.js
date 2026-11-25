@@ -1,16 +1,24 @@
 import React, {useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
 
-export default function PageImage({uri, index, sourceName, style, ...props}) {
+export default function PageImage({
+  uri,
+  index,
+  sourceName,
+  thumbnail,
+  style,
+  ...props
+}) {
   const [failedUri, setFailedUri] = useState(null);
 
   if (failedUri === uri) {
+    const page = `Page ${index + 1}`;
     return (
       <View style={[style, styles.unavailable]}>
         <Text style={styles.message}>
-          Page {index + 1} couldn’t load.{'\n'}
-          {sourceName} may be having trouble serving this page. InkNest has no
-          control over its availability.
+          {thumbnail
+            ? page
+            : `${page} couldn’t load.\n${sourceName} may be having trouble serving this page. InkNest has no control over its availability.`}
         </Text>
       </View>
     );

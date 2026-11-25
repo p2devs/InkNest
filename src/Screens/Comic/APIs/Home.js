@@ -11,7 +11,6 @@ import {parseHomePageCards} from './homeParser';
 import {loadMoreLatestComics} from './latestComics';
 
 const catalogPaths = {
-  comicbookplus: page => `?cbplus=latestuploads_l_s_${page - 1}`,
   xoxocomic: page => `new-comic?page=${page}`,
   ocecomic: page => `comic/all/latest/page/${page}`,
   comichubfree: page => `new-comic?page=${page}`,
@@ -20,14 +19,6 @@ const catalogPaths = {
 
 const getLastCatalogPage = ($, source, page) => {
   switch (source) {
-    case 'comicbookplus':
-      return (
-        Number(
-          $('title')
-            .text()
-            .match(/\bof (\d+)$/)?.[1],
-        ) || null
-      );
     case 'ocecomic':
       return Number($('main select[name="page"] option').last().val()) || page;
     case 'latestcomics':
@@ -38,6 +29,7 @@ const getLastCatalogPage = ($, source, page) => {
 };
 
 export const getComics = async (source, page = 1, dispatch) => {
+  if (!Object.prototype.hasOwnProperty.call(catalogPaths, source)) return null;
   try {
     const url = ComicHostName[source] + catalogPaths[source](page);
     const response = await APICaller.get(url);
@@ -48,11 +40,7 @@ export const getComics = async (source, page = 1, dispatch) => {
       $ = load(more.html);
       lastPage = more.hasMore ? null : page;
     }
-    const config =
-      source === 'comicbookplus'
-        ? HomePageCardClasses.comicbookplus['latest-uploads']
-        : HomePageCardClasses[source];
-    const comicsData = parseHomePageCards($, config, url);
+    const comicsData = parseHomePageCards($, HomePageCardClasses[source], url);
     if (!comicsData.length)
       throw new Error('Could not load the comic catalog.');
 

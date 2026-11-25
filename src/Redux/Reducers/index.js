@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import {DEFAULT_COMIC_SOURCE} from '../../Utils/APIs';
 
 const SUBSCRIPTION_CACHE_TTL_MS = 1000;
 
@@ -49,7 +50,7 @@ const initialState = {
   history: {},
   Search: [],
   downTime: false,
-  baseUrl: 'comicbookplus',
+  baseUrl: DEFAULT_COMIC_SOURCE,
   Anime: false,
   AnimeWatched: {},
   AnimeBookMarks: {},

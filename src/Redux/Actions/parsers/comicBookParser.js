@@ -4,50 +4,6 @@
 import {getComicSourceKey, resolveComicUrl} from '../../../Utils/APIs';
 import {ComicIssuePageClasses} from '../../../Screens/Comic/APIs/constance';
 
-/**
- * Parses ComicBookPlus pages that use JavaScript variables
- *
- * @param {string} html - Raw HTML content
- * @param {Object} $ - Cheerio instance
- * @returns {Object} - Parsed comic book data
- */
-export const parseComicBookPlusPage = (html, $) => {
-  const imgSources = [];
-  let detailsLink = '';
-
-  // Get the base image URL from the main comic image
-  const mainComicImg = $('#maincomic').attr('src');
-
-  // Extract number of pages from JavaScript variable
-  const numPagesMatch = html.match(/comicnumpages\s*=\s*(\d+)/);
-
-  if (mainComicImg && numPagesMatch) {
-    const numPages = parseInt(numPagesMatch[1], 10);
-    // Get base URL by removing the page number (e.g., /1.jpg -> /)
-    const baseUrl = mainComicImg.replace(/\/\d+\.jpg$/, '/');
-
-    // Generate image URLs for all pages (0-indexed)
-    for (let i = 0; i < numPages; i++) {
-      imgSources.push(`${baseUrl}${i}.jpg`);
-    }
-  }
-
-  // Get title and details link from page
-  const card = $('div.indexcardwrapper');
-  const titleLink = card.find('a[href*="?cid="]').first();
-
-  if (titleLink.length) {
-    detailsLink = 'https://comicbookplus.com' + titleLink.attr('href');
-  }
-
-  return {
-    images: imgSources,
-    title: '',
-    detailsLink,
-    detailPageTitle: '',
-  };
-};
-
 export const getComicReaderUrl = (source, issueUrl) =>
   ComicIssuePageClasses[source]?.allPages
     ? issueUrl.split(/[?#]/)[0].replace(/(?:\/all)?\/?$/, '/all')

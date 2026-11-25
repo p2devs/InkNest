@@ -1,10 +1,10 @@
 export const ComicHostName = {
-  comicbookplus: 'https://comicbookplus.com/',
   xoxocomic: 'https://xoxocomic.com/',
   ocecomic: 'https://ocecomic.com/',
   comichubfree: 'https://comichubfree.com/',
   latestcomics: 'https://www.latestcomics.com/en/',
 };
+export const DEFAULT_COMIC_SOURCE = 'xoxocomic';
 
 const comicHost = url =>
   /^https?:\/\/(?:www\.)?([a-z0-9.-]+)(?=[/?#]|$)/i

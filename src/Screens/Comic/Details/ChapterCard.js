@@ -25,7 +25,7 @@ import {NAVIGATION} from '../../../Constants';
 import {fetchComicBook} from '../../../Redux/Actions/GlobalActions';
 import {downloadComicBook} from '../../../InkNest-Externals/Redux/Actions/Download';
 
-const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst}) => {
+const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst, sampleSeries}) => {
   const ComicBook = useSelector(state => state.data.dataByUrl[item.link]);
   const ComicDetail = useSelector(
     state => state.data.dataByUrl[detailPageLink],
@@ -84,7 +84,7 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst}) => {
       link: item?.link?.toString(),
       title: item?.title?.toString(),
     });
-    if (!ComicBook?.images?.length) {
+    if (!sampleSeries && !ComicBook?.images?.length) {
       const result = await dispatch(fetchComicBook(item.link, false, true));
       if (result?.data) DownloadedComic(result.data);
       else setLoadingStatus(false);
@@ -103,10 +103,11 @@ const ChapterCard = ({item, index, isBookmark, detailPageLink, isFirst}) => {
       downloadComicBook({
         comicDetails: {
           link: detailPageLink,
-          title: ComicDetail?.title,
-          imgSrc: ComicDetail?.imgSrc,
+          title: sampleSeries?.title ?? ComicDetail?.title,
+          imgSrc: sampleSeries?.image ?? ComicDetail?.imgSrc,
         },
         comicBook: {...data, ...item},
+        isIosSample: Boolean(sampleSeries),
         setLoadingStatus,
         onProgress: (downloaded, total) => setProgress({downloaded, total}),
       }),
