@@ -1,11 +1,33 @@
-import {parseReadAllComicsDetails} from '../../../Components/Func/parseFunc';
-import {
-  parseReadAllComicsBook,
-  parseReadComicsOnlineBook,
-} from '../../../Redux/Actions/parsers/comicBookParser';
-import {parseReadComicsOnlineDetails} from '../../../Redux/Actions/parsers/comicDetailParser';
-
 export const HomePageCardClasses = {
+  xoxocomic: {
+    cardClass: '.items .item > figure',
+    cardTitleClass: 'figcaption h3 a',
+    imageClass: '.image img',
+    imageAttr: 'data-original',
+  },
+  ocecomic: {
+    cardClass: 'main.Comics .items > .item',
+    cardTitleClass: 'h2 a',
+    imageClass: 'figure img',
+    genresClass: '.genre a',
+  },
+  comichubfree: {
+    cardClass: 'main .cartoon-box',
+    cardTitleClass: '.mb-right h3',
+    cardLinkClass: '.mb-right h3 a',
+    imageClass: 'a.image img',
+    imageAttr: 'data-src',
+  },
+  latestcomics: {
+    cardClass: '.series-card',
+    cardTitleClass: '.series-card-title',
+    cardLinkClass: 'a.series-card-link',
+    imageClass: '.series-card-thumb',
+    getImageUrl: image =>
+      image
+        .attr('style')
+        ?.match(/background-image:\s*url\(\s*(['"]?)(.*?)\1\s*\)/i)?.[2],
+  },
   azcomic: {
     'popular-comics': {
       cardClass: '.eg-box',
@@ -32,119 +54,86 @@ export const HomePageCardClasses = {
       dateClass: '.egb-episode', // Assumes the 'Latest Episode' label can be used for date
     },
   },
-  readcomicsonline: {
-    'hot-comic-updates': {
-      cardClass: '.schedule-avatar',
-      cardTitleClass: '.schedule-name a',
-      cardLinkClass: 'a',
-      imageClass: '.schedule-avatar img',
-      genresClass: null,
-      statusClass: null,
-      dateClass: null,
-    },
-    'latest-release': {
-      cardClass: '.col-sm-6',
-      cardTitleClass: '.media-body h5.media-heading a.chart-title',
-      cardLinkClass: '.media-body h5.media-heading a.chart-title',
-      imageClass: '.media-left a img',
-      genresClass: null,
-      statusClass: null,
-      dateClass: '.media-body small',
-      lastPageClass: '.pagenavi span.page-numbers.dots',
-    },
-    'most-viewed': {
-      cardClass: 'li.list-group-item',
-      cardTitleClass: '.media-body h5.media-heading a.chart-title',
-      cardLinkClass: '.media-body h5.media-heading a.chart-title',
-      imageClass: '.media-left a img',
-      genresClass: null,
-      statusClass: null,
-      dateClass: null,
-    },
-  },
-  readallcomics: {
-    'all-comic': {
-      cardClass: 'ul.list-story > li',
-      cardTitleClass: '.cat-title',
-      imageClass: 'img.book-cover, img',
-      genresClass: null, // Not applicable for readallcomics
-      statusClass: null, // Not applicable for readallcomics
-      dateClass: '.latest-date',
-      cardLinkClass: '.book-link, .cat-title',
-      paginationLinkClass: 'a[href*="paged="]',
-    },
-  },
-  comicbookplus: {
-    'latest-uploads': {
-      cardClass: '.cbpLtableleft, .cbpLtable, .cbpLtableright',
-      cardTitleClass: '.w a.ya',
-      cardLinkClass: '.w a.ya',
-      imageClass: 'td.v img',
-      genresClass: null,
-      statusClass: null,
-      dateClass: 'time[itemprop="dateModified"]',
-      imageAttr: 'src',
-    },
-  },
 };
 
 export const ComicDetailPageClasses = {
-  readcomicsonline: {
-    // Site redesigned (2026) — handled by a dedicated parser.
-    customParser: parseReadComicsOnlineDetails,
+  xoxocomic: {
+    detailsContainer: '#item-detail',
+    title: '.breadcrumb li:last-child [itemprop="name"]',
+    imgSrc: '.col-image img',
+    summary: '#item-detail .detail-content p',
+    detailsDL: '.list-info .name',
+    detailsValue: 'p',
+    genre: '#item-detail .kind a',
+    chaptersList: '#nt_listchapter li.row',
+    chapterLink: '.chapter a',
+    chapterDate: '.col-xs-3',
+    nextChapterPage: '#nt_listchapter .pagination a[rel="next"]',
+    newestFirst: true,
   },
-  readallcomics: {
-    container: '.description-archive',
-    title: 'h1',
-    image: 'img',
-    imageAttr: 'src',
-    genre: 'p strong:nth-of-type(1)',
-    author: 'p strong:nth-of-type(2)',
-    volumeDescription: 'hr.style-six',
-    summarySelector: 'strong',
-    chapters: '.list-story li a',
-    chapterTitleAttr: 'title',
-    chapterLinkAttr: 'href',
-    customParser: parseReadAllComicsDetails,
+  ocecomic: {
+    detailsContainer: '#Comic .page.home',
+    title: '#Comic .page.home h1',
+    imgSrc: 'figure img',
+    summary: '#Comic .page.home .about',
+    detailsDL: '.info ul li:first-child',
+    detailsValue: 'li',
+    genre: '#Comic .page.home .info ul:has(span:contains("Genre")) a',
+    chaptersList: '#Comic .issues li',
+    chapterLink: 'a.issue-link',
   },
-  comicbookplus: {
-    detailsContainer: '.introtext',
-    title: 'h1.sectionh1',
-    imgSrc: '.introtext img.leftmargin',
-    getImageAttr: 'src',
-    summary: null,
-    chaptersList: 'table.catlistings tr.overrow',
-    chapterTitle: 'td.n a[itemprop="url"] span[itemprop="name"]',
-    chapterLink: 'td.n a[itemprop="url"]',
-    chapterDate: 'td.r:nth-child(7)',
-    detailsDL: '.introtext table td.d',
-    detailsValue: '.introtext table td.e',
-    pagination: null,
-    genre: '.introtext a[itemprop="genre"]',
-    publisher: '.introtext span[itemprop="name"]',
-    publisherLink: '.introtext a[itemprop="url"]',
+  comichubfree: {
+    detailsContainer: '.movie-info',
+    title: '.breadcrumb li:last-child [itemprop="name"]',
+    imgSrc: '.movie-image img',
+    getImageAttr: 'data-src',
+    summary: '#film-content',
+    detailsDL: '.movie-dl dt',
+    chaptersList: '#list tr',
+    chapterLink: 'td:first-child a',
+    chapterDate: 'td:last-child',
+    nextChapterPage: '.page-single .pagination a[rel="next"]',
+    newestFirst: true,
+  },
+  latestcomics: {
+    detailsContainer: 'main .series-header',
+    title: 'main .series-title',
+    imgSrc: '.series-header-thumbnail img',
+    summary: 'main .series-description',
+    chaptersList: 'article.chapter-item',
+    chapterLink: 'a.chapter-link',
+    chapterTitle: '.chapter-title',
+    newestFirst: true,
   },
 };
 
-export const ComicBookPageClasses = {
-  readcomicsonline: {
-    // Site redesigned (2026) — handled by a dedicated parser.
-    customParser: parseReadComicsOnlineBook,
+export const ComicIssuePageClasses = {
+  xoxocomic: {
+    allPages: true,
+    images: '.reading-detail .page-chapter img',
+    imageAttr: 'data-original',
+    title: '.select-chapter option[selected]',
+    seriesLink: '.chapter-nav a.backward',
+    seriesTitleAttr: 'title',
   },
-  readallcomics: {
-    imageContainer: 'div[style*="margin:0px auto"]',
-    imageSelector: 'img',
-    imageAttr: 'src',
-    titleSelector: 'h3[style*="color: #0363df"] strong',
-    titleAttr: 'textContent',
-    detailsLinkSelector: 'a[rel="category tag"]',
-    customParser: parseReadAllComicsBook,
+  ocecomic: {
+    images: '#Comic .page.issue figure img',
+    imageAttr: 'data-original',
+    title: '#Comic .volume .pages > label',
+    seriesLink: '#Comic .volume .nav a:has(.fa-home)',
+    seriesTitle: '#Comic .share-box h4 b',
   },
-  comicbookplus: {
-    useJsVars: true,
-    websiteVar: 'website',
-    comicLocVar: 'comicloc',
-    numPagesVar: 'comicnumpages',
-    imagePattern: '{website}{comicloc}/{page}.jpg',
+  comichubfree: {
+    allPages: true,
+    images: '.chapter-container.chapter-all img.chapter_img',
+    imageAttr: 'data-src',
+    title: 'select[name="chapter_select"] option[selected]',
+    seriesLink: '.breadcrumb a[href*="/comic/"]',
+  },
+  latestcomics: {
+    images: 'main .entry-content .wp-block-image img',
+    imageAttr: 'data-src',
+    title: 'main .entry-title',
+    seriesLink: 'main a.manga-series',
   },
 };

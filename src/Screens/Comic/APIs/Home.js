@@ -1,179 +1,103 @@
+import {load} from 'cheerio';
 import APICaller from '../../../Redux/Controller/Interceptor';
-import cheerio from 'cheerio';
+import {checkDownTime} from '../../../Redux/Actions/utils/errorHandlers';
 import {ComicHostName} from '../../../Utils/APIs';
-import {HomePageCardClasses} from './constance';
-import {
-  buildComicsRequestParams,
-  extractLastPage,
-  parseHomePageCards,
-  parseReadComicsOnlineHome,
-} from './homeParser';
-import {checkDownTime} from '../../../Redux/Actions/GlobalActions';
 import {
   recordSourceError,
   recordSourceSuccess,
-  getStatusFromCode,
-  SOURCE_STATUS,
-  getSourceLabel,
 } from '../../../Utils/sourceStatus';
+import {HomePageCardClasses} from './constance';
+import {parseHomePageCards} from './homeParser';
+import {loadMoreLatestComics} from './latestComics';
 
-export const getComics = async (hostName, page, type = null, dispatch = null) => {
+const catalogPaths = {
+  xoxocomic: page => `new-comic?page=${page}`,
+  ocecomic: page => `comic/all/latest/page/${page}`,
+  comichubfree: page => `new-comic?page=${page}`,
+  latestcomics: () => '',
+};
+
+const getLastCatalogPage = ($, source, page) => {
+  switch (source) {
+    case 'ocecomic':
+      return Number($('main select[name="page"] option').last().val()) || page;
+    case 'latestcomics':
+      return $('#load-more-series-grid').length ? null : page;
+    default:
+      return $('.pagination a[rel="next"]').length ? null : page;
+  }
+};
+
+export const getComics = async (source, page = 1, dispatch) => {
+  if (!Object.prototype.hasOwnProperty.call(catalogPaths, source)) return null;
   try {
-    const hostKey = Object.keys(ComicHostName).find(
-      key => ComicHostName[key] === hostName,
-    );
-
-    const params = buildComicsRequestParams(hostName, page, type);
-    const requestUrl = `${hostName}${params}`;
-
-    const response = await APICaller.get(requestUrl);
-    const html = response.data;
-    const $ = cheerio.load(html);
-
-    let comicsData = [];
-    let lastPage = null;
-
-    if (hostKey === 'readcomicsonline') {
-      // Site redesigned (2026) — uses a dedicated parser instead of the config.
-      comicsData = parseReadComicsOnlineHome($, {type});
-    } else {
-      const tagConfig = HomePageCardClasses[hostKey]?.[type ?? 'all-comic'];
-
-      if (tagConfig) {
-        comicsData = parseHomePageCards($, tagConfig, {hostName, type});
-
-        if (
-          (tagConfig.lastPageClass || tagConfig.paginationLinkClass) &&
-          page === 1
-        ) {
-          lastPage = extractLastPage($, tagConfig);
-        }
-      }
+    const url = ComicHostName[source] + catalogPaths[source](page);
+    const response = await APICaller.get(url);
+    let $ = load(response.data);
+    let lastPage = getLastCatalogPage($, source, page);
+    if (source === 'latestcomics' && page > 1) {
+      const more = await loadMoreLatestComics($, page, 'series_grid');
+      $ = load(more.html);
+      lastPage = more.hasMore ? null : page;
     }
+    const comicsData = parseHomePageCards($, HomePageCardClasses[source], url);
+    if (!comicsData.length)
+      throw new Error('Could not load the comic catalog.');
 
-    // Record successful request
-    if (hostKey) {
-      recordSourceSuccess(hostKey);
-    }
-
+    recordSourceSuccess(source);
     return {comicsData, lastPage};
   } catch (error) {
-    console.error('Error fetching comics data:', error);
-    console.log('Request URL:', hostName, page, type);
-
-    // Track source-specific errors
-    const hostKey = Object.keys(ComicHostName).find(
-      key => ComicHostName[key] === hostName,
-    );
-    const statusCode = error?.response?.status;
-
-    if (hostKey && statusCode) {
-      recordSourceError(hostKey, statusCode);
-
-      // Dispatch notification for 403 or 500+ errors
-      const sourceStatus = getStatusFromCode(statusCode);
-      if ((sourceStatus === SOURCE_STATUS.CLOUDFLARE_PROTECTED || 
-           sourceStatus === SOURCE_STATUS.SERVER_DOWN) && dispatch) {
-        const {setSourceStatusNotification} = require('../../../Redux/Reducers');
-        dispatch(setSourceStatusNotification({
-          sourceKey: hostKey,
-          status: sourceStatus,
-          statusCode,
-          sourceName: getSourceLabel(hostKey),
-        }));
-      }
-    }
-
-    // Also dispatch checkDownTime for general error handling
     if (dispatch) {
-      dispatch(checkDownTime(error, hostKey));
+      dispatch(checkDownTime(error, source));
+    } else if (error?.response?.status) {
+      recordSourceError(source, error.response.status);
     }
-
     return null;
   }
 };
 
-const getHomeRequests = (type, dispatch) => ({
-  readcomicsonline: {
-    hot_comic_updates: getComics(
-      ComicHostName.readcomicsonline,
-      1,
-      'hot-comic-updates',
-      dispatch,
-    ),
-    latest_release: getComics(
-      ComicHostName.readcomicsonline,
-      1,
-      'latest-release',
-      dispatch,
-    ),
-    most_viewed: getComics(ComicHostName.readcomicsonline, 1, 'most-viewed', dispatch),
+const comicSearch = {
+  xoxocomic: {
+    request: (host, keyword) =>
+      APICaller.get(`${host}search-comic?keyword=${keyword}`),
+    resultsPage: '#ctl00_divCenter h1',
   },
-  readallcomics: {
-    all_comic: getComics(ComicHostName.readallcomics, 1, null, dispatch),
+  ocecomic: {
+    // The form redirects to the site's own normalized search slug.
+    request: (host, keyword) =>
+      APICaller.post(host, `q=${keyword}`, {
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      }),
+    resultsPage: 'main#Search',
   },
-  comicbookplus: {
-    latest_release: getComics(
-      ComicHostName.comicbookplus,
-      0,
-      'latest-uploads',
-      dispatch,
-    ),
+  comichubfree: {
+    request: (host, keyword) =>
+      APICaller.get(`${host}search-comic?key=${keyword}`),
+    resultsPage: 'main h1.header-list-index',
   },
-});
+  latestcomics: {
+    request: (host, keyword) => APICaller.get(`${host}?s=${keyword}&lang=en`),
+    resultsPage: 'body.search main .page-title',
+  },
+};
 
-export const getComicsHome = async (
-  type = 'readcomicsonline',
-  setComics,
-  setLoading,
-  dispatch = null,
-) => {
-  setLoading(true);
+export const searchableComicSources = Object.keys(comicSearch);
+
+export const searchComics = async (source, query) => {
+  const host = ComicHostName[source];
+  const keyword = encodeURIComponent(query.trim());
   try {
-    const requests = getHomeRequests(type, dispatch)[type] || {};
-    const entries = await Promise.all(
-      Object.entries(requests).map(async ([key, promise]) => [key, await promise]),
-    );
-    const {
-      hot_comic_updates,
-      latest_release,
-      most_viewed,
-      all_comic,
-    } = Object.fromEntries(entries);
-
-    const ComicHomeList = {};
-
-    if (all_comic) {
-      ComicHomeList['all-comic'] = {
-        title: 'Latest Comic',
-        data: all_comic?.comicsData,
-        hostName: ComicHostName[type],
-        lastPage: all_comic?.lastPage,
-      };
-    }
-
-    if (latest_release) {
-      ComicHomeList['latest-release'] = {
-        title: 'Latest Release',
-        data: latest_release?.comicsData,
-        hostName: ComicHostName[type],
-        lastPage: latest_release?.lastPage,
-      };
-    }
-
-    if (hot_comic_updates) {
-      ComicHomeList['hot-comic-updates'] = {
-        title: 'Hot Comic',
-        data: hot_comic_updates?.comicsData,
-        hostName: ComicHostName[type],
-        lastPage: hot_comic_updates?.lastPage,
-      };
-    }
-
-    setComics(ComicHomeList);
-    setLoading(false);
+    const {request, resultsPage} = comicSearch[source];
+    const response = await request(host, keyword);
+    const $ = load(response.data);
+    if (!$(resultsPage).length)
+      throw new Error('Could not load comic search results.');
+    const cards = parseHomePageCards($, HomePageCardClasses[source], host);
+    recordSourceSuccess(source);
+    return cards;
   } catch (error) {
-    console.error('Error fetching manga Home data:', error);
-    setLoading(false);
+    if (error.response?.status)
+      recordSourceError(source, error.response.status);
+    throw error;
   }
 };

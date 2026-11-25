@@ -29,6 +29,8 @@ import VerticalView from './VerticalView';
 import {downloadComicBook} from '../../../InkNest-Externals/Redux/Actions/Download';
 import {updateData, setScrollPreference, setComicBackgroundColor} from '../../../Redux/Reducers';
 import {handleScrollModeChange} from '../../../Utils/ScrollModeUtils';
+import {getComicSourceKey} from '../../../Utils/APIs';
+import {getSourceLabel} from '../../../Utils/sourceStatus';
 import {NAVIGATION} from '../../../Constants';
 
 // Background color options with their header colors
@@ -44,6 +46,7 @@ export function ComicBook({navigation, route}) {
   const ref = useRef(null);
   const dispatch = useDispatch();
   const {comicBookLink, pageJump, isDownloadComic, DetailsPage} = route?.params;
+  const sourceName = getSourceLabel(getComicSourceKey(comicBookLink)) || 'The source website';
   const comicBook = useSelector(state => state?.data?.dataByUrl[comicBookLink]);
 
   const userScrollPreference = useSelector(
@@ -188,10 +191,10 @@ export function ComicBook({navigation, route}) {
     (item, index) => {
       let assets = {uri: item};
       return (
-        <GalleryImage asset={assets} index={index} activeIndex={activeIndex} />
+        <GalleryImage asset={assets} index={index} activeIndex={activeIndex} sourceName={sourceName} />
       );
     },
-    [activeIndex],
+    [activeIndex, sourceName],
   );
 
   function getChapterIndex() {
@@ -434,6 +437,7 @@ export function ComicBook({navigation, route}) {
           </Animated.View>
           {isVerticalScroll ? (
             <VerticalView
+              sourceName={sourceName}
               data={comicBook?.images}
               loading={loading}
               setImageLinkIndex={setImageLinkIndex}

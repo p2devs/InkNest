@@ -1,5 +1,6 @@
 import React, {useMemo, useState} from 'react';
-import {useWindowDimensions, Image, ActivityIndicator} from 'react-native';
+import {useWindowDimensions, ActivityIndicator} from 'react-native';
+import PageImage from './PageImage';
 import {
   runOnJS,
   useAnimatedReaction,
@@ -9,35 +10,26 @@ import { heightPercentageToDP } from 'react-native-responsive-screen';
 
 import {fitContainer, useImageResolution} from 'react-native-zoom-toolkit';
 
-import {withClearanceImageSource} from '../../../Utils/cloudflareClearance';
-
 type GalleryImageProps = {
   asset: any;
   index: number;
+  sourceName: string;
   activeIndex: SharedValue<number>;
 };
 
 const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
   index,
+  sourceName,
   activeIndex,
 }) => {
   const {width, height} = useWindowDimensions();
 
-  // Prepare the image source, attaching Cloudflare clearance headers when the
-  // URI is a protected host (needed for readcomicsonline main-domain images).
-  const imageSource = useMemo(() => {
-    if (asset.uri) {
-      return withClearanceImageSource(asset.uri);
-    }
-    return {
-      uri: '',
-    };
-  }, [asset.uri]);
+  const imageSource = useMemo(() => ({uri: asset.uri || ''}), [asset.uri]);
 
   const {isFetching, resolution} = useImageResolution(imageSource);
 
-  const size = resolution
+  const size = resolution && resolution.width > 0 && resolution.height > 0
     ? fitContainer(resolution.width / resolution.height, {
         width,
         height: height - heightPercentageToDP('4%'),
@@ -63,9 +55,11 @@ const GalleryImage: React.FC<GalleryImageProps> = ({
   }
 
   return (
-    <Image
-      source={imageSource}
-      style={size}
+    <PageImage
+      uri={imageSource.uri}
+      index={index}
+      sourceName={sourceName}
+      style={size || {width, height}}
       allowDownscaling={downScale}
     />
   );

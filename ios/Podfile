@@ -11,7 +11,9 @@ end
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, min_ios_version_supported
+# SSZipArchive (used by react-native-unarchive) requires iOS 15.5 or newer.
+ios_deployment_target = '15.5'
+platform :ios, ios_deployment_target
 prepare_react_native_project!
 
 # ⬇️ uncomment the permissions you need
@@ -50,16 +52,6 @@ target 'InkNest' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pre_install do |installer|
-    installer.pod_targets.each do |pod|
-      if pod.name.start_with?('RNFB')
-        def pod.build_type
-          Pod::BuildType.static_library
-        end
-      end
-    end
-  end
-
   post_install do |installer|
     react_native_post_install(
       installer,
@@ -67,5 +59,15 @@ target 'InkNest' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Resource/privacy bundles can retain older podspec targets that Xcode 27 rejects.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        deployment_target = build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if deployment_target.nil? || Gem::Version.new(deployment_target) < Gem::Version.new(ios_deployment_target)
+          build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ios_deployment_target
+        end
+      end
+    end
   end
 end

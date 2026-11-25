@@ -16,6 +16,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import {fetchComicDetails} from '../../../Redux/Actions/GlobalActions';
+import {updateData} from '../../../Redux/Reducers';
+import {IOS_SAMPLE_CHAPTERS, IOS_SAMPLE_COMICS} from '../../../Utils/iosComicSamples';
 import {navigate} from '../../../Navigation/NavigationService';
 import {NAVIGATION} from '../../../Constants';
 import LoadingModal from '../../../Components/UIComp/LoadingModal';
@@ -31,29 +33,6 @@ import {
   signInWithApple,
   signInWithGoogle,
 } from '../../../InkNest-Externals/Community/Logic/CommunityActions';
-
-const IOS_PLACEHOLDER_CHAPTERS = [
-  {
-    link: 'https://comicbookplus.com/?dlid=16848',
-    date: 'December 4, 2010',
-    title: 'Issues 1',
-  },
-  {
-    link: 'https://comicbookplus.com/?dlid=15946',
-    date: 'November 27, 2010',
-    title: 'Issues 2',
-  },
-  {
-    link: 'https://comicbookplus.com/?dlid=16857',
-    date: 'December 4, 2010',
-    title: 'Issues 3',
-  },
-  {
-    link: 'https://comicbookplus.com/?cid=860',
-    date: 'August 7, 2015',
-    title: 'Issues 4',
-  },
-];
 
 export function ComicDetails({route, navigation}) {
   const [PageLink, setPageLink] = useState(route?.params?.link);
@@ -85,16 +64,20 @@ export function ComicDetails({route, navigation}) {
   const isIosOverrideActive =
     !forIosLoading && appVersion === forIosValue && !!forIosValue;
 
+  const sampleSeries = isIosOverrideActive
+    ? IOS_SAMPLE_COMICS.find(series => series.link === PageLink)
+    : undefined;
+
   const availableChapters = useMemo(() => {
     if (isIosOverrideActive) {
-      return IOS_PLACEHOLDER_CHAPTERS;
+      return IOS_SAMPLE_CHAPTERS;
     }
     return ComicDetail?.chapters ?? [];
   }, [ComicDetail?.chapters, isIosOverrideActive]);
 
   const sortedChapters = useMemo(() => {
     if (isIosOverrideActive) {
-      return IOS_PLACEHOLDER_CHAPTERS;
+      return IOS_SAMPLE_CHAPTERS;
     }
     const baseList = [...availableChapters];
     return sort ? baseList.reverse() : baseList;
@@ -146,7 +129,7 @@ export function ComicDetails({route, navigation}) {
       chapter: lastReadChapter.title,
     });
     
-    navigate(NAVIGATION.comicBook, {
+    navigate(sampleSeries ? NAVIGATION.mockBooks : NAVIGATION.comicBook, {
       comicBookLink: lastReadChapter.link,
       pageJump: lastReadChapter.currentPage - 1,
       DetailsPage: {
@@ -155,7 +138,7 @@ export function ComicDetails({route, navigation}) {
         imgSrc: ComicDetail?.imgSrc,
       },
     });
-  }, [lastReadChapter, PageLink, ComicDetail]);
+  }, [lastReadChapter, PageLink, ComicDetail, sampleSeries]);
 
   const recentChapters = useMemo(() => {
     if (!isRecentTab || !readingHistory?.readComics) {
@@ -344,6 +327,16 @@ export function ComicDetails({route, navigation}) {
         image={route?.params?.image}
         title={route?.params?.title}
         tabBar={tabBar}
+        onRefresh={() => {
+          if (sampleSeries) {
+            dispatch(updateData({
+              url: PageLink,
+              data: {title: sampleSeries.title, imgSrc: sampleSeries.image},
+            }));
+          } else {
+            dispatch(fetchComicDetails(PageLink, true));
+          }
+        }}
         onTabBar={handleTabChange}
         sort={sort}
         setSORT={handleSortToggle}
@@ -409,6 +402,7 @@ export function ComicDetails({route, navigation}) {
                   index={index}
                   isBookmark={false}
                   detailPageLink={PageLink}
+                  sampleSeries={sampleSeries}
                   isFirst={index === 0}
                 />
               )}

@@ -1,7 +1,8 @@
 import {configureStore} from '@reduxjs/toolkit';
-import {persistStore, persistReducer} from 'redux-persist';
+import {createMigrate, persistStore, persistReducer} from 'redux-persist';
 import {storage, mmkvStorage} from '../Storage/Storage';
 import Reducers from '../Reducers';
+import {migrateRetiredComicSources} from '../../Utils/retiredComicSources';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 // Store and persistor references
@@ -11,7 +12,8 @@ let isStoreInitialized = false;
 
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 3,
+  migrate: createMigrate({3: migrateRetiredComicSources}),
   storage: storage,
   blacklist: [
     'error',
@@ -19,8 +21,6 @@ const persistConfig = {
     'loading',
     'downTime',
     'Search',
-    'cloudflareVerify',
-    'clearanceNonce',
   ],
   // Important: Don't write until rehydration is complete
   writeDelayed: true,

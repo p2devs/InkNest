@@ -14,12 +14,12 @@ import {
   ResumableZoom,
   useImageResolution,
 } from 'react-native-zoom-toolkit';
-
-import {withClearanceImageSource} from '../../../Utils/cloudflareClearance';
+import PageImage from './PageImage';
 
 const ITEM_SPACING = 20;
 
 export default function VerticalView({
+  sourceName,
   data,
   loading,
   setImageLinkIndex,
@@ -57,22 +57,12 @@ export default function VerticalView({
     setInitialSyncDone(false);
   }, [data]);
 
-  // Prepare the image source, attaching Cloudflare clearance headers when the
-  // URI is a protected host (needed for readcomicsonline main-domain images).
-  const imageSource = useMemo(() => {
-    if (data?.length > 0 && imagesLinks) {
-      return withClearanceImageSource(imagesLinks);
-    }
-    return {
-      uri: '',
-    };
-  }, [imagesLinks, data]);
+  const imageSource = useMemo(() => ({uri: imagesLinks || ''}), [imagesLinks]);
 
-  // Only call useImageResolution with a valid image source
   const {isFetching, resolution} = useImageResolution(imageSource);
 
   // Calculate size only when resolution is available
-  const size = resolution
+  const size = resolution && resolution.width > 0 && resolution.height > 0
     ? fitContainer(resolution.width / resolution.height, {
         width,
         height,
@@ -212,24 +202,14 @@ export default function VerticalView({
               setZoomMode(true);
             }}
             delayLongPress={300}>
-            {/* Render placeholder or image based on size availability */}
-            {size?.width && size?.height ? (
-              <Image
-                source={withClearanceImageSource(item)}
-                style={{...size}}
-                resizeMethod={'scale'}
-              />
-            ) : (
-              // Optional: Render a placeholder with estimated height
-              <View
-                style={{
-                  height: resolutions?.height || height,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <ActivityIndicator size={'large'} color="#fff" />
-              </View>
-            )}
+            <PageImage
+              sourceName={sourceName}
+              uri={item}
+              index={index}
+              style={size || {width, height: itemLength - ITEM_SPACING}}
+              resizeMode="contain"
+              resizeMethod="scale"
+            />
           </TouchableOpacity>
         )}
         onScrollEndDrag={handleScrollEnd}
@@ -255,7 +235,7 @@ export default function VerticalView({
               maxScale={6}
               pinchCenteringMode={'sync'}>
               <Image
-                source={withClearanceImageSource(imagesLinks)}
+                source={imageSource}
                 style={{...size}}
                 resizeMethod="scale"
               />

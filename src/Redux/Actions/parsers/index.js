@@ -6,5 +6,3 @@
 export * from './comicDetailParser';
 export * from './chapterParser';
 export * from './comicBookParser';
-export * from './searchParser';
-export * from './advancedSearchParser';

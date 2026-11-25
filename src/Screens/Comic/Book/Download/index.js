@@ -30,6 +30,7 @@ import {
   updateDownloadedComicBook,
   updateLocalComicProgress,
 } from '../../../../Redux/Reducers';
+import {isRetiredComicUrl, MISSING_RETIRED_COMIC_MESSAGE} from '../../../../Utils/retiredComicSources';
 import {handleScrollModeChange} from '../../../../Utils/ScrollModeUtils';
 import {downloadComicBook} from '../../../../InkNest-Externals/Redux/Actions/Download';
 
@@ -39,6 +40,7 @@ export function DownloadComicBook({route}) {
   const isLocalComic = !isDownloadComic && route?.params?.localComic;
 
   const ref = useRef(null);
+  const activeIndex = useSharedValue(0);
 
   const DownloadComic = useSelector(state => state?.data?.DownloadComic);
   const userScrollPreference = useSelector(
@@ -256,8 +258,6 @@ export function DownloadComicBook({route}) {
     isVerticalScroll,
   ]);
 
-  const activeIndex = useSharedValue(0);
-
   const imageSource = useMemo(() => {
     if (extractDownloaded?.downloadedImagesPath?.length > 0) {
       return {
@@ -400,6 +400,7 @@ export function DownloadComicBook({route}) {
   }
 
   if (isMissingFiles) {
+    const sourceRetired = isRetiredComicUrl(isDownloadComic) || isRetiredComicUrl(chapterlink);
     return (
       <SafeAreaView style={styles.container}>
         <Text
@@ -411,31 +412,32 @@ export function DownloadComicBook({route}) {
             marginBottom: 20,
             paddingHorizontal: 24,
           }}>
-          We could not find the downloaded files for this chapter. Sync to
-          restore them offline.
+          {sourceRetired ? MISSING_RETIRED_COMIC_MESSAGE : 'We could not find the downloaded files for this chapter. Sync to restore them offline.'}
         </Text>
-        <TouchableOpacity
-          style={[styles.button, {opacity: isSyncing ? 0.7 : 1, width: '80%'}]}
-          disabled={isSyncing || !extractDownloaded?.comicBook?.images?.length}
-          onPress={handleSyncDownloads}>
-          {isSyncing ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-              }}>
-              <ActivityIndicator color="#fff" />
-              <Text style={styles.text}>
-                {syncProgress.total
-                  ? `Syncing ${syncProgress.downloaded}/${syncProgress.total}`
-                  : 'Syncing downloads...'}
-              </Text>
-            </View>
-          ) : (
-            <Text style={styles.text}>Sync Downloads</Text>
-          )}
-        </TouchableOpacity>
+        {!sourceRetired && (
+          <TouchableOpacity
+            style={[styles.button, {opacity: isSyncing ? 0.7 : 1, width: '80%'}]}
+            disabled={isSyncing || !extractDownloaded?.comicBook?.images?.length}
+            onPress={handleSyncDownloads}>
+            {isSyncing ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                }}>
+                <ActivityIndicator color="#fff" />
+                <Text style={styles.text}>
+                  {syncProgress.total
+                    ? `Syncing ${syncProgress.downloaded}/${syncProgress.total}`
+                    : 'Syncing downloads...'}
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.text}>Sync Downloads</Text>
+            )}
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={[styles.button, {backgroundColor: '#555', width: '80%'}]}
           onPress={() => {

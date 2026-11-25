@@ -1,116 +1,67 @@
-/**
- * Chapter parsing utilities
- */
-
+import {load} from 'cheerio';
 import APICaller from '../../Controller/Interceptor';
+import {getComicSourceKey, resolveComicUrl} from '../../../Utils/APIs';
+import {loadMoreLatestComics} from '../../../Screens/Comic/APIs/latestComics';
 
-// Host-specific configuration
-const HOST_CONFIGS = {
-  comicbookplus: {
-    domain: 'comicbookplus.com',
-    baseUrl: 'https://comicbookplus.com',
-    skipPagination: true,
-    transformLink: (link) => {
-      if (link && link.startsWith('/?')) {
-        return 'https://comicbookplus.com' + link.substring(1);
-      }
-      return link;
-    },
-  },
-};
-
-/**
- * Determines if a URL belongs to a specific host
- *
- * @param {string} url - The URL to check
- * @param {string} hostKey - The host key to check against
- * @returns {boolean} - True if URL matches the host
- */
-const isHost = (url, hostKey) => {
-  const config = HOST_CONFIGS[hostKey];
-  return config && url.includes(config.domain);
-};
-
-/**
- * Fetches chapters with pagination support
- *
- * @param {Object} $ - Cheerio instance
- * @param {Object} config - Parser configuration
- * @param {string} link - Comic URL
- * @returns {Array} - Array of chapter objects
- */
 export const fetchChaptersWithPagination = async ($, config, link) => {
-  const chapters = [];
+  const source = getComicSourceKey(link);
+  const chapters = new Map();
   const visitedPages = new Set();
-  let currentLink = link;
-  let currentCheerio = $;
+  let pageUrl = link;
+  let page = $;
 
-  const hostKey = Object.keys(HOST_CONFIGS).find(key => isHost(link, key));
-  const hostConfig = hostKey ? HOST_CONFIGS[hostKey] : null;
+  const collectChapters = (document, url) => {
+    document(config.chaptersList).each((_, el) => {
+      const row = document(el);
+      const anchor = row.find(config.chapterLink).first();
+      const title = (
+        config.chapterTitle ? row.find(config.chapterTitle) : anchor
+      )
+        .text()
+        .trim();
+      const chapterUrl = resolveComicUrl(anchor.attr('href'), url)?.split('#')[0];
+      if (title && chapterUrl && getComicSourceKey(chapterUrl) === source) {
+        const date = config.chapterDate
+          ? row.find(config.chapterDate).text().trim()
+          : '';
+        chapters.set(chapterUrl, {title, link: chapterUrl, date});
+      }
+    });
+  };
 
-  while (!visitedPages.has(currentLink)) {
-    visitedPages.add(currentLink);
-
-    // Parse chapters from current page
-    const pageChapters = parseChaptersFromPage(
-      currentCheerio,
-      config,
-      hostConfig
-    );
-    chapters.push(...pageChapters);
-
-    // Skip pagination for hosts that don't use it
-    if (hostConfig?.skipPagination || !config.pagination) {
+  while (pageUrl) {
+    visitedPages.add(pageUrl);
+    collectChapters(page, pageUrl);
+    const next =
+      config.nextChapterPage && page(config.nextChapterPage).attr('href');
+    const nextUrl = resolveComicUrl(next, pageUrl);
+    if (
+      !nextUrl ||
+      visitedPages.has(nextUrl) ||
+      getComicSourceKey(nextUrl) !== source
+    )
       break;
-    }
-
-    // Find next page link
-    const nextPageLink = currentCheerio(config.pagination)
-      .filter((i, el) => currentCheerio(el).text().trim().toLowerCase() === 'next')
-      .attr('href');
-
-    if (!nextPageLink) {break;}
-
-    // Fetch next page
-    const response = await APICaller.get(nextPageLink);
-    currentLink = nextPageLink;
-    currentCheerio = require('cheerio').load(response.data);
+    const response = await APICaller.get(nextUrl);
+    page = load(response.data);
+    if (!page(config.chaptersList).length)
+      throw new Error('Could not load the next page of issues.');
+    pageUrl = nextUrl;
   }
 
-  return chapters;
-};
-
-/**
- * Parses chapters from a single page
- *
- * @param {Object} $ - Cheerio instance
- * @param {Object} config - Parser configuration
- * @param {Object} hostConfig - Host-specific configuration
- * @returns {Array} - Array of chapter objects
- */
-const parseChaptersFromPage = ($, config, hostConfig) => {
-  const chapters = [];
-
-  $(config.chaptersList).each((i, el) => {
-    const chapterTitle = $(el).find(config.chapterTitle).text().trim();
-    let chapterLink = $(el).find(config.chapterLink).attr('href');
-    const chapterDate = $(el).find(config.chapterDate).text().trim();
-
-    // Apply host-specific link transformation
-    if (hostConfig?.transformLink) {
-      chapterLink = hostConfig.transformLink(chapterLink);
+  if (source === 'latestcomics' && $('#load-more-series').length) {
+    for (let number = 2; ; number++) {
+      const {html, hasMore} = await loadMoreLatestComics($, number, 'series');
+      const previousSize = chapters.size;
+      collectChapters(load(html), link);
+      if (!hasMore) break;
+      if (chapters.size === previousSize) {
+        throw new Error('Latest Comics did not return the next issues.');
+      }
     }
+  }
 
-    if (chapterTitle && chapterLink) {
-      chapters.push({
-        title: chapterTitle,
-        link: chapterLink,
-        date: chapterDate,
-      });
-    }
-  });
-
-  return chapters;
+  const result = Array.from(chapters.values());
+  return config.newestFirst ? result.reverse() : result;
 };
 
 /**

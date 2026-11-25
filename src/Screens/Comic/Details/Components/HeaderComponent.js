@@ -21,7 +21,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DescriptionView from '../../../../Components/UIComp/DescriptionView';
 import {goBack} from '../../../../Navigation/NavigationService';
 import {updateData} from '../../../../Redux/Reducers';
-import {fetchComicDetails} from '../../../../Redux/Actions/GlobalActions';
 import HeaderMenu from './HeaderMenu';
 
 const HeaderComponent = memo(
@@ -31,6 +30,7 @@ const HeaderComponent = memo(
     link,
     tabBar,
     onTabBar,
+    onRefresh,
     notificationBell,
     onRequestLoginPrompt,
   }) => {
@@ -128,7 +128,7 @@ const HeaderComponent = memo(
                     }),
                   );
                 }}
-                onRefresh={() => dispatch(fetchComicDetails(link, true))}
+                onRefresh={onRefresh}
                 isBookmarked={ComicDetail?.Bookmark}
                 bellBusy={bellBusy}
                 bellDisabled={bellDisabled}

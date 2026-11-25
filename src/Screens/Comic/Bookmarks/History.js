@@ -1,16 +1,17 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
+import {selectComicHistory} from '../../../Redux/Selectors/comics';
 import HomeRenderItem from '../../../Components/UIComp/HomeRenderItem';
 import GridList from '../../../Components/UIComp/GridList';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 export function ComicHistory({ navigation }) {
-    const History = useSelector(state => state.data.history);
+    const history = useSelector(selectComicHistory);
 
     return (
         <GridList
-            data={Object.values(History)}
+            data={history}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }) => (
                 <HomeRenderItem

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -24,27 +24,26 @@ import {
 import Button from '../../../Components/UIComp/Button';
 import Toast from 'react-native-toast-message';
 import {NAVIGATION} from '../../../Constants';
+import {DEFAULT_COMIC_SOURCE} from '../../../Utils/APIs';
 
 export function SeeAll({navigation, route}) {
-  const {title, data, key, hostName, lastPage} = route.params;
+  const {title, data, key, source = DEFAULT_COMIC_SOURCE} = route.params;
+  const [lastPage, setLastPage] = useState(route.params.lastPage);
   const [comicsData, setComicsData] = useState(data);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  const fetchComics = async (page = 1) => {
-    if (lastPage && page > lastPage) return;
-    if (page < 1) return;
+  const fetchComics = async nextPage => {
+    if (loading || !nextPage || nextPage < 1 || (lastPage && nextPage > lastPage)) return;
 
     setLoading(true);
 
-    const type = key === 'readallcomics' ? null : key;
-
-    const response = await getComics(hostName, page, type);
-
+    const response = await getComics(source, nextPage);
+    setLoading(false);
     if (response) {
-      setPage(page);
+      setPage(nextPage);
+      if (response.lastPage) setLastPage(response.lastPage);
       setComicsData(response?.comicsData);
-      setLoading(false);
       return;
     }
     return Toast.show({
@@ -104,13 +103,9 @@ export function SeeAll({navigation, route}) {
                 analytics().logEvent('see_all_comics_card_clicked', {
                   key: key?.toString(),
                   title: title?.toString(),
-                  isComicBookLink: key === 'readallcomics',
                   link: item?.link?.toString(),
                 });
-                navigation.navigate(NAVIGATION.comicDetails, {
-                  ...item,
-                  isComicBookLink: key === 'readallcomics',
-                });
+                navigation.navigate(NAVIGATION.comicDetails, item);
               }}
               containerStyle={{
                 width: widthPercentageToDP('44%'),

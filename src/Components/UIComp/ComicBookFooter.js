@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -15,18 +15,6 @@ const ComicBookFooter = ({
   setScrollMode,
 }) => {
   const dispatch = useDispatch();
-  const ComicBook = useSelector(state => state.data.dataByUrl[comicBookLink]);
-  const index = ComicBook?.volumes?.findIndex(item => {
-    const checklinkBaseUrl = item?.link.includes('readallcomics.com')
-      ? 'readallcomics'
-      : 'azcomic';
-    const currentComic =
-      'azcomic' == checklinkBaseUrl
-        ? item.title.split('#')[1] === ComicBook?.title.split('#')[1]
-        : item.title.replace('- Reading', '').trim() === ComicBook?.title;
-    return currentComic;
-  });
-
   return (
     <View
       style={{
